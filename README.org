@@ -5,41 +5,41 @@
    1. Create a simple L-system
    2. Create a (turtle) interpretation 
 
-* Philosophy
+** Philosophy
   - Highly interactive
   - Climbing the ladder of abstraction
 
-* Dependencies
+** Dependencies
   - SFML 2.4.1
   - (Future) gtest
-  - (Future) dear imgui,
+  - (Future) dear imgui
 
-* Development Guidelines
-** In use
-   - Environment: debian stretch chroot with these packages: =
-   - Coding rule: [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]]
-   - Compilation: =make=
-   - Testing suite: [[https://github.com/google/googletest/][googletest]]
+** Development Guidelines
+*** In use
+   - *Environment:* debian stretch chroot with these development packages: =g++ make git libsfml-dev=
+   - *Coding rule:* [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]]
+   - *Compilation:* =make=
+   - *Testing suite:* [[https://github.com/google/googletest/][googletest]]
 
 
-** To consider
+*** To consider
    - Static analysis (Coverity?)
    - Formal documentation (Doxygen?)
    - (Static Analysis?)
 
-** Alternatives
-   - Coding rule: [[https://gist.github.com/bkaradzic/2e39896bc7d8c34e042b][Orthodox C++]]: C-with-classes C++ style)
+*** Alternatives
+   - *Coding rule:* [[https://gist.github.com/bkaradzic/2e39896bc7d8c34e042b][Orthodox C++]]: C-with-classes C++ style)
 
-* Technologies employed
-** Easy way
-   I may use C++ 14 and SFML 2.x, as this is the framework I know best.
-** Other possibilities
-   * Hard(er) way: Try to learn a more appropriate tool like a scripting language (Lua). Interacting with C++/SFML or with a completely new framework like LÖVE.
-   * Hard way: The hard way is to pick a specific and precise, but unfamiliar, framework, like the Processing language.
-   * Strange way: More an excuse than a real need, using this project to learn a language like a Lisp
-
-* Thoughts dump
+** Technologies employed
+*** Easy way
+    I use C++ 14 and SFML 2.x, as this is the framework I know best.
+*** Other possibilities
+   - *Hard(er) way:* Try to learn a more appropriate tool like a scripting language (Lua). Interacting with C++/SFML or with a completely new framework like LÖVE.
+   - *Hard way:* The hard way is to pick a specific and precise, but unfamiliar, framework, like the Processing language.
+   - *Strange way:* More an excuse than a real need, using this project to learn a language like a Lisp
+     
+** Thoughts dump
   - Huge literature on the subject and extremely developed existing software. Where is my place?
 
-* (Re)sources
+** (Re)sources
 [[http://blog.rabidgremlin.com/2014/12/09/procedural-content-generation-l-systems/][Procedural content generation: L-Systems (by Rabidgremlin)]]
