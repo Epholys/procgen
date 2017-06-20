@@ -2,31 +2,41 @@
 ** First steps
    Simple L-systems plant generation
 
+   1. Create a simple L-system
+   2. Create a (turtle) interpretation 
+
 * Philosophy
   - Highly interactive
   - Climbing the ladder of abstraction
 
+* Dependencies
+  - SFML 2.4.1
+  - (Future) gtest
+  - (Future) dear imgui,
+
+* Development Guidelines
+** In use
+   - Environment: debian stretch chroot with these packages: =
+   - Coding rule: [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]]
+   - Compilation: =make=
+   - Testing suite: [[https://github.com/google/googletest/][googletest]]
+
+
+** To consider
+   - Static analysis (Coverity?)
+   - Formal documentation (Doxygen?)
+   - (Static Analysis?)
+
+** Alternatives
+   - Coding rule: [[https://gist.github.com/bkaradzic/2e39896bc7d8c34e042b][Orthodox C++]]: C-with-classes C++ style)
+
 * Technologies employed
 ** Easy way
    I may use C++ 14 and SFML 2.x, as this is the framework I know best.
-** Hard(er) way
-   Try to learn a more appropriate tool like a scripting language (Lua). Interacting with C++/SFML or with a completely new framework like LÖVE.
-** Hard way
-   The hard way is to pick a specific and precise, but unfamiliar, framework, like the Processing language.
-** Strange way
-   More an excuse than a real need, using this project to learn a language like a Lisp
-
-* Development Guidelines
-** Workflow
-   - Research and Learn (Literature, Code, ...)
-   - Create
-** Coding
-   - Linter, Static Analysis?
-   - C++
-     - Using a modern approach with latest, clearer features? (C++ 14/17, ...)
-     - Using a minimalist approach with a strict subset closer to C? [[https://gist.github.com/bkaradzic/2e39896bc7d8c34e042b][Orthodox C++]]
-** Environment
-   - Use docker, vagrant?
+** Other possibilities
+   * Hard(er) way: Try to learn a more appropriate tool like a scripting language (Lua). Interacting with C++/SFML or with a completely new framework like LÖVE.
+   * Hard way: The hard way is to pick a specific and precise, but unfamiliar, framework, like the Processing language.
+   * Strange way: More an excuse than a real need, using this project to learn a language like a Lisp
 
 * Thoughts dump
   - Huge literature on the subject and extremely developed existing software. Where is my place?
