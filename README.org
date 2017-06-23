@@ -19,7 +19,7 @@
 
 ** Development Guidelines
 *** In use
-   - *Environment:* debian stretch chroot with these development packages: =g++ make git libsfml-dev=
+   - *Environment:* debian stretch chroot with these development packages: =g++ make git libsfml-dev googletest=
    - *Coding rule:* [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]]
    - *Compilation:* =make=
    - *Testing suite:* [[https://github.com/google/googletest/][googletest]]
