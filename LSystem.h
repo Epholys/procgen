@@ -21,7 +21,7 @@ public:
     using production_rules = std::unordered_map<char, std::string>;
         
     // Constructors
-    LSystem();
+    LSystem() = default;
     LSystem(const std::string& ax, const production_rules& prod);
         
     // Getters and setters
@@ -35,6 +35,9 @@ public:
     // Called if the axiom or the production rules are modified.
     void reset();
 
+    // Get the current string.
+    std::string get_result() const;
+    
     // Iterate n_iter times and return the updated current string.
     std::string iter(unsigned int n_iter = 1);
 
@@ -44,14 +47,14 @@ public:
        
 private:
     // The starting point defining the initial state.
-    std::string axiom;
+    std::string axiom = "";
 
     // The production rules applied in each iteration.
-    production_rules rules;
+    production_rules rules = {};
 
     // The current string.
     // Is always coherent with the axiom and the rules.
-    std::string current;
+    std::string current = "";
 };
 
 

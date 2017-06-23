@@ -2,7 +2,7 @@
 
 #include<SFML/Graphics.hpp>
 
-#include "l-system.h"
+#include "LSystem.h"
 
 int main()
 {

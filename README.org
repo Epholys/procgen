@@ -1,9 +1,12 @@
 * Procedural Generation Experiments
-** First steps
+** Main steps
    Simple L-systems plant generation
 
    1. Create a simple L-system
    2. Create a (turtle) interpretation 
+
+** Framework steps
+   - Clean the Makefiles
 
 ** Philosophy
   - Highly interactive
@@ -11,7 +14,7 @@
 
 ** Dependencies
   - SFML 2.4.1
-  - (Future) gtest
+  - googletest 1.8.0
   - (Future) dear imgui
 
 ** Development Guidelines

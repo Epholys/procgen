@@ -1,9 +1,4 @@
-#include "l-system.h"
-
-LSystem::LSystem()
-    : LSystem("", {})
-{
-}
+#include "LSystem.h"
 
 LSystem::LSystem(const std::string& ax, const production_rules& prod)
     : axiom{ax},
@@ -16,7 +11,12 @@ void LSystem::reset()
 {
     current = axiom;
 }
-    
+
+std::string LSystem::get_result() const
+{
+    return current;
+}
+
 std::string LSystem::iter(unsigned int n_iter)
 {
     // Use a temporary string: we can't iterate "in place".  

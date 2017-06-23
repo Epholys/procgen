@@ -1,8 +1,16 @@
-# Executable files
+# Intermediate compilation steps files
+*.a
 *.o
+*.test
+
+# Executable files
+*.out
 
 # Easy-to-access large documents like .pdf
 resources/
 
 # Emacs backup files
 *~
+
+# scratch playground
+tmp/
