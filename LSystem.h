@@ -47,7 +47,7 @@ namespace lsys
         std::vector<char> get_result() const;
     
         // Iterate n_iter times and return the updated current result.
-        std::vector<char> iter(unsigned int n_iter = 1);
+        std::vector<char> iter(int n_iter = 1);
        
     private:
         // The starting point defining the initial state.

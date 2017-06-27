@@ -1,3 +1,4 @@
+#include "gsl/gsl"
 #include "LSystem.h"
 
 namespace lsys
@@ -29,42 +30,23 @@ namespace lsys
         return rules;
     }
 
-
-// void LSystem::reset()
-// {
-//     current = axiom;
-// }
-
-
-// void LSystem::set_axiom(const std::vector<char>& str)
-// {
-//     axiom = str;
-//     reset(); // The current result must be coherent with the axiom:
-//              // reset the current string to the new axiom
-// }
-
-// void LSystem::set_rules(const production_rules& prod)
-// {
-//     rules = prod;
-//     reset(); // The current result must be coherent with the rule:
-//              // reset the new string to the axiom
-// }
-
-
     std::vector<char> LSystem::get_result() const
     {
         return current;
     }
 
-// TODO: Remove 'unsigned int', add Expects().
-// Note: May throw in case of allocation problem.
-    std::vector<char> LSystem::iter(unsigned int n_iter)
+// Exceptions:
+//   - May throw in case of allocation problem.
+//   - Precondition: n_iter positive. Will throw otherwise.
+    std::vector<char> LSystem::iter(int n_iter)
     {
+        Expects(n_iter >= 0);
+        
         // Use a temporary vector: we can't iterate "in place".
         std::vector<char> result = current;
         std::vector<char> tmp;
         
-        for (unsigned int i=0; i<n_iter; ++i) {
+        for (int i=0; i<n_iter; ++i) {
             tmp.clear();
             
             for (auto c : result) {
