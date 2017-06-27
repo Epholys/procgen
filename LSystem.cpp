@@ -8,12 +8,12 @@ LSystem::LSystem(const std::vector<char>& ax, const production_rules& prod)
 {
 }
 LSystem::LSystem(const std::string& ax, const pretty_production_rules& prod)
-    : axiom{std::vector<char>(ax.begin(), ax.end())},
+    : axiom{string_to_vec(ax)},
       rules{},
       current{axiom}
 {
     for (const auto& rule: prod) {
-        rules[rule.first] = std::vector<char> (rule.second.begin(), rule.second.end());
+        rules[rule.first] = string_to_vec(rule.second);
     }
 }
 
@@ -21,6 +21,12 @@ std::vector<char> LSystem::get_axiom() const
 {
     return axiom;
 }
+
+LSystem::production_rules LSystem::get_rules() const
+{
+    return rules;
+}
+
 
 // void LSystem::reset()
 // {
@@ -35,10 +41,6 @@ std::vector<char> LSystem::get_axiom() const
 //              // reset the current string to the new axiom
 // }
 
-// LSystem::production_rules LSystem::get_rules() const
-// {
-//     return rules;
-// }
 // void LSystem::set_rules(const production_rules& prod)
 // {
 //     rules = prod;
@@ -89,4 +91,9 @@ std::ostream& operator<< (std::ostream& stream, std::vector<char> vec)
     std::string str (vec.begin(), vec.end());
     stream << str;
     return stream;
+}
+
+std::vector<char> string_to_vec (const std::string& str)
+{
+    return std::vector<char> (str.begin(), str.end());
 }

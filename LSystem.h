@@ -12,7 +12,6 @@
 // character. This class is a simple variant of more general
 // L-systems: context-free (one generating symbol by rule) and
 // deterministic (at most one rule for each symbol).
-
 class LSystem
 {
 public:
@@ -41,7 +40,7 @@ public:
     std::vector<char> get_axiom() const;
     // void set_axiom(const std::vector<char>& str);
 
-    // production_rules get_rules() const;
+    production_rules get_rules() const;
     // void set_rules(const production_rules& prod);
     // void add_rule(const rule& r);
     // void remove_rule(char c);
@@ -69,6 +68,7 @@ private:
 };
 
 std::ostream& operator<< (std::ostream& stream, std::vector<char> vec);
+std::vector<char> string_to_vec (const std::string& str);
 
 #endif
 
