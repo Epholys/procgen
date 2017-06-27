@@ -2,6 +2,8 @@
 
 #include "LSystem.h"
 
+using namespace lsys;
+
 TEST(LSystemTest, string_to_vec)
 {
     std::string str = "Test";

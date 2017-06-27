@@ -4,6 +4,8 @@
 
 #include "LSystem.h"
 
+using namespace lsys;
+
 int main()
 {
     // sf::RenderWindow window(sf::VideoMode(1600, 900), "Procgen");
