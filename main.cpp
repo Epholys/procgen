@@ -6,6 +6,7 @@
 #include "Turtle.h"
 
 using namespace lsys;
+using namespace logo;
 
 int main()
 {
@@ -13,11 +14,7 @@ int main()
     window.setVerticalSyncEnabled(true);
     
     Turtle turtle;
-    turtle.add_order('F', go_forward);
-    turtle.add_order('G', go_forward);
-    turtle.add_order('+', turn_right);
-    turtle.add_order('-', turn_left);
-    turtle.compute_vertices(3);
+    auto vertices = compute_vertices(turtle, 8);
     
     while (window.isOpen())
     {
@@ -33,7 +30,7 @@ int main()
             }
 
             window.clear();
-            window.draw(turtle);
+            window.draw(vertices.data(), vertices.size(), sf::LineStrip);
             window.display();
     }
     

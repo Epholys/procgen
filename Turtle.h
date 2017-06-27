@@ -13,32 +13,43 @@
 #include "math.h"
 #include "LSystem.h"
 
-
-struct Turtle : public sf::Drawable
+namespace logo
 {
+
+    struct Walk
+    {
+        sf::Vector2f curr_pos { 0, 0 };
+        float curr_angle { 0 };
+        std::vector<sf::Vertex> vertices { };
+    };
+
+    struct Turtle;
     
-    virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
-
-    void compute_vertices(int n_iter = 1);
-
-    void add_order(char c, const std::function<void(Turtle*)>& fn);
-
-
-    std::unordered_map<char, std::function<void()>> orders;
+    std::vector<sf::Vertex> compute_vertices(const Turtle& turtle, int n_iter = 1);
+    void go_forward(const Turtle& turtle, Walk& walk);
+    void turn_right(const Turtle& turtle, Walk& walk);
+    void turn_left(const Turtle& turtle, Walk& walk);
     
-    const float delta_angle = math::degree_to_rad(60);
-    const int step = 5;
-    lsys::LSystem lsys {"F", { {'F', "G-F-G"}, {'G', "F+G+F"} }};
-
-
-    float curr_angle = math::degree_to_rad(90);
-    sf::Vector2f curr_pos  {600, 200};
-    std::vector<sf::Vertex> vertices = { sf::Vertex(curr_pos) };
-};
-
-
-void go_forward(Turtle* turtle);
-void turn_right(Turtle* turtle);
-void turn_left(Turtle* turtle);
+    struct Turtle
+    {
+        using order = std::function<void(const Turtle& turtle, Walk& walk)>;
+        
+        const sf::Vector2f starting_pos { 600, 200 };
+        const double starting_angle { 0 };
+    
+        // May become non-const when creating more complex systems and by
+        // consequence migrated to TurtleWalk
+        const lsys::LSystem lsys { "F", { {'F', "G-F-G"}, {'G', "F+G+F"} } };
+        const std::unordered_map<char, order> orders
+            {
+                { 'F', go_forward },
+                { 'G', go_forward },
+                { '+', turn_right },
+                { '-', turn_left  },
+            };
+        const double delta_angle { math::degree_to_rad(60) };
+        const int step { 3 };
+    };
+}
 
 #endif

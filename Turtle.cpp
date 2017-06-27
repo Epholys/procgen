@@ -1,45 +1,45 @@
 #include "Turtle.h"
 
-void Turtle::add_order(char c, const std::function<void(Turtle*)>& fn)
+namespace logo
 {
-    orders[c] = std::bind(fn, this);
-}
-void go_forward(Turtle* turtle)
-{
-    float dx = turtle->step * std::cos(turtle->curr_angle);
-    float dy = turtle->step * std::sin(turtle->curr_angle);
-    turtle->curr_pos += {dx, dy};
-    turtle->vertices.push_back(turtle->curr_pos);
-}
-void turn_right(Turtle* turtle)
-{
-    turtle->curr_angle += turtle->delta_angle;
-}
 
-void turn_left(Turtle* turtle)
-{
-    turtle->curr_angle -= turtle->delta_angle;
-}
+    std::vector<sf::Vertex> compute_vertices(const Turtle& turtle, int n_iter)
+    {
+        Walk walk;
+        walk.curr_pos   = turtle.starting_pos;
+        walk.curr_angle = turtle.starting_angle;
+        walk.vertices   = { walk.curr_pos };
+        
+        lsys::LSystem lsys = turtle.lsys;
+        
+        const auto res = lsys.iter(n_iter);
 
-
-void Turtle::compute_vertices(int n_iter)
-{
-    const auto res = lsys.iter(n_iter);
-    
-    vertices = { sf::Vertex(curr_pos) };
-
-    for (auto c : res) {
-        if (orders.count(c) > 0) {
-            orders.at(c)();
+        for (auto c : res) {
+            if (turtle.orders.count(c) > 0) {
+                turtle.orders.at(c)(turtle, walk);
+            }
+            else {
+                // Do nothing.
+            }
         }
-        else {
-            // Do nothing
-        }
+
+        return walk.vertices;
     }
 
-}
+    void go_forward(const Turtle& turtle, Walk& walk)
+    {
+        float dx = turtle.step * std::cos(walk.curr_angle);
+        float dy = turtle.step * std::sin(walk.curr_angle);
+        walk.curr_pos += {dx, dy};
+        walk.vertices.push_back(walk.curr_pos);
+    }
+    void turn_right(const Turtle& turtle, Walk& walk)
+    {
+        walk.curr_angle += turtle.delta_angle;
+    }
 
-void Turtle::draw(sf::RenderTarget& target, sf::RenderStates states) const
-{      
-    target.draw(vertices.data(), vertices.size(), sf::LinesStrip, states);
+    void turn_left(const Turtle& turtle, Walk& walk)
+    {
+        walk.curr_angle -= turtle.delta_angle;
+    }
 }
