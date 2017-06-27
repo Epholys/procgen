@@ -17,7 +17,7 @@ IFLAGS += -I.
 
 
 # All the .o from the .cpp files of the main project to compile.
-OBJECTS = main.o LSystem.o
+OBJECTS = main.o LSystem.o Turtle.o
 
 # Main executable
 TARGET = procgen.out
