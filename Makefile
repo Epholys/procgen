@@ -17,8 +17,9 @@ IFLAGS += -I.
 
 
 # All the .o from the .cpp files of the main project to compile.
-OBJECTS = main.o LSystem.o Turtle.o
-
+OBJECTS = LSystem.o Turtle.o
+MAIN    = main.o
+MAIN   += $(OBJECTS)
 # Main executable
 TARGET = procgen.out
 
@@ -41,22 +42,26 @@ GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 TEST_DIR = test
 
 # All tests for this project.
-TESTS = LSystemTest.test
+TESTS = LSystemTest.o TurtleTest.o
+
+# Complete Test Suite
+TEST_TARGET = $(TEST_DIR)/procgenTest.out
 
 
 all : main test
 
 clean :
 	rm -f *.o *.a *.out \
-	$(TEST_DIR)/*.o $(TEST_DIR)/*.a $(TEST_DIR)/*.test
+	$(TEST_DIR)/*.o $(TEST_DIR)/*.a $(TEST_DIR)/*.out
 
 
 # main: Links all the .o file from OBJECTS into TARGET
-main : $(OBJECTS)
+main : $(MAIN)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) *.o $(LFLAGS)
 
 # test: Asks to generates all OBJECTS and TESTS files
-test: $(OBJECTS) $(TESTS)
+test: $(OBJECTS) $(TESTS) gtest_main.a
+	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -o $(TEST_TARGET) *.o $(TEST_DIR)/*.o $(IFLAGS) $(LFLAGS) -lpthread
 
 
 # Each .o file is compiled with its associated *.cpp file.
@@ -87,7 +92,4 @@ gtest_main.a : gtest-all.o gtest_main.o
 %Test.o :
 	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -c $(TEST_DIR)/$*Test.cpp -o $(TEST_DIR)/$@ $(IFLAGS)
 
-# Links each *Test.o with googletest internals to an executable per test.
-%Test.test : %Test.o gtest_main.a
-	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -o $(addprefix $(TEST_DIR)/, $@ $^) $*.o $(IFLAGS) -lpthread
 
