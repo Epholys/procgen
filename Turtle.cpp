@@ -15,8 +15,8 @@ namespace logo
         const auto res = lsys.iter(n_iter);
 
         for (auto c : res) {
-            if (turtle.orders.count(c) > 0) {
-                turtle.orders.at(c)(turtle, walk);
+            if (turtle.interpretations.count(c) > 0) {
+                turtle.interpretations.at(c)(turtle, walk);
             }
             else {
                 // Do nothing.
