@@ -1,45 +1,38 @@
 * Procedural Generation Experiments
-** Main steps
-   Simple L-systems plant generation
-
-   1. Create a simple L-system
-   2. Create a (turtle) interpretation 
-
-** Framework steps
-   - Clean the Makefiles
-
 ** Philosophy
   - Highly interactive
-  - Climbing the ladder of abstraction
+  - Climbing the [[http://worrydream.com/LadderOfAbstraction/][ladder of abstraction]]
 
-** Dependencies
-  - SFML 2.4.1 [[https://www.sfml-dev.org/][Website]]
-  - googletest 1.8.0 [[https://github.com/google/googletest][Github Repository]]
-  - GSL (Guidelines Support Library) 2017-06-27 [[https://github.com/Microsoft/GSL][Github Repository]]
+** Main Roadmap
+   1. Make an integrated GUI with =dear imgui,=
+      1. Visualize on-screen the parameters
+      2. Modify dynamically the parameters
+   2. Save and load L-system models
+   3. Vizualize the turtle moving
 
-** Development Guidelines
-*** In use
+** Implemented
+   - (Simple) L-systems
+   - (Simple) Turtle interpretation
+
+** Development framework
    - *Environment:* debian stretch chroot with these development packages: =g++ make git libsfml-dev googletest=
-   - *Coding rule:* [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]]
+   - *Dependencies:*
+     - SFML 2.4.1 [[https://www.sfml-dev.org/][Website]] (installed by packages)
+     - googletest 1.8.0 [[https://github.com/google/googletest][Github Repository]] (installed by packages)
+     - GSL (Guidelines Support Library) 2017-06-27 [[https://github.com/Microsoft/GSL][Github Repository]] (cloned from the repository)
+   - *Coding rule:* [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]] with GSL
    - *Compilation:* =make=
    - *Testing suite:* [[https://github.com/google/googletest/][googletest]]
 
-
-*** To consider
+** Completing the framework?:
+   - Formally Licencing
    - Static analysis (Coverity?)
    - Formal documentation (Doxygen?)
+   - Automatic cross-compiling?
 
-** Technologies employed
-*** Easy way
-    I use C++ 14 and SFML 2.x, as this is the framework I know best.
-
-*** Other possibilities
-   - *Hard(er) way:* Try to learn a more appropriate tool like a scripting language (Lua). Interacting with C++/SFML or with a completely new framework like LÖVE.
-   - *Hard way:* The hard way is to pick a specific and precise, but unfamiliar, framework, like the Processing language.
-   - *Strange way:* More an excuse than a real need, using this project to learn a language like a Lisp
-     
 ** Thoughts dump
-  - Huge literature on the subject and extremely developed existing software. Where is my place?
+  - Huge literature on the subject and extremely developed existing software. What does this project bring?
 
-** (Re)sources
+** (Res)sources
 [[http://blog.rabidgremlin.com/2014/12/09/procedural-content-generation-l-systems/][Procedural content generation: L-Systems (by Rabidgremlin)]]
+[[http://algorithmicbotany.org/papers/#abop][The Algorithmic Beauty of Plants]]
