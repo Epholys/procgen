@@ -4,6 +4,7 @@
 
 using namespace lsys;
 
+// Test the string_to_vec helper function.
 TEST(LSystemTest, string_to_vec)
 {
     std::string str = "Test";
@@ -12,6 +13,7 @@ TEST(LSystemTest, string_to_vec)
     ASSERT_EQ(vec, string_to_vec(str));
 }
 
+// Test the default constructor.
 TEST(LSystemTest, default_ctor)
 {
     LSystem lsys;
@@ -24,6 +26,7 @@ TEST(LSystemTest, default_ctor)
     ASSERT_EQ(lsys.get_result(), empty_vec);
 }
 
+// Test the complete constructor.
 TEST(LSystemTest, complete_ctor)
 {
     LSystem lsys ( string_to_vec("F"), { { 'F', string_to_vec("F+F") } } );
@@ -35,6 +38,7 @@ TEST(LSystemTest, complete_ctor)
     ASSERT_EQ(lsys.get_result(), string_to_vec("F"));
 }
 
+// Test the easy-to-use constructor.
 TEST(LSystemTest, pretty_ctor)
 {
     LSystem lsys ( "F", { { 'F', "F+F" } } );
@@ -46,6 +50,7 @@ TEST(LSystemTest, pretty_ctor)
     ASSERT_EQ(lsys.get_result(), string_to_vec("F"));
 }
 
+// Test some iterations
 TEST(LSystemTest, derivation)
 {
     LSystem lsys ( "F", { { 'F', "F+G" }, { 'G', "G-F" } } );
