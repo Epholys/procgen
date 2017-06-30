@@ -35,6 +35,8 @@ public:
     Walk walk0;
 };
 
+// SFML does not provide an equality operator for sf::Vertex. It is
+// defined inside the 'sf' namespace to help googletest find it.
 namespace sf
 {
     inline bool operator== (const sf::Vertex& left, const sf::Vertex& right)
@@ -46,6 +48,7 @@ namespace sf
     }
 }
 
+// Test the go_forward order.
 TEST_F(TurtleTest, go_forward)
 {
     sf::Vertex begin { t0.starting_pos };
@@ -60,6 +63,7 @@ TEST_F(TurtleTest, go_forward)
     ASSERT_EQ(walk0.vertices.at(1), end);
 }
 
+// Test the turn_right order.
 TEST_F(TurtleTest, turn_right)
 {
     turn_right(t0, walk0);
@@ -67,6 +71,7 @@ TEST_F(TurtleTest, turn_right)
     ASSERT_FLOAT_EQ(walk0.curr_angle, t0.starting_angle + t0.delta_angle);
 }
 
+// Test the turn_left order.
 TEST_F(TurtleTest, turn_left)
 {
     turn_left(t0, walk0);
@@ -74,11 +79,11 @@ TEST_F(TurtleTest, turn_left)
     ASSERT_FLOAT_EQ(walk0.curr_angle, t0.starting_angle - t0.delta_angle);
 }
 
-// L-System returned string: "F+G"
-// Turtle interpretation:
-//   - go_forward
-//   - turn_left
-//   - go_forward
+// The L-system defined returns the string: "F+G" with 1 iteration.
+// The turtle interpretation of "F+G" in this case is:
+//   1. go_forward
+//   2. turn_left
+//   3. go_forward
 TEST_F(TurtleTest, compute_vertices)
 {
     go_forward(t0, walk0);

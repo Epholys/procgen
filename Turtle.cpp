@@ -2,7 +2,6 @@
 
 namespace logo
 {
-
     std::vector<sf::Vertex> compute_vertices(const Turtle& turtle, int n_iter)
     {
         Walk walk;
@@ -16,6 +15,8 @@ namespace logo
 
         for (auto c : res) {
             if (turtle.interpretations.count(c) > 0) {
+                // If an interpretation of the character 'c' is found,
+                // applies it to the current walk.
                 turtle.interpretations.at(c)(turtle, walk);
             }
             else {
@@ -33,6 +34,7 @@ namespace logo
         walk.curr_pos += {dx, dy};
         walk.vertices.push_back(walk.curr_pos);
     }
+
     void turn_right(const Turtle& turtle, Walk& walk)
     {
         walk.curr_angle += turtle.delta_angle;

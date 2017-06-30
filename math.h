@@ -1,7 +1,7 @@
 #ifndef MATH_H
 #define MATH_H
 
-
+// This namespace defines commonly used function and constants missing in <cmath>.
 namespace math
 {
     const double pi = 3.14159;
