@@ -14,3 +14,6 @@ resources/
 
 # scratch playground
 tmp/
+
+# imgui ini file
+imgui.ini

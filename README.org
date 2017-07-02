@@ -4,7 +4,7 @@
   - Climbing the [[http://worrydream.com/LadderOfAbstraction/][ladder of abstraction]]
 
 ** Main Roadmap
-   1. Make an integrated GUI with =dear imgui,=
+   1. Make an integrated GUI with = dear imgui, =
       1. Visualize on-screen the parameters
       2. Modify dynamically the parameters
    2. Save and load L-system models
@@ -17,15 +17,16 @@
 ** Development framework
    - *Environment:* debian stretch chroot with these development packages: =g++ make git libsfml-dev googletest=
    - *Dependencies:*
-     - SFML 2.4.1 [[https://www.sfml-dev.org/][Website]] (installed by packages)
-     - googletest 1.8.0 [[https://github.com/google/googletest][Github Repository]] (installed by packages)
-     - GSL (Guidelines Support Library) 2017-06-27 [[https://github.com/Microsoft/GSL][Github Repository]] (cloned from the repository)
+     - SFML / 2.4.1 / [[https://www.sfml-dev.org/][Website]] / installed from packages/
+     - dear imgui, / 1.5 / [[https://github.com/ocornut/imgui][Github Repository]] / installed via [[https://github.com/ocornut/imgui/releases/tag/v1.50][release 1.5]]
+     - googletest / 1.8.0 / [[https://github.com/google/googletest][Github Repository]] / installed from packages
+     - GSL (Guidelines Support Library) / 2017-06-27 / [[https://github.com/Microsoft/GSL][Github Repository]] / cloned from the repository
    - *Coding rule:* [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]] with GSL
    - *Compilation:* =make=
    - *Testing suite:* [[https://github.com/google/googletest/][googletest]]
 
 ** Completing the framework?:
-   - Formally Licencing
+   - Add Licence
    - Static analysis (Coverity?)
    - Formal documentation (Doxygen?)
    - Automatic cross-compiling?
@@ -35,4 +36,5 @@
 
 ** (Res)sources
 [[http://blog.rabidgremlin.com/2014/12/09/procedural-content-generation-l-systems/][Procedural content generation: L-Systems (by Rabidgremlin)]]
+
 [[http://algorithmicbotany.org/papers/#abop][The Algorithmic Beauty of Plants]]

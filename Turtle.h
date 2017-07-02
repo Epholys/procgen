@@ -10,7 +10,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
-#include "math.h"
+#include "helper_math.h"
 #include "LSystem.h"
 
 // A Turtle is a computer graphics concept from the language
