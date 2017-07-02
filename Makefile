@@ -13,8 +13,7 @@ IFLAGS += -I.
 
 ### Source files, Object Files, Directories, Targets, ...
 # Core object files to compile for every target.
-ALL_SRCS = $(wildcard *.cpp)
-SRCS     = $(filter-out main.cpp,$(ALL_SRCS))
+SRCS = $(wildcard *.cpp)
 OBJECTS  = $(SRCS:%.cpp=%.o)
 
 # 'dear imgui,' object files to compile for the main target.
@@ -22,18 +21,16 @@ IMGUI_DIR = imgui
 IMGUI_SRC = $(wildcard $(IMGUI_DIR)/*.cpp)
 IMGUI_OBJ = $(IMGUI_SRC:$(IMGUI_DIR)/%.cpp=$(IMGUI_DIR)/%.o)
 
-# Object files to compile for the main target.
-MAIN    = main.o
-MAIN   += $(OBJECTS)
-MAIN   += $(IMGUI_OBJ)
+OBJECTS  += $(IMGUI_OBJ)
 
 # Main executable
 TARGET = procgen.out
 
 # Tests object file to compile for the test target.
 TEST_DIR  = test
-TESTS_SRC = $(wildcard $(TEST_DIR)/*.cpp)
-TESTS_OBJ = $(TESTS_SRC:$(TEST_DIR)/%.cpp=$(TEST_DIR)/%.o)
+TEST_SRC  = $(wildcard $(TEST_DIR)/*.cpp)
+TEST_OBJ  = $(TEST_SRC:$(TEST_DIR)/%.cpp=$(TEST_DIR)/%.o)
+TEST_OBJ += $(TEST_SRC:$(TEST_DIR)/%Test.cpp=%.o)
 
 # Complete Test Suite executable.
 TEST_TARGET = $(TEST_DIR)/procgenTest.out
@@ -66,12 +63,12 @@ clean :
 
 
 # main: Links all the .o file from MAIN to TARGET.
-main : $(MAIN)
+main : $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $^ $(LFLAGS)
 
-# test: Links all OBJECTS, TESTS files plus gtest_main.a into the test
+# test: Links all OBJECTS, TEST files plus gtest_main.a into the test
 #       suite TEST_TARGET.
-test : $(OBJECTS) $(TESTS_OBJ) $(TEST_DIR)/gtest_main.a
+test : $(TEST_OBJ) $(TEST_DIR)/gtest_main.a
 	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -o $(TEST_TARGET) $^ $(IFLAGS) $(LFLAGS) -lpthread
 
 

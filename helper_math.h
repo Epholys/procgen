@@ -1,5 +1,5 @@
-#ifndef MATH_H
-#define MATH_H
+#ifndef HELPER_MATH_H
+#define HELPER_MATH_H
 
 // This namespace defines commonly used function and constants missing in <cmath>.
 namespace math

@@ -8,6 +8,7 @@
 #include "LSystem.h"
 #include "Turtle.h"
 #include "helper_math.h"
+#include "gui.h"
 
 using namespace lsys;
 using namespace logo;
@@ -47,16 +48,15 @@ int main()
         }
 
         ImGui::SFML::Update(window, deltaClock.restart());
-
-        ImGui::Begin("Hello, world!");
-        ImGui::Button("Look at this pretty button");
-        ImGui::End();
             
         window.clear();
         window.draw(vertices.data(), vertices.size(), sf::LineStrip);
+        show_data(turtle, true);
         ImGui::SFML::Render(window);
         window.display();
     }
+
+    ImGui::SFML::Shutdown();
     
     return 0;
 }
