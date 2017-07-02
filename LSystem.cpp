@@ -70,16 +70,22 @@ namespace lsys
         return current;
     }
 
-    std::ostream& operator<< (std::ostream& stream, std::vector<char> vec)
-    {
-        std::string str (vec.begin(), vec.end());
-        stream << str;
-        return stream;
-    }
-
     std::vector<char> string_to_vec (const std::string& str)
     {
         return std::vector<char> (str.begin(), str.end());
     }
 
+    std::string vec_to_string (const std::vector<char> vec)
+    {
+        return std::string (vec.begin(), vec.end());
+    }
+
 }
+
+std::ostream& operator<< (std::ostream& stream, std::vector<char> vec)
+{
+    std::string str (vec.begin(), vec.end());
+    stream << str;
+    return stream;
+}
+

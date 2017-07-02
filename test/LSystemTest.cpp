@@ -13,6 +13,15 @@ TEST(LSystemTest, string_to_vec)
     ASSERT_EQ(vec, string_to_vec(str));
 }
 
+// Test the vec_to_string helper function.
+TEST(LSystemTest, vec_to_string)
+{
+    std::string str = "Test";
+    std::vector<char> vec = { 'T', 'e', 's', 't' };
+    
+    ASSERT_EQ(str, vec_to_string(vec));
+}
+
 // Test the default constructor.
 TEST(LSystemTest, default_ctor)
 {

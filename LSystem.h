@@ -61,13 +61,15 @@ namespace lsys
         std::vector<char> current = {};
     };
 
-    // Print a std::vector<char> like a std::string.
-    std::ostream& operator<< (std::ostream& stream, std::vector<char> vec);
-
     // Convert a std::string to a std::vector<char>.
     std::vector<char> string_to_vec (const std::string& str);
 
+    // Convert a std::vector<char> to a std::string.
+    std::string vec_to_string (const std::vector<char> vec);
 }
+
+// Print a std::vector<char> like a std::string.
+std::ostream& operator<< (std::ostream& stream, std::vector<char> vec);
    
 #endif
 
