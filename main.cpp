@@ -14,6 +14,10 @@ using namespace lsys;
 using namespace logo;
 using namespace math;
 
+
+#ifndef IMGUI_DEMO
+
+// Standard main() for the procgen application
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(1600, 900), "Procgen");
@@ -48,7 +52,6 @@ int main()
         }
 
         ImGui::SFML::Update(window, deltaClock.restart());
-            
         window.clear();
         window.draw(vertices.data(), vertices.size(), sf::LineStrip);
         show_data(turtle, true);
@@ -60,3 +63,43 @@ int main()
     
     return 0;
 }
+
+
+#else
+
+// Special main to display imgui's demo
+int main()
+{
+    sf::RenderWindow window(sf::VideoMode(1600, 900), "Procgen");
+    window.setVerticalSyncEnabled(true);
+    ImGui::SFML::Init(window);
+    
+    sf::Clock deltaClock;
+    while (window.isOpen())
+    {
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            ImGui::SFML::ProcessEvent(event);
+
+            if (event.type == sf::Event::Closed ||
+                (event.type == sf::Event::KeyPressed &&
+                 event.key.code == sf::Keyboard::Escape))
+            {
+                window.close();
+            }
+        }
+
+        ImGui::SFML::Update(window, deltaClock.restart());
+        ImGui::ShowTestWindow();
+        window.clear();
+        ImGui::SFML::Render(window);
+        window.display();
+    }
+
+    ImGui::SFML::Shutdown();
+    
+    return 0;
+}
+
+#endif
