@@ -8,7 +8,7 @@
 #include "LSystem.h"
 #include "Turtle.h"
 #include "helper_math.h"
-#include "gui.h"
+#include "static_gui.h"
 
 using namespace lsys;
 using namespace logo;

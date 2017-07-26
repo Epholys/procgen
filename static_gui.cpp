@@ -1,18 +1,27 @@
-#include "gui.h"
+#include "static_gui.h"
 
 using namespace math;
 
+// TODO: Be sure we'll be able to display several windows if we call
+// ```show_data(lsys1); show_data(lsys2);```
+
+// Model function with header and footer to display inline
+// components.
+
 // void show_data(const TYPE& NAME, bool main)
 // {
+//     // If we're the main class, display datas in a new window.
 //     if (main) {
 //         ImGui::Begin("WIN");
 //     }
+//
+//     // Otherwise, print inline with an indent.
 //     else {
-//         ImGui::Text("WIN:");
+//         ImGui::Text("TYPE:");
 //         ImGui::Indent();
 //     }
 //
-//
+//     // Display data
 //
 //     if (main) {
 //         ImGui::End();
@@ -67,6 +76,7 @@ void show_data(const lsys::LSystem& lsys, bool main)
 
 void show_data(const logo::Turtle& turtle, bool main)
 {
+    // Arbitrary value to align neatly every members.
     const int align = 150;   
 
     if (main) {
@@ -100,7 +110,7 @@ void show_data(const logo::Turtle& turtle, bool main)
         ImGui::Text("%d", turtle.step);
     }
 
-    show_data(turtle.lsys);
+    show_data(turtle.lsys, false);
 
     if (main) {
         ImGui::End();
