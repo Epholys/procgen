@@ -17,6 +17,7 @@ IFLAGS += -I.
 SRCS = $(wildcard *.cpp)
 OBJECTS  = $(SRCS:%.cpp=%.o)
 
+
 # 'dear imgui,' and 'imgui-sfml' object files to compile for the main target.
 IMGUI_DIR = imgui
 IMGUI_SRC = $(wildcard $(IMGUI_DIR)/*.cpp)
@@ -64,13 +65,16 @@ clean :
 
 
 # main: Links all the .o file from MAIN to TARGET.
+# Recompile main.cpp as the target 'imgui' may have been compiled
+# previously
 main : $(OBJECTS)
+	$(CXX) $(CXXFLAGS) -c main.cpp -o main.o $(IFLAGS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $^ $(LFLAGS)
 
 # imgui: Same as main with the alternative main() function
-imgui : $(OBJECTS)
+imgui : $(IMGUI_OBJ)
 	$(CXX) $(CXXFLAGS) -DIMGUI_DEMO -c main.cpp -o main.o $(IFLAGS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $^ $(LFLAGS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $^ main.o $(LFLAGS)
 
 
 # test: Links all OBJECTS, TEST files plus gtest_main.a into the test
