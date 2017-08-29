@@ -8,12 +8,12 @@
 #include "LSystem.h"
 #include "Turtle.h"
 #include "helper_math.h"
-#include "static_gui.h"
+#include "procgui.h"
 
 using namespace lsys;
 using namespace logo;
 using namespace math;
-
+using namespace procgui;
 
 #ifndef IMGUI_DEMO
 
@@ -31,9 +31,10 @@ int main()
         { '+', turn_left  },
         { '-', turn_right } };
 
-    Turtle turtle { { 400, 100 }, 0, degree_to_rad(60), 5, lsys, intr };
+    Turtle turtle1 { { 400, 100 }, 0, degree_to_rad(60), 5, lsys, intr };
+    Turtle turtle2 { { 200, 200 }, 0, degree_to_rad(50), 4, lsys, intr };
 
-    auto vertices = compute_vertices(turtle, 7);
+    auto vertices = compute_vertices(turtle1, 7);
 
     sf::Clock deltaClock;
     while (window.isOpen())
@@ -54,7 +55,9 @@ int main()
         ImGui::SFML::Update(window, deltaClock.restart());
         window.clear();
         window.draw(vertices.data(), vertices.size(), sf::LineStrip);
-        show_data(turtle, true);
+        display_data(turtle1, "Turtle1");
+        display_data(lsys, "Turtle1");
+        display_data(turtle2, "Turtle2");
         ImGui::SFML::Render(window);
         window.display();
     }

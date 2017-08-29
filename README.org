@@ -30,6 +30,7 @@
    - Static analysis (Coverity?)
    - Formal documentation (Doxygen?)
    - Automatic cross-compiling?
+   - Automatic on-screen serialization?
 
 ** Thoughts dump
   - Huge literature on the subject and extremely developed existing software. What does this project bring?
