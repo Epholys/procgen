@@ -1,0 +1,4 @@
+Dell Inspiron
+16 GB memory
+i7-7500U processor
+g++ (Debian 6.3.0-18) 6.3.0 20170516

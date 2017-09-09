@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdlib>
 
 #include <SFML/Graphics.hpp>
 
@@ -18,11 +19,19 @@ using namespace procgui;
 #ifndef IMGUI_DEMO
 
 // Standard main() for the procgen application
-int main()
+int main(int argc, char* argv[])
 {
-    sf::RenderWindow window(sf::VideoMode(1600, 900), "Procgen");
-    window.setVerticalSyncEnabled(true);
-    ImGui::SFML::Init(window);
+    if (argc < 2)
+    {
+        std::cerr << "Usage: procgen [n]" << std::endl;
+        return 1;;
+    }
+    int n_iter = std::atoi(argv[1]);
+    std::cout << "Number of iterations: " << n_iter << std::endl;
+
+    // sf::RenderWindow window(sf::VideoMode(1600, 900), "Procgen");
+    // window.setVerticalSyncEnabled(true);
+    // ImGui::SFML::Init(window);
     
     LSystem lsys { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } };
 
@@ -31,38 +40,37 @@ int main()
         { '+', turn_left  },
         { '-', turn_right } };
 
-    Turtle turtle1 { { 400, 100 }, 0, degree_to_rad(60), 5, lsys, intr };
-    Turtle turtle2 { { 200, 200 }, 0, degree_to_rad(50), 4, lsys, intr };
+    Turtle turtle { { 400, 100 }, 0, degree_to_rad(60), 5, lsys, intr };
 
-    auto vertices = compute_vertices(turtle1, 7);
+    auto vertices = compute_vertices(turtle, n_iter);
 
-    sf::Clock deltaClock;
-    while (window.isOpen())
-    {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            ImGui::SFML::ProcessEvent(event);
+    // sf::Clock deltaClock;
+    // while (window.isOpen())
+    // {
+    //     sf::Event event;
+    //     while (window.pollEvent(event))
+    //     {
+    //         ImGui::SFML::ProcessEvent(event);
 
-            if (event.type == sf::Event::Closed ||
-                (event.type == sf::Event::KeyPressed &&
-                 event.key.code == sf::Keyboard::Escape))
-            {
-                window.close();
-            }
-        }
+    //         if (event.type == sf::Event::Closed ||
+    //             (event.type == sf::Event::KeyPressed &&
+    //              event.key.code == sf::Keyboard::Escape))
+    //         {
+    //             window.close();
+    //         }
+    //     }
 
-        ImGui::SFML::Update(window, deltaClock.restart());
-        window.clear();
-        window.draw(vertices.data(), vertices.size(), sf::LineStrip);
-        display_data(turtle1, "Turtle1");
-        display_data(lsys, "Turtle1");
-        display_data(turtle2, "Turtle2");
-        ImGui::SFML::Render(window);
-        window.display();
-    }
+    //     ImGui::SFML::Update(window, deltaClock.restart());
+    //     window.clear();
+    //     window.draw(vertices.data(), vertices.size(), sf::LineStrip);
+    //     display_data(turtle1, "Turtle1");
+    //     display_data(lsys, "Turtle1");
+    //     display_data(turtle2, "Turtle2");
+    //     ImGui::SFML::Render(window);
+    //     window.display();
+    // }
 
-    ImGui::SFML::Shutdown();
+    // ImGui::SFML::Shutdown();
     
     return 0;
 }

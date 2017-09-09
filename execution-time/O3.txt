@@ -1,0 +1,89 @@
+g++ -O3
+No optimization
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Number of iterations: 1
+real	0m0.027s
+user	0m0.004s
+sys	0m0.008s
+
+Number of iterations: 2
+real	0m0.005s
+user	0m0.000s
+sys	0m0.004s
+
+Number of iterations: 3
+real	0m0.004s
+user	0m0.000s
+sys	0m0.004s
+
+Number of iterations: 4
+real	0m0.004s
+user	0m0.000s
+sys	0m0.000s
+
+Number of iterations: 5
+real	0m0.004s
+user	0m0.000s
+sys	0m0.000s
+
+Number of iterations: 6
+real	0m0.004s
+user	0m0.000s
+sys	0m0.000s
+
+Number of iterations: 7
+real	0m0.003s
+user	0m0.000s
+sys	0m0.000s
+
+Number of iterations: 8
+real	0m0.004s
+user	0m0.000s
+sys	0m0.000s
+
+Number of iterations: 9
+real	0m0.005s
+user	0m0.004s
+sys	0m0.000s
+
+Number of iterations: 10
+real	0m0.009s
+user	0m0.004s
+sys	0m0.004s
+
+Number of iterations: 11
+real	0m0.022s
+user	0m0.020s
+sys	0m0.000s
+
+Number of iterations: 12
+real	0m0.064s
+user	0m0.056s
+sys	0m0.008s
+
+Number of iterations: 13
+real	0m0.175s
+user	0m0.136s
+sys	0m0.036s
+
+Number of iterations: 14
+real	0m0.535s
+user	0m0.432s
+sys	0m0.100s
+
+Number of iterations: 15
+real	0m1.546s
+user	0m1.300s
+sys	0m0.244s
+
+Number of iterations: 16
+real	0m4.718s
+user	0m3.932s
+sys	0m0.784s
+
+Number of iterations: 17
+real	0m14.026s
+user	0m11.880s
+sys	0m2.140s

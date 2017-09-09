@@ -4,15 +4,24 @@
   - Climbing the [[http://worrydream.com/LadderOfAbstraction/][ladder of abstraction]]
 
 ** Main Roadmap
-   1. Make an integrated GUI with = dear imgui, =
-      1. Visualize on-screen the parameters
-      2. Modify dynamically the parameters
-   2. Save and load L-system models
-   3. Vizualize the turtle moving
+   1. Optimize L-System and Turtle execution time and memory consumption
+      With the current algorithm, execution time and memory consumption are exponential. Memory consumption is the biggest factor, as several gigabytes can be allocated.
+   1. Make an integrated and interactive GUI with = dear imgui, =
+   1. Save and load L-system models
+   1. Vizualize the turtle moving
 
 ** Implemented
    - (Simple) L-systems
    - (Simple) Turtle interpretation
+   - Static GUI to disaplay parameters
+
+** Optimization
+   First, use valgrind to track memry consumption
+
+   Ideas:
+   - Cache L-System (excellent for multiple execution time but awful for memory consumption)
+   - Cache multi-iteration production rules (very good for execution time but bad for memory consumption)
+   - Condense data types (use binary-encoded instead of 8-bits character?) 
 
 ** Development framework
    - *Environment:* debian stretch chroot with these development packages: =g++ make git libsfml-dev googletest=
