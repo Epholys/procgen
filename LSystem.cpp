@@ -35,21 +35,20 @@ namespace lsys
         return current;
     }
 
-// Exceptions:
-//   - May throw in case of allocation problem.
-//   - Precondition: n_iter positive. Will throw otherwise.
+    // Exceptions:
+    //   - May throw in case of allocation problem.
+    //   - Precondition: n_iter positive. Will throw otherwise.
     std::vector<char> LSystem::iter(int n_iter)
     {
         Expects(n_iter >= 0);
         
-        // Use a temporary vector: we can't iterate "in place".
-        std::vector<char> result = current;
+        // We use a temporary vector: we can't iterate "in place".
         std::vector<char> tmp;
         
         for (int i=0; i<n_iter; ++i) {
             tmp.clear();
             
-            for (auto c : result) {
+            for (auto c : current) {
                 if(rules.count(c) > 0) {
                     std::vector<char> rule = rules.at(c);
 
@@ -63,10 +62,9 @@ namespace lsys
                 }
             }
 
-            result = tmp;
+            current = tmp;
         }
 
-        current = result;
         return current;
     }
 
