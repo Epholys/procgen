@@ -1,47 +1,59 @@
 #include "Turtle.h"
 
-namespace logo
+
+namespace drawing
 {
-    std::vector<sf::Vertex> compute_vertices(const Turtle& turtle, int n_iter)
+    using namespace impl;
+
+    Turtle::Turtle(const DrawingParameters& params)
+        : parameters(params)
+        , position(parameters.starting_position)
+        , angle(parameters.starting_angle)
+        , vertices({position})
     {
-        Walk walk;
-        walk.curr_pos   = turtle.starting_pos;
-        walk.curr_angle = turtle.starting_angle;
-        walk.vertices   = { walk.curr_pos };
+    }
         
-        lsys::LSystem lsys = turtle.lsys;
+    
+    std::vector<sf::Vertex> compute_vertices(const LSysInterpretation& interpretation,
+                                             const DrawingParameters& parameters,
+                                             int n_iter)
+    {
+        Turtle turtle (parameters);
+        
+        lsys::LSystem lsys = interpretation.lsys;
         
         const auto res = lsys.iter(n_iter);
 
         for (auto c : res) {
-            if (turtle.interpretations.count(c) > 0) {
+            if (interpretation.map.count(c) > 0) {
                 // If an interpretation of the character 'c' is found,
-                // applies it to the current walk.
-                turtle.interpretations.at(c)(turtle, walk);
+                // applies it to the current turtle.
+                interpretation.map.at(c)(turtle);
             }
             else {
-                // Do nothing.
+                // Do nothing: if 'c' does not have an associated
+                // order, it has no effects.
             }
         }
 
-        return walk.vertices;
+        return turtle.vertices;
     }
 
-    void go_forward(const Turtle& turtle, Walk& walk)
+    void go_forward(Turtle& turtle)
     {
-        float dx = turtle.step * std::cos(walk.curr_angle);
-        float dy = turtle.step * std::sin(walk.curr_angle);
-        walk.curr_pos += {dx, dy};
-        walk.vertices.push_back(walk.curr_pos);
+        float dx = turtle.parameters.step * std::cos(turtle.angle);
+        float dy = turtle.parameters.step * std::sin(turtle.angle);
+        turtle.position += {dx, dy};
+        turtle.vertices.push_back(turtle.position);
     }
 
-    void turn_right(const Turtle& turtle, Walk& walk)
+    void turn_right(Turtle& turtle)
     {
-        walk.curr_angle += turtle.delta_angle;
+        turtle.angle += turtle.parameters.delta_angle;
     }
 
-    void turn_left(const Turtle& turtle, Walk& walk)
+    void turn_left(Turtle& turtle)
     {
-        walk.curr_angle -= turtle.delta_angle;
+        turtle.angle -= turtle.parameters.delta_angle;
     }
 }

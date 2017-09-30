@@ -39,7 +39,11 @@ namespace procgui {
     // Otherwise, close the current TreeNode.
     void conclude(bool main);
 
-    void display_data(const logo::Turtle& turtle,const std::string& name, bool main=true);
+
+    void display_data(const drawing::DrawingParameters& turtle,
+                      const std::string& name,
+                      bool main=true);
+
     void display_data(const lsys::LSystem& lsys, const std::string& name, bool main=true);
 }
 

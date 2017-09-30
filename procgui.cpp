@@ -75,7 +75,7 @@ namespace procgui
     }
 
     
-    void display_data(const logo::Turtle& turtle, const std::string& name, bool main)
+    void display_data(const drawing::DrawingParameters& parameters, const std::string& name, bool main)
     {
         if( !set_up(name, main) ) {
             // Early out if the display zone is collapsed.
@@ -87,31 +87,28 @@ namespace procgui
 
         {
             ImGui::Text("Starting Position:"); ImGui::SameLine(align);
-            ImGui::Text("x: %#.f", turtle.starting_pos.x); ImGui::SameLine();
-            ImGui::Text("y: %#.f", turtle.starting_pos.y);
+            ImGui::Text("x: %#.f", parameters.starting_position.x); ImGui::SameLine();
+            ImGui::Text("y: %#.f", parameters.starting_position.y);
         }
 
         {
             ImGui::Text("Starting Angle:"); ImGui::SameLine(align);
-            ImGui::Text("%#.lf", math::rad_to_degree(turtle.starting_angle)); ImGui::SameLine();
+            ImGui::Text("%#.lf", math::rad_to_degree(parameters.starting_angle)); ImGui::SameLine();
             ImGui::Text("degree");
         }
 
         {
             ImGui::Text("Angle Delta:"); ImGui::SameLine(align);
-            ImGui::Text("%#.lf", math::rad_to_degree(turtle.delta_angle)); ImGui::SameLine();
+            ImGui::Text("%#.lf", math::rad_to_degree(parameters.delta_angle)); ImGui::SameLine();
             ImGui::Text("degree");
         }
 
         {
             ImGui::Text("Step:"); ImGui::SameLine(align);
-            ImGui::Text("%d", turtle.step);
+            ImGui::Text("%d", parameters.step);
         }
-
-        display_data(turtle.lsys, "LSystem", false);
 
         conclude(main);
     }
-
 }
 
