@@ -72,7 +72,7 @@ namespace drawing
     {
         // The starting position and angle of the Turtle.
         sf::Vector2f starting_position { 0, 0 };
-        double starting_angle { 0 };
+        float starting_angle { 0 };
 
         // When 'turn_left' or 'turn_right' orders are executed, the
         // Turtle pivot at a 'delta_angle' angle (in

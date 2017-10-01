@@ -6,10 +6,10 @@ namespace drawing
     using namespace impl;
 
     Turtle::Turtle(const DrawingParameters& params)
-        : parameters(params)
-        , position(parameters.starting_position)
-        , angle(parameters.starting_angle)
-        , vertices({position})
+        : parameters { params }
+        , position   { parameters.starting_position }
+        , angle      { parameters.starting_angle }
+        , vertices   { {position} }
     {
     }
         
