@@ -67,7 +67,7 @@ TEST(LSystemTest, derivation)
     std::vector<char> iter_1 = string_to_vec("F+G");
     std::vector<char> iter_3 = string_to_vec("F+G+G-F+G-F-F+G");
 
-    ASSERT_EQ(lsys.iter(), iter_1);
-    ASSERT_EQ(lsys.iter(2), iter_3);
+    ASSERT_EQ(lsys.produce(1), iter_1);
+    ASSERT_EQ(lsys.produce(3), iter_3);
 }
         

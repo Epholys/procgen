@@ -7,13 +7,13 @@ namespace lsys
     LSystem::LSystem(const std::vector<char>& ax, const production_rules& prod)
         : axiom{ax},
           rules{prod},
-          current{ax}
+          result{ax}
 {
 }
     LSystem::LSystem(const std::string& ax, const pretty_production_rules& prod)
         : axiom{string_to_vec(ax)},
           rules{},
-          current{axiom}
+          result{axiom}
 {
     for (const auto& rule: prod) {
         rules[rule.first] = string_to_vec(rule.second);
@@ -32,23 +32,26 @@ namespace lsys
 
     std::vector<char> LSystem::get_result() const
     {
-        return current;
+        return result;
     }
 
     // Exceptions:
     //   - May throw in case of allocation problem.
-    //   - Precondition: n_iter positive. Will throw otherwise.
-    std::vector<char> LSystem::iter(int n_iter)
+    //   - Precondition: n positive. Will throw otherwise.
+    std::vector<char> LSystem::produce(int n)
     {
-        Expects(n_iter >= 0);
+        Expects(n >= 0);
+
+        // Reinitialize the result to the axiom.
+        result = axiom;
         
         // We use a temporary vector: we can't iterate "in place".
         std::vector<char> tmp;
         
-        for (int i=0; i<n_iter; ++i) {
+        for (int i=0; i<n; ++i) {
             tmp.clear();
             
-            for (auto c : current) {
+            for (auto c : result) {
                 if(rules.count(c) > 0) {
                     std::vector<char> rule = rules.at(c);
 
@@ -62,10 +65,10 @@ namespace lsys
                 }
             }
 
-            current = tmp;
+            result = tmp;
         }
 
-        return current;
+        return result;
     }
 
     std::vector<char> string_to_vec (const std::string& str)

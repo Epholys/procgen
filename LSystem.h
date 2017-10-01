@@ -43,11 +43,11 @@ namespace lsys
 
         // Getters and setters
         std::vector<char> get_axiom() const;
-        production_rules get_rules() const;
+        production_rules  get_rules() const;
         std::vector<char> get_result() const;
     
-        // Iterate n_iter times and return the updated current result.
-        std::vector<char> iter(int n_iter = 1);
+        // Returns the result of the 'n'-th iteration of the L-System.
+        std::vector<char> produce(int n);
        
     private:
         // The starting point defining the initial state.
@@ -56,9 +56,9 @@ namespace lsys
         // The production rules applied in each iteration.
         production_rules rules = {};
 
-        // The current result.
+        // The result.
         // Must be always coherent with the axiom and the rules.
-        std::vector<char> current = {};
+        std::vector<char> result = {};
     };
 
     // Convert a std::string to a std::vector<char>.

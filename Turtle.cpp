@@ -22,7 +22,7 @@ namespace drawing
         
         lsys::LSystem lsys = interpretation.lsys;
         
-        const auto res = lsys.iter(n_iter);
+        const auto res = lsys.produce(n_iter);
 
         for (auto c : res) {
             if (interpretation.map.count(c) > 0) {
