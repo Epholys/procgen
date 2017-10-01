@@ -30,7 +30,7 @@ public:
                                                  { '+', turn_left  } };
     LSysInterpretation interpretation { lsys, intr };    
     // starting_position, starting_angle, delta_angle, step
-    DrawingParameters parameters { { 100, 100 }, degree_to_rad(45), degree_to_rad(90), 10 };
+    DrawingParameters parameters { { 100, 100 }, degree_to_rad(45.f), degree_to_rad(90.f), 10 };
     impl::Turtle turtle;
 };
 

@@ -40,7 +40,7 @@ int main(/*int argc, char* argv[]*/)
                                                  { '-', turn_right } };
     LSysInterpretation interpretation { lsys, map };
 
-    DrawingParameters parameters { { 400, 100 }, 0, degree_to_rad(60), 5 };
+    DrawingParameters parameters { { 400, 100 }, 0, degree_to_rad(60.f), 5 };
 
     auto vertices = compute_vertices(interpretation, parameters, 7);
 
