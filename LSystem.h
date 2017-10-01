@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_map>
 #include <iostream>
+#include <algorithm>
 
 namespace lsys
 {
@@ -44,7 +45,8 @@ namespace lsys
         // Getters and setters
         std::vector<char> get_axiom() const;
         production_rules  get_rules() const;
-        std::vector<char> get_result() const;
+        std::unordered_map<int, std::vector<char>>
+            get_cache() const;
     
         // Returns the result of the 'n'-th iteration of the L-System.
         std::vector<char> produce(int n);
@@ -56,9 +58,13 @@ namespace lsys
         // The production rules applied in each iteration.
         production_rules rules = {};
 
-        // The result.
-        // Must be always coherent with the axiom and the rules.
-        std::vector<char> result = {};
+        // The cache of all calculated iterations.
+        // It contains all the iterations up to the highest iteration
+        // calculated. It is clearly not optimized for memory
+        // usage. However, this project emphasizes interactivity so
+        // quickly swapping between different iterations of the same
+        // L-System, so it is adapted.
+        std::unordered_map<int, std::vector<char>> cache = {};
     };
 
     // Convert a std::string to a std::vector<char>.

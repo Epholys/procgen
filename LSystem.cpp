@@ -7,13 +7,13 @@ namespace lsys
     LSystem::LSystem(const std::vector<char>& ax, const production_rules& prod)
         : axiom{ax},
           rules{prod},
-          result{ax}
+          cache{ {0, {axiom}} }
 {
 }
     LSystem::LSystem(const std::string& ax, const pretty_production_rules& prod)
         : axiom{string_to_vec(ax)},
           rules{},
-          result{axiom}
+          cache{ {0, {axiom}} }
 {
     for (const auto& rule: prod) {
         rules[rule.first] = string_to_vec(rule.second);
@@ -30,9 +30,11 @@ namespace lsys
         return rules;
     }
 
-    std::vector<char> LSystem::get_result() const
+    std::unordered_map<int, std::vector<char>>
+        LSystem::get_cache() const
+
     {
-        return result;
+        return cache;
     }
 
     // Exceptions:
@@ -42,16 +44,29 @@ namespace lsys
     {
         Expects(n >= 0);
 
-        // Reinitialize the result to the axiom.
-        result = axiom;
-        
+        if (cache.count(n) > 0)
+        {
+            // A solution was already computed.
+            return cache.at(n);
+        }
+
+        // The cache saves all the iteration from the start. So we get
+        // the highest-iteration result.
+        auto it = std::max_element(cache.begin(),
+                                   cache.end(),
+                                   [](const auto& pair1, const auto& pair2)
+                                   { return pair1.first < pair2.first; });
+
+        // We will start iterating from this result.
+        std::vector<char> base = it->second;
         // We use a temporary vector: we can't iterate "in place".
         std::vector<char> tmp;
-        
-        for (int i=0; i<n; ++i) {
+
+        int n_iter = n - it->first;
+        for (int i=0; i<n_iter; ++i) {
             tmp.clear();
             
-            for (auto c : result) {
+            for (auto c : base) {
                 if(rules.count(c) > 0) {
                     std::vector<char> rule = rules.at(c);
 
@@ -65,10 +80,11 @@ namespace lsys
                 }
             }
 
-            result = tmp;
+            base = tmp;
         }
 
-        return result;
+        cache.emplace(n, base);
+        return cache.at(n);
     }
 
     std::vector<char> string_to_vec (const std::string& str)

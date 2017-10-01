@@ -29,10 +29,11 @@ TEST(LSystemTest, default_ctor)
     
     LSystem::production_rules empty_rules;
     std::vector<char> empty_vec;
+    std::unordered_map<int, std::vector<char>> empty_cache;
     
     ASSERT_EQ(lsys.get_axiom(), empty_vec);
     ASSERT_EQ(lsys.get_rules(), empty_rules);
-    ASSERT_EQ(lsys.get_result(), empty_vec);
+    ASSERT_EQ(lsys.get_cache(), empty_cache);
 }
 
 // Test the complete constructor.
@@ -42,9 +43,9 @@ TEST(LSystemTest, complete_ctor)
 
     LSystem::production_rules expected_rules = { { 'F', string_to_vec("F+F") } };
 
-    ASSERT_EQ(lsys.get_axiom(), string_to_vec("F"));
-    ASSERT_EQ(lsys.get_rules(), expected_rules);
-    ASSERT_EQ(lsys.get_result(), string_to_vec("F"));
+    ASSERT_EQ(lsys.get_axiom(),       string_to_vec("F"));
+    ASSERT_EQ(lsys.get_rules(),       expected_rules);
+    ASSERT_EQ(lsys.get_cache().at(0), string_to_vec("F"));
 }
 
 // Test the easy-to-use constructor.
@@ -54,9 +55,9 @@ TEST(LSystemTest, pretty_ctor)
 
     LSystem::production_rules expected_rules = { { 'F', string_to_vec("F+F") } };
 
-    ASSERT_EQ(lsys.get_axiom(), string_to_vec("F"));
-    ASSERT_EQ(lsys.get_rules(), expected_rules);
-    ASSERT_EQ(lsys.get_result(), string_to_vec("F"));
+    ASSERT_EQ(lsys.get_axiom(),       string_to_vec("F"));
+    ASSERT_EQ(lsys.get_rules(),       expected_rules);
+    ASSERT_EQ(lsys.get_cache().at(0), string_to_vec("F"));
 }
 
 // Test some iterations
