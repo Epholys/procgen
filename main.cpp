@@ -18,6 +18,9 @@ using namespace procgui;
 
 #ifndef IMGUI_DEMO
 
+// Forward Declaration
+void handle_input(sf::RenderWindow& window);
+
 // Standard main() for the procgen application
 int main(/*int argc, char* argv[]*/)
 {
@@ -44,23 +47,13 @@ int main(/*int argc, char* argv[]*/)
 
     auto vertices = compute_vertices(interpretation, parameters, 7);
 
-    sf::Clock deltaClock;
+    sf::Clock delta_clock;
     while (window.isOpen())
     {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            ImGui::SFML::ProcessEvent(event);
+        handle_input(window);
+        
+        ImGui::SFML::Update(window, delta_clock.restart());
 
-            if (event.type == sf::Event::Closed ||
-                (event.type == sf::Event::KeyPressed &&
-                 event.key.code == sf::Keyboard::Escape))
-            {
-                window.close();
-            }
-        }
-
-        ImGui::SFML::Update(window, deltaClock.restart());
         window.clear();
         window.draw(vertices.data(), vertices.size(), sf::LineStrip);
         display_data(parameters, "Serpinski");
@@ -74,6 +67,67 @@ int main(/*int argc, char* argv[]*/)
     return 0;
 }
 
+// Handle input with SFML and ImGui
+void handle_input(sf::RenderWindow& window)
+{
+    static float zoom_level = 1.f;
+    static sf::Vector2i mouse_position {};
+    
+    sf::View view = window.getView();
+    ImGuiIO& imgui_io = ImGui::GetIO();
+    sf::Event event;
+    while (window.pollEvent(event))
+    {
+        ImGui::SFML::ProcessEvent(event);
+
+        if (event.type == sf::Event::Closed ||
+            (event.type == sf::Event::KeyPressed &&
+             event.key.code == sf::Keyboard::Escape))
+        {
+            window.close();
+        }
+            
+        if (!imgui_io.WantCaptureMouse)
+        {
+            if (event.type == sf::Event::MouseWheelMoved)
+            {
+                auto delta = event.mouseWheel.delta;
+                if (delta>0)
+                {
+                    zoom_level *= 0.9f;
+                    view.zoom(0.9f);
+                }
+                else if (delta<0)
+                {
+                    zoom_level *= 1.1f;
+                    view.zoom(1.1f);
+                }
+            }
+
+            else if (event.type == sf::Event::MouseButtonPressed &&
+                     event.mouseButton.button == sf::Mouse::Left)
+            {
+                mouse_position = sf::Mouse::getPosition(window);
+            }
+        }
+    }
+
+    if (!imgui_io.WantCaptureMouse &&
+        sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    {
+        sf::Vector2i new_position = sf::Mouse::getPosition(window);
+        sf::IntRect window_rect (sf::Vector2i(0,0), sf::Vector2i(window.getSize()));
+        if (window_rect.contains(new_position))
+        {
+            sf::Vector2i mouse_delta = mouse_position - new_position;
+            view.move(sf::Vector2f(mouse_delta) * zoom_level);
+            mouse_position = new_position;
+        }
+    }
+
+    window.setView(view);
+}
+
 
 #else
 
@@ -84,7 +138,7 @@ int main()
     window.setVerticalSyncEnabled(true);
     ImGui::SFML::Init(window);
     
-    sf::Clock deltaClock;
+    sf::Clock delta_clock;
     while (window.isOpen())
     {
         sf::Event event;
@@ -100,7 +154,7 @@ int main()
             }
         }
 
-        ImGui::SFML::Update(window, deltaClock.restart());
+        ImGui::SFML::Update(window, delta_clock.restart());
         ImGui::ShowTestWindow();
         window.clear();
         ImGui::SFML::Render(window);
