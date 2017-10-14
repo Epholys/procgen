@@ -8,7 +8,15 @@ namespace procgui
     {
         // If we're the main class, open window 'name'.
         if (main) {
-            return ImGui::Begin(name.c_str());
+            if(ImGui::Begin(name.c_str())) {
+                // Window is opened and active.
+                return true;
+            }
+            else {
+                // Window is collapsed, call End();
+                ImGui::End();
+                return false;
+            }
         }
         // Otherwise, set up a TreeNode.
         else {
