@@ -14,7 +14,6 @@
 using namespace lsys;
 using namespace drawing;
 using namespace math;
-using namespace procgui;
 
 #ifndef IMGUI_DEMO
 
@@ -37,13 +36,19 @@ int main(/*int argc, char* argv[]*/)
     ImGui::SFML::Init(window);
     
     LSystem lsys { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } };
-    LSysInterpretation::interpretation_map map { { 'F', go_forward },
-                                                 { 'G', go_forward },
-                                                 { '+', turn_left  },
-                                                 { '-', turn_right } };
-    LSysInterpretation interpretation { lsys, map };
+    LSysInterpretation interpretation;
+    interpretation.lsys = lsys;
+    interpretation.map  = { { 'F', go_forward },
+                            { 'G', go_forward },
+                            { '+', turn_left  },
+                            { '-', turn_right } };
 
-    DrawingParameters parameters { { 400, 100 }, 0, degree_to_rad(60.f), 5 };
+
+    DrawingParameters parameters;
+    parameters.starting_position = { 400, 100 };
+    parameters.starting_angle = 0.f;
+    parameters.delta_angle = degree_to_rad(60.f);
+    parameters.step = 5;
 
     auto vertices = compute_vertices(interpretation, parameters, 7);
 
@@ -56,8 +61,8 @@ int main(/*int argc, char* argv[]*/)
 
         window.clear();
         window.draw(vertices.data(), vertices.size(), sf::LineStrip);
-        display_data(parameters, "Serpinski");
-        display_data(lsys, "Serpinski");
+        procgui::display_data(parameters, "Serpinski");
+        procgui::display_data(lsys, "Serpinski");
         ImGui::SFML::Render(window);
         window.display();
     }
