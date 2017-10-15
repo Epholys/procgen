@@ -8,15 +8,12 @@ namespace procgui
     {
         // If we're the main class, open window 'name'.
         if (main) {
-            if(ImGui::Begin(name.c_str())) {
-                // Window is opened and active.
-                return true;
-            }
-            else {
+            bool is_active = ImGui::Begin(name.c_str());
+            if(!is_active) {
                 // Window is collapsed, call End();
                 ImGui::End();
-                return false;
             }
+            return is_active;
         }
         // Otherwise, set up a TreeNode.
         else {
@@ -38,7 +35,7 @@ namespace procgui
         }
     }
 
-    void display_data(const lsys::LSystem& lsys, const std::string& name, bool main)
+    void display(const lsys::LSystem& lsys, const std::string& name, bool main)
     {
         if( !set_up(name, main) ) {
             // Early out if the display zone is collapsed.
@@ -83,7 +80,7 @@ namespace procgui
     }
 
     
-    void display_data(const drawing::DrawingParameters& parameters, const std::string& name, bool main)
+    void display(const drawing::DrawingParameters& parameters, const std::string& name, bool main)
     {
         if( !set_up(name, main) ) {
             // Early out if the display zone is collapsed.

@@ -40,11 +40,11 @@ namespace procgui {
     void conclude(bool main);
 
 
-    void display_data(const drawing::DrawingParameters& turtle,
+    void display(const drawing::DrawingParameters& turtle,
                       const std::string& name,
                       bool main=true);
 
-    void display_data(const lsys::LSystem& lsys, const std::string& name, bool main=true);
+    void display(const lsys::LSystem& lsys, const std::string& name, bool main=true);
 }
 
 #endif
