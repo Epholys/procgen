@@ -41,10 +41,16 @@ namespace procgui {
 
 
     void display(const drawing::DrawingParameters& turtle,
-                      const std::string& name,
-                      bool main=true);
+                 const std::string& name,
+                 bool main=true);
 
     void display(const lsys::LSystem& lsys, const std::string& name, bool main=true);
+
+    bool interact_with(drawing::DrawingParameters& turtle,
+                       const std::string& name,
+                       bool main=true);
+
+    bool interact_with(lsys::LSystem& lsys, const std::string& name, bool main=true);
 }
 
 #endif

@@ -60,9 +60,11 @@ int main(/*int argc, char* argv[]*/)
         ImGui::SFML::Update(window, delta_clock.restart());
 
         window.clear();
-        window.draw(vertices.data(), vertices.size(), sf::LineStrip);
-        procgui::display(parameters, "Serpinski");
+        if (procgui::interact_with(parameters, "Serpinski")) {
+            vertices = compute_vertices(interpretation, parameters, 7);
+        }
         procgui::display(lsys, "Serpinski");
+        window.draw(vertices.data(), vertices.size(), sf::LineStrip);
         ImGui::SFML::Render(window);
         window.display();
     }
