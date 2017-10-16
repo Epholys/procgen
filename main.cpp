@@ -49,8 +49,9 @@ int main(/*int argc, char* argv[]*/)
     parameters.starting_angle = 0.f;
     parameters.delta_angle = degree_to_rad(60.f);
     parameters.step = 5;
+    parameters.n_iter = 7;
 
-    auto vertices = compute_vertices(interpretation, parameters, 7);
+    auto vertices = compute_vertices(interpretation, parameters);
 
     sf::Clock delta_clock;
     while (window.isOpen())
@@ -61,7 +62,7 @@ int main(/*int argc, char* argv[]*/)
 
         window.clear();
         if (procgui::interact_with(parameters, "Serpinski")) {
-            vertices = compute_vertices(interpretation, parameters, 7);
+            vertices = compute_vertices(interpretation, parameters);
         }
         procgui::display(lsys, "Serpinski");
         window.draw(vertices.data(), vertices.size(), sf::LineStrip);

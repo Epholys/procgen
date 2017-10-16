@@ -15,14 +15,13 @@ namespace drawing
         
     
     std::vector<sf::Vertex> compute_vertices(const LSysInterpretation& interpretation,
-                                             const DrawingParameters& parameters,
-                                             int n_iter)
+                                             const DrawingParameters& parameters)
     {
         Turtle turtle (parameters);
         
         lsys::LSystem lsys = interpretation.lsys;
         
-        const auto res = lsys.produce(n_iter);
+        const auto res = lsys.produce(parameters.n_iter);
 
         for (auto c : res) {
             if (interpretation.map.count(c) > 0) {

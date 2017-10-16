@@ -83,6 +83,9 @@ namespace drawing
         // forward 'step' pixels (at default zoom level). Initialized
         // at an arbitrary value. 
         int step { 5 };
+
+        // The number of iterations done by the L-system.
+        int n_iter { 0 };
     };
 
 
@@ -110,8 +113,7 @@ namespace drawing
     // This function iterates first 'n_iter' times the L-system
     // 'turtle.lsys' then interprates the result.
     std::vector<sf::Vertex> compute_vertices(const LSysInterpretation& interpretation,
-                                             const DrawingParameters& parameters,
-                                             int n_iter = 1);
+                                             const DrawingParameters& parameters);
 
     // All the orders currently defined. //
     // "Turn right" means "turn clockwise" AS SEEN ON THE SCREEN.
