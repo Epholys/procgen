@@ -2,11 +2,17 @@
 
 using namespace math;
 
-namespace procgui
+namespace
 {
+    // The two next function are shared by all the 'display()' and
+    // 'interact_with()' functions. They manage window creation and integration.
+
+    // Open a window named 'name' if 'main' is true.  Otherwise, set up a
+    // TreeNode named 'name', to inline the GUI in a existing window.
+    // Returns 'false' if the window is collapsed, to early-out.
     bool set_up(const std::string& name, bool main)
     {
-        // If we're the main class, open window 'name'.
+       // If we're the main class, open window 'name'.
         if (main) {
             bool is_active = ImGui::Begin(name.c_str());
             if(!is_active) {
@@ -15,12 +21,14 @@ namespace procgui
             }
             return is_active;
         }
-        // Otherwise, set up a TreeNode.
+         // Otherwise, set up a TreeNode.
         else {
             return ImGui::TreeNode(name.c_str());
         }
     }
-
+    
+    // Finish appending to the current window if 'main' is true.
+    // Otherwise, close the current TreeNode.
     void conclude(bool main)
     {
         // If we're the main class, stop appending to the current
@@ -34,7 +42,27 @@ namespace procgui
             ImGui::TreePop();
         }
     }
+}
 
+namespace ImGui
+{
+    // Taken from 'imgui.cpp', helper function to display a help tooltip.
+    void ShowHelpMarker(const char* desc)
+    {
+        ImGui::TextDisabled("(?)");
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(450.0f);
+            ImGui::TextUnformatted(desc);
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
+    }
+}
+
+namespace procgui
+{
     void display(const lsys::LSystem& lsys, const std::string& name, bool main)
     {
         if( !set_up(name, main) ) {
@@ -204,9 +232,19 @@ namespace procgui
             is_modified |= ImGui::DragInt("Step", &parameters.step);
         }
 
+        {
+            // Arbitrary value to avoid resource depletion happening with higher
+            // number of iterations (several GiB of memory usage and huge CPU
+            // load).
+            const int n_iter_max = 12;
+            is_modified |= ImGui::SliderInt("Iterations", &parameters.n_iter, 0, n_iter_max);
+            ImGui::SameLine(); ImGui::ShowHelpMarker("CTRL+click to directly input values. Higher values will use all of your memory and CPU");
+        }
+
         conclude(main);
 
         return is_modified;
     }
+
 }
 

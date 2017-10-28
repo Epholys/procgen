@@ -10,42 +10,36 @@
 #include "Turtle.h"
 
 
-// Define 'display_data()' for the structs and classes to display.
+// Define 'display()' and 'interact_with()' for the structs and classes to
+// display.
 // 
-// These functions display some of the datas (attributes for example) at
-// each frame to visualize important parameters and/or dynamic
-// attributes.
-// 
-// The 'name' parameter will be the name of the window. If
-// 'display_data()' is called with the same name for two different
-// objects, even with different types, they will be in the same window.
+// The 'display()' functions display some of the data (attributes for example)
+// at each frame to visualize important parameters and/or dynamic attributes.
 //
-// The 'main' parameter is used for a cleaner visualization when
-// chaining 'display_data()'. When 'main' has the value 'false', the
-// data will be displayed in the same window as a collapsed
-// TreeNode. As such, composition relations between objects are shown
-// more clearly.
-// This behaviour is implemented by the 'set_up()' and 'conclude()'
-// functions.
+// The 'interact_with()' functions not only display the data, but also give the
+// possibility to modify them on-the-fly, allowing a great deal of
+// interactivity.
+// 
+// The 'name' parameter will be the name of the window. If 'display()' is called
+// with the same name for two different objects, even with different types, they
+// will be in the same window.
+//
+// The 'main' parameter is used for a cleaner visualization when chaining
+// 'display()'. When 'main' has the value 'false', the data will be displayed in
+// the same window as a collapsed TreeNode. As such, composition relations
+// between objects are shown more clearly.
+//
+// The 'interact_with()' functions return 'true' if the object was modified by
+// the GUI, 'false' otherwise.
 
 namespace procgui {
-    // Open a window named 'name' if 'main' is true.
-    // Otherwise, set up a TreeNode named 'name'.
-    // Returns 'false' if the window is collapsed, allowing
-    // 'display_data()' to early out.
-    bool set_up(const std::string& name, bool main);
-
-    // Finish appending to the current window if 'main' is true.
-    // Otherwise, close the current TreeNode.
-    void conclude(bool main);
-
-
     void display(const drawing::DrawingParameters& turtle,
                  const std::string& name,
                  bool main=true);
-
+    
     void display(const lsys::LSystem& lsys, const std::string& name, bool main=true);
 
+    
     bool interact_with(drawing::DrawingParameters& turtle,
                        const std::string& name,
                        bool main=true);
