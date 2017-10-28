@@ -112,7 +112,7 @@ namespace drawing
     // Compute all vertices of a turtle interpretation of a L-system.
     // This function iterates first 'n_iter' times the L-system
     // 'turtle.lsys' then interprates the result.
-    std::vector<sf::Vertex> compute_vertices(const LSysInterpretation& interpretation,
+    std::vector<sf::Vertex> compute_vertices(LSysInterpretation& interpretation,
                                              const DrawingParameters& parameters);
 
     // All the orders currently defined. //
