@@ -15,5 +15,8 @@ resources/
 # scratch playground
 tmp/
 
+# optimization playground
+optimization/
+
 # imgui ini file
 imgui.ini

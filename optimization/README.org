@@ -1,3 +1,0 @@
-** Optimization Datas
-
-This directory contains several files used to compare cpu and memory usage during the iterations. They are meaningless without context, so they will be removed in the future.
