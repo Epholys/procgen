@@ -61,7 +61,8 @@ int main(/*int argc, char* argv[]*/)
         ImGui::SFML::Update(window, delta_clock.restart());
 
         window.clear();
-        if (procgui::interact_with(parameters, "Serpinski")) {
+        if (procgui::interact_with(parameters, "Serpinski"))
+        {
             vertices = compute_vertices(interpretation, parameters);
         }
         procgui::display(lsys, "Serpinski");
@@ -80,6 +81,7 @@ void handle_input(sf::RenderWindow& window)
 {
     static float zoom_level = 1.f;
     static sf::Vector2i mouse_position {};
+    static bool has_focus = true;
     
     sf::View view = window.getView();
     ImGuiIO& imgui_io = ImGui::GetIO();
@@ -94,8 +96,21 @@ void handle_input(sf::RenderWindow& window)
         {
             window.close();
         }
+
+        else if (event.type == sf::Event::GainedFocus)
+        {
+            has_focus = true;
+        }
+        else if (event.type == sf::Event::LostFocus)
+        {
+            has_focus = false;
+        }
+        else if (event.type == sf::Event::Resized)
+        {
+            view.setSize(event.size.width, event.size.height);
+        }
             
-        if (!imgui_io.WantCaptureMouse)
+        else if (!imgui_io.WantCaptureMouse)
         {
             if (event.type == sf::Event::MouseWheelMoved)
             {
@@ -120,7 +135,8 @@ void handle_input(sf::RenderWindow& window)
         }
     }
 
-    if (!imgui_io.WantCaptureMouse &&
+    if (has_focus &&
+        !imgui_io.WantCaptureMouse &&
         sf::Mouse::isButtonPressed(sf::Mouse::Left))
     {
         sf::Vector2i new_position = sf::Mouse::getPosition(window);
