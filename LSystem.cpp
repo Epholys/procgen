@@ -5,36 +5,36 @@ namespace lsys
 {
 
     LSystem::LSystem(const std::vector<char>& ax, const production_rules& prod)
-        : axiom{ax},
-          rules{prod},
-          cache{ {0, {axiom}} }
+        : axiom_{ax},
+          rules_{prod},
+          cache_{ {0, {axiom_}} }
 {
 }
     LSystem::LSystem(const std::string& ax, const pretty_production_rules& prod)
-        : axiom{string_to_vec(ax)},
-          rules{},
-          cache{ {0, {axiom}} }
+        : axiom_{string_to_vec(ax)},
+          rules_{},
+          cache_{ {0, {axiom_}} }
 {
     for (const auto& rule: prod) {
-        rules[rule.first] = string_to_vec(rule.second);
+        rules_[rule.first] = string_to_vec(rule.second);
     }
 }
 
     std::vector<char> LSystem::get_axiom() const
     {
-        return axiom;
+        return axiom_;
     }
 
     LSystem::production_rules LSystem::get_rules() const
     {
-        return rules;
+        return rules_;
     }
 
     std::unordered_map<int, std::vector<char>>
         LSystem::get_cache() const
 
     {
-        return cache;
+        return cache_;
     }
 
     // Exceptions:
@@ -44,16 +44,16 @@ namespace lsys
     {
         Expects(n >= 0);
 
-        if (cache.count(n) > 0)
+        if (cache_.count(n) > 0)
         {
             // A solution was already computed.
-            return cache.at(n);
+            return cache_.at(n);
         }
 
         // The cache saves all the iteration from the start. So we get
         // the highest-iteration result.
-        auto it = std::max_element(cache.begin(),
-                                   cache.end(),
+        auto it = std::max_element(cache_.begin(),
+                                   cache_.end(),
                                    [](const auto& pair1, const auto& pair2)
                                    { return pair1.first < pair2.first; });
 
@@ -67,8 +67,8 @@ namespace lsys
             tmp.clear();
             
             for (auto c : base) {
-                if(rules.count(c) > 0) {
-                    std::vector<char> rule = rules.at(c);
+                if(rules_.count(c) > 0) {
+                    std::vector<char> rule = rules_.at(c);
 
                     // Replace the symbol according to its rule.
                     tmp.insert(tmp.end(), rule.begin(), rule.end());
@@ -83,8 +83,8 @@ namespace lsys
             base = tmp;
         }
 
-        cache.emplace(n, base);
-        return cache.at(n);
+        cache_.emplace(n, base);
+        return cache_.at(n);
     }
 
     std::vector<char> string_to_vec (const std::string& str)

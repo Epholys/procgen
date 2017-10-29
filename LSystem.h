@@ -53,10 +53,10 @@ namespace lsys
        
     private:
         // The starting point defining the initial state.
-        std::vector<char> axiom = {};
+        std::vector<char> axiom_ = {};
 
         // The production rules applied in each iteration.
-        production_rules rules = {};
+        production_rules rules_ = {};
 
         // The cache of all calculated iterations.
         // It contains all the iterations up to the highest iteration
@@ -64,7 +64,7 @@ namespace lsys
         // usage. However, this project emphasizes interactivity so
         // quickly swapping between different iterations of the same
         // L-System, so it is adapted.
-        std::unordered_map<int, std::vector<char>> cache = {};
+        std::unordered_map<int, std::vector<char>> cache_ = {};
     };
 
     // Convert a std::string to a std::vector<char>.
