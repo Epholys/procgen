@@ -23,13 +23,16 @@ namespace drawing
         
         const auto res = lsys.produce(parameters.n_iter);
 
-        for (auto c : res) {
-            if (interpretation.map.count(c) > 0) {
+        for (auto c : res)
+        {
+            if (interpretation.map.count(c) > 0)
+            {
                 // If an interpretation of the character 'c' is found,
                 // applies it to the current turtle.
                 interpretation.map.at(c)(turtle);
             }
-            else {
+            else
+            {
                 // Do nothing: if 'c' does not have an associated
                 // order, it has no effects.
             }

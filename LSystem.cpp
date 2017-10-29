@@ -66,15 +66,18 @@ namespace lsys
         for (int i=0; i<n_iter; ++i) {
             tmp.clear();
             
-            for (auto c : base) {
-                if(rules_.count(c) > 0) {
+            for (auto c : base)
+            {
+                if(rules_.count(c) > 0)
+                {
                     std::vector<char> rule = rules_.at(c);
 
                     // Replace the symbol according to its rule.
                     tmp.insert(tmp.end(), rule.begin(), rule.end());
 
                 }
-                else {
+                else
+                {
                     // The symbol is a terminal: replace it by itself.
                     tmp.push_back(c);
                 }

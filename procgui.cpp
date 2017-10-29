@@ -13,16 +13,19 @@ namespace
     bool set_up(const std::string& name, bool main)
     {
        // If we're the main class, open window 'name'.
-        if (main) {
+        if (main)
+        {
             bool is_active = ImGui::Begin(name.c_str());
-            if(!is_active) {
+            if(!is_active)
+            {
                 // Window is collapsed, call End();
                 ImGui::End();
             }
             return is_active;
         }
          // Otherwise, set up a TreeNode.
-        else {
+        else
+        {
             return ImGui::TreeNode(name.c_str());
         }
     }
@@ -33,12 +36,14 @@ namespace
     {
         // If we're the main class, stop appending to the current
         // window.
-        if (main) {
+        if (main)
+        {
             ImGui::Separator();
             ImGui::End();
         }
         // Otherwise, close the TreeNode.
-        else {
+        else
+        {
             ImGui::TreePop();
         }
     }
@@ -65,7 +70,8 @@ namespace procgui
 {
     void display(const lsys::LSystem& lsys, const std::string& name, bool main)
     {
-        if( !set_up(name, main) ) {
+        if( !set_up(name, main) )
+        {
             // Early out if the display zone is collapsed.
             return;
         }
@@ -95,7 +101,8 @@ namespace procgui
             ImGui::Text("Production rules:");
 
             ImGui::Indent(); 
-            for (const auto& rule : lsys.get_rules()) {
+            for (const auto& rule : lsys.get_rules())
+            {
                 std::ostringstream oss;
                 oss << rule.first << " -> " << rule.second;
                 std::string str = oss.str();
@@ -110,7 +117,8 @@ namespace procgui
     
     void display(const drawing::DrawingParameters& parameters, const std::string& name, bool main)
     {
-        if( !set_up(name, main) ) {
+        if( !set_up(name, main) )
+        {
             // Early out if the display zone is collapsed.
             return;
         }
@@ -191,7 +199,8 @@ namespace procgui
     
     bool interact_with(drawing::DrawingParameters& parameters, const std::string& name, bool main)
     {
-        if( !set_up(name, main) ) {
+        if( !set_up(name, main) )
+        {
             // Early out if the display zone is collapsed.
             return false;
         }
@@ -203,7 +212,8 @@ namespace procgui
             float pos[2] = { parameters.starting_position.x,
                              parameters.starting_position.y };
             if ( ImGui::DragFloat2("Starting position", pos,
-                                   1.f, 0.f, 0.f, "%#.lf") ) {
+                                   1.f, 0.f, 0.f, "%#.lf") )
+            {
                 is_modified = true;
                 parameters.starting_position.x = pos[0];
                 parameters.starting_position.y = pos[1];
@@ -213,7 +223,8 @@ namespace procgui
         {
             float starting_angle_deg = math::rad_to_degree(parameters.starting_angle);
             if ( ImGui::DragFloat("Starting Angle", &starting_angle_deg,
-                                  1.f, 0.f, 360.f, "%#.lf") ) {
+                                  1.f, 0.f, 360.f, "%#.lf") )
+            {
                 is_modified = true;
                 parameters.starting_angle = math::degree_to_rad(starting_angle_deg);
             }
@@ -222,7 +233,8 @@ namespace procgui
         {
             float delta_angle_deg = math::rad_to_degree(parameters.delta_angle);
             if ( ImGui::DragFloat("Angle Delta", &delta_angle_deg,
-                                  1.f, 0.f, 360.f, "%#.lf") ) {
+                                  1.f, 0.f, 360.f, "%#.lf") )
+            {
                 is_modified = true;
                 parameters.delta_angle = math::degree_to_rad(delta_angle_deg);
             }
