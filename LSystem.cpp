@@ -5,15 +5,13 @@ namespace lsys
 {
 
     LSystem::LSystem(const std::vector<char>& ax, const production_rules& prod)
-        : axiom_{ax},
-          rules_{prod},
-          cache_{ {0, {axiom_}} }
+        : rules_{prod},
+          cache_{ {0, {ax}} }
 {
 }
     LSystem::LSystem(const std::string& ax, const pretty_production_rules& prod)
-        : axiom_{string_to_vec(ax)},
-          rules_{},
-          cache_{ {0, {axiom_}} }
+        : rules_{},
+          cache_{ {0, {string_to_vec(ax)}} }
 {
     for (const auto& rule: prod) {
         rules_[rule.first] = string_to_vec(rule.second);
@@ -22,7 +20,15 @@ namespace lsys
 
     std::vector<char> LSystem::get_axiom() const
     {
-        return axiom_;
+        // If an axiom is defined, returns it.
+        if (cache_.count(0) > 0)
+        {
+            return cache_.at(0);
+        }
+        else
+        {
+            return {};
+        }
     }
 
     LSystem::production_rules LSystem::get_rules() const
@@ -40,7 +46,6 @@ namespace lsys
     // Exceptions:
     //   - Precondition: n positive.
     //   - Precondition: 'cache_' is not empty and contains the axiom
-    //   (invariant).
     //   - Throw in case of allocation problem.
     //   - Throw at '.at()' if code is badly refactored.
     std::vector<char> LSystem::produce(int n)

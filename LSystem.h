@@ -16,6 +16,10 @@ namespace lsys
     // of character. This class is a simple variant of more general
     // L-systems: context-free (one generating symbol by rule) and
     // deterministic (at most one rule for each symbol).
+    // Invariants:
+    //   - If an axiom is defined at construction, 'cache_.at(0)' contains it at
+    //   all time.
+    //   - 'cache_' is coherent with the 'rules_'.
     class LSystem
     {
     public:
@@ -53,13 +57,10 @@ namespace lsys
         std::vector<char> produce(int n);
        
     private:
-        // The starting point defining the initial state.
-        std::vector<char> axiom_ = {};
-
         // The production rules applied in each iteration.
         production_rules rules_ = {};
 
-        // The cache of all calculated iterations.
+        // The cache of all calculated iterations and the axiom.
         // It contains all the iterations up to the highest iteration
         // calculated. It is clearly not optimized for memory
         // usage. However, this project emphasizes interactivity so
