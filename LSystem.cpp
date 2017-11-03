@@ -38,8 +38,11 @@ namespace lsys
     }
 
     // Exceptions:
-    //   - May throw in case of allocation problem.
-    //   - Precondition: n positive. Will throw otherwise.
+    //   - Precondition: n positive.
+    //   - Precondition: 'cache_' is not empty and contains the axiom
+    //   (invariant).
+    //   - Throw in case of allocation problem.
+    //   - Throw at '.at()' if code is badly refactored.
     std::vector<char> LSystem::produce(int n)
     {
         Expects(n >= 0);
@@ -56,6 +59,7 @@ namespace lsys
                                    cache_.end(),
                                    [](const auto& pair1, const auto& pair2)
                                    { return pair1.first < pair2.first; });
+        Expects(it != cache_.end());
 
         // We will start iterating from this result.
         std::vector<char> base = it->second;
@@ -84,9 +88,9 @@ namespace lsys
             }
 
             base = tmp;
+            cache_.emplace(it->first + i + 1, tmp);
         }
 
-        cache_.emplace(n, base);
         return cache_.at(n);
     }
 

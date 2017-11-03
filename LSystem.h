@@ -48,7 +48,8 @@ namespace lsys
         std::unordered_map<int, std::vector<char>>
             get_cache() const;
     
-        // Returns the result of the 'n'-th iteration of the L-System.
+        // Returns the result of the 'n'-th iteration of the L-System and cache
+        // it as well as the transitional iterations.
         std::vector<char> produce(int n);
        
     private:
@@ -63,7 +64,7 @@ namespace lsys
         // calculated. It is clearly not optimized for memory
         // usage. However, this project emphasizes interactivity so
         // quickly swapping between different iterations of the same
-        // L-System, so it is adapted.
+        // L-System.
         std::unordered_map<int, std::vector<char>> cache_ = {};
     };
 

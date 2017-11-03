@@ -60,7 +60,7 @@ TEST(LSystemTest, pretty_ctor)
     ASSERT_EQ(lsys.get_cache().at(0), string_to_vec("F"));
 }
 
-// Test some iterations
+// Test some iterations.
 TEST(LSystemTest, derivation)
 {
     LSystem lsys ( "F", { { 'F', "F+G" }, { 'G', "G-F" } } );
@@ -71,4 +71,18 @@ TEST(LSystemTest, derivation)
     ASSERT_EQ(lsys.produce(1), iter_1);
     ASSERT_EQ(lsys.produce(3), iter_3);
 }
-        
+
+// Test some iterations in a non-standard order.
+TEST(LSystemTest, wild_derivation)
+{
+    LSystem lsys ( "F", { { 'F', "F+" } } );
+
+    std::vector<char> iter_1 = string_to_vec("F+");
+    std::vector<char> iter_3 = string_to_vec("F+++");
+    std::vector<char> iter_5 = string_to_vec("F+++++");
+
+    ASSERT_EQ(lsys.produce(3), iter_3);
+    ASSERT_EQ(lsys.produce(1), iter_1);
+    ASSERT_EQ(lsys.produce(5), iter_5);
+}
+
