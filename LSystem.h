@@ -2,7 +2,6 @@
 #define L_SYSTEM_H
 
 
-#include <vector>
 #include <string>
 #include <unordered_map>
 #include <iostream>
@@ -29,34 +28,23 @@ namespace lsys
         // (terminals) are replaced by themselves.  The rules are
         // contained in a hashmap for quick access during an
         // iteration.
-        using production_rules = std::unordered_map<char, std::vector<char>>;
-
-        // For ease of use, defines a hashmap only used in a
-        // constructor with std::string initalization instead of
-        // std::vector.
-        using pretty_production_rules = std::unordered_map<char, std::string>;
+        using production_rules = std::unordered_map<char, std::string>;
         
         // Constructors
         LSystem() = default;
-        LSystem(const std::vector<char>& ax, const production_rules& prod);
-
-        // Prettier way to create a LSystem:
-        //     { "F" , { 'F', "F+F" } }
-        //  VS
-        //     { {'F'}, { 'F', { 'F', '+', 'F' } } }
-        LSystem(const std::string& ax, const pretty_production_rules& prod);
+        LSystem(const std::string& axiom, const production_rules& prod);
 
         // Getters and setters
-        std::vector<char> get_axiom() const;
+        std::string get_axiom() const;
         production_rules  get_rules() const;
-        std::unordered_map<int, std::vector<char>>
+        std::unordered_map<int, std::string>
             get_cache() const;
 
-        void set_axiom(const std::vector<char>& axiom);
+        void set_axiom(const std::string& axiom);
     
         // Returns the result of the 'n'-th iteration of the L-System and cache
         // it as well as the transitional iterations.
-        std::vector<char> produce(int n);
+        std::string produce(int n);
        
     private:
         // The production rules applied in each iteration.
@@ -68,18 +56,10 @@ namespace lsys
         // usage. However, this project emphasizes interactivity so
         // quickly swapping between different iterations of the same
         // L-System.
-        std::unordered_map<int, std::vector<char>> cache_ = {};
+        std::unordered_map<int, std::string> cache_ = {};
     };
 
-    // Convert a std::string to a std::vector<char>.
-    std::vector<char> string_to_vec (const std::string& str);
-
-    // Convert a std::vector<char> to a std::string.
-    std::string vec_to_string (const std::vector<char> vec);
 }
-
-// Print a std::vector<char> like a std::string.
-std::ostream& operator<< (std::ostream& stream, std::vector<char> vec);
    
 #endif
 

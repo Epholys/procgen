@@ -4,22 +4,13 @@
 
 namespace lsys
 {
-
-    LSystem::LSystem(const std::vector<char>& ax, const production_rules& prod)
+    LSystem::LSystem(const std::string& axiom, const production_rules& prod)
         : rules_{prod},
-          cache_{ {0, {ax}} }
+          cache_{ {0, axiom} }
 {
-}
-    LSystem::LSystem(const std::string& ax, const pretty_production_rules& prod)
-        : rules_{},
-          cache_{ {0, {string_to_vec(ax)}} }
-{
-    for (const auto& rule: prod) {
-        rules_[rule.first] = string_to_vec(rule.second);
-    }
 }
 
-    std::vector<char> LSystem::get_axiom() const
+    std::string LSystem::get_axiom() const
     {
         // If an axiom is defined, returns it.
         if (cache_.count(0) > 0)
@@ -37,14 +28,14 @@ namespace lsys
         return rules_;
     }
 
-    std::unordered_map<int, std::vector<char>>
+    std::unordered_map<int, std::string>
         LSystem::get_cache() const
 
     {
         return cache_;
     }
 
-    void LSystem::set_axiom(const std::vector<char>& axiom)
+    void LSystem::set_axiom(const std::string& axiom)
     {
         cache_ = { {0, axiom} };
     }
@@ -54,7 +45,7 @@ namespace lsys
     //   - Precondition: 'cache_' is not empty and contains the axiom
     //   - Throw in case of allocation problem.
     //   - Throw at '.at()' if code is badly refactored.
-    std::vector<char> LSystem::produce(int n)
+    std::string LSystem::produce(int n)
     {
         Expects(n >= 0);
         Expects(cache_.count(0) > 0);
@@ -67,18 +58,17 @@ namespace lsys
 
         // The cache saves all the iteration from the start. So we get
         // the highest-iteration result.
-        auto it = std::max_element(cache_.begin(),
-                                   cache_.end(),
-                                   [](const auto& pair1, const auto& pair2)
-                                   { return pair1.first < pair2.first; });
-        Expects(it != cache_.end());
+        auto highest = std::max_element(cache_.begin(),
+                                        cache_.end(),
+                                        [](const auto& pair1, const auto& pair2)
+                                        { return pair1.first < pair2.first; });
 
         // We will start iterating from this result.
-        std::vector<char> base = it->second;
-        // We use a temporary vector: we can't iterate "in place".
-        std::vector<char> tmp;
+        std::string base = highest->second;
+        // We use a temporary string: we can't iterate "in place".
+        std::string tmp;
 
-        int n_iter = n - it->first;
+        int n_iter = n - highest->first;
         for (int i=0; i<n_iter; ++i) {
             tmp.clear();
             
@@ -86,10 +76,10 @@ namespace lsys
             {
                 if(rules_.count(c) > 0)
                 {
-                    std::vector<char> rule = rules_.at(c);
+                    std::string derivation = rules_.at(c);
 
                     // Replace the symbol according to its rule.
-                    tmp.insert(tmp.end(), rule.begin(), rule.end());
+                    tmp.insert(tmp.end(), derivation.begin(), derivation.end());
 
                 }
                 else
@@ -100,28 +90,10 @@ namespace lsys
             }
 
             base = tmp;
-            cache_.emplace(it->first + i + 1, tmp);
+            cache_.emplace(highest->first + i + 1, tmp);
         }
 
         return cache_.at(n);
     }
 
-    std::vector<char> string_to_vec (const std::string& str)
-    {
-        return std::vector<char> (str.begin(), str.end());
-    }
-
-    std::string vec_to_string (const std::vector<char> vec)
-    {
-        return std::string (vec.begin(), vec.end());
-    }
-
 }
-
-std::ostream& operator<< (std::ostream& stream, std::vector<char> vec)
-{
-    std::string str (vec.begin(), vec.end());
-    stream << str;
-    return stream;
-}
-
