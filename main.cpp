@@ -35,23 +35,36 @@ int main(/*int argc, char* argv[]*/)
     window.setVerticalSyncEnabled(true);
     ImGui::SFML::Init(window);
     
-    LSystem lsys { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } };
-    LSysInterpretation interpretation;
-    interpretation.lsys = lsys;
-    interpretation.map  = { { 'F', go_forward },
-                            { 'G', go_forward },
-                            { '+', turn_left  },
-                            { '-', turn_right } };
+    LSystem serpinski { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } };
+    LSystem smally    { "F", { { 'F', "F+F" } } };
+    LSysInterpretation::interpretation_map map  = { { 'F', go_forward },
+                                                    { 'G', go_forward },
+                                                    { '+', turn_left  },
+                                                    { '-', turn_right } };
+    LSysInterpretation serpinski_inter;
+    serpinski_inter.lsys = serpinski;
+    serpinski_inter.map  = map;
 
+    LSysInterpretation smally_inter;
+    smally_inter.lsys = smally;
+    smally_inter.map  = map;
+        
+    DrawingParameters serpinski_param;
+    serpinski_param.starting_position = { 400, 100 };
+    serpinski_param.starting_angle = 0.f;
+    serpinski_param.delta_angle = degree_to_rad(60.f);
+    serpinski_param.step = 5;
+    serpinski_param.n_iter = 7;
 
-    DrawingParameters parameters;
-    parameters.starting_position = { 400, 100 };
-    parameters.starting_angle = 0.f;
-    parameters.delta_angle = degree_to_rad(60.f);
-    parameters.step = 5;
-    parameters.n_iter = 7;
+    DrawingParameters smally_param;
+    smally_param.starting_position = { 1000, 600 };
+    smally_param.starting_angle = 0.f;
+    smally_param.delta_angle = degree_to_rad(60.f);
+    smally_param.step = 10;
+    smally_param.n_iter = 4;
 
-    auto vertices = compute_vertices(interpretation, parameters);
+    auto serpinski_vertices = compute_vertices(serpinski_inter, serpinski_param);
+    auto smally_vertices = compute_vertices(smally_inter, smally_param);
 
     sf::Clock delta_clock;
     while (window.isOpen())
@@ -61,12 +74,21 @@ int main(/*int argc, char* argv[]*/)
         ImGui::SFML::Update(window, delta_clock.restart());
 
         window.clear();
-        if (procgui::interact_with(parameters, "Serpinski"))
+        bool is_modified = false;
+        is_modified |= procgui::interact_with(serpinski_param, "Serpinski");
+        is_modified |= procgui::interact_with(serpinski_inter.lsys, "Serpinski");
+        if (is_modified)
         {
-            vertices = compute_vertices(interpretation, parameters);
+            serpinski_vertices = compute_vertices(serpinski_inter, serpinski_param);
         }
-        procgui::display(lsys, "Serpinski");
-        window.draw(vertices.data(), vertices.size(), sf::LineStrip);
+
+        if (procgui::interact_with(smally_inter.lsys, "smally"))
+        {
+            smally_vertices = compute_vertices(smally_inter, smally_param);
+        }
+
+        window.draw(serpinski_vertices.data(), serpinski_vertices.size(), sf::LineStrip);
+        window.draw(smally_vertices.data(), smally_vertices.size(), sf::LineStrip);
         ImGui::SFML::Render(window);
         window.display();
     }

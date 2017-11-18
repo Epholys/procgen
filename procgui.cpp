@@ -1,3 +1,4 @@
+#include <cstring>
 #include "procgui.h"
 
 using namespace math;
@@ -51,7 +52,7 @@ namespace
 
 namespace ImGui
 {
-    // Taken from 'imgui.cpp', helper function to display a help tooltip.
+    // Taken from 'imgui_demo.cpp', helper function to display a help tooltip.
     void ShowHelpMarker(const char* desc)
     {
         ImGui::TextDisabled("(?)");
@@ -75,24 +76,13 @@ namespace procgui
             // Early out if the display zone is collapsed.
             return;
         }
-    
+
         {
             ImGui::Text("Axiom:");
 
             ImGui::Indent();
 
-            // Note :
-            // "The copy of the underlying string returned by 'str' is
-            // a temporary object that will be destructed at the end
-            // of the expression, so directly calling 'c_str()' on the 
-            // result of 'str()'
-            // (for example in auto '*ptr = out.str().c_str();')
-            // results in a dangling pointer."
-            // http://en.cppreference.com/w/cpp/io/basic_stringstream/str
-            std::ostringstream oss;
-            oss << lsys.get_axiom();
-            std::string str = oss.str();
-            ImGui::Text(str.c_str());
+            ImGui::Text(lsys.get_axiom().c_str());
 
             ImGui::Unindent(); 
         }
@@ -151,50 +141,6 @@ namespace procgui
 
         conclude(main);
     }
-
-    // bool interact_with(lsys::LSystem& lsys, const std::string& name, bool main)
-    // {
-    //     if( !set_up(name, main) ) {
-    //         // Early out if the display zone is collapsed.
-    //         return;
-    //     }
-    
-    //     {
-    //         ImGui::Text("Axiom:");
-
-    //         ImGui::Indent();
-
-    //         // Note :
-    //         // "The copy of the underlying string returned by 'str' is
-    //         // a temporary object that will be destructed at the end
-    //         // of the expression, so directly calling 'c_str()' on the 
-    //         // result of 'str()'
-    //         // (for example in auto '*ptr = out.str().c_str();')
-    //         // results in a dangling pointer."
-    //         // http://en.cppreference.com/w/cpp/io/basic_stringstream/str
-    //         std::ostringstream oss;
-    //         oss << lsys.get_axiom();
-    //         std::string str = oss.str();
-    //         ImGui::Text(str.c_str());
-
-    //         ImGui::Unindent(); 
-    //     }
-
-    //     {
-    //         ImGui::Text("Production rules:");
-
-    //         ImGui::Indent(); 
-    //         for (const auto& rule : lsys.get_rules()) {
-    //             std::ostringstream oss;
-    //             oss << rule.first << " -> " << rule.second;
-    //             std::string str = oss.str();
-    //             ImGui::Text(str.c_str());
-    //         }
-    //         ImGui::Unindent(); 
-    //     }
-
-    //     conclude(main);
-    // }
 
     
     bool interact_with(drawing::DrawingParameters& parameters, const std::string& name, bool main)
@@ -258,5 +204,54 @@ namespace procgui
         return is_modified;
     }
 
-}
+    bool interact_with(lsys::LSystem& lsys, const std::string& name, bool main)
+    {
+        if( !set_up(name, main) )
+        {
+            // Early out if the display zone is collapsed.
+            return false;
+        }
+        
+        // TODO: document limitation
+        const int input_size = 64;
 
+        bool is_modified = false;
+ 
+        {
+            // TODO: put this in a global doc
+            // Normally, we would use all things 'gsl::span', but to interact
+            // nicely with imgui, we use C-style strings and arrays.
+
+            // TODO: put this in a testable function
+            char buf[input_size];
+            std::string axiom = lsys.get_axiom();
+            axiom.resize(input_size, '\0');
+            std::strncpy(buf, axiom.data(), input_size-1);
+            buf[input_size-1] = '\0';
+  
+            if (ImGui::InputText("Axiom", buf, input_size))
+            {
+                lsys.set_axiom({buf});
+                is_modified = true;
+            }
+        }
+
+        {
+            ImGui::Text("Production rules:");
+
+            ImGui::Indent(); 
+            for (const auto& rule : lsys.get_rules())
+            {
+                std::ostringstream oss;
+                oss << rule.first << " -> " << rule.second;
+                std::string str = oss.str();
+                ImGui::Text(str.c_str());
+            }
+            ImGui::Unindent(); 
+        }
+
+        conclude(main);
+
+        return is_modified;
+    }
+}
