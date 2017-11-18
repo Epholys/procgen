@@ -60,6 +60,20 @@ TEST(LSystemTest, pretty_ctor)
     ASSERT_EQ(lsys.get_cache().at(0), string_to_vec("F"));
 }
 
+
+TEST(LSystemTest, set_axiom)
+{
+    LSystem lsys ( "F", { { 'F', "F+F" } } );
+    LSystem::production_rules expected_rules = { { 'F', string_to_vec("F+F") } };
+
+    lsys.set_axiom(string_to_vec("FF"));
+
+    ASSERT_EQ(lsys.get_axiom(),       string_to_vec("FF"));
+    ASSERT_EQ(lsys.get_rules(),       expected_rules);
+    ASSERT_EQ(lsys.get_cache().at(0), string_to_vec("FF"));
+}
+
+
 // Test some iterations.
 TEST(LSystemTest, derivation)
 {

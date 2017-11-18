@@ -1,6 +1,7 @@
 #include "gsl/gsl"
 #include "LSystem.h"
 
+
 namespace lsys
 {
 
@@ -43,6 +44,11 @@ namespace lsys
         return cache_;
     }
 
+    void LSystem::set_axiom(const std::vector<char>& axiom)
+    {
+        cache_ = { {0, axiom} };
+    }
+
     // Exceptions:
     //   - Precondition: n positive.
     //   - Precondition: 'cache_' is not empty and contains the axiom
@@ -51,6 +57,7 @@ namespace lsys
     std::vector<char> LSystem::produce(int n)
     {
         Expects(n >= 0);
+        Expects(cache_.count(0) > 0);
 
         if (cache_.count(n) > 0)
         {

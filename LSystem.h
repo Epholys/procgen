@@ -51,6 +51,8 @@ namespace lsys
         production_rules  get_rules() const;
         std::unordered_map<int, std::vector<char>>
             get_cache() const;
+
+        void set_axiom(const std::vector<char>& axiom);
     
         // Returns the result of the 'n'-th iteration of the L-System and cache
         // it as well as the transitional iterations.
