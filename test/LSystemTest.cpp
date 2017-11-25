@@ -5,7 +5,6 @@
 using namespace lsys;
 
 
-// Test the default constructor.
 TEST(LSystemTest, default_ctor)
 {
     LSystem lsys;
@@ -19,10 +18,9 @@ TEST(LSystemTest, default_ctor)
     ASSERT_EQ(lsys.get_cache(), empty_cache);
 }
 
-// Test the complete constructor.
 TEST(LSystemTest, complete_ctor)
 {
-    LSystem lsys ( "F", { { 'F', "F+F" } } );
+    LSystem lsys { "F", { { 'F', "F+F" } } };
 
     LSystem::production_rules expected_rules = { { 'F', "F+F" } };
 
@@ -33,21 +31,39 @@ TEST(LSystemTest, complete_ctor)
 
 TEST(LSystemTest, set_axiom)
 {
-    LSystem lsys ( "F", { { 'F', "F+F" } } );
-    LSystem::production_rules expected_rules = { { 'F', "F+F" } };
+    LSystem lsys { "F", { { 'F', "F+F" } } };
 
     lsys.set_axiom("FF");
 
     ASSERT_EQ(lsys.get_axiom(),       "FF");
-    ASSERT_EQ(lsys.get_rules(),       expected_rules);
     ASSERT_EQ(lsys.get_cache().at(0), "FF");
+}
+
+TEST(LSystemTest, add_rule)
+{
+    LSystem lsys { "F", { } };
+    LSystem::production_rules expected_rules = { { 'F', "F+F" } };
+
+    lsys.add_rule('F', "F+F");
+
+    ASSERT_EQ(lsys.get_rules(), expected_rules);
+}
+
+TEST(LSystemTest, remove_rule)
+{
+    LSystem lsys { "F", { { 'F', "F+F" } } };
+    LSystem::production_rules empty_rules;
+
+    lsys.remove_rule('F');
+
+    ASSERT_EQ(lsys.get_rules(), empty_rules);
 }
 
 
 // Test some iterations.
 TEST(LSystemTest, derivation)
 {
-    LSystem lsys ( "F", { { 'F', "F+G" }, { 'G', "G-F" } } );
+    LSystem lsys { "F", { { 'F', "F+G" }, { 'G', "G-F" } } };
 
     std::string iter_1 = "F+G";
     std::string iter_3 = "F+G+G-F+G-F-F+G";
@@ -59,7 +75,7 @@ TEST(LSystemTest, derivation)
 // Test some iterations in a non-standard order.
 TEST(LSystemTest, wild_derivation)
 {
-    LSystem lsys ( "F", { { 'F', "F+" } } );
+    LSystem lsys { "F", { { 'F', "F+" } } };
 
     std::string iter_1 = "F+";
     std::string iter_3 = "F+++";

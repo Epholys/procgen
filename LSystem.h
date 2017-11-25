@@ -36,12 +36,14 @@ namespace lsys
 
         // Getters and setters
         std::string get_axiom() const;
-        production_rules  get_rules() const;
-        std::unordered_map<int, std::string>
-            get_cache() const;
+        const production_rules&  get_rules() const;
+        std::pair<char, std::string> get_rule(char predecessor) const;
+        const std::unordered_map<int, std::string>& get_cache() const;
 
         void set_axiom(const std::string& axiom);
-    
+        void add_rule(char predecessor, const std::string& successor);
+        void remove_rule(char predecessor);
+        
         // Returns the result of the 'n'-th iteration of the L-System and cache
         // it as well as the transitional iterations.
         std::string produce(int n);

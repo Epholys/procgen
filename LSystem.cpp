@@ -23,13 +23,21 @@ namespace lsys
         }
     }
 
-    LSystem::production_rules LSystem::get_rules() const
+    const LSystem::production_rules& LSystem::get_rules() const
     {
         return rules_;
     }
 
-    std::unordered_map<int, std::string>
-        LSystem::get_cache() const
+    // Exceptions:
+    //   - Precondition: a production rule with 'predecessor' as a predecessor
+    //   exists.
+    std::pair<char, std::string> LSystem::get_rule(char predecessor) const
+    {
+        Expects(rules_.count(predecessor) > 0);
+        return { predecessor, rules_.at(predecessor) };
+    }
+    
+    const std::unordered_map<int, std::string>& LSystem::get_cache() const
 
     {
         return cache_;
@@ -40,6 +48,24 @@ namespace lsys
         cache_ = { {0, axiom} };
     }
 
+    // Note: replace the successor of an existing rule if 'predecessor' has
+    // already a rule associated.
+    void LSystem::add_rule(char predecessor, const std::string& successor)
+    {
+        rules_[predecessor] = successor;
+    }
+
+    // Exception:
+    //   - Precondition: 'predecessor' must have a rule associated.
+    void LSystem::remove_rule(char predecessor)
+    {
+        auto rule = rules_.find(predecessor);
+        Expects(rule != rules_.end());
+
+        rules_.erase(rule);
+    }
+
+    
     // Exceptions:
     //   - Precondition: n positive.
     //   - Precondition: 'cache_' is not empty and contains the axiom
