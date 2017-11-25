@@ -15,8 +15,6 @@ using namespace lsys;
 using namespace drawing;
 using namespace math;
 
-#ifndef IMGUI_DEMO
-
 // Forward Declaration
 void handle_input(sf::RenderWindow& window);
 
@@ -173,43 +171,3 @@ void handle_input(sf::RenderWindow& window)
 
     window.setView(view);
 }
-
-
-#else
-
-// Special main to display imgui's demo
-int main()
-{
-    sf::RenderWindow window(sf::VideoMode(1600, 900), "Procgen");
-    window.setVerticalSyncEnabled(true);
-    ImGui::SFML::Init(window);
-    
-    sf::Clock delta_clock;
-    while (window.isOpen())
-    {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            ImGui::SFML::ProcessEvent(event);
-
-            if (event.type == sf::Event::Closed ||
-                (event.type == sf::Event::KeyPressed &&
-                 event.key.code == sf::Keyboard::Escape))
-            {
-                window.close();
-            }
-        }
-
-        ImGui::SFML::Update(window, delta_clock.restart());
-        ImGui::ShowTestWindow();
-        window.clear();
-        ImGui::SFML::Render(window);
-        window.display();
-    }
-
-    ImGui::SFML::Shutdown();
-    
-    return 0;
-}
-
-#endif
