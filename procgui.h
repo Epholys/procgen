@@ -7,6 +7,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
 #include "LSystem.h"
+#include "LSystemView.h"
 #include "Turtle.h"
 
 
@@ -44,7 +45,7 @@ namespace procgui {
                        const std::string& name,
                        bool main=true);
 
-    bool interact_with(lsys::LSystem& lsys, const std::string& name, bool main=true);
+    bool interact_with(LSystemView& lsys_view, const std::string& name, bool main=true);
 }
 
 #endif

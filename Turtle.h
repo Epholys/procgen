@@ -92,6 +92,7 @@ namespace drawing
     // LSysInterpretation is the link between a LSystem and a
     // graphical Turtle interpretation. Each symbol of a L-System is
     // associated with an 'order' which modifies a Turtle.
+    // TODO: remove the lsys inside this
     struct LSysInterpretation
     {
         // An 'order' is a function modifying a 'Turtle'. Semantically
@@ -104,7 +105,7 @@ namespace drawing
         // associated order will be executed.
         using interpretation_map = std::unordered_map<char, order>;
         
-        lsys::LSystem lsys { };
+        lsys::LSystem& lsys;
         interpretation_map map { };
     };
 

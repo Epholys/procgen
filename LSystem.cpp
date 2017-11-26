@@ -4,11 +4,12 @@
 
 namespace lsys
 {
+    // TODO: check duplicate rules
     LSystem::LSystem(const std::string& axiom, const production_rules& prod)
         : rules_{prod},
           cache_{ {0, axiom} }
-{
-}
+    {
+    }
 
     std::string LSystem::get_axiom() const
     {
@@ -31,7 +32,7 @@ namespace lsys
     // Exceptions:
     //   - Precondition: a production rule with 'predecessor' as a predecessor
     //   exists.
-    std::pair<char, std::string> LSystem::get_rule(char predecessor) const
+    LSystem::rule LSystem::get_rule(char predecessor) const
     {
         Expects(rules_.count(predecessor) > 0);
         return { predecessor, rules_.at(predecessor) };
@@ -52,6 +53,7 @@ namespace lsys
     // already a rule associated.
     void LSystem::add_rule(char predecessor, const std::string& successor)
     {
+        cache_ = { {0, get_axiom()} };
         rules_[predecessor] = successor;
     }
 
@@ -62,9 +64,15 @@ namespace lsys
         auto rule = rules_.find(predecessor);
         Expects(rule != rules_.end());
 
+        cache_ = { {0, get_axiom()} };
         rules_.erase(rule);
     }
 
+    void LSystem::clear_rules()
+    {
+        cache_ = { {0, get_axiom()} };
+        rules_.clear();
+    }                             
     
     // Exceptions:
     //   - Precondition: n positive.

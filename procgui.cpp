@@ -204,7 +204,7 @@ namespace procgui
         return is_modified;
     }
 
-    bool interact_with(lsys::LSystem& lsys, const std::string& name, bool main)
+    bool interact_with(LSystemView& lsys_view, const std::string& name, bool main)
     {
         if( !set_up(name, main) )
         {
@@ -212,24 +212,20 @@ namespace procgui
             return false;
         }
         
-        // TODO: document limitation
-        const int input_size = 64;
-
         bool is_modified = false;
+        lsys::LSystem& lsys = lsys_view.lsys;
  
         {
-            // TODO: put this in a global doc
-            // Normally, we would use all things 'gsl::span', but to interact
-            // nicely with imgui, we use C-style strings and arrays.
-
-            // TODO: put this in a testable function
-            char buf[input_size];
+            // TODO: put this in a testable function and use std::array<char>
+            // Copy and truncate the 'std::string' axiom into a C-style char
+            // array for ImGui's functions.
+            char buf[lsys_input_size] = "";
             std::string axiom = lsys.get_axiom();
-            axiom.resize(input_size, '\0');
-            std::strncpy(buf, axiom.data(), input_size-1);
-            buf[input_size-1] = '\0';
+            axiom.resize(lsys_input_size-1, '\0');
+            std::strncpy(buf, axiom.data(), lsys_input_size-1);
+            buf[lsys_input_size-1] = '\0';
   
-            if (ImGui::InputText("Axiom", buf, input_size))
+            if (ImGui::InputText("Axiom", buf, lsys_input_size))
             {
                 lsys.set_axiom({buf});
                 is_modified = true;
@@ -240,13 +236,65 @@ namespace procgui
             ImGui::Text("Production rules:");
 
             ImGui::Indent(); 
-            for (const auto& rule : lsys.get_rules())
+
+            auto& rules = lsys_view.rule_buffer;
+            using predecessor = LSystemView::predecessor;
+            using successor   = LSystemView::successor;
+            bool rules_modified = false;
+
+            // TODO: auto-update vertices
+            // TODO: manage '' rules
+            // TODO: manage whitespace rules
+            // TODO: Add '+' and '-' buttons
+            
+            for (auto it = rules.begin(); it != rules.end(); ++it)
             {
-                std::ostringstream oss;
-                oss << rule.first << " -> " << rule.second;
-                std::string str = oss.str();
-                ImGui::Text(str.c_str());
+                ImGui::PushID(&(*it));
+
+                ImGui::PushItemWidth(20);
+                auto& pred = std::get<predecessor>(*it);
+                if (ImGui::InputText("##pred", pred.data(), 2))
+                {
+                    bool is_duplicate = false;
+                    for(auto find_it = rules.begin(); find_it != rules.end(); ++find_it)
+                    {
+                        if(find_it != it && std::get<predecessor>(*find_it) == pred)
+                        {
+                            is_duplicate = true;
+                            break;
+                        }                            
+                    }
+
+                    if (is_duplicate)
+                    {
+                        std::get<bool>(*it) = false;
+                    }
+                    else
+                    {
+                        std::get<bool>(*it) = true;
+                        rules_modified = true;
+                    }
+                }
+
+                ImGui::PopItemWidth(); ImGui::SameLine(); ImGui::Text("->"); ImGui::SameLine();
+
+                ImGui::PushItemWidth(200);
+                rules_modified |= ImGui::InputText("##succ", std::get<successor>(*it).data(), lsys_input_size);
+
+                if(!std::get<bool>(*it))
+                {
+                    ImGui::SameLine(); ImGui::TextColored(ImVec4(1.f,0.f,0.f,1.f), "Duplicated predecessor: %s", pred.data());
+                }
+                
+                ImGui::PopID();
             }
+            if (rules_modified)
+            {
+                lsys_view.sync();
+                is_modified = true;
+            }
+        
+            
             ImGui::Unindent(); 
         }
 

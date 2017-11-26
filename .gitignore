@@ -5,6 +5,7 @@
 
 # Executable files
 *.out
+*.bin
 
 # Easy-to-access large documents like .pdf
 resources/

@@ -7,6 +7,7 @@
 #include "imgui/imgui-SFML.h"
 
 #include "LSystem.h"
+#include "LSystemView.h"
 #include "Turtle.h"
 #include "helper_math.h"
 #include "procgui.h"
@@ -14,6 +15,7 @@
 using namespace lsys;
 using namespace drawing;
 using namespace math;
+using namespace procgui;
 
 // Forward Declaration
 void handle_input(sf::RenderWindow& window);
@@ -34,18 +36,16 @@ int main(/*int argc, char* argv[]*/)
     ImGui::SFML::Init(window);
     
     LSystem serpinski { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } };
+    LSystemView serpinski_view { serpinski };
     LSystem smally    { "F", { { 'F', "F+F" } } };
+    LSystemView smally_view { smally };
     LSysInterpretation::interpretation_map map  = { { 'F', go_forward },
                                                     { 'G', go_forward },
                                                     { '+', turn_left  },
                                                     { '-', turn_right } };
-    LSysInterpretation serpinski_inter;
-    serpinski_inter.lsys = serpinski;
-    serpinski_inter.map  = map;
+    LSysInterpretation serpinski_inter { serpinski, map };
 
-    LSysInterpretation smally_inter;
-    smally_inter.lsys = smally;
-    smally_inter.map  = map;
+    LSysInterpretation smally_inter { smally, map };
         
     DrawingParameters serpinski_param;
     serpinski_param.starting_position = { 400, 100 };
@@ -73,14 +73,15 @@ int main(/*int argc, char* argv[]*/)
 
         window.clear();
         bool is_modified = false;
-        is_modified |= procgui::interact_with(serpinski_param, "Serpinski");
-        is_modified |= procgui::interact_with(serpinski_inter.lsys, "Serpinski");
+        is_modified |= interact_with(serpinski_param, "Serpinski");
+        is_modified |= interact_with(serpinski_view, "Serpinski");
         if (is_modified)
         {
             serpinski_vertices = compute_vertices(serpinski_inter, serpinski_param);
         }
+        display(serpinski, "Serpinski");
 
-        if (procgui::interact_with(smally_inter.lsys, "smally"))
+        if (interact_with(smally_view, "smally"))
         {
             smally_vertices = compute_vertices(smally_inter, smally_param);
         }

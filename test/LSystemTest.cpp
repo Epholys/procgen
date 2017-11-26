@@ -43,20 +43,36 @@ TEST(LSystemTest, add_rule)
 {
     LSystem lsys { "F", { } };
     LSystem::production_rules expected_rules = { { 'F', "F+F" } };
-
+    std::unordered_map<int, std::string> base_cache { { 0, "F" } };
+    
     lsys.add_rule('F', "F+F");
 
     ASSERT_EQ(lsys.get_rules(), expected_rules);
+    ASSERT_EQ(lsys.get_cache(), base_cache);
 }
 
 TEST(LSystemTest, remove_rule)
 {
     LSystem lsys { "F", { { 'F', "F+F" } } };
     LSystem::production_rules empty_rules;
+    std::unordered_map<int, std::string> base_cache { { 0, "F" } };
 
     lsys.remove_rule('F');
 
     ASSERT_EQ(lsys.get_rules(), empty_rules);
+    ASSERT_EQ(lsys.get_cache(), base_cache);
+}
+
+TEST(LSystemTest, clear_rules)
+{
+    LSystem lsys { "F", { { 'F', "F+F" }, { 'G', "G-G" } } };
+    LSystem::production_rules empty_rules;
+    std::unordered_map<int, std::string> base_cache { { 0, "F" } };
+
+    lsys.clear_rules();
+
+    ASSERT_EQ(lsys.get_rules(), empty_rules);
+    ASSERT_EQ(lsys.get_cache(), base_cache);
 }
 
 
