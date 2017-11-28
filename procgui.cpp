@@ -247,6 +247,7 @@ namespace procgui
             // TODO: Add '+' and '-' buttons
             
             auto to_delete = rules.end();
+            bool add_button = false;
             for (auto it = rules.begin(); it != rules.end(); ++it)
             {
                 ImGui::PushID(&(*it));
@@ -287,6 +288,19 @@ namespace procgui
                     to_delete = it;
                     rules_modified = true;
                 }
+                if (it == --rules.end())
+                {
+                    ImGui::SameLine();
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(2/7.0f, 0.6f, 0.6f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor::HSV(2/7.0f, 0.7f, 0.7f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor::HSV(2/7.0f, 0.8f, 0.8f));
+                    if (ImGui::Button("+"))
+                    {
+                        add_button = true;
+                        is_modified = true;
+                    }
+                    ImGui::PopStyleColor(3);
+                }
 
                 if(!std::get<bool>(*it))
                 {
@@ -299,7 +313,14 @@ namespace procgui
             {
                 rules.erase(to_delete);
             }
-            
+            if (add_button)
+            {
+                predecessor pred;
+                pred.fill('\0');
+                successor succ;
+                succ.fill('\0');
+                rules.push_back({true, pred, succ});
+            }
             if (rules_modified)
             {
                 lsys_view.sync();
