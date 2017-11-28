@@ -242,11 +242,11 @@ namespace procgui
             using successor   = LSystemView::successor;
             bool rules_modified = false;
 
-            // TODO: auto-update vertices
             // TODO: manage '' rules
             // TODO: manage whitespace rules
             // TODO: Add '+' and '-' buttons
             
+            auto to_delete = rules.end();
             for (auto it = rules.begin(); it != rules.end(); ++it)
             {
                 ImGui::PushID(&(*it));
@@ -281,6 +281,13 @@ namespace procgui
                 ImGui::PushItemWidth(200);
                 rules_modified |= ImGui::InputText("##succ", std::get<successor>(*it).data(), lsys_input_size);
 
+                ImGui::SameLine();
+                if (ImGui::Button("-"))
+                {
+                    to_delete = it;
+                    rules_modified = true;
+                }
+
                 if(!std::get<bool>(*it))
                 {
                     ImGui::SameLine(); ImGui::TextColored(ImVec4(1.f,0.f,0.f,1.f), "Duplicated predecessor: %s", pred.data());
@@ -288,6 +295,11 @@ namespace procgui
                 
                 ImGui::PopID();
             }
+            if (to_delete != rules.end())
+            {
+                rules.erase(to_delete);
+            }
+            
             if (rules_modified)
             {
                 lsys_view.sync();

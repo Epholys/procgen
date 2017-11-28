@@ -2,7 +2,7 @@
 #define LSYSTEM_VIEW_H
 
 
-#include <vector>
+#include <list>
 #include <tuple>
 #include <array>
 
@@ -23,7 +23,7 @@ namespace procgui
         void sync();
 
         lsys::LSystem& lsys;
-        std::vector<std::tuple<bool, predecessor, successor>> rule_buffer;
+        std::list<std::tuple<bool, predecessor, successor>> rule_buffer;
     };
 }
 
