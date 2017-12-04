@@ -76,14 +76,21 @@ namespace lsys
     
     // Exceptions:
     //   - Precondition: n positive.
-    //   - Precondition: 'cache_' is not empty and contains the axiom
     //   - Throw in case of allocation problem.
     //   - Throw at '.at()' if code is badly refactored.
+    // Edge Cases:
+    //   - If 'cache_' is not empty so does not contains the axiom, simply
+    //   returns an empty string.
     std::string LSystem::produce(int n)
     {
         Expects(n >= 0);
-        Expects(cache_.count(0) > 0);
 
+        if (cache_.count(0) == 0)
+        {
+            // We do not have any axiom so nothing to produce.
+            return "";
+        }
+        
         if (cache_.count(n) > 0)
         {
             // A solution was already computed.
