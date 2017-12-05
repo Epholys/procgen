@@ -79,13 +79,14 @@ namespace lsys
     //   - Throw in case of allocation problem.
     //   - Throw at '.at()' if code is badly refactored.
     // Edge Cases:
-    //   - If 'cache_' is not empty so does not contains the axiom, simply
+    //   - If 'cache_' is empty so does not contains the axiom, simply
     //   returns an empty string.
+    //   - If the axiom is an empty string, early-out.
     std::string LSystem::produce(int n)
     {
         Expects(n >= 0);
 
-        if (cache_.count(0) == 0)
+        if (cache_.count(0) == 0 || cache_.at(0) == "")
         {
             // We do not have any axiom so nothing to produce.
             return "";
