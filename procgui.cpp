@@ -1,3 +1,4 @@
+#include <cctype>
 #include <cstring>
 #include "procgui.h"
 
@@ -243,9 +244,6 @@ namespace procgui
             using successor   = LSystemView::successor;
             bool rules_modified = false;
 
-            // TODO: manage '' rules
-            // TODO: manage whitespace rules
-            // TODO: Add '+' and '-' buttons
             
             auto to_delete = rules.end();
             bool add_button = false;

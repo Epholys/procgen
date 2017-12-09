@@ -30,9 +30,9 @@ namespace procgui
         
         for (const auto& rule : rule_buffer)
         {
-            if(std::get<validity>(rule))
+            char pred = std::get<predecessor>(rule).at(0);
+            if(std::get<validity>(rule) && pred != '\0')
             {
-                char pred = std::get<predecessor>(rule).at(0);
                 const auto& arr = std::get<successor>(rule);
                 std::string succ { arr.begin(),
                                    std::find(arr.begin(), arr.end(), '\0') };
