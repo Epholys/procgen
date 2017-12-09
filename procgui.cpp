@@ -1,6 +1,7 @@
 #include <cctype>
 #include <cstring>
 #include "procgui.h"
+#include "helper_string.h"
 
 using namespace math;
 
@@ -217,18 +218,11 @@ namespace procgui
         lsys::LSystem& lsys = lsys_view.lsys;
  
         {
-            // TODO: put this in a testable function and use std::array<char>
-            // Copy and truncate the 'std::string' axiom into a C-style char
-            // array for ImGui's functions.
-            char buf[lsys_input_size] = "";
-            std::string axiom = lsys.get_axiom();
-            axiom.resize(lsys_input_size-1, '\0');
-            std::strncpy(buf, axiom.data(), lsys_input_size-1);
-            buf[lsys_input_size-1] = '\0';
-  
-            if (ImGui::InputText("Axiom", buf, lsys_input_size))
+            auto buf = string_to_array<lsys_input_size>(lsys.get_axiom());
+                        
+            if (ImGui::InputText("Axiom", buf.data(), lsys_input_size))
             {
-                lsys.set_axiom({buf});
+                lsys.set_axiom(array_to_string(buf));
                 is_modified = true;
             }
         }

@@ -1,4 +1,5 @@
 #include "LSystemView.h"
+#include "helper_string.h"
 
 namespace procgui
 {
@@ -6,20 +7,10 @@ namespace procgui
         : lsys {lsys}
         , rule_buffer {}
     {
-        // TODO: but this in a helper func
-        auto string_to_arr = [](auto str)
-            { std::array<char, lsys_input_size> arr;
-              str.resize(lsys_input_size-1, '\0');
-              for(std::size_t i=0; i<str.size(); ++i)
-                  arr.at(i) = str.at(i);
-              arr.back() = '\0';
-              return arr;
-            };
-            
         for (const auto& rule : lsys.get_rules())
         {
             predecessor pred = { rule.first, '\0' };
-            successor succ   = string_to_arr(rule.second);
+            successor   succ = string_to_array<lsys_input_size>(rule.second);
             rule_buffer.push_back({true, pred, succ});
         }
     }
@@ -27,16 +18,14 @@ namespace procgui
     void LSystemView::sync()
     {
         lsys.clear_rules();
-        
+
         for (const auto& rule : rule_buffer)
         {
             char pred = std::get<predecessor>(rule).at(0);
             if(std::get<validity>(rule) && pred != '\0')
             {
                 const auto& arr = std::get<successor>(rule);
-                std::string succ { arr.begin(),
-                                   std::find(arr.begin(), arr.end(), '\0') };
-
+                auto succ = array_to_string(arr);
                 lsys.add_rule(pred, succ);
             }
         }
