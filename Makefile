@@ -18,15 +18,15 @@ release : CXXFLAGS = -std=c++14 -O3 -Wall -Wextra -pthread
 ### Source files, Object Files, Directories, Targets, ...
 # Core object files to compile for every target.
 SRCS = $(wildcard *.cpp)
-OBJECTS  = $(SRCS:%.cpp=%.o)
-
+ALL_OBJECTS = $(SRCS:%.cpp=%.o)
+OBJECTS = $(filter-out main.o, $(ALL_OBJECTS))   
 
 # 'dear imgui,' and 'imgui-sfml' object files to compile for the main target.
 IMGUI_DIR = imgui
 IMGUI_SRC = $(wildcard $(IMGUI_DIR)/*.cpp)
 IMGUI_OBJ = $(IMGUI_SRC:$(IMGUI_DIR)/%.cpp=$(IMGUI_DIR)/%.o)
 
-OBJECTS  += $(IMGUI_OBJ)
+ALL_OBJECTS  += $(IMGUI_OBJ)
 
 # Main executable
 TARGET = procgen.out
@@ -35,7 +35,6 @@ TARGET = procgen.out
 TEST_DIR  = test
 TEST_SRC  = $(wildcard $(TEST_DIR)/*.cpp)
 TEST_OBJ  = $(TEST_SRC:$(TEST_DIR)/%.cpp=$(TEST_DIR)/%.o)
-TEST_OBJ += $(TEST_SRC:$(TEST_DIR)/%Test.cpp=%.o)
 
 # Complete Test Suite executable.
 TEST_TARGET = $(TEST_DIR)/procgenTest.out
@@ -57,7 +56,6 @@ GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 
 
 
-
 all : main test
 
 # Cleans all intermediate compilation files.
@@ -68,18 +66,16 @@ clean :
 
 
 # main: Links all the .o file from MAIN to TARGET.
-main : $(OBJECTS)
-#	$(CXX) $(CXXFLAGS) -c main.cpp -o main.o $(IFLAGS) # recompile main to assure the correct execution even if 'make imgui' was done precedently.
+main : $(ALL_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(MACROFLAGS) -o $(TARGET) $^ $(LFLAGS)
-
-# release: Same as main with the '-O3' option in CXXFLAGS (see above).
-release : main
-
 
 # test: Links all OBJECTS, TEST files plus gtest_main.a into the test
 #       suite TEST_TARGET.
-test : $(TEST_OBJ) $(TEST_DIR)/gtest_main.a
+test : $(OBJECTS) $(TEST_OBJ) $(TEST_DIR)/gtest_main.a
 	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -o $(TEST_TARGET) $^ $(IFLAGS) $(LFLAGS) -lpthread
+
+# release: Same as main with the '-O3' option in CXXFLAGS (see above).
+release : main
 
 
 # Each .o file is compiled with its associated *.cpp file.
