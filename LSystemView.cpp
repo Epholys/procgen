@@ -30,7 +30,7 @@ namespace procgui
         
         for (const auto& rule : rule_buffer)
         {
-            if(std::get<bool>(rule))
+            if(std::get<validity>(rule))
             {
                 char pred = std::get<predecessor>(rule).at(0);
                 const auto& arr = std::get<successor>(rule);

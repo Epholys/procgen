@@ -238,6 +238,7 @@ namespace procgui
             ImGui::Indent(); 
 
             auto& rules = lsys_view.rule_buffer;
+            using validity    = LSystemView::validity;
             using predecessor = LSystemView::predecessor;
             using successor   = LSystemView::successor;
             bool rules_modified = false;
@@ -268,11 +269,11 @@ namespace procgui
 
                     if (is_duplicate)
                     {
-                        std::get<bool>(*it) = false;
+                        std::get<validity>(*it) = false;
                     }
                     else
                     {
-                        std::get<bool>(*it) = true;
+                        std::get<validity>(*it) = true;
                         rules_modified = true;
                     }
                 }
@@ -302,7 +303,7 @@ namespace procgui
                     ImGui::PopStyleColor(3);
                 }
 
-                if(!std::get<bool>(*it))
+                if(!std::get<validity>(*it))
                 {
                     ImGui::SameLine(); ImGui::TextColored(ImVec4(1.f,0.f,0.f,1.f), "Duplicated predecessor: %s", pred.data());
                 }

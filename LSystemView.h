@@ -15,6 +15,7 @@ namespace procgui
     
     struct LSystemView
     {
+        using validity    = bool;
         using predecessor = std::array<char, 2>;
         using successor   = std::array<char, lsys_input_size>;
 
@@ -23,7 +24,7 @@ namespace procgui
         void sync();
 
         lsys::LSystem& lsys;
-        std::list<std::tuple<bool, predecessor, successor>> rule_buffer;
+        std::list<std::tuple<validity, predecessor, successor>> rule_buffer;
     };
 }
 
