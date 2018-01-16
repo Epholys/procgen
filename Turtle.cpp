@@ -14,22 +14,21 @@ namespace drawing
     }
         
     
-    std::vector<sf::Vertex> compute_vertices(LSysInterpretation& interpretation,
+    std::vector<sf::Vertex> compute_vertices(lsys::LSystem& lsys,
+                                             interpretation_map& interpretation,
                                              const DrawingParameters& parameters)
     {
         Turtle turtle (parameters);
-        
-        lsys::LSystem& lsys = interpretation.lsys;
         
         const auto res = lsys.produce(parameters.n_iter);
 
         for (auto c : res)
         {
-            if (interpretation.map.count(c) > 0)
+            if (interpretation.count(c) > 0)
             {
                 // If an interpretation of the character 'c' is found,
                 // applies it to the current turtle.
-                interpretation.map.at(c)(turtle);
+                interpretation.at(c)(turtle);
             }
             else
             {

@@ -12,6 +12,8 @@
 #include "helper_math.h"
 #include "procgui.h"
 
+#include <functional>
+
 using namespace lsys;
 using namespace drawing;
 using namespace math;
@@ -34,19 +36,16 @@ int main(/*int argc, char* argv[]*/)
     sf::RenderWindow window(sf::VideoMode(1600, 900), "Procgen");
     window.setVerticalSyncEnabled(true);
     ImGui::SFML::Init(window);
-    
+
     LSystem serpinski { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } };
     LSystemView serpinski_view { serpinski };
-    LSystem smally    { "F", { { 'F', "F+F" } } };
+    LSystem smally    { "FG", { { 'F', "F+G" }, { 'G', "G-F" } } };
     LSystemView smally_view { smally };
-    LSysInterpretation::interpretation_map map  = { { 'F', go_forward },
-                                                    { 'G', go_forward },
-                                                    { '+', turn_left  },
-                                                    { '-', turn_right } };
-    LSysInterpretation serpinski_inter { serpinski, map };
+    interpretation_map map  = { { 'F', go_forward },
+                                { 'G', go_forward },
+                                { '+', turn_left  },
+                                { '-', turn_right } };
 
-    LSysInterpretation smally_inter { smally, map };
-        
     DrawingParameters serpinski_param;
     serpinski_param.starting_position = { 400, 100 };
     serpinski_param.starting_angle = 0.f;
@@ -61,8 +60,8 @@ int main(/*int argc, char* argv[]*/)
     smally_param.step = 10;
     smally_param.n_iter = 4;
 
-    auto serpinski_vertices = compute_vertices(serpinski_inter, serpinski_param);
-    auto smally_vertices = compute_vertices(smally_inter, smally_param);
+    auto serpinski_vertices = compute_vertices(serpinski, map, serpinski_param);
+    auto smally_vertices = compute_vertices(smally, map, smally_param);
 
     sf::Clock delta_clock;
     while (window.isOpen())
@@ -77,13 +76,15 @@ int main(/*int argc, char* argv[]*/)
         is_modified |= interact_with(serpinski_view, "Serpinski");
         if (is_modified)
         {
-            serpinski_vertices = compute_vertices(serpinski_inter, serpinski_param);
+            serpinski_vertices = compute_vertices(serpinski, map, serpinski_param);
         }
         display(serpinski, "Serpinski");
 
-        if (interact_with(smally_view, "smally"))
+        is_modified |= interact_with(smally_param, "smally");
+        is_modified |= interact_with(smally_view, "smally");
+        if (is_modified)
         {
-            smally_vertices = compute_vertices(smally_inter, smally_param);
+            smally_vertices = compute_vertices(smally, map, smally_param);
         }
 
         window.draw(serpinski_vertices.data(), serpinski_vertices.size(), sf::LineStrip);
@@ -93,7 +94,7 @@ int main(/*int argc, char* argv[]*/)
     }
 
     ImGui::SFML::Shutdown();
-    
+
     return 0;
 }
 

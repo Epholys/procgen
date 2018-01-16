@@ -25,10 +25,9 @@ public:
         }
     
     LSystem lsys { "F", { { 'F', "F+G" } } };
-    LSysInterpretation::interpretation_map intr { { 'F', go_forward },
-                                                  { 'G', go_forward },
-                                                  { '+', turn_left  } };
-    LSysInterpretation interpretation { lsys, intr };    
+    interpretation_map interpretation { { 'F', go_forward },
+                                        { 'G', go_forward },
+                                        { '+', turn_left  } };
     // starting_position, starting_angle, delta_angle, step, n_iter
     DrawingParameters parameters { { 100, 100 }, degree_to_rad(45.f), degree_to_rad(90.f), 10, 0 };
     impl::Turtle turtle;
@@ -94,7 +93,7 @@ TEST_F(TurtleTest, compute_vertices)
                               turtle.vertices.at(2) };
 
     parameters.n_iter = 1;
-    auto res = compute_vertices(interpretation, parameters);
+    auto res = compute_vertices(lsys, interpretation, parameters);
 
     ASSERT_EQ(res, norm);
 }
