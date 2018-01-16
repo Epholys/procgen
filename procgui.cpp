@@ -238,9 +238,9 @@ namespace procgui
         lsys::LSystem& lsys = lsys_view.lsys;
         
         { // Axiom
-            auto buf = string_to_array<lsys_input_size>(lsys.get_axiom());
+            auto buf = string_to_array<lsys_successor_size>(lsys.get_axiom());
                         
-            if (ImGui::InputText("Axiom", buf.data(), lsys_input_size))
+            if (ImGui::InputText("Axiom", buf.data(), lsys_successor_size))
             {
                 is_modified = true;
                 lsys.set_axiom(array_to_string(buf));
@@ -255,7 +255,7 @@ namespace procgui
 
             ImGui::Indent(); 
 
-            auto& rules = lsys_view.rule_buffer;
+            auto& rules = lsys_view.rule_buffer_;
             using validity    = LSystemView::validity; // if the rule is unique
             using predecessor = LSystemView::predecessor;
             using successor   = LSystemView::successor;
@@ -310,7 +310,7 @@ namespace procgui
 
                 // Interact with the successor. Except for the input size, does
                 // not have any constraints.
-                rules_modified |= ImGui::InputText("##succ", succ.data(), lsys_input_size);
+                rules_modified |= ImGui::InputText("##succ", succ.data(), lsys_successor_size);
 
                 // The [-] button. If clicked, the current iterator is saved as
                 // the one to delete. We reasonably assume a user can not click

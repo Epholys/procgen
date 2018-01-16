@@ -4,7 +4,6 @@
 
 namespace lsys
 {
-    // TODO: check duplicate rules
     LSystem::LSystem(const std::string& axiom, const production_rules& prod)
         : rules_{prod},
           cache_{ {0, axiom} }

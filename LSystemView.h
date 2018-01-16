@@ -7,24 +7,42 @@
 #include <array>
 
 #include "LSystem.h"
+#include "helper_string.h"
 
 namespace procgui
 {
-    // TODO: document limitation
-    constexpr int lsys_input_size = 64;
-    
+    // ImGui needs a number for its fixed-size input buffer.
+    // We arbitrarily choose 64 characters as the limit for the sucessor of a
+    // production rule.
+    constexpr int lsys_successor_size = 64;
+
+    // The interface between the pure logic of a LSystem and the ImGui GUI.
+    //
+    // ImGui is a immediate-mode GUI, so it can not retain information between
+    // frame. This class hosts a production rules buffer used in
+    // 'procgui::interact_with()' to manage:
+    //   - duplicate rules
+    //   - adding new rules
+    //   - removing rules
+    // We can still directly access the LSystem for all trivial attributes like
+    // the axiom.
+    //
+    // A LSystemView must be destructed before the destruction of a LSystem (non
+    // owning-reference). For the coherence of the GUI, a LSystem must have a
+    // unique LSystemView associated.
     struct LSystemView
     {
-        using validity    = bool;
+        using validity    = bool; // If the rule is a duplicate, it is not valid.
         using predecessor = std::array<char, 2>;
-        using successor   = std::array<char, lsys_input_size>;
+        using successor   = std::array<char, lsys_successor_size>;
 
         LSystemView(lsys::LSystem& lsys);
 
+        // Synchronize the rule buffer with the LSystem.
         void sync();
 
-        lsys::LSystem& lsys;
-        std::list<std::tuple<validity, predecessor, successor>> rule_buffer;
+        lsys::LSystem& lsys; // non-owning reference
+        std::list<std::tuple<validity, predecessor, successor>> rule_buffer_;
     };
 }
 
