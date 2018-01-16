@@ -27,8 +27,8 @@
 //
 // The 'main' parameter is used for a cleaner visualization when chaining
 // 'display()'. When 'main' has the value 'false', the data will be displayed in
-// the same window as a collapsed TreeNode. As such, composition relations
-// between objects are shown more clearly.
+// the same window as a collapsed ImGui::TreeNode. As such, composition
+// relations between objects are shown more clearly.
 //
 // The 'interact_with()' functions return 'true' if the object was modified by
 // the GUI, 'false' otherwise.
