@@ -4,70 +4,101 @@
 
 using namespace lsys;
 
-// Test the string_to_vec helper function.
-TEST(LSystemTest, string_to_vec)
-{
-    std::string str = "Test";
-    std::vector<char> vec = { 'T', 'e', 's', 't' };
-    
-    ASSERT_EQ(vec, string_to_vec(str));
-}
 
-// Test the vec_to_string helper function.
-TEST(LSystemTest, vec_to_string)
-{
-    std::string str = "Test";
-    std::vector<char> vec = { 'T', 'e', 's', 't' };
-    
-    ASSERT_EQ(str, vec_to_string(vec));
-}
-
-// Test the default constructor.
 TEST(LSystemTest, default_ctor)
 {
     LSystem lsys;
     
     LSystem::production_rules empty_rules;
-    std::vector<char> empty_vec;
+    std::string empty_vec;
+    std::unordered_map<int, std::string> empty_cache;
     
     ASSERT_EQ(lsys.get_axiom(), empty_vec);
     ASSERT_EQ(lsys.get_rules(), empty_rules);
-    ASSERT_EQ(lsys.get_result(), empty_vec);
+    ASSERT_EQ(lsys.get_cache(), empty_cache);
 }
 
-// Test the complete constructor.
 TEST(LSystemTest, complete_ctor)
 {
-    LSystem lsys ( string_to_vec("F"), { { 'F', string_to_vec("F+F") } } );
+    LSystem lsys { "F", { { 'F', "F+F" } } };
 
-    LSystem::production_rules expected_rules = { { 'F', string_to_vec("F+F") } };
+    LSystem::production_rules expected_rules = { { 'F', "F+F" } };
 
-    ASSERT_EQ(lsys.get_axiom(), string_to_vec("F"));
-    ASSERT_EQ(lsys.get_rules(), expected_rules);
-    ASSERT_EQ(lsys.get_result(), string_to_vec("F"));
+    ASSERT_EQ(lsys.get_axiom(),       "F");
+    ASSERT_EQ(lsys.get_rules(),       expected_rules);
+    ASSERT_EQ(lsys.get_cache().at(0), "F");
 }
 
-// Test the easy-to-use constructor.
-TEST(LSystemTest, pretty_ctor)
+TEST(LSystemTest, set_axiom)
 {
-    LSystem lsys ( "F", { { 'F', "F+F" } } );
+    LSystem lsys { "F", { { 'F', "F+F" } } };
 
-    LSystem::production_rules expected_rules = { { 'F', string_to_vec("F+F") } };
+    lsys.set_axiom("FF");
 
-    ASSERT_EQ(lsys.get_axiom(), string_to_vec("F"));
-    ASSERT_EQ(lsys.get_rules(), expected_rules);
-    ASSERT_EQ(lsys.get_result(), string_to_vec("F"));
+    ASSERT_EQ(lsys.get_axiom(),       "FF");
+    ASSERT_EQ(lsys.get_cache().at(0), "FF");
 }
 
-// Test some iterations
+TEST(LSystemTest, add_rule)
+{
+    LSystem lsys { "F", { } };
+    LSystem::production_rules expected_rules = { { 'F', "F+F" } };
+    std::unordered_map<int, std::string> base_cache { { 0, "F" } };
+    
+    lsys.add_rule('F', "F+F");
+
+    ASSERT_EQ(lsys.get_rules(), expected_rules);
+    ASSERT_EQ(lsys.get_cache(), base_cache);
+}
+
+TEST(LSystemTest, remove_rule)
+{
+    LSystem lsys { "F", { { 'F', "F+F" } } };
+    LSystem::production_rules empty_rules;
+    std::unordered_map<int, std::string> base_cache { { 0, "F" } };
+
+    lsys.remove_rule('F');
+
+    ASSERT_EQ(lsys.get_rules(), empty_rules);
+    ASSERT_EQ(lsys.get_cache(), base_cache);
+}
+
+TEST(LSystemTest, clear_rules)
+{
+    LSystem lsys { "F", { { 'F', "F+F" }, { 'G', "G-G" } } };
+    LSystem::production_rules empty_rules;
+    std::unordered_map<int, std::string> base_cache { { 0, "F" } };
+
+    lsys.clear_rules();
+
+    ASSERT_EQ(lsys.get_rules(), empty_rules);
+    ASSERT_EQ(lsys.get_cache(), base_cache);
+}
+
+
+// Test some iterations.
 TEST(LSystemTest, derivation)
 {
-    LSystem lsys ( "F", { { 'F', "F+G" }, { 'G', "G-F" } } );
+    LSystem lsys { "F", { { 'F', "F+G" }, { 'G', "G-F" } } };
 
-    std::vector<char> iter_1 = string_to_vec("F+G");
-    std::vector<char> iter_3 = string_to_vec("F+G+G-F+G-F-F+G");
+    std::string iter_1 = "F+G";
+    std::string iter_3 = "F+G+G-F+G-F-F+G";
 
-    ASSERT_EQ(lsys.iter(), iter_1);
-    ASSERT_EQ(lsys.iter(2), iter_3);
+    ASSERT_EQ(lsys.produce(1), iter_1);
+    ASSERT_EQ(lsys.produce(3), iter_3);
 }
-        
+
+// Test some iterations in a non-standard order.
+TEST(LSystemTest, wild_derivation)
+{
+    LSystem lsys { "F", { { 'F', "F+" } } };
+
+    std::string iter_1 = "F+";
+    std::string iter_3 = "F+++";
+    std::string iter_5 = "F+++++";
+
+    ASSERT_EQ(lsys.produce(3), iter_3);
+    ASSERT_EQ(lsys.produce(1), iter_1);
+    ASSERT_EQ(lsys.produce(5), iter_5);
+}
+

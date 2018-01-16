@@ -1,3 +1,0 @@
-* Massif
-  * Manual: http://valgrind.org/docs/manual/ms-manual.html
-  * With =--pages-as-heap= =_dl_map_object_from_fd= refers to external libraries

@@ -1,89 +1,140 @@
 #include "gsl/gsl"
 #include "LSystem.h"
 
+
 namespace lsys
 {
-
-    LSystem::LSystem(const std::vector<char>& ax, const production_rules& prod)
-        : axiom{ax},
-          rules{prod},
-          current{ax}
-{
-}
-    LSystem::LSystem(const std::string& ax, const pretty_production_rules& prod)
-        : axiom{string_to_vec(ax)},
-          rules{},
-          current{axiom}
-{
-    for (const auto& rule: prod) {
-        rules[rule.first] = string_to_vec(rule.second);
-    }
-}
-
-    std::vector<char> LSystem::get_axiom() const
+    LSystem::LSystem(const std::string& axiom, const production_rules& prod)
+        : rules_{prod},
+          cache_{ {0, axiom} }
     {
-        return axiom;
     }
 
-    LSystem::production_rules LSystem::get_rules() const
+    std::string LSystem::get_axiom() const
     {
-        return rules;
+        // If an axiom is defined, returns it.
+        if (cache_.count(0) > 0)
+        {
+            return cache_.at(0);
+        }
+        else
+        {
+            return {};
+        }
     }
 
-    std::vector<char> LSystem::get_result() const
+    const LSystem::production_rules& LSystem::get_rules() const
     {
-        return current;
+        return rules_;
     }
 
     // Exceptions:
-    //   - May throw in case of allocation problem.
-    //   - Precondition: n_iter positive. Will throw otherwise.
-    std::vector<char> LSystem::iter(int n_iter)
+    //   - Precondition: a production rule with 'predecessor' as a predecessor
+    //   exists.
+    LSystem::rule LSystem::get_rule(char predecessor) const
     {
-        Expects(n_iter >= 0);
+        Expects(rules_.count(predecessor) > 0);
+        return { predecessor, rules_.at(predecessor) };
+    }
+    
+    const std::unordered_map<int, std::string>& LSystem::get_cache() const
+
+    {
+        return cache_;
+    }
+
+    void LSystem::set_axiom(const std::string& axiom)
+    {
+        cache_ = { {0, axiom} };
+    }
+
+    // Note: replace the successor of an existing rule if 'predecessor' has
+    // already a rule associated.
+    void LSystem::add_rule(char predecessor, const std::string& successor)
+    {
+        cache_ = { {0, get_axiom()} };
+        rules_[predecessor] = successor;
+    }
+
+    // Exception:
+    //   - Precondition: 'predecessor' must have a rule associated.
+    void LSystem::remove_rule(char predecessor)
+    {
+        auto rule = rules_.find(predecessor);
+        Expects(rule != rules_.end());
+
+        cache_ = { {0, get_axiom()} };
+        rules_.erase(rule);
+    }
+
+    void LSystem::clear_rules()
+    {
+        cache_ = { {0, get_axiom()} };
+        rules_.clear();
+    }                             
+    
+    // Exceptions:
+    //   - Precondition: n positive.
+    //   - Throw in case of allocation problem.
+    //   - Throw at '.at()' if code is badly refactored.
+    // Edge Cases:
+    //   - If 'cache_' is empty so does not contains the axiom, simply
+    //   returns an empty string.
+    //   - If the axiom is an empty string, early-out.
+    std::string LSystem::produce(int n)
+    {
+        Expects(n >= 0);
+
+        if (cache_.count(0) == 0 || cache_.at(0) == "")
+        {
+            // We do not have any axiom so nothing to produce.
+            return "";
+        }
         
-        // We use a temporary vector: we can't iterate "in place".
-        std::vector<char> tmp;
-        
+        if (cache_.count(n) > 0)
+        {
+            // A solution was already computed.
+            return cache_.at(n);
+        }
+
+        // The cache saves all the iteration from the start. So we get
+        // the highest-iteration result.
+        auto highest = std::max_element(cache_.begin(),
+                                        cache_.end(),
+                                        [](const auto& pair1, const auto& pair2)
+                                        { return pair1.first < pair2.first; });
+
+        // We will start iterating from this result.
+        std::string base = highest->second;
+        // We use a temporary string: we can't iterate "in place".
+        std::string tmp;
+
+        int n_iter = n - highest->first;
         for (int i=0; i<n_iter; ++i) {
             tmp.clear();
             
-            for (auto c : current) {
-                if(rules.count(c) > 0) {
-                    std::vector<char> rule = rules.at(c);
+            for (auto c : base)
+            {
+                if(rules_.count(c) > 0)
+                {
+                    std::string derivation = rules_.at(c);
 
                     // Replace the symbol according to its rule.
-                    tmp.insert(tmp.end(), rule.begin(), rule.end());
+                    tmp.insert(tmp.end(), derivation.begin(), derivation.end());
 
                 }
-                else {
+                else
+                {
                     // The symbol is a terminal: replace it by itself.
                     tmp.push_back(c);
                 }
             }
 
-            current = tmp;
+            base = tmp;
+            cache_.emplace(highest->first + i + 1, tmp);
         }
 
-        return current;
-    }
-
-    std::vector<char> string_to_vec (const std::string& str)
-    {
-        return std::vector<char> (str.begin(), str.end());
-    }
-
-    std::string vec_to_string (const std::vector<char> vec)
-    {
-        return std::string (vec.begin(), vec.end());
+        return cache_.at(n);
     }
 
 }
-
-std::ostream& operator<< (std::ostream& stream, std::vector<char> vec)
-{
-    std::string str (vec.begin(), vec.end());
-    stream << str;
-    return stream;
-}
-

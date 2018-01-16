@@ -72,7 +72,7 @@ namespace drawing
     {
         // The starting position and angle of the Turtle.
         sf::Vector2f starting_position { 0, 0 };
-        double starting_angle { 0 };
+        float starting_angle { 0 };
 
         // When 'turn_left' or 'turn_right' orders are executed, the
         // Turtle pivot at a 'delta_angle' angle (in
@@ -83,35 +83,27 @@ namespace drawing
         // forward 'step' pixels (at default zoom level). Initialized
         // at an arbitrary value. 
         int step { 5 };
+
+        // The number of iterations done by the L-system.
+        int n_iter { 0 };
     };
 
+    // An 'order' is a function modifying a 'Turtle'. Semantically it is an
+    // instruction like "move forward" or "turn left".
+    using order = std::function<void(impl::Turtle& turtle)>;
 
-    // LSysInterpretation is the link between a LSystem and a
-    // graphical Turtle interpretation. Each symbol of a L-System is
-    // associated with an 'order' which modifies a Turtle.
-    struct LSysInterpretation
-    {
-        // An 'order' is a function modifying a 'Turtle'. Semantically
-        // it is an instruction like "move forward" or "turn left".
-        using order = std::function<void(impl::Turtle& turtle)>;
-
-        // 'interpretation' is a map linking a symbol of the
-        // vocabulary of a L-system to an order. During the
-        // interpretation, if the character is encountered, the
-        // associated order will be executed.
-        using interpretation_map = std::unordered_map<char, order>;
-        
-        lsys::LSystem lsys { };
-        interpretation_map map { };
-    };
-
+    // 'interpretation_map' is a map linking a symbol of the vocabulary of a
+    // L-system to an order. During the interpretation, if the character is
+    // encountered, the associated order will be executed.
+    using interpretation_map = std::unordered_map<char, order>;
     
     // Compute all vertices of a turtle interpretation of a L-system.
-    // This function iterates first 'n_iter' times the L-system
-    // 'turtle.lsys' then interprates the result.
-    std::vector<sf::Vertex> compute_vertices(const LSysInterpretation& interpretation,
-                                             const DrawingParameters& parameters,
-                                             int n_iter = 1);
+    // First, this function iterates 'parameters.n_iter' times the LSystem
+    // 'lsys', using and modifying its cache. Then, it interprates the result
+    // with 'interpretation' and 'parameters'.
+    std::vector<sf::Vertex> compute_vertices(lsys::LSystem& lsys,
+                                             interpretation_map& interpretation,
+                                             const DrawingParameters& parameters);
 
     // All the orders currently defined. //
     // "Turn right" means "turn clockwise" AS SEEN ON THE SCREEN.
