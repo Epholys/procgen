@@ -41,7 +41,7 @@ namespace procgui
         // Synchronize the rule buffer with the LSystem.
         void sync();
 
-        lsys::LSystem& lsys; // non-owning reference
+        lsys::LSystem& lsys_; // non-owning reference
         std::list<std::tuple<validity, predecessor, successor>> rule_buffer_;
     };
 }

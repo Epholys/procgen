@@ -3,11 +3,11 @@
 namespace procgui
 {
     LSystemView::LSystemView(lsys::LSystem& lsys)
-        : lsys {lsys}
+        : lsys_ {lsys}
         , rule_buffer_ {}
     {
         // Initialize the buffer with the LSystem's rules.
-        for (const auto& rule : lsys.get_rules())
+        for (const auto& rule : lsys_.get_rules())
         {
             predecessor pred = { rule.first, '\0' };
             successor   succ = string_to_array<lsys_successor_size>(rule.second);
@@ -17,7 +17,7 @@ namespace procgui
 
     void LSystemView::sync()
     {
-        lsys.clear_rules();
+        lsys_.clear_rules();
 
         for (const auto& rule : rule_buffer_)
         {
@@ -27,7 +27,7 @@ namespace procgui
             {
                 const auto& arr = std::get<successor>(rule);
                 auto succ = array_to_string(arr);
-                lsys.add_rule(pred, succ);
+                lsys_.add_rule(pred, succ);
             }
         }
     }
