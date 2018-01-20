@@ -40,7 +40,7 @@ namespace drawing
         return turtle.vertices;
     }
 
-    void go_forward(Turtle& turtle)
+    void go_forward_fn(Turtle& turtle)
     {
         float dx = turtle.parameters.step * std::cos(turtle.angle);
         float dy = turtle.parameters.step * std::sin(turtle.angle);
@@ -48,12 +48,12 @@ namespace drawing
         turtle.vertices.push_back(turtle.position);
     }
 
-    void turn_right(Turtle& turtle)
+    void turn_right_fn(Turtle& turtle)
     {
         turtle.angle += turtle.parameters.delta_angle;
     }
 
-    void turn_left(Turtle& turtle)
+    void turn_left_fn(Turtle& turtle)
     {
         turtle.angle -= turtle.parameters.delta_angle;
     }

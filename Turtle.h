@@ -92,10 +92,17 @@ namespace drawing
     // instruction like "move forward" or "turn left".
     using order = std::function<void(impl::Turtle& turtle)>;
 
+    struct Order
+    {
+        std::function<void(impl::Turtle& turtle)> fn;
+        std::string name;
+        void operator() (impl::Turtle& turtle) { fn(turtle); }
+    };
+    
     // 'interpretation_map' is a map linking a symbol of the vocabulary of a
     // L-system to an order. During the interpretation, if the character is
     // encountered, the associated order will be executed.
-    using interpretation_map = std::unordered_map<char, order>;
+    using interpretation_map = std::unordered_map<char, Order>;
     
     // Compute all vertices of a turtle interpretation of a L-system.
     // First, this function iterates 'parameters.n_iter' times the LSystem
@@ -107,9 +114,15 @@ namespace drawing
 
     // All the orders currently defined. //
     // "Turn right" means "turn clockwise" AS SEEN ON THE SCREEN.
-    void turn_right(impl::Turtle& turtle);
-    void turn_left(impl::Turtle& turtle);
-    void go_forward(impl::Turtle& turtle);
+    void turn_right_fn(impl::Turtle& turtle);
+    void turn_left_fn(impl::Turtle& turtle);
+    void go_forward_fn(impl::Turtle& turtle);
+    
+    const Order turn_right { turn_right_fn, "Turn right" };
+    const Order turn_left { turn_left_fn, "Turn left" };
+    const Order go_forward { go_forward_fn, "Go forward" };
+    
+    const std::vector<Order> all_orders { turn_right, turn_left, go_forward };
 }
 
 #endif
