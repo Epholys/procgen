@@ -1,3 +1,5 @@
+// TODO Rename to buffer
+// TODO: factorize procgui::*Buffer ?
 #ifndef LSYSTEM_VIEW_H
 #define LSYSTEM_VIEW_H
 

@@ -8,7 +8,9 @@
 #include "imgui/imgui-SFML.h"
 #include "LSystem.h"
 #include "LSystemView.h"
+#include "InterpretationMapView.h"
 #include "Turtle.h"
+#include "helper_string.h"
 
 
 // Define 'display()' and 'interact_with()' for the structs and classes to
@@ -39,6 +41,8 @@ namespace procgui {
                  bool main=true);
     
     void display(const lsys::LSystem& lsys, const std::string& name, bool main=true);
+    
+    void display(const drawing::interpretation_map& map, const std::string& name, bool main=true);
 
     
     bool interact_with(drawing::DrawingParameters& turtle,
@@ -46,6 +50,8 @@ namespace procgui {
                        bool main=true);
 
     bool interact_with(LSystemView& lsys_view, const std::string& name, bool main=true);
+
+    bool interact_with(InterpretationMapView& map_view, const std::string& name, bool main=true);
 }
 
 #endif

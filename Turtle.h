@@ -11,6 +11,7 @@
 #include <SFML/Window.hpp>
 
 #include "helper_math.h"
+#include "helper_string.h"
 #include "LSystem.h"
 
 // A Turtle is a computer graphics concept from the language
@@ -88,6 +89,7 @@ namespace drawing
         int n_iter { 0 };
     };
 
+    // TODO: change comments
     // An 'order' is a function modifying a 'Turtle'. Semantically it is an
     // instruction like "move forward" or "turn left".
     using order = std::function<void(impl::Turtle& turtle)>;

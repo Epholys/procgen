@@ -45,7 +45,8 @@ int main(/*int argc, char* argv[]*/)
                                 { 'G', go_forward },
                                 { '+', turn_left  },
                                 { '-', turn_right } };
-
+    InterpretationMapView map_view { map };
+    
     DrawingParameters serpinski_param;
     serpinski_param.starting_position = { 400, 100 };
     serpinski_param.starting_angle = 0.f;
@@ -74,11 +75,11 @@ int main(/*int argc, char* argv[]*/)
         bool is_modified = false;
         is_modified |= interact_with(serpinski_param, "Serpinski");
         is_modified |= interact_with(serpinski_view, "Serpinski");
+        is_modified |= interact_with(map_view, "Serpinski");
         if (is_modified)
         {
             serpinski_vertices = compute_vertices(serpinski, map, serpinski_param);
         }
-        display(serpinski, "Serpinski");
 
         is_modified |= interact_with(smally_param, "smally");
         is_modified |= interact_with(smally_view, "smally");
@@ -86,6 +87,8 @@ int main(/*int argc, char* argv[]*/)
         {
             smally_vertices = compute_vertices(smally, map, smally_param);
         }
+
+        display(map, "interpretations");
 
         window.draw(serpinski_vertices.data(), serpinski_vertices.size(), sf::LineStrip);
         window.draw(smally_vertices.data(), smally_vertices.size(), sf::LineStrip);

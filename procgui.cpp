@@ -15,7 +15,7 @@ namespace
     // Returns 'false' if the window is collapsed, to early-out.
     bool set_up(const std::string& name, bool main)
     {
-       // If we're the main class, open window 'name'.
+        // If we're the main class, open window 'name'.
         if (main)
         {
             bool is_active = ImGui::Begin(name.c_str());
@@ -26,7 +26,7 @@ namespace
             }
             return is_active;
         }
-         // Otherwise, set up a TreeNode.
+        // Otherwise, set up a TreeNode.
         else
         {
             return ImGui::TreeNode(name.c_str());
@@ -161,7 +161,25 @@ namespace procgui
         conclude(main);
     }
 
+    void display(const drawing::interpretation_map& map, const std::string& name, bool main)
+    {
+        if( !set_up(name, main) )
+        {
+            // Early out if the display zone is collapsed.
+            return;
+        }
+
+        for(auto interpretation : map)
+        {
+            ImGui::Text("%c -> %s", interpretation.first, interpretation.second.name.c_str());
+
+        }
+        
+        conclude(main);
+    }
+
     
+
     bool interact_with(drawing::DrawingParameters& parameters, const std::string& name, bool main)
     {
         if( !set_up(name, main) )
@@ -235,7 +253,7 @@ namespace procgui
         bool is_modified = false;
 
         // The LSystem itelf
-        lsys::LSystem& lsys = lsys_view.lsys;
+        lsys::LSystem& lsys = lsys_view.lsys_;
         
         { // Axiom
             auto buf = string_to_array<lsys_successor_size>(lsys.get_axiom());
@@ -282,7 +300,7 @@ namespace procgui
                 ImGui::PushID(&rule); // Create a scope.
                 ImGui::PushItemWidth(20);
 
-                // Display the predicate in as InputText
+                // Display the predecessor in as InputText
                 if (ImGui::InputText("##pred", pred.data(), 2))
                 {
                     // The predecessor has been modified by the user. Now...
@@ -372,6 +390,159 @@ namespace procgui
             
             ImGui::Unindent(); 
         }
+
+        conclude(main);
+
+        return is_modified;
+    }
+
+    bool interact_with(InterpretationMapView& map_view, const std::string& name, bool main)
+    {
+        if( !set_up(name, main) )
+        {
+            // Early out
+            return false;
+        }
+
+        bool is_modified = false;
+
+        // TODO: factorize [+] [-] ?
+        // TODO: update comments
+        { // | predecessor | -> | successor | [-] (remove rule) | [+] (add rule)
+
+            // TODO:
+            // using namespace drawing; ?
+
+            auto& interpretations = map_view.interpretation_buffer_;
+            using validity    = LSystemView::validity; // if the rule is unique
+            using predecessor = LSystemView::predecessor;
+            
+            // Inform 'lsys_view' to synchronize the rule buffer with the
+            // LSystem.
+            bool interpretations_modified = false;
+
+            // Iterator pointing to the rule to delete, if the [-] button is
+            // clicked on.
+            auto to_delete = interpretations.end();
+
+            // If the [+] button is clicked we add a rule to the LSystemView.
+            bool must_add_interpretation = false;
+
+            // We use the old iterator style to save the rule to delete, if necessary.
+            for (auto it = interpretations.begin(); it != interpretations.end(); ++it)
+            { 
+                auto& interp = *it;
+                auto& is_valid = std::get<validity>(interp);
+                auto& pred = std::get<predecessor>(interp);
+                auto& order = std::get<drawing::Order>(interp);
+
+                // TODO: helper_string ?
+                std::vector<const char*> all_orders_name =
+                    [](){ std::vector<const char*> v;
+                          for(const auto& o : drawing::all_orders)
+                              v.push_back(o.name.c_str());
+                          return v; }();
+
+                ImGui::PushID(&interp); // Create a scope.
+                ImGui::PushItemWidth(20);
+
+                // Display the predecessor in as InputText
+                if (ImGui::InputText("##pred", pred.data(), 2))
+                {
+                    // The predecessor has been modified by the user. Now...
+                    interpretations_modified = true;
+                    
+                    // ... check if the new predecessor already exists in the rules.
+                    bool is_duplicate = false;
+                    for(auto find_it = interpretations.begin(); find_it != interpretations.end(); ++find_it)
+                    {
+                        if(find_it != it && // do not check a rule against itself
+                           std::get<predecessor>(*find_it) == pred)
+                        {
+                            is_duplicate = true;
+                            break;
+                        }                            
+                    }
+
+                    // If the predecessor is not unique, the rule is not valid.
+                    is_valid = !is_duplicate;
+                }
+
+                ImGui::PopItemWidth(); ImGui::SameLine(); ImGui::Text("->"); ImGui::SameLine();
+
+                ImGui::PushItemWidth(200);
+
+                // Interact with the successor. Except for the input size, does
+                // not have any constraints.
+                auto which_interpretation_it = std::find_if(drawing::all_orders.begin(),
+                                                            drawing::all_orders.end(),
+                                                            [order](const auto& o){return o.name == order.name;});
+                int index = std::distance(drawing::all_orders.begin(), which_interpretation_it);
+                if(ImGui::ListBox("##order", &index, all_orders_name.data(), all_orders_name.size()))
+                {
+                    interpretations_modified = true;
+                    order = drawing::all_orders.at(index);
+                }
+
+                // The [-] button. If clicked, the current iterator is saved as
+                // the one to delete. We reasonably assume a user can not click
+                // on two different buttons in the same frame.
+                // We will need to synchronize the rules.
+                ImGui::SameLine();
+                if (ImGui::Button("-"))
+                {
+                    to_delete = it;
+                    interpretations_modified = true;
+                }
+
+                // For the last rule in the buffer, add the [+] button.
+                if (it == --interpretations.end())
+                {
+                    ImGui::SameLine();
+                    ImGui::PushStyleGreenButton();
+                    if (ImGui::Button("+"))
+                    {
+                        // If the button is clicked, we must add a rule to the buffer.
+                        must_add_interpretation = true;
+                    }
+                    ImGui::PopStyleColor(3);
+                }
+
+                // If the current rule is not valid, add a warning.
+                if(!is_valid)
+                {
+                    ImGui::SameLine();
+                    ImGui::TextColored(ImVec4(1.f,0.f,0.f,1.f), "Duplicated predecessor: %s", pred.data());
+                }
+                
+                ImGui::PopID(); // End of the loop and the scope
+            }
+
+            // Erase the marked rule if necessary
+            if (to_delete != interpretations.end())
+            {
+                interpretations.erase(to_delete);
+            }
+
+            // Add a interpretation if necessary
+            if (must_add_interpretation)
+            {
+                predecessor pred;
+                pred.fill('\0');
+                interpretations.push_back({true, pred, drawing::go_forward});
+            }
+
+            // Synchronize the interpretation if necessary
+            if (interpretations_modified)
+            {
+                map_view.sync();
+                is_modified = true;
+            }
+        
+            
+            ImGui::Unindent(); 
+        }
+
 
         conclude(main);
 
