@@ -161,7 +161,7 @@ namespace procgui
         conclude(main);
     }
 
-    void display(const drawing::interpretation_map& map, const std::string& name, bool main)
+    void display(const drawing::InterpretationMap& map, const std::string& name, bool main)
     {
         if( !set_up(name, main) )
         {
@@ -171,7 +171,8 @@ namespace procgui
 
         for(auto interpretation : map)
         {
-            ImGui::Text("%c -> %s", interpretation.first, interpretation.second.name.c_str());
+            std::string name = get_order_entry(interpretation.second).name;
+            ImGui::Text("%c -> %s", interpretation.first, name.c_str());
 
         }
         
@@ -241,7 +242,7 @@ namespace procgui
         return is_modified;
     }
 
-    bool interact_with(LSystemView& lsys_view, const std::string& name, bool main)
+    bool interact_with(LSystemBuffer& lsys_buffer, const std::string& name, bool main)
     {
         if( !set_up(name, main) )
         {
@@ -253,7 +254,7 @@ namespace procgui
         bool is_modified = false;
 
         // The LSystem itelf
-        lsys::LSystem& lsys = lsys_view.lsys_;
+        lsys::LSystem& lsys = lsys_buffer.lsys_;
         
         { // Axiom
             auto buf = string_to_array<lsys_successor_size>(lsys.get_axiom());
@@ -265,20 +266,22 @@ namespace procgui
             }
         }
 
+        // The next part has a lot in common with 'interact_with(InterpretationMapBuffer, )'
+        // It will be refactorized if a third similar use case come.
         { // Production rules
-          // | predecessor | -> | successor | [-] (remove rule) | [+] (add rule)
+          // [ predecessor ] -> [ successor ] [-] (remove rule) | [+] (add rule)
 
             
             ImGui::Text("Production rules:");
 
             ImGui::Indent(); 
 
-            auto& rules = lsys_view.rule_buffer_;
-            using validity    = LSystemView::validity; // if the rule is unique
-            using predecessor = LSystemView::predecessor;
-            using successor   = LSystemView::successor;
+            auto& rules = lsys_buffer.rule_buffer_;
+            using validity    = LSystemBuffer::validity; // if the rule is unique
+            using predecessor = LSystemBuffer::predecessor;
+            using successor   = LSystemBuffer::successor;
 
-            // Inform 'lsys_view' to synchronize the rule buffer with the
+            // Inform 'lsys_buffer' to synchronize the rule buffer with the
             // LSystem.
             bool rules_modified = false;
 
@@ -286,7 +289,7 @@ namespace procgui
             // clicked on.
             auto to_delete = rules.end();
 
-            // If the [+] button is clicked we add a rule to the LSystemView.
+            // If the [+] button is clicked we add a rule to the LSystemBuffer.
             bool must_add_rule = false;
 
             // We use the old iterator style to save the rule to delete, if necessary.
@@ -383,7 +386,7 @@ namespace procgui
             // Synchronize the rule if necessary
             if (rules_modified)
             {
-                lsys_view.sync();
+                lsys_buffer.sync();
                 is_modified = true;
             }
         
@@ -396,7 +399,7 @@ namespace procgui
         return is_modified;
     }
 
-    bool interact_with(InterpretationMapView& map_view, const std::string& name, bool main)
+    bool interact_with(InterpretationMapBuffer& map_buffer, const std::string& name, bool main)
     {
         if( !set_up(name, main) )
         {
@@ -406,42 +409,34 @@ namespace procgui
 
         bool is_modified = false;
 
-        // TODO: factorize [+] [-] ?
-        // TODO: update comments
-        { // | predecessor | -> | successor | [-] (remove rule) | [+] (add rule)
+        // The next part has a lot in common with 'interact_with(LSystemBuffer, )'
+        // It will be refactorized if a third similar use case come.
+        
+        { // Interpretations
+          // [ predecessor ] -> [ interpretation ] | [-] (remove) | [+] (add)
 
-            // TODO:
-            // using namespace drawing; ?
-
-            auto& interpretations = map_view.interpretation_buffer_;
-            using validity    = LSystemView::validity; // if the rule is unique
-            using predecessor = LSystemView::predecessor;
+            auto& interpretations = map_buffer.interpretation_buffer_;
+            using validity    = InterpretationMapBuffer::validity; // == unicity
+            using predecessor = InterpretationMapBuffer::predecessor;
             
-            // Inform 'lsys_view' to synchronize the rule buffer with the
-            // LSystem.
+            // Inform 'map_buffer' to synchronize the map buffer with the
+            // InterpretationMap.
             bool interpretations_modified = false;
 
             // Iterator pointing to the rule to delete, if the [-] button is
             // clicked on.
             auto to_delete = interpretations.end();
 
-            // If the [+] button is clicked we add a rule to the LSystemView.
+            // If the [+] button is clicked we add a rule to the LSystemBuffer.
             bool must_add_interpretation = false;
 
-            // We use the old iterator style to save the rule to delete, if necessary.
+            // We use the old iterator style to save the rule in 'to_delete', if necessary.
             for (auto it = interpretations.begin(); it != interpretations.end(); ++it)
             { 
                 auto& interp = *it;
                 auto& is_valid = std::get<validity>(interp);
                 auto& pred = std::get<predecessor>(interp);
-                auto& order = std::get<drawing::Order>(interp);
-
-                // TODO: helper_string ?
-                std::vector<const char*> all_orders_name =
-                    [](){ std::vector<const char*> v;
-                          for(const auto& o : drawing::all_orders)
-                              v.push_back(o.name.c_str());
-                          return v; }();
+                auto& order = std::get<OrderEntry>(interp);
 
                 ImGui::PushID(&interp); // Create a scope.
                 ImGui::PushItemWidth(20);
@@ -472,22 +467,30 @@ namespace procgui
 
                 ImGui::PushItemWidth(200);
 
-                // Interact with the successor. Except for the input size, does
-                // not have any constraints.
-                auto which_interpretation_it = std::find_if(drawing::all_orders.begin(),
-                                                            drawing::all_orders.end(),
-                                                            [order](const auto& o){return o.name == order.name;});
-                int index = std::distance(drawing::all_orders.begin(), which_interpretation_it);
+                // ImGui::ListBox needs:
+                //   - An array of 'char *' for the different elements
+                //   - An index to select between these elements
+
+                // As 'all_orders_name' has the exact same order as
+                // 'all_orders', the index is common.
+                // 
+                // The index is calculated by finding in the vector the order
+                // and using the distance between the first element and the
+                // current one.
+                auto selected_interpretation_it = std::find(all_orders.begin(),
+                                                            all_orders.end(),
+                                                            order);
+                int index = std::distance(all_orders.begin(), selected_interpretation_it);
                 if(ImGui::ListBox("##order", &index, all_orders_name.data(), all_orders_name.size()))
                 {
                     interpretations_modified = true;
-                    order = drawing::all_orders.at(index);
+                    order = all_orders.at(index);
                 }
 
                 // The [-] button. If clicked, the current iterator is saved as
                 // the one to delete. We reasonably assume a user can not click
                 // on two different buttons in the same frame.
-                // We will need to synchronize the rules.
+                // We will need to synchronize the interpretations.
                 ImGui::SameLine();
                 if (ImGui::Button("-"))
                 {
@@ -495,7 +498,7 @@ namespace procgui
                     interpretations_modified = true;
                 }
 
-                // For the last rule in the buffer, add the [+] button.
+                // For the last interpretation in the buffer, add the [+] button.
                 if (it == --interpretations.end())
                 {
                     ImGui::SameLine();
@@ -508,7 +511,7 @@ namespace procgui
                     ImGui::PopStyleColor(3);
                 }
 
-                // If the current rule is not valid, add a warning.
+                // If the current interpretation is not valid, add a warning.
                 if(!is_valid)
                 {
                     ImGui::SameLine();
@@ -518,24 +521,24 @@ namespace procgui
                 ImGui::PopID(); // End of the loop and the scope
             }
 
-            // Erase the marked rule if necessary
+            // Erase the marked interpretation if necessary
             if (to_delete != interpretations.end())
             {
                 interpretations.erase(to_delete);
             }
 
-            // Add a interpretation if necessary
+            // Add an interpretation if necessary
             if (must_add_interpretation)
             {
                 predecessor pred;
                 pred.fill('\0');
-                interpretations.push_back({true, pred, drawing::go_forward});
+                interpretations.push_back({true, pred, go_forward_entry});
             }
 
-            // Synchronize the interpretation if necessary
+            // Synchronize the interpretations if necessary
             if (interpretations_modified)
             {
-                map_view.sync();
+                map_buffer.sync();
                 is_modified = true;
             }
         

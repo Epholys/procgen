@@ -15,7 +15,7 @@ namespace drawing
         
     
     std::vector<sf::Vertex> compute_vertices(lsys::LSystem& lsys,
-                                             interpretation_map& interpretation,
+                                             InterpretationMap& interpretation,
                                              const DrawingParameters& parameters)
     {
         Turtle turtle (parameters);

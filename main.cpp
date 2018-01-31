@@ -7,7 +7,7 @@
 #include "imgui/imgui-SFML.h"
 
 #include "LSystem.h"
-#include "LSystemView.h"
+#include "LSystemBuffer.h"
 #include "Turtle.h"
 #include "helper_math.h"
 #include "procgui.h"
@@ -38,14 +38,14 @@ int main(/*int argc, char* argv[]*/)
     ImGui::SFML::Init(window);
 
     LSystem serpinski { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } };
-    LSystemView serpinski_view { serpinski };
+    LSystemBuffer serpinski_view { serpinski };
     LSystem smally    { "FG", { { 'F', "F+G" }, { 'G', "G-F" } } };
-    LSystemView smally_view { smally };
-    interpretation_map map  = { { 'F', go_forward },
+    LSystemBuffer smally_view { smally };
+    InterpretationMap map  = { { 'F', go_forward },
                                 { 'G', go_forward },
                                 { '+', turn_left  },
                                 { '-', turn_right } };
-    InterpretationMapView map_view { map };
+    InterpretationMapBuffer map_view { map };
     
     DrawingParameters serpinski_param;
     serpinski_param.starting_position = { 400, 100 };

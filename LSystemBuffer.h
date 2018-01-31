@@ -1,5 +1,3 @@
-// TODO Rename to buffer
-// TODO: factorize procgui::*Buffer ?
 #ifndef LSYSTEM_VIEW_H
 #define LSYSTEM_VIEW_H
 
@@ -29,16 +27,19 @@ namespace procgui
     // We can still directly access the LSystem for all trivial attributes like
     // the axiom.
     //
-    // A LSystemView must be destructed before the destruction of a LSystem (non
-    // owning-reference). For the coherence of the GUI, a LSystem must have a
-    // unique LSystemView associated.
-    struct LSystemView
+    // A LSystemBuffer must be destructed before the destruction of its LSystem
+    // (non owning-reference). For the coherence of the GUI, a LSystem must have
+    // a unique LSystemBuffer associated.
+    //
+    // Note: This class has a lot in common with 'IntepretationMapBuffer'. If a
+    // third class has the same properties, all will be refactorized.
+    struct LSystemBuffer
     {
         using validity    = bool; // If the rule is a duplicate, it is not valid.
         using predecessor = std::array<char, 2>;
         using successor   = std::array<char, lsys_successor_size>;
 
-        LSystemView(lsys::LSystem& lsys);
+        LSystemBuffer(lsys::LSystem& lsys);
 
         // Synchronize the rule buffer with the LSystem.
         void sync();

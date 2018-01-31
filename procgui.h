@@ -7,8 +7,8 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
 #include "LSystem.h"
-#include "LSystemView.h"
-#include "InterpretationMapView.h"
+#include "LSystemBuffer.h"
+#include "InterpretationMapBuffer.h"
 #include "Turtle.h"
 #include "helper_string.h"
 
@@ -42,16 +42,16 @@ namespace procgui {
     
     void display(const lsys::LSystem& lsys, const std::string& name, bool main=true);
     
-    void display(const drawing::interpretation_map& map, const std::string& name, bool main=true);
+    void display(const drawing::InterpretationMap& map, const std::string& name, bool main=true);
 
     
     bool interact_with(drawing::DrawingParameters& turtle,
                        const std::string& name,
                        bool main=true);
 
-    bool interact_with(LSystemView& lsys_view, const std::string& name, bool main=true);
+    bool interact_with(LSystemBuffer& lsys_view, const std::string& name, bool main=true);
 
-    bool interact_with(InterpretationMapView& map_view, const std::string& name, bool main=true);
+    bool interact_with(InterpretationMapBuffer& map_view, const std::string& name, bool main=true);
 }
 
 #endif

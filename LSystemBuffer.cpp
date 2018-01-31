@@ -1,8 +1,8 @@
-#include "LSystemView.h"
+#include "LSystemBuffer.h"
 
 namespace procgui
 {
-    LSystemView::LSystemView(lsys::LSystem& lsys)
+    LSystemBuffer::LSystemBuffer(lsys::LSystem& lsys)
         : lsys_ {lsys}
         , rule_buffer_ {}
     {
@@ -15,7 +15,7 @@ namespace procgui
         }
     }
 
-    void LSystemView::sync()
+    void LSystemBuffer::sync()
     {
         lsys_.clear_rules();
 

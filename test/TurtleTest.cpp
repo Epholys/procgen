@@ -25,7 +25,7 @@ public:
         }
     
     LSystem lsys { "F", { { 'F', "F+G" } } };
-    interpretation_map interpretation { { 'F', go_forward },
+    InterpretationMap interpretation { { 'F', go_forward },
                                         { 'G', go_forward },
                                         { '+', turn_left  } };
     // starting_position, starting_angle, delta_angle, step, n_iter
