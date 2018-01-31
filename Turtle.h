@@ -6,6 +6,7 @@
 #include <string>
 #include <cmath>
 #include <functional>
+#include <stack>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -52,13 +53,21 @@ namespace drawing
             const DrawingParameters& parameters;
 
             // The current position and angle of the turtle.
-            sf::Vector2f position { 0, 0 };
-            float angle { 0 };
+            struct State {
+                sf::Vector2f position { 0, 0 };
+                float angle { 0 };
+            };
+            State state { };
 
-            // Each time the Turtle changes its position, the new one is
-            // saved in a vertex. 'vertices' represent the whole path
-            // walked by the Turtle.
-            std::vector<sf::Vertex> vertices { };
+            // The state of a turtle can be saved and loaded in a stack.
+            std::stack<State> stack { };
+            
+            // Each time the Turtle changes its position, the new one is saved
+            // in a vertex. Moreover, as we can jump from position to position,
+            // we must save the different continuous paths separately, to
+            // correctly display the whole trajectory of the turtle. 'paths' is
+            // this data structure.
+            std::vector<std::vector<sf::Vertex>> paths { };
         };
     }
 
@@ -94,10 +103,12 @@ namespace drawing
     using order_fn = std::function<void(impl::Turtle& turtle)>;
 
     // All the orders currently defined.
-    enum OrderID {
+    enum class OrderID {
         GO_FORWARD,
         TURN_RIGHT,
         TURN_LEFT,
+        SAVE_POSITION,
+        LOAD_POSITION,
     };
 
     // An 'Order' is the association of an 'order_fn' and an identifier to allow
@@ -117,10 +128,14 @@ namespace drawing
     // "Turn right" means "turn clockwise" AS SEEN ON THE SCREEN.
     void turn_right_fn(impl::Turtle& turtle);
     void turn_left_fn(impl::Turtle& turtle);
-
-    const Order go_forward { GO_FORWARD, go_forward_fn };
-    const Order turn_right { TURN_RIGHT, turn_right_fn };
-    const Order turn_left  { TURN_LEFT , turn_left_fn  };
+    void save_position_fn(impl::Turtle& turtle);
+    void load_position_fn(impl::Turtle& turtle);
+    
+    const Order go_forward    { OrderID::GO_FORWARD,    go_forward_fn };
+    const Order turn_right    { OrderID::TURN_RIGHT,    turn_right_fn };
+    const Order turn_left     { OrderID::TURN_LEFT,     turn_left_fn  };
+    const Order save_position { OrderID::SAVE_POSITION, save_position_fn };
+    const Order load_position { OrderID::LOAD_POSITION, load_position_fn };
         
     
     // WARNING: if new orders are added, do not forget to complete the order
@@ -132,13 +147,13 @@ namespace drawing
     // encountered, the associated order will be executed.
     using InterpretationMap = std::unordered_map<char, Order>;
     
-    // Compute all vertices of a turtle interpretation of a L-system.
+    // Compute all paths of a turtle interpretation of a L-system.
     // First, this function iterates 'parameters.n_iter' times the LSystem
     // 'lsys', using and modifying its cache. Then, it interprates the result
     // with 'interpretation' and 'parameters'.
-    std::vector<sf::Vertex> compute_vertices(lsys::LSystem& lsys,
-                                             InterpretationMap& interpretation,
-                                             const DrawingParameters& parameters);
+    std::vector<std::vector<sf::Vertex>> compute_path(lsys::LSystem& lsys,
+                                                      InterpretationMap& interpretation,
+                                                      const DrawingParameters& parameters);
 }
 
 #endif

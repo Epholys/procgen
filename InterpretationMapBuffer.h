@@ -27,8 +27,12 @@ namespace procgui
     // All the orders:
     const OrderEntry go_forward_entry { drawing::go_forward, "Go forward" };
     const OrderEntry turn_right_entry { drawing::turn_right, "Turn right" };
-    const OrderEntry turn_left_entry { drawing::turn_left, "Turn left" };
-    const std::vector<OrderEntry> all_orders { go_forward_entry, turn_right_entry, turn_left_entry };
+    const OrderEntry turn_left_entry  { drawing::turn_left, "Turn left"   };
+    const OrderEntry save_position_entry { drawing::save_position, "Save position" };
+    const OrderEntry load_position_entry { drawing::load_position, "Load position" };
+
+    const std::vector<OrderEntry> all_orders { go_forward_entry, turn_right_entry, turn_left_entry,
+                                               save_position_entry, load_position_entry };
     const std::vector<const char*> all_orders_name =
         [](){ std::vector<const char*> v;
               for(const auto& o : all_orders)

@@ -8,6 +8,7 @@
 
 #include "LSystem.h"
 #include "LSystemBuffer.h"
+#include "InterpretationMapBuffer.h"
 #include "Turtle.h"
 #include "helper_math.h"
 #include "procgui.h"
@@ -38,31 +39,33 @@ int main(/*int argc, char* argv[]*/)
     ImGui::SFML::Init(window);
 
     LSystem serpinski { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } };
-    LSystemBuffer serpinski_view { serpinski };
-    LSystem smally    { "FG", { { 'F', "F+G" }, { 'G', "G-F" } } };
-    LSystemBuffer smally_view { smally };
+    LSystemBuffer serpinski_buffer { serpinski };
+    LSystem plant { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } } };
+    LSystemBuffer plant_buffer { plant };
     InterpretationMap map  = { { 'F', go_forward },
-                                { 'G', go_forward },
-                                { '+', turn_left  },
-                                { '-', turn_right } };
-    InterpretationMapBuffer map_view { map };
+                               { 'G', go_forward },
+                               { '+', turn_left  },
+                               { '-', turn_right },
+                               { '[', save_position },
+                               { ']', load_position } };
+    InterpretationMapBuffer map_buffer { map };
     
     DrawingParameters serpinski_param;
-    serpinski_param.starting_position = { 400, 100 };
+    serpinski_param.starting_position = { 1000, 600 };
     serpinski_param.starting_angle = 0.f;
     serpinski_param.delta_angle = degree_to_rad(60.f);
-    serpinski_param.step = 5;
-    serpinski_param.n_iter = 7;
+    serpinski_param.step = 7;
+    serpinski_param.n_iter = 5;
 
-    DrawingParameters smally_param;
-    smally_param.starting_position = { 1000, 600 };
-    smally_param.starting_angle = 0.f;
-    smally_param.delta_angle = degree_to_rad(60.f);
-    smally_param.step = 10;
-    smally_param.n_iter = 4;
+    DrawingParameters plant_param;
+    plant_param.starting_position = { 400, 800 };
+    plant_param.starting_angle = degree_to_rad(-80.f);
+    plant_param.delta_angle = degree_to_rad(25.f);
+    plant_param.step = 5;
+    plant_param.n_iter = 6;
 
-    auto serpinski_vertices = compute_vertices(serpinski, map, serpinski_param);
-    auto smally_vertices = compute_vertices(smally, map, smally_param);
+    auto serpinski_paths = compute_path(serpinski, map, serpinski_param);
+    auto plant_paths = compute_path(plant, map, plant_param);
 
     sf::Clock delta_clock;
     while (window.isOpen())
@@ -74,24 +77,30 @@ int main(/*int argc, char* argv[]*/)
         window.clear();
         bool is_modified = false;
         is_modified |= interact_with(serpinski_param, "Serpinski");
-        is_modified |= interact_with(serpinski_view, "Serpinski");
-        is_modified |= interact_with(map_view, "Serpinski");
+        is_modified |= interact_with(serpinski_buffer, "Serpinski");
+        is_modified |= interact_with(map_buffer, "Serpinski");
         if (is_modified)
         {
-            serpinski_vertices = compute_vertices(serpinski, map, serpinski_param);
+            serpinski_paths = compute_path(serpinski, map, serpinski_param);
         }
 
-        is_modified |= interact_with(smally_param, "smally");
-        is_modified |= interact_with(smally_view, "smally");
+        is_modified |= interact_with(plant_param, "plant");
+        is_modified |= interact_with(plant_buffer, "plant");
         if (is_modified)
         {
-            smally_vertices = compute_vertices(smally, map, smally_param);
+            plant_paths = compute_path(plant, map, plant_param);
         }
 
         display(map, "interpretations");
 
-        window.draw(serpinski_vertices.data(), serpinski_vertices.size(), sf::LineStrip);
-        window.draw(smally_vertices.data(), smally_vertices.size(), sf::LineStrip);
+        for(const auto& path : serpinski_paths)
+        {
+            window.draw(path.data(), path.size(), sf::LineStrip);
+        }
+        for(const auto& path : plant_paths)
+        {
+            window.draw(path.data(), path.size(), sf::LineStrip);
+        }
         ImGui::SFML::Render(window);
         window.display();
     }
