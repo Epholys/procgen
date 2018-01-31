@@ -39,6 +39,8 @@
      - googletest / 1.8.0 / [[https://github.com/google/googletest][Github Repository]] / installed from packages
      - GSL (Guidelines Support Library) / 2017-06-27 / [[https://github.com/Microsoft/GSL][Github Repository]] / cloned from the repository
    - *Coding rule:* [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]] with GSL
+     - Difference: [[https://en.wikipedia.org/wiki/Indentation_style#Allman_style][Allman indentation Style]]
+     - Difference: When using ImGui ; ImGui style of coding
    - *Compilation:* =make=
    - *Testing suite:* [[https://github.com/google/googletest/][googletest]]
 
@@ -56,3 +58,7 @@
 [[http://blog.rabidgremlin.com/2014/12/09/procedural-content-generation-l-systems/][Procedural content generation: L-Systems (by Rabidgremlin)]]
 
 [[http://algorithmicbotany.org/papers/#abop][The Algorithmic Beauty of Plants]]
+
+[[https://www.reddit.com/r/lsystem/][/r/lsystem]]
+
+[[http://jobtalle.com/lindenmayer_systems.html][Job Talle -- Lindermayer systems]]

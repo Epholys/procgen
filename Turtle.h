@@ -11,6 +11,7 @@
 #include <SFML/Window.hpp>
 
 #include "helper_math.h"
+#include "helper_string.h"
 #include "LSystem.h"
 
 // A Turtle is a computer graphics concept from the language
@@ -88,28 +89,56 @@ namespace drawing
         int n_iter { 0 };
     };
 
-    // An 'order' is a function modifying a 'Turtle'. Semantically it is an
+    // An 'order_fn' is a function modifying a 'Turtle'. Semantically it is an
     // instruction like "move forward" or "turn left".
-    using order = std::function<void(impl::Turtle& turtle)>;
+    using order_fn = std::function<void(impl::Turtle& turtle)>;
 
-    // 'interpretation_map' is a map linking a symbol of the vocabulary of a
+    // All the orders currently defined.
+    enum OrderID {
+        GO_FORWARD,
+        TURN_RIGHT,
+        TURN_LEFT,
+    };
+
+    // An 'Order' is the association of an 'order_fn' and an identifier to allow
+    // equality comparison between orders, as 'std::function<>' does not have
+    // it.
+    struct Order {
+        OrderID id;
+        order_fn order;
+        void operator() (impl::Turtle& t) { order(t); }
+    };
+    inline bool operator== (const Order& lhs, const Order& rhs)
+    {
+        return lhs.id == rhs.id;
+    }
+    
+    void go_forward_fn(impl::Turtle& turtle);
+    // "Turn right" means "turn clockwise" AS SEEN ON THE SCREEN.
+    void turn_right_fn(impl::Turtle& turtle);
+    void turn_left_fn(impl::Turtle& turtle);
+
+    const Order go_forward { GO_FORWARD, go_forward_fn };
+    const Order turn_right { TURN_RIGHT, turn_right_fn };
+    const Order turn_left  { TURN_LEFT , turn_left_fn  };
+        
+    
+    // WARNING: if new orders are added, do not forget to complete the order
+    // database in 'InterpretationMapBuffer.h'. These informations are in two
+    // files due to separation of concerns: the database is specific to the GUI.
+
+    // 'InterpretationMap' is a map linking a symbol of the vocabulary of a
     // L-system to an order. During the interpretation, if the character is
     // encountered, the associated order will be executed.
-    using interpretation_map = std::unordered_map<char, order>;
+    using InterpretationMap = std::unordered_map<char, Order>;
     
     // Compute all vertices of a turtle interpretation of a L-system.
     // First, this function iterates 'parameters.n_iter' times the LSystem
     // 'lsys', using and modifying its cache. Then, it interprates the result
     // with 'interpretation' and 'parameters'.
     std::vector<sf::Vertex> compute_vertices(lsys::LSystem& lsys,
-                                             interpretation_map& interpretation,
+                                             InterpretationMap& interpretation,
                                              const DrawingParameters& parameters);
-
-    // All the orders currently defined. //
-    // "Turn right" means "turn clockwise" AS SEEN ON THE SCREEN.
-    void turn_right(impl::Turtle& turtle);
-    void turn_left(impl::Turtle& turtle);
-    void go_forward(impl::Turtle& turtle);
 }
 
 #endif

@@ -25,7 +25,7 @@ public:
         }
     
     LSystem lsys { "F", { { 'F', "F+G" } } };
-    interpretation_map interpretation { { 'F', go_forward },
+    InterpretationMap interpretation { { 'F', go_forward },
                                         { 'G', go_forward },
                                         { '+', turn_left  } };
     // starting_position, starting_angle, delta_angle, step, n_iter
@@ -55,7 +55,7 @@ TEST_F(TurtleTest, go_forward)
     sf::Vector2f end_pos = begin.position + sf::Vector2f (newx, newy);
     sf::Vertex end { end_pos } ;
 
-    go_forward(turtle);
+    go_forward_fn(turtle);
     
     ASSERT_EQ(turtle.vertices.at(0), begin);
     ASSERT_EQ(turtle.vertices.at(1), end);
@@ -64,7 +64,7 @@ TEST_F(TurtleTest, go_forward)
 // Test the turn_right order.
 TEST_F(TurtleTest, turn_right)
 {
-    turn_right(turtle);
+    turn_right_fn(turtle);
     
     ASSERT_FLOAT_EQ(turtle.angle, parameters.starting_angle + parameters.delta_angle);
 }
@@ -72,7 +72,7 @@ TEST_F(TurtleTest, turn_right)
 // Test the turn_left order.
 TEST_F(TurtleTest, turn_left)
 {
-    turn_left(turtle);
+    turn_left_fn(turtle);
     
     ASSERT_FLOAT_EQ(turtle.angle, parameters.starting_angle - parameters.delta_angle);
 }
@@ -84,9 +84,9 @@ TEST_F(TurtleTest, turn_left)
 //   3. go_forward
 TEST_F(TurtleTest, compute_vertices)
 {
-    go_forward(turtle);
-    turn_left (turtle);
-    go_forward(turtle);
+    go_forward_fn(turtle);
+    turn_left_fn (turtle);
+    go_forward_fn(turtle);
 
     vector<sf::Vertex> norm { turtle.vertices.at(0),
                               turtle.vertices.at(1),
