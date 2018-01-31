@@ -7,16 +7,15 @@ namespace drawing
 
     Turtle::Turtle(const DrawingParameters& params)
         : parameters { params }
-        , position   { parameters.starting_position }
-        , angle      { parameters.starting_angle }
-        , vertices   { {position} }
+        , state   { parameters.starting_position, parameters.starting_angle }
+        , paths      { { state.position } }
     {
     }
         
     
-    std::vector<sf::Vertex> compute_vertices(lsys::LSystem& lsys,
-                                             InterpretationMap& interpretation,
-                                             const DrawingParameters& parameters)
+    std::vector<std::vector<sf::Vertex>> compute_path(lsys::LSystem& lsys,
+                                                      InterpretationMap& interpretation,
+                                                      const DrawingParameters& parameters)
     {
         Turtle turtle (parameters);
         
@@ -37,24 +36,38 @@ namespace drawing
             }
         }
 
-        return turtle.vertices;
+        return turtle.paths;
     }
 
     void go_forward_fn(Turtle& turtle)
     {
-        float dx = turtle.parameters.step * std::cos(turtle.angle);
-        float dy = turtle.parameters.step * std::sin(turtle.angle);
-        turtle.position += {dx, dy};
-        turtle.vertices.push_back(turtle.position);
+        float dx = turtle.parameters.step * std::cos(turtle.state.angle);
+        float dy = turtle.parameters.step * std::sin(turtle.state.angle);
+        turtle.state.position += {dx, dy};
+        turtle.paths.back().push_back(turtle.state.position);
     }
 
     void turn_right_fn(Turtle& turtle)
     {
-        turtle.angle += turtle.parameters.delta_angle;
+        turtle.state.angle += turtle.parameters.delta_angle;
     }
 
     void turn_left_fn(Turtle& turtle)
     {
-        turtle.angle -= turtle.parameters.delta_angle;
+        turtle.state.angle -= turtle.parameters.delta_angle;
     }
+
+    void save_position_fn(Turtle& turtle)
+    {
+        turtle.stack.push(turtle.state);
+    }
+
+    void load_position_fn(Turtle& turtle)
+    {
+        turtle.state.position = turtle.stack.top().position;
+        turtle.state.angle = turtle.stack.top().angle;
+        turtle.paths.push_back( {turtle.stack.top().position} );
+        turtle.stack.pop();
+    }
+
 }
