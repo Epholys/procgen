@@ -97,10 +97,22 @@ int main(/*int argc, char* argv[]*/)
         {
             window.draw(path.data(), path.size(), sf::LineStrip);
         }
-        for(const auto& path : plant_paths)
-        {
-            window.draw(path.data(), path.size(), sf::LineStrip);
+
+        size_t n = std::accumulate(plant_paths.begin(), plant_paths.end(), 0,
+                                   [](const auto& n, const auto& v) { return n + v.size(); });
+        std::vector<sf::Vertex> v;
+        v.reserve(n);
+        for(const auto& p : plant_paths) {
+            auto vx1 = p.at(0);
+            vx1.color = sf::Color(0);
+            v.push_back(vx1);
+            v.insert(v.end(), p.begin(), p.end());
+            auto vx2 = p.at(p.size()-1);
+            vx2.color = sf::Color(0);
+            v.push_back(vx2);
         }
+        window.draw(v.data(), v.size(), sf::LineStrip);
+
         ImGui::SFML::Render(window);
         window.display();
     }
