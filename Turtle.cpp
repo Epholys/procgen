@@ -64,10 +64,17 @@ namespace drawing
 
     void load_position_fn(Turtle& turtle)
     {
-        turtle.state.position = turtle.stack.top().position;
-        turtle.state.angle = turtle.stack.top().angle;
-        turtle.paths.push_back( {turtle.stack.top().position} );
-        turtle.stack.pop();
+        if (turtle.stack.empty())
+        {
+            // Do nothing
+        }
+        else
+        {
+            turtle.state.position = turtle.stack.top().position;
+            turtle.state.angle = turtle.stack.top().angle;
+            turtle.paths.push_back( {turtle.stack.top().position} );
+            turtle.stack.pop();
+        }
     }
 
 }
