@@ -1,0 +1,87 @@
+#include "Observer.h"
+#include <iostream>
+
+struct A : Observable
+{
+    int n { 0 };
+    void notif() { notify(); }
+};
+
+struct B : Observable
+{
+    int m { 0 };
+    void notif() { notify(); }
+};
+
+struct C : public Observer<A>, public Observer<B>
+{
+    using lsys = Observer<A>;
+    using map = Observer<B>;
+    
+    C(const std::shared_ptr<A>& a,
+      const std::shared_ptr<B>& b);
+    virtual ~C();
+
+    virtual void handle_notification() const;
+};
+    
+C::C(const std::shared_ptr<A>& a,
+     const std::shared_ptr<B>& b)
+    : lsys(a)
+    , map(b)
+{
+}
+
+C::~C()
+{
+}
+
+void C::handle_notification() const
+{
+    std::cout << "***Cid:*** " << lsys::id_ << std::endl;
+    std::cout << "***Cid:*** " << map::id_ << std::endl;
+    std::cout << "C::handle a.n: " << lsys::target_->n++ << std::endl;
+    std::cout << "C::handle b.m: " << map::target_->m++ << std::endl;
+}
+
+
+struct D : public Observer<A>
+{
+    using lsys = Observer<A>;
+    
+    D(const std::shared_ptr<A>& a);
+    virtual ~D();
+
+    virtual void handle_notification() const;
+};
+    
+D::D(const std::shared_ptr<A>& a)
+    : lsys(a)
+{
+}
+
+D::~D()
+{
+}
+
+void D::handle_notification() const
+{
+    std::cout << "D::handle a.n: " << lsys::target_->n << std::endl << "***Did:*** " << id_ << std::endl;
+}
+
+int main()
+{
+    std::shared_ptr<A> a = std::make_shared<A>();
+    std::shared_ptr<B> b = std::make_shared<B>();
+    C c (a, b);
+    D d (a);
+
+    std::cout << "a.n: " << a->n << std::endl;
+    std::cout << "b.m: " << b->m << std::endl;
+
+    a->notif();
+
+    b->notif();
+
+    return 0;
+}
