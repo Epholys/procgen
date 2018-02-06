@@ -30,6 +30,10 @@ C::C(const std::shared_ptr<A>& a,
     : lsys(a)
     , map(b)
 {
+    lsys::add_callback([this](){handle_notification();});
+    std::cout << "C added callback A // id=" << lsys::id_.first << std::endl;
+    map::add_callback([this](){handle_notification();});
+    std::cout << "C added callback B // id=" << map::id_.first << std::endl;
 }
 
 C::~C()
@@ -38,10 +42,8 @@ C::~C()
 
 void C::handle_notification() const
 {
-    std::cout << "***Cid:*** " << lsys::id_ << std::endl;
-    std::cout << "***Cid:*** " << map::id_ << std::endl;
-    std::cout << "C::handle a.n: " << lsys::target_->n++ << std::endl;
-    std::cout << "C::handle b.m: " << map::target_->m++ << std::endl;
+    std::cout << "***Cid:*** " << lsys::id_.first << std::endl;
+    std::cout << "***Cid:*** " << map::id_.first << std::endl;
 }
 
 
@@ -58,6 +60,8 @@ struct D : public Observer<A>
 D::D(const std::shared_ptr<A>& a)
     : lsys(a)
 {
+    lsys::add_callback([this](){handle_notification();});
+    std::cout << "D added callback A // id=" << lsys::id_.first << std::endl;
 }
 
 D::~D()
@@ -66,7 +70,7 @@ D::~D()
 
 void D::handle_notification() const
 {
-    std::cout << "D::handle a.n: " << lsys::target_->n << std::endl << "***Did:*** " << id_ << std::endl;
+    std::cout << "***Did:*** " << id_.first << std::endl;
 }
 
 int main()
