@@ -20,7 +20,6 @@ public:
 protected:
     void notify() const;
 
-private:
     int id_ { 0 };
     std::unordered_map<int, callback> observers_ { };
 };
