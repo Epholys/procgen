@@ -49,6 +49,9 @@ int main(/*int argc, char* argv[]*/)
                                { '[', save_position },
                                { ']', load_position } };
     InterpretationMapBuffer map_buffer { map };
+
+    LSystemBuffer lsys_test { serpinski };
+    InterpretationMapBuffer map_test { map };
     
     DrawingParameters serpinski_param;
     serpinski_param.starting_position = { 1000, 600 };
@@ -76,19 +79,19 @@ int main(/*int argc, char* argv[]*/)
 
         window.clear();
         bool is_modified = false;
-        is_modified |= interact_with(serpinski_param, "Serpinski");
+        // is_modified |= interact_with(serpinski_param, "Serpinski");
         is_modified |= interact_with(serpinski_buffer, "Serpinski");
-        is_modified |= interact_with(map_buffer, "Serpinski");
-        if (is_modified)
-        {
-            serpinski_paths = compute_path(serpinski, map, serpinski_param);
-        }
+        // is_modified |= interact_with(map_buffer, "Serpinski");
+ 
+        // is_modified |= interact_with(map_test, "test");
+        is_modified |= interact_with(lsys_test, "test");
 
-        is_modified |= interact_with(plant_param, "plant");
-        is_modified |= interact_with(plant_buffer, "plant");
+        // is_modified |= interact_with(plant_param, "plant");
+        // is_modified |= interact_with(plant_buffer, "plant");
         if (is_modified)
         {
             plant_paths = compute_path(plant, map, plant_param);
+            serpinski_paths = compute_path(serpinski, map, serpinski_param);
         }
 
         display(map, "interpretations");
