@@ -88,7 +88,7 @@ namespace ImGui
 
 namespace procgui
 {
-    void display(const lsys::LSystem& lsys, const std::string& name, bool main)
+    void display(const LSystem& lsys, const std::string& name, bool main)
     {
         if( !set_up(name, main) )
         {
@@ -254,7 +254,7 @@ namespace procgui
         bool is_modified = false;
 
         // The LSystem itelf
-        lsys::LSystem& lsys = lsys_buffer.lsys_;
+        LSystem& lsys = lsys_buffer.lsys_;
         
         { // Axiom
             auto buf = string_to_array<lsys_successor_size>(lsys.get_axiom());

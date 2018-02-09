@@ -40,7 +40,7 @@ namespace procgui {
                  const std::string& name,
                  bool main=true);
     
-    void display(const lsys::LSystem& lsys, const std::string& name, bool main=true);
+    void display(const LSystem& lsys, const std::string& name, bool main=true);
     
     void display(const drawing::InterpretationMap& map, const std::string& name, bool main=true);
 
