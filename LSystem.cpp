@@ -44,6 +44,7 @@ const std::unordered_map<int, std::string>& LSystem::get_cache() const
 void LSystem::set_axiom(const std::string& axiom)
 {
     cache_ = { {0, axiom} };
+    notify();
 }
 
 // Note: replace the successor of an existing rule if 'predecessor' has
@@ -52,6 +53,7 @@ void LSystem::add_rule(char predecessor, const std::string& successor)
 {
     cache_ = { {0, get_axiom()} };
     rules_[predecessor] = successor;
+    notify();
 }
 
 // Exception:
@@ -63,12 +65,14 @@ void LSystem::remove_rule(char predecessor)
 
     cache_ = { {0, get_axiom()} };
     rules_.erase(rule);
+    notify();
 }
 
 void LSystem::clear_rules()
 {
     cache_ = { {0, get_axiom()} };
     rules_.clear();
+    notify();
 }                             
     
 // Exceptions:
@@ -131,6 +135,8 @@ std::string LSystem::produce(int n)
         base = tmp;
         cache_.emplace(highest->first + i + 1, tmp);
     }
+
+//TODO? notify();
 
     return cache_.at(n);
 }

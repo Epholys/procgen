@@ -6,7 +6,9 @@
 #include <unordered_map>
 #include <iostream>
 #include <algorithm>
-    
+
+#include "Observable.h"
+
 // Simple L-system generation class. Starting from an axiom and
 // simple production rules, generate by iteration a result array
 // of character. This class is a simple variant of more general
@@ -16,7 +18,7 @@
 //   - If an axiom is defined at construction, 'cache_.at(0)' contains it at
 //   all time.
 //   - 'cache_' is coherent with the 'rules_'.
-class LSystem
+class LSystem : public Observable
 {
 public:
     // A 'production_rule' is a sole symbol associated with an

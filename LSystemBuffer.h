@@ -7,6 +7,7 @@
 #include <array>
 
 #include "LSystem.h"
+#include "Observer.h"
 #include "helper_string.h"
 
 namespace procgui
@@ -33,19 +34,35 @@ namespace procgui
     //
     // Note: This class has a lot in common with 'IntepretationMapBuffer'. If a
     // third class has the same properties, all will be refactorized.
-    struct LSystemBuffer
+    class LSystemBuffer : public Observer<LSystem>
     {
-        using validity    = bool; // If the rule is a duplicate, it is not valid.
-        using predecessor = std::array<char, 2>;
-        using successor   = std::array<char, lsys_successor_size>;
+    public:
+        using lsys_ = Observer<LSystem>;
 
-        LSystemBuffer(LSystem& lsys);
+        using validity    = bool; // If the rule is a duplicate, it is not valid.
+        using predecessor = char;
+        using successor   = std::string;
+        using entry       = std::tuple<validity, predecessor, successor>;
+        using const_iterator = std::list<entry>::const_iterator;
+
+        LSystemBuffer(const std::shared_ptr<LSystem>& lsys);
+
+        LSystem& get_lsys() const;
+        const_iterator begin();
+        const_iterator end();
+
+        void change_predecessor(const_iterator cit, bool valid, predecessor pred);
+        void remove_predecessor(const_iterator cit);
+        void change_successor(const_iterator cit, successor succ);
+        void erase(const_iterator cit);
+        void add_rule();
 
         // Synchronize the rule buffer with the LSystem.
         void sync();
 
-        LSystem& lsys_; // non-owning reference
-        std::list<std::tuple<validity, predecessor, successor>> rule_buffer_;
+    private:
+        std::list<entry> buffer_;
+        bool lock_;
     };
 }
 

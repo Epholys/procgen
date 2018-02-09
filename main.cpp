@@ -37,9 +37,9 @@ int main(/*int argc, char* argv[]*/)
     window.setVerticalSyncEnabled(true);
     ImGui::SFML::Init(window);
 
-    LSystem serpinski { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } };
+    std::shared_ptr<LSystem> serpinski (new LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
     LSystemBuffer serpinski_buffer { serpinski };
-    LSystem plant { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } } };
+    std::shared_ptr<LSystem> plant (new LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } } });
     LSystemBuffer plant_buffer { plant };
     InterpretationMap map  = { { 'F', go_forward },
                                { 'G', go_forward },
@@ -66,8 +66,23 @@ int main(/*int argc, char* argv[]*/)
     plant_param.step = 5;
     plant_param.n_iter = 6;
 
-    auto serpinski_paths = compute_path(serpinski, map, serpinski_param);
-    auto plant_paths = compute_path(plant, map, plant_param);
+    std::vector<sf::Vertex> v;
+
+    auto serpinski_paths = compute_path(*serpinski, map, serpinski_param);
+    auto plant_paths = compute_path(*plant, map, plant_param);
+
+    size_t n = std::accumulate(plant_paths.begin(), plant_paths.end(), 0,
+                               [](const auto& n, const auto& v) { return n + v.size(); });
+    v.reserve(n);
+    for(const auto& p : plant_paths) {
+        auto vx1 = p.at(0);
+        vx1.color = sf::Color(0);
+        v.push_back(vx1);
+        v.insert(v.end(), p.begin(), p.end());
+        auto vx2 = p.at(p.size()-1);
+        vx2.color = sf::Color(0);
+        v.push_back(vx2);
+    }
 
     sf::Clock delta_clock;
     while (window.isOpen())
@@ -89,8 +104,25 @@ int main(/*int argc, char* argv[]*/)
         // is_modified |= interact_with(plant_buffer, "plant");
         if (is_modified)
         {
-            plant_paths = compute_path(plant, map, plant_param);
-            serpinski_paths = compute_path(serpinski, map, serpinski_param);
+            plant_paths = compute_path(*plant, map, plant_param);
+            serpinski_paths = compute_path(*serpinski, map, serpinski_param);
+
+
+            size_t n = std::accumulate(plant_paths.begin(), plant_paths.end(), 0,
+                                       [](const auto& n, const auto& v) { return n + v.size(); });
+            v.clear();
+            v.reserve(n);
+            for(const auto& p : plant_paths) {
+                auto vx1 = p.at(0);
+                vx1.color = sf::Color(0);
+                v.push_back(vx1);
+                v.insert(v.end(), p.begin(), p.end());
+                auto vx2 = p.at(p.size()-1);
+                vx2.color = sf::Color(0);
+                v.push_back(vx2);
+            }
+
+
         }
 
         display(map, "interpretations");
@@ -100,19 +132,6 @@ int main(/*int argc, char* argv[]*/)
             window.draw(path.data(), path.size(), sf::LineStrip);
         }
 
-        size_t n = std::accumulate(plant_paths.begin(), plant_paths.end(), 0,
-                                   [](const auto& n, const auto& v) { return n + v.size(); });
-        std::vector<sf::Vertex> v;
-        v.reserve(n);
-        for(const auto& p : plant_paths) {
-            auto vx1 = p.at(0);
-            vx1.color = sf::Color(0);
-            v.push_back(vx1);
-            v.insert(v.end(), p.begin(), p.end());
-            auto vx2 = p.at(p.size()-1);
-            vx2.color = sf::Color(0);
-            v.push_back(vx2);
-        }
         window.draw(v.data(), v.size(), sf::LineStrip);
 
         ImGui::SFML::Render(window);
