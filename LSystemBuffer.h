@@ -39,12 +39,12 @@ namespace procgui
         using predecessor = std::array<char, 2>;
         using successor   = std::array<char, lsys_successor_size>;
 
-        LSystemBuffer(lsys::LSystem& lsys);
+        LSystemBuffer(LSystem& lsys);
 
         // Synchronize the rule buffer with the LSystem.
         void sync();
 
-        lsys::LSystem& lsys_; // non-owning reference
+        LSystem& lsys_; // non-owning reference
         std::list<std::tuple<validity, predecessor, successor>> rule_buffer_;
     };
 }

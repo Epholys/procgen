@@ -2,7 +2,7 @@
 
 namespace procgui
 {
-    LSystemBuffer::LSystemBuffer(lsys::LSystem& lsys)
+    LSystemBuffer::LSystemBuffer(LSystem& lsys)
         : lsys_ {lsys}
         , rule_buffer_ {}
     {

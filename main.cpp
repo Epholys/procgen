@@ -15,7 +15,6 @@
 
 #include <functional>
 
-using namespace lsys;
 using namespace drawing;
 using namespace math;
 using namespace procgui;

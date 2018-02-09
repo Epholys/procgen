@@ -2,8 +2,6 @@
 
 #include "LSystem.h"
 
-using namespace lsys;
-
 
 TEST(LSystemTest, default_ctor)
 {

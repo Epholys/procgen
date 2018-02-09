@@ -1,4 +1,3 @@
-#include <vector>
 #include <cmath>
 
 #include <gtest/gtest.h>
@@ -6,10 +5,9 @@
 
 #include "LSystem.h"
 #include "Turtle.h"
-#include "math.h"
+
 
 using namespace std;
-using namespace lsys;
 using namespace drawing;
 using namespace math;
 
