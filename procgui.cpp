@@ -330,7 +330,6 @@ namespace procgui
                     {
                         buffer.remove_predecessor(it);
                     }
-                        
                 }
 
                 ImGui::PopItemWidth(); ImGui::SameLine(); ImGui::Text("->"); ImGui::SameLine();
@@ -340,7 +339,8 @@ namespace procgui
                 // Interact with the successor. Except for the input size, does
                 // not have any constraints.
                 auto array = string_to_array<lsys_successor_size>(succ);
-                if(ImGui::InputText("##succ", array.data(), lsys_successor_size))
+                if(ImGui::InputText("##succ", array.data(), lsys_successor_size) &&
+                   predec[0] != '\0')
                 {
                     is_modified = true;
                     buffer.change_successor(it, array_to_string(array));
@@ -388,6 +388,8 @@ namespace procgui
             {
                 buffer.add_rule();
             }
+
+            buffer.apply();
             
             ImGui::Unindent(); 
         }

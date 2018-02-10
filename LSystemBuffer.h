@@ -4,7 +4,6 @@
 
 #include <list>
 #include <tuple>
-#include <array>
 
 #include "LSystem.h"
 #include "Observer.h"
@@ -48,8 +47,8 @@ namespace procgui
         LSystemBuffer(const std::shared_ptr<LSystem>& lsys);
 
         LSystem& get_lsys() const;
-        const_iterator begin();
-        const_iterator end();
+        const_iterator begin() const;
+        const_iterator end() const;
 
         void change_predecessor(const_iterator cit, bool valid, predecessor pred);
         void remove_predecessor(const_iterator cit);
@@ -57,11 +56,14 @@ namespace procgui
         void erase(const_iterator cit);
         void add_rule();
 
+        void apply();
+        
         // Synchronize the rule buffer with the LSystem.
         void sync();
 
     private:
         std::list<entry> buffer_;
+        std::function<void()> instruction_;
         // bool lock_;
     };
 }
