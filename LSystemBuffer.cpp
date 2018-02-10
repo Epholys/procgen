@@ -55,6 +55,7 @@ namespace procgui
                 {
                     auto copy = buffer_.insert(std::next(cit), {true, old_pred, succ});
                     erase(copy);
+                    apply();
                 }
             }
         };
@@ -131,7 +132,7 @@ namespace procgui
                 lsys_::target_->remove_rule(pred);
                 // lock_ = false;
             }
-            else if (!valid)
+            else
             {
                 buffer_.erase(cit);
                 return;
