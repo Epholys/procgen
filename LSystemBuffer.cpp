@@ -5,7 +5,7 @@ namespace procgui
     LSystemBuffer::LSystemBuffer(const std::shared_ptr<LSystem>& lsys)
         : lsys_ {lsys}
         , buffer_ {}
-        , lock_ {false}
+//        , // lock_ {false}
     {
         lsys_::add_callback([this](){sync();});
         
@@ -42,9 +42,9 @@ namespace procgui
 
         if (valid)// we added a pred
         {
-            lock_ = true;
+            // lock_ = true;
             lsys_::target_->add_rule(pred, succ);
-            lock_ = false;
+            // lock_ = false;
         }
     }
 
@@ -72,9 +72,9 @@ namespace procgui
 
         if (!duplicate)
         {
-            lock_ = true;
+            // lock_ = true;
             lsys_::target_->remove_rule(old_pred);
-            lock_ = false;
+            // lock_ = false;
         }
         
     }
@@ -92,9 +92,9 @@ namespace procgui
 
         if (valid)
         {
-            lock_ = true;
+            // lock_ = true;
             lsys_::target_->add_rule(pred, succ);
-            lock_ = false;
+            // lock_ = false;
         }
     }
 
@@ -109,9 +109,9 @@ namespace procgui
 
         if (valid && pred != '\0')
         {
-            lock_ = true;
+            // lock_ = true;
             lsys_::target_->remove_rule(pred);
-            lock_ = false;
+            // lock_ = false;
         }
 
         for (auto it = buffer_.begin(); it != buffer_.end(); ++it)
@@ -125,14 +125,12 @@ namespace procgui
                 {
                     std::get<validity>(*it) = true;
                 }
-                lock_ = true;
+                // lock_ = true;
                 lsys_::target_->add_rule(same_pred, new_succ);
-                lock_ = false;
+                // lock_ = false;
                 break;
             }
         }
-
-        buffer_.erase(cit);
     }
 
     void LSystemBuffer::add_rule()
@@ -143,10 +141,10 @@ namespace procgui
     
     void LSystemBuffer::sync()
     {
-        if(lock_)
-        {
-            return;
-        }
+        // if(// lock_)
+        // {
+        //     return;
+        // }
             
     
         const auto& lsys_rules = lsys_::target_->get_rules();
@@ -198,27 +196,27 @@ namespace procgui
         }
 
         // IMPOSSIBLE : lock
-        // for (auto it = buffer_.begin(); it != buffer_.end(); ++it)
-        // {
-        //     if (!std::get<validity>(*it))
-        //     {
-        //         bool duplicate = false;
-        //         for (auto jt = buffer_.begin(); jt != buffer_.end(); ++jt)
-        //         {
-        //             if (it != jt &&
-        //                 std::get<predecessor>(*it) == std::get<predecessor>(*jt))
-        //             {
-        //                 duplicate = true;
-        //                 break;
-        //             }
-        //         }
-        //         if (!duplicate)
-        //         {
-        //             std::get<validity>(*it) = true;
-        //             change_predecessor(it, true, std::get<predecessor>(*it));
-        //         }
-        //     }
-        // }
+        for (auto it = buffer_.begin(); it != buffer_.end(); ++it)
+        {
+            if (!std::get<validity>(*it))
+            {
+                bool duplicate = false;
+                for (auto jt = buffer_.begin(); jt != buffer_.end(); ++jt)
+                {
+                    if (it != jt &&
+                        std::get<predecessor>(*it) == std::get<predecessor>(*jt))
+                    {
+                        duplicate = true;
+                        break;
+                    }
+                }
+                if (!duplicate)
+                {
+                    std::get<validity>(*it) = true;
+                    change_predecessor(it, true, std::get<predecessor>(*it));
+                }
+            }
+        }
         
         // lsys_::target_->clear_rules();
 

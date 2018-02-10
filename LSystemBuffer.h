@@ -62,7 +62,7 @@ namespace procgui
 
     private:
         std::list<entry> buffer_;
-        bool lock_;
+        // bool lock_;
     };
 }
 
