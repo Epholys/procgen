@@ -69,8 +69,9 @@ namespace procgui
 
     private:
         bool has_duplicate(const_iterator cit);
-        const_iterator find_existing(predecessor pred);
-        
+        const_iterator find_existing(predecessor pred); 
+        iterator remove_const(const_iterator cit);
+       
         std::list<entry> buffer_;
         std::function<void()> instruction_;
         // bool lock_;

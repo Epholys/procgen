@@ -46,6 +46,11 @@ namespace procgui
         return buffer_.end();
     }
 
+    LSystemBuffer::iterator LSystemBuffer::remove_const(const_iterator cit)
+    {
+        return buffer_.erase(cit, cit);
+    }
+
     
     void LSystemBuffer::add_rule()
     {
@@ -74,15 +79,14 @@ namespace procgui
             return;
         }
 
-        auto cexisting = find_existing(pred);
-        if (cexisting != buffer_.end())
+        auto existing = find_existing(pred);
+        if (existing != buffer_.end())
         {
             if (valid)
             {
-                auto existing = buffer_.erase(cexisting, cexisting);
-                std::get<validity>(*existing) = true;
+                std::get<validity>(*remove_const(existing)) = true;
             }
-            lsys_::target_->add_rule(pred, std::get<successor>(*cexisting));
+            lsys_::target_->add_rule(pred, std::get<successor>(*existing));
         }
                 
         // for (auto it = buffer_.begin(); it != buffer_.end(); ++it)
@@ -113,9 +117,8 @@ namespace procgui
         bool duplicate = find_existing(pred) != buffer_.end();
         
         // https://stackoverflow.com/a/10669041/4309005
-        auto it = buffer_.erase(cit, cit);
         const successor& succ = std::get<successor>(*cit);
-        *it = { !duplicate, pred, succ };
+        *remove_const(cit) = { !duplicate, pred, succ };
 
         if (!duplicate)// we added a pred
         {
@@ -137,7 +140,7 @@ namespace procgui
 
         auto old_pred = std::get<predecessor>(*cit);
 
-        auto it = buffer_.erase(cit, cit);
+        auto it = remove_const(cit);
         const successor& succ = std::get<successor>(*cit);
         *it = { true, '\0', succ };
 
@@ -166,7 +169,7 @@ namespace procgui
     {
         Expects(cit != buffer_.end());
 
-        auto it = buffer_.erase(cit, cit);
+        auto it = remove_const(cit);
 
         auto valid = std::get<validity>(*cit);
         auto pred = std::get<predecessor>(*cit);
