@@ -7,7 +7,7 @@
 
 #include "LSystem.h"
 #include "Observer.h"
-#include "helper_string.h"
+#include "helper_algorithm.h"
 
 namespace procgui
 {
@@ -52,13 +52,13 @@ namespace procgui
 
         void add_rule();
         void erase(const_iterator cit);
-        void change_predecessor(const_iterator cit, bool valid, predecessor pred);
+        void change_predecessor(const_iterator cit, predecessor pred);
         void remove_predecessor(const_iterator cit);
         void change_successor(const_iterator cit, successor succ);
 
         void delayed_add_rule();
         void delayed_erase(const_iterator cit);
-        void delayed_change_predecessor(const_iterator cit, bool valid, predecessor pred);
+        void delayed_change_predecessor(const_iterator cit, predecessor pred);
         void delayed_remove_predecessor(const_iterator cit);
         void delayed_change_successor(const_iterator cit, successor succ);
         void apply();
@@ -67,6 +67,9 @@ namespace procgui
         void sync();
 
     private:
+        bool has_duplicate(const_iterator cit);
+        bool already_exists(predecessor pred);
+        
         std::list<entry> buffer_;
         std::function<void()> instruction_;
         // bool lock_;

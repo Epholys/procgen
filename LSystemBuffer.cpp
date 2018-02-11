@@ -15,7 +15,31 @@ namespace procgui
             buffer_.push_back({true, rule.first, rule.second});
         }
     }
+
+    bool LSystemBuffer::has_duplicate(const_iterator it)
+    {
+        return find_duplicate(it, buffer_.cbegin(), buffer_.cend(),
+                              [](const auto& t1, const auto& t2)
+                              { return std::get<predecessor>(t1) == std::get<predecessor>(t2); })
+            != buffer_.cend();
+    }
+
+    bool LSystemBuffer::already_exists(predecessor pred)
+    {
+        return find_existing(buffer_.cbegin(), buffer_.cend(), pred,
+                             [](const auto& tuple, const auto& pred)
+                             { return std::get<predecessor>(tuple) == pred; })
+            != buffer_.cend();
+    }
+
     
+    // bool LSystemBuffer::has_duplicate(const_iterator it, predecessor pred)
+    // {
+    //     return find_duplicate(buffer_.begin(), buffer_.begin(), buffer_.end(),
+    //                           [pred](const auto& t1, const auto& t2)
+    //                           { return std::get<predecessor>(t1) == std::get<predecessor>(t2); });
+    // }
+
     LSystem& LSystemBuffer::get_lsys() const
     {
         return *lsys_::target_;
@@ -78,18 +102,20 @@ namespace procgui
         }
     }
 
-    void LSystemBuffer::change_predecessor(const_iterator cit, bool valid, predecessor pred)
+    void LSystemBuffer::change_predecessor(const_iterator cit, predecessor pred)
     {
         Expects(cit != buffer_.end());
-
+        
         auto old_pred = std::get<predecessor>(*cit);
 
+        bool duplicate = already_exists(pred);
+        
         // https://stackoverflow.com/a/10669041/4309005
         auto it = buffer_.erase(cit, cit);
         const successor& succ = std::get<successor>(*cit);
-        *it = { valid, pred, succ };
+        *it = { !duplicate, pred, succ };
 
-        if (valid)// we added a pred
+        if (!duplicate)// we added a pred
         {
             // lock_ = true;
             lsys_::target_->add_rule(pred, succ);
@@ -160,9 +186,9 @@ namespace procgui
     {
         instruction_ = [=](){ erase(cit); };
     }
-    void LSystemBuffer::delayed_change_predecessor(const_iterator cit, bool valid, predecessor pred)
+    void LSystemBuffer::delayed_change_predecessor(const_iterator cit, predecessor pred)
     {
-        instruction_ = [=](){ change_predecessor(cit, valid, pred); };
+        instruction_ = [=](){ change_predecessor(cit, pred); };
     }
     void LSystemBuffer::delayed_remove_predecessor(const_iterator cit)
     {
