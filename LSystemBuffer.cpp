@@ -24,21 +24,12 @@ namespace procgui
             != buffer_.cend();
     }
 
-    bool LSystemBuffer::already_exists(predecessor pred)
+    LSystemBuffer::const_iterator LSystemBuffer::find_existing(predecessor pred)
     {
-        return find_existing(buffer_.cbegin(), buffer_.cend(), pred,
-                             [](const auto& tuple, const auto& pred)
-                             { return std::get<predecessor>(tuple) == pred; })
-            != buffer_.cend();
+        return ::find_existing(buffer_.cbegin(), buffer_.cend(), pred,
+                               [](const auto& tuple, const auto& pred)
+                               { return std::get<predecessor>(tuple) == pred; });
     }
-
-    
-    // bool LSystemBuffer::has_duplicate(const_iterator it, predecessor pred)
-    // {
-    //     return find_duplicate(buffer_.begin(), buffer_.begin(), buffer_.end(),
-    //                           [pred](const auto& t1, const auto& t2)
-    //                           { return std::get<predecessor>(t1) == std::get<predecessor>(t2); });
-    // }
 
     LSystem& LSystemBuffer::get_lsys() const
     {
@@ -83,23 +74,34 @@ namespace procgui
             return;
         }
 
-        for (auto it = buffer_.begin(); it != buffer_.end(); ++it)
+        auto cexisting = find_existing(pred);
+        if (cexisting != buffer_.end())
         {
-            auto same_pred = std::get<predecessor>(*it);
-            auto new_succ = std::get<successor>(*it);
-            if (it != cit &&
-                pred == same_pred)
+            if (valid)
             {
-                if(valid)
-                {
-                    std::get<validity>(*it) = true;
-                }
-                // lock_ = true;
-                lsys_::target_->add_rule(same_pred, new_succ);
-                // lock_ = false;
-                break;
+                auto existing = buffer_.erase(cexisting, cexisting);
+                std::get<validity>(*existing) = true;
             }
+            lsys_::target_->add_rule(pred, std::get<successor>(*cexisting));
         }
+                
+        // for (auto it = buffer_.begin(); it != buffer_.end(); ++it)
+        // {
+        //     auto same_pred = std::get<predecessor>(*it);
+        //     auto new_succ = std::get<successor>(*it);
+        //     if (it != cit &&
+        //         pred == same_pred)
+        //     {
+        //         if(valid)
+        //         {
+        //         std::get<validity>(*it) = true;
+        //         }
+        //         // lock_ = true;
+        //         lsys_::target_->add_rule(same_pred, new_succ);
+        //         // lock_ = false;
+        //         break;
+        //     }
+        // }
     }
 
     void LSystemBuffer::change_predecessor(const_iterator cit, predecessor pred)
@@ -108,7 +110,7 @@ namespace procgui
         
         auto old_pred = std::get<predecessor>(*cit);
 
-        bool duplicate = already_exists(pred);
+        bool duplicate = find_existing(pred) != buffer_.end();
         
         // https://stackoverflow.com/a/10669041/4309005
         auto it = buffer_.erase(cit, cit);

@@ -42,6 +42,7 @@ namespace procgui
         using predecessor = char;
         using successor   = std::string;
         using entry       = std::tuple<validity, predecessor, successor>;
+        using iterator = std::list<entry>::iterator;
         using const_iterator = std::list<entry>::const_iterator;
 
         LSystemBuffer(const std::shared_ptr<LSystem>& lsys);
@@ -68,7 +69,7 @@ namespace procgui
 
     private:
         bool has_duplicate(const_iterator cit);
-        bool already_exists(predecessor pred);
+        const_iterator find_existing(predecessor pred);
         
         std::list<entry> buffer_;
         std::function<void()> instruction_;
