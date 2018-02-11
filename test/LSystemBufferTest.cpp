@@ -76,6 +76,33 @@ public:
     LSystemBuffer buffer2;
 };
 
+TEST_F(LSystemBufferTest, helper_has_predecessor)
+{
+    ASSERT_TRUE(has_predecessor(buffer1, 'F'));
+    ASSERT_FALSE(has_predecessor(buffer1, 'X'));
+}
+
+TEST_F(LSystemBufferTest, helper_has_rule)
+{
+    ASSERT_TRUE(has_rule(buffer1, 'F', "G-F-G"));
+    ASSERT_FALSE(has_rule(buffer1, 'F', "AAA"));
+}
+
+TEST_F(LSystemBufferTest, helper_has_duplicate)
+{
+    ASSERT_FALSE(has_duplicate(buffer1, buffer1.begin()));
+
+    auto pred = std::get<predecessor>(*buffer1.begin());
+    buffer1.add_rule();
+    buffer1.change_predecessor(std::prev(buffer1.end()), false, pred);
+    ASSERT_TRUE(has_duplicate(buffer1, buffer1.begin()));
+}
+
+TEST_F(LSystemBufferTest, helper_size)
+{
+    ASSERT_EQ(2, buffer_size(buffer1));
+}
+
 TEST_F(LSystemBufferTest, constructor)
 {
     // Check if all lsys' rules are here
