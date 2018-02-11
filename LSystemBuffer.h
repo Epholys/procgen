@@ -50,12 +50,17 @@ namespace procgui
         const_iterator begin() const;
         const_iterator end() const;
 
+        void add_rule();
+        void erase(const_iterator cit);
         void change_predecessor(const_iterator cit, bool valid, predecessor pred);
         void remove_predecessor(const_iterator cit);
         void change_successor(const_iterator cit, successor succ);
-        void erase(const_iterator cit);
-        void add_rule();
 
+        void delayed_add_rule();
+        void delayed_erase(const_iterator cit);
+        void delayed_change_predecessor(const_iterator cit, bool valid, predecessor pred);
+        void delayed_remove_predecessor(const_iterator cit);
+        void delayed_change_successor(const_iterator cit, successor succ);
         void apply();
         
         // Synchronize the rule buffer with the LSystem.

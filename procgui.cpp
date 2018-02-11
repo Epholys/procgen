@@ -324,11 +324,11 @@ namespace procgui
                         // If the predecessor is not unique, the rule is not valid.
                         is_valid = !is_duplicate;
                     
-                        buffer.change_predecessor(it, is_valid, predec[0]);
+                        buffer.delayed_change_predecessor(it, is_valid, predec[0]);
                     }
                     else
                     {
-                        buffer.remove_predecessor(it);
+                        buffer.delayed_remove_predecessor(it);
                     }
                 }
 
@@ -343,7 +343,7 @@ namespace procgui
                    predec[0] != '\0')
                 {
                     is_modified = true;
-                    buffer.change_successor(it, array_to_string(array));
+                    buffer.delayed_change_successor(it, array_to_string(array));
                 }
                 
                 
@@ -380,13 +380,13 @@ namespace procgui
             // Erase the marked rule if necessary
             if (to_delete != buffer.end())
             {
-                buffer.erase(to_delete);
+                buffer.delayed_erase(to_delete);
             }
 
             // Add a rule if necessary
             if (must_add_rule)
             {
-                buffer.add_rule();
+                buffer.delayed_add_rule();
             }
 
             buffer.apply();

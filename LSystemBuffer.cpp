@@ -6,7 +6,6 @@ namespace procgui
         : lsys_ {lsys}
         , buffer_ {}
         , instruction_ {nullptr}
-//        , // lock_ {false}
     {
         lsys_::add_callback([this](){sync();});
         
@@ -32,137 +31,146 @@ namespace procgui
         return buffer_.end();
     }
 
+    
+    void LSystemBuffer::add_rule()
+    {
+        buffer_.push_back({true, '\0', "" });
+    }
+
+
+    void LSystemBuffer::erase(const_iterator cit)
+    {
+        Expects(cit != buffer_.end());
+        
+        auto valid = std::get<validity>(*cit);
+        auto pred = std::get<predecessor>(*cit);
+        auto succ = std::get<successor>(*cit);
+
+
+        if (valid && pred != '\0')
+        {
+            // lock_ = true;
+            lsys_::target_->remove_rule(pred);
+            // lock_ = false;
+        }
+        else
+        {
+            buffer_.erase(cit);
+            return;
+        }
+
+        for (auto it = buffer_.begin(); it != buffer_.end(); ++it)
+        {
+            auto same_pred = std::get<predecessor>(*it);
+            auto new_succ = std::get<successor>(*it);
+            if (it != cit &&
+                pred == same_pred)
+            {
+                if(valid)
+                {
+                    std::get<validity>(*it) = true;
+                }
+                // lock_ = true;
+                lsys_::target_->add_rule(same_pred, new_succ);
+                // lock_ = false;
+                break;
+            }
+        }
+    }
+
     void LSystemBuffer::change_predecessor(const_iterator cit, bool valid, predecessor pred)
     {
-        instruction_ = [=]() {
+        Expects(cit != buffer_.end());
 
-            Expects(cit != buffer_.end());
+        auto old_pred = std::get<predecessor>(*cit);
 
-            auto old_pred = std::get<predecessor>(*cit);
+        // https://stackoverflow.com/a/10669041/4309005
+        auto it = buffer_.erase(cit, cit);
+        const successor& succ = std::get<successor>(*cit);
+        *it = { valid, pred, succ };
 
-            // https://stackoverflow.com/a/10669041/4309005
-            auto it = buffer_.erase(cit, cit);
-            const successor& succ = std::get<successor>(*cit);
-            *it = { valid, pred, succ };
+        if (valid)// we added a pred
+        {
+            // lock_ = true;
+            lsys_::target_->add_rule(pred, succ);
+            // lock_ = false;
 
-            if (valid)// we added a pred
+            if (old_pred != '\0')
             {
-                // lock_ = true;
-                lsys_::target_->add_rule(pred, succ);
-                // lock_ = false;
-
-                if (old_pred != '\0')
-                {
-                    auto copy = buffer_.insert(std::next(cit), {true, old_pred, succ});
-                    erase(copy);
-                    apply();
-                }
+                auto copy = buffer_.insert(std::next(cit), {true, old_pred, succ});
+                erase(copy);
             }
-        };
+        }
     }
     
     void LSystemBuffer::remove_predecessor(LSystemBuffer::const_iterator cit)
     {
-        instruction_ = [=]() {
+        Expects(cit != buffer_.end());
 
-            Expects(cit != buffer_.end());
+        auto old_pred = std::get<predecessor>(*cit);
 
-            auto old_pred = std::get<predecessor>(*cit);
+        auto it = buffer_.erase(cit, cit);
+        const successor& succ = std::get<successor>(*cit);
+        *it = { true, '\0', succ };
 
-            auto it = buffer_.erase(cit, cit);
-            const successor& succ = std::get<successor>(*cit);
-            *it = { true, '\0', succ };
-
-            bool duplicate = false;
-            for (auto same_it = buffer_.begin(); same_it != buffer_.end(); ++same_it)
+        bool duplicate = false;
+        for (auto same_it = buffer_.begin(); same_it != buffer_.end(); ++same_it)
+        {
+            auto same_pred = std::get<predecessor>(*same_it);
+            if (same_it != it &&
+                old_pred == same_pred)
             {
-                auto same_pred = std::get<predecessor>(*same_it);
-                if (same_it != it &&
-                    old_pred == same_pred)
-                {
-                    duplicate = true;
-                    break;
-                }
+                duplicate = true;
+                break;
             }
+        }
 
-            if (!duplicate)
-            {
-                // lock_ = true;
-                lsys_::target_->remove_rule(old_pred);
-                // lock_ = false;
-            }
-        };        
+        if (!duplicate)
+        {
+            // lock_ = true;
+            lsys_::target_->remove_rule(old_pred);
+            // lock_ = false;
+        }
     }
 
 
     void LSystemBuffer::change_successor(const_iterator cit, successor succ)
     {
-        instruction_ = [=]() {
+        Expects(cit != buffer_.end());
 
-            Expects(cit != buffer_.end());
+        auto it = buffer_.erase(cit, cit);
 
-            auto it = buffer_.erase(cit, cit);
+        auto valid = std::get<validity>(*cit);
+        auto pred = std::get<predecessor>(*cit);
+        *it = { valid, pred, succ };
 
-            auto valid = std::get<validity>(*cit);
-            auto pred = std::get<predecessor>(*cit);
-            *it = { valid, pred, succ };
-
-            if (valid)
-            {
-                // lock_ = true;
-                lsys_::target_->add_rule(pred, succ);
-                // lock_ = false;
-            }
-        };
-    }
-
-    void LSystemBuffer::erase(const_iterator cit)
-    {
-        instruction_ = [=]() {
-            Expects(cit != buffer_.end());
-        
-            auto valid = std::get<validity>(*cit);
-            auto pred = std::get<predecessor>(*cit);
-            auto succ = std::get<successor>(*cit);
-
-
-            if (valid && pred != '\0')
-            {
-                // lock_ = true;
-                lsys_::target_->remove_rule(pred);
-                // lock_ = false;
-            }
-            else
-            {
-                buffer_.erase(cit);
-                return;
-            }
-
-            for (auto it = buffer_.begin(); it != buffer_.end(); ++it)
-            {
-                auto same_pred = std::get<predecessor>(*it);
-                auto new_succ = std::get<successor>(*it);
-                if (it != cit &&
-                    pred == same_pred)
-                {
-                    if(valid)
-                    {
-                        std::get<validity>(*it) = true;
-                    }
-                    // lock_ = true;
-                    lsys_::target_->add_rule(same_pred, new_succ);
-                    // lock_ = false;
-                    break;
-                }
-            }
-        };
+        if (valid)
+        {
+            // lock_ = true;
+            lsys_::target_->add_rule(pred, succ);
+            // lock_ = false;
+        }
     }
     
-    void LSystemBuffer::add_rule()
+    void LSystemBuffer::delayed_add_rule()
     {
-        instruction_ = [=]() {
-            buffer_.push_back({true, '\0', "" });
-        };
+        instruction_ = [=](){ add_rule(); };
+    }
+    void LSystemBuffer::delayed_erase(const_iterator cit)
+    {
+        instruction_ = [=](){ erase(cit); };
+    }
+    void LSystemBuffer::delayed_change_predecessor(const_iterator cit, bool valid, predecessor pred)
+    {
+        instruction_ = [=](){ change_predecessor(cit, valid, pred); };
+    }
+    void LSystemBuffer::delayed_remove_predecessor(const_iterator cit)
+    {
+        instruction_ = [=](){ remove_predecessor(cit); };
+    }
+    void LSystemBuffer::delayed_change_successor(const_iterator cit, successor succ)
+    {
+        instruction_ = [=](){ change_successor(cit, succ); };
     }
 
     void LSystemBuffer::apply()
@@ -173,7 +181,7 @@ namespace procgui
             instruction_ = nullptr;
         }
     }
-    
+
     void LSystemBuffer::sync()
     {
         // if(// lock_)
