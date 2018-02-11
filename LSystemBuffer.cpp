@@ -48,6 +48,7 @@ namespace procgui
 
     LSystemBuffer::iterator LSystemBuffer::remove_const(const_iterator cit)
     {
+        // https://stackoverflow.com/a/10669041/4309005
         return buffer_.erase(cit, cit);
     }
 
@@ -69,9 +70,7 @@ namespace procgui
 
         if (valid && pred != '\0')
         {
-            // lock_ = true;
             lsys_::target_->remove_rule(pred);
-            // lock_ = false;
         }
         else
         {
@@ -88,24 +87,6 @@ namespace procgui
             }
             lsys_::target_->add_rule(pred, std::get<successor>(*existing));
         }
-                
-        // for (auto it = buffer_.begin(); it != buffer_.end(); ++it)
-        // {
-        //     auto same_pred = std::get<predecessor>(*it);
-        //     auto new_succ = std::get<successor>(*it);
-        //     if (it != cit &&
-        //         pred == same_pred)
-        //     {
-        //         if(valid)
-        //         {
-        //         std::get<validity>(*it) = true;
-        //         }
-        //         // lock_ = true;
-        //         lsys_::target_->add_rule(same_pred, new_succ);
-        //         // lock_ = false;
-        //         break;
-        //     }
-        // }
     }
 
     void LSystemBuffer::change_predecessor(const_iterator cit, predecessor pred)
@@ -116,15 +97,12 @@ namespace procgui
 
         bool duplicate = find_existing(pred) != buffer_.end();
         
-        // https://stackoverflow.com/a/10669041/4309005
         const successor& succ = std::get<successor>(*cit);
         *remove_const(cit) = { !duplicate, pred, succ };
 
         if (!duplicate)// we added a pred
         {
-            // lock_ = true;
             lsys_::target_->add_rule(pred, succ);
-            // lock_ = false;
 
             if (old_pred != '\0')
             {
@@ -140,27 +118,15 @@ namespace procgui
 
         auto old_pred = std::get<predecessor>(*cit);
 
+        bool duplicate = has_duplicate(cit);
+
         auto it = remove_const(cit);
         const successor& succ = std::get<successor>(*cit);
         *it = { true, '\0', succ };
 
-        bool duplicate = false;
-        for (auto same_it = buffer_.begin(); same_it != buffer_.end(); ++same_it)
-        {
-            auto same_pred = std::get<predecessor>(*same_it);
-            if (same_it != it &&
-                old_pred == same_pred)
-            {
-                duplicate = true;
-                break;
-            }
-        }
-
         if (!duplicate)
         {
-            // lock_ = true;
             lsys_::target_->remove_rule(old_pred);
-            // lock_ = false;
         }
     }
 
@@ -177,9 +143,7 @@ namespace procgui
 
         if (valid)
         {
-            // lock_ = true;
             lsys_::target_->add_rule(pred, succ);
-            // lock_ = false;
         }
     }
     
@@ -215,12 +179,6 @@ namespace procgui
 
     void LSystemBuffer::sync()
     {
-        // if(// lock_)
-        // {
-        //     return;
-        // }
-            
-    
         const auto& lsys_rules = lsys_::target_->get_rules();
 
         // gérer les ajouts
@@ -269,7 +227,6 @@ namespace procgui
             }
         }
 
-        // IMPOSSIBLE : lock
         for (auto it = buffer_.begin(); it != buffer_.end(); ++it)
         {
             if (!std::get<validity>(*it))
@@ -291,19 +248,5 @@ namespace procgui
                 }
             }
         }
-        
-        // lsys_::target_->clear_rules();
-
-        // for (const auto& rule : buffer_)
-        // {
-        //     char pred = std::get<predecessor>(rule).at(0);
-        //     if(std::get<validity>(rule) &&
-        //        pred != '\0') // An empty rule is not synchronized.
-        //     {
-        //         const auto& arr = std::get<successor>(rule);
-        //         auto succ = array_to_string(arr);
-        //         lsys_::target_->add_rule(pred, succ);
-        //     }
-        // }
     }
 }
