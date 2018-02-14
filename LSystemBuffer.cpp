@@ -93,6 +93,12 @@ namespace procgui
     {
         Expects(cit != buffer_.end());
         
+        if (pred == '\0')
+        {
+            remove_predecessor(cit);
+            return;
+        }
+
         auto old_pred = std::get<predecessor>(*cit);
 
         bool duplicate = find_existing(pred) != buffer_.end();

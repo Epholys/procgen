@@ -308,28 +308,7 @@ namespace procgui
                     
                     // ... check if the new predecessor already exists in the rules.
                     // (does not apply to the null character)
-                    bool is_duplicate = false;
-                    if(predec[0] != '\0')
-                    {
-                        for(auto find_it = buffer.begin(); find_it != buffer.end(); ++find_it)
-                        {
-                            if(find_it != it && // do not check a rule against itself
-                               std::get<predecessor>(*find_it) == predec[0])
-                            {
-                                is_duplicate = true;
-                                break;
-                            }                            
-                        }
-
-                        // If the predecessor is not unique, the rule is not valid.
-                        is_valid = !is_duplicate;
-                    
-                        buffer.delayed_change_predecessor(it, is_valid, predec[0]);
-                    }
-                    else
-                    {
-                        buffer.delayed_remove_predecessor(it);
-                    }
+                    buffer.delayed_change_predecessor(it, predec[0]);
                 }
 
                 ImGui::PopItemWidth(); ImGui::SameLine(); ImGui::Text("->"); ImGui::SameLine();
