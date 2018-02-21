@@ -14,7 +14,7 @@ public:
     using validity = LSystemBuffer::validity;
     using predecessor = LSystemBuffer::predecessor;
     using successor = LSystemBuffer::successor;
-    using entry = LSystemBuffer::entry;
+    using rule = LSystemBuffer::rule;
     using const_iterator = LSystemBuffer::const_iterator;
 
     LSystemBufferTest()
@@ -138,9 +138,9 @@ TEST_F(LSystemBufferTest, add_rule)
     buffer1.add_rule();
 
     // Check if the last rule is an empty one
-    ASSERT_EQ(*std::prev(buffer1.end()), entry({true, '\0', ""}));
+    ASSERT_EQ(*std::prev(buffer1.end()), rule({true, '\0', ""}));
 
-    ASSERT_NE(*std::prev(buffer2.end()), entry({true, '\0', ""}));
+    ASSERT_NE(*std::prev(buffer2.end()), rule({true, '\0', ""}));
 }
 
 TEST_F(LSystemBufferTest, change_predecessor_simple)
@@ -164,12 +164,14 @@ TEST_F(LSystemBufferTest, change_predecessor_duplicate)
     auto it = std::prev(buffer1.end());
     buffer1.change_predecessor(it, first_pred);
     buffer1.change_successor(it, "AAA");
+    buffer1.change_predecessor(it, 'A');
 
+    // TODO
+    ASSERT_TRUE(has_duplicate(buffer1, buffer1.begin()));
     ASSERT_TRUE(duplicates_marked(buffer1));
     
     ASSERT_FALSE(has_duplicate(buffer2, buffer2.begin()));
 }
-
 
 
 TEST_F(LSystemBufferTest, remove_predecessor_simple)
@@ -194,12 +196,13 @@ TEST_F(LSystemBufferTest, remove_predecessor_duplicate)
 
     auto end = std::prev(buffer1.end());
     buffer1.change_predecessor(end, pred);
-    buffer1.remove_predecessor(end);
+    buffer1.change_successor(end, "AAA");
+    buffer1.remove_predecessor(begin);
 
-    ASSERT_NO_THROW(lsys->get_rule(pred));
+    ASSERT_EQ("AAA", lsys->get_rule(pred).second);
 
     ASSERT_FALSE(has_duplicate(buffer1, buffer1.begin()));
-    
+
     ASSERT_FALSE(has_duplicate(buffer2, buffer2.begin()));
 }
 
@@ -221,12 +224,12 @@ TEST_F(LSystemBufferTest, change_successor_duplicate)
 
     buffer1.add_rule();
     
-    auto last_entry = std::prev(buffer1.end());
-    buffer1.change_predecessor(last_entry, first_pred);
-    buffer1.change_successor(last_entry, "AAA");
+    auto last_rule = std::prev(buffer1.end());
+    buffer1.change_predecessor(last_rule, first_pred);
+    buffer1.change_successor(last_rule, "AAA");
 
     ASSERT_NE("AAA", lsys->get_rule(first_pred).second);
-    ASSERT_EQ("AAA", std::get<successor>(*last_entry));
+    ASSERT_EQ("AAA", std::get<successor>(*last_rule));
     ASSERT_NE("AAA", std::get<successor>(*buffer1.begin()));
     ASSERT_NE("AAA", std::get<successor>(*buffer2.begin()));
 }
@@ -247,9 +250,9 @@ TEST_F(LSystemBufferTest, erase_duplicate)
 
     buffer1.add_rule();
 
-    auto last_entry = std::prev(buffer1.end());
-    buffer1.change_predecessor(last_entry, first_pred);
-    buffer1.erase(last_entry);
+    auto last_rule = std::prev(buffer1.end());
+    buffer1.change_predecessor(last_rule, first_pred);
+    buffer1.erase(last_rule);
 
     ASSERT_NO_THROW(lsys->get_rule(first_pred));
 
@@ -277,9 +280,9 @@ TEST_F(LSystemBufferTest, erase_replacement)
     
     buffer1.add_rule();
     
-    auto last_entry = std::prev(buffer1.end());
-    buffer1.change_predecessor(last_entry, pred);
-    buffer1.change_successor(last_entry, next_succ);
+    auto last_rule = std::prev(buffer1.end());
+    buffer1.change_predecessor(last_rule, pred);
+    buffer1.change_successor(last_rule, next_succ);
     buffer1.erase(buffer1.begin());
 
     ASSERT_EQ(next_succ, lsys->get_rule(pred).second);
@@ -295,14 +298,14 @@ TEST_F(LSystemBufferTest, advanced_sync_and_layout)
     
     buffer1.add_rule();
 
-    auto last_entry = std::prev(buffer1.end());
-    buffer1.change_predecessor(last_entry, 'X');
-    buffer1.change_successor(last_entry, "XXX");
+    auto last_rule = std::prev(buffer1.end());
+    buffer1.change_predecessor(last_rule, 'X');
+    buffer1.change_successor(last_rule, "XXX");
 
     buffer1.add_rule();
-    last_entry = std::prev(buffer1.end());
-    buffer1.change_predecessor(last_entry, 'X');
-    buffer1.change_successor(last_entry, "YYY");
+    last_rule = std::prev(buffer1.end());
+    buffer1.change_predecessor(last_rule, 'X');
+    buffer1.change_successor(last_rule, "YYY");
     
     // buffer1:        // buffer2:    
     // F -> G-F-G      // F -> G-F-G
@@ -310,8 +313,8 @@ TEST_F(LSystemBufferTest, advanced_sync_and_layout)
     // X -> XXX        // X -> XXX
     // X -> YYY (dupe) // 
 
-    last_entry = std::prev(buffer2.end());
-    buffer2.erase(last_entry);
+    last_rule = std::prev(buffer2.end());
+    buffer2.erase(last_rule);
 
     // buffer1:        // buffer2:    
     // F -> G-F-G      // F -> G-F-G

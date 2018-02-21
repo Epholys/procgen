@@ -10,15 +10,19 @@ namespace procgui
         lsys_::add_callback([this](){sync();});
         
         // Initialize the buffer with the LSystem's rules.
+        // By construction, there are not duplicate rules in a 'LSystem', so
+        // there is no check: all rules are valid.
         for (const auto& rule : lsys_::target_->get_rules())
         {
             buffer_.push_back({true, rule.first, rule.second});
         }
     }
 
-    bool LSystemBuffer::has_duplicate(const_iterator it)
+    bool LSystemBuffer::has_duplicate(const_iterator cit)
     {
-        return find_duplicate(it, buffer_.cbegin(), buffer_.cend(),
+        // Find the duplicate of 'cit' in 'buffer_' by comparing the
+        // predecessors. 
+        return find_duplicate(cit, buffer_.cbegin(), buffer_.cend(),
                               [](const auto& t1, const auto& t2)
                               { return std::get<predecessor>(t1) == std::get<predecessor>(t2); })
             != buffer_.cend();
@@ -26,6 +30,8 @@ namespace procgui
 
     LSystemBuffer::const_iterator LSystemBuffer::find_existing(predecessor pred)
     {
+        // Find in 'buffer_' an existing rule with the same predecessor as
+        // 'pred'. 
         return ::find_existing(buffer_.cbegin(), buffer_.cend(), pred,
                                [](const auto& tuple, const auto& pred)
                                { return std::get<predecessor>(tuple) == pred; });
@@ -38,12 +44,12 @@ namespace procgui
 
     LSystemBuffer::const_iterator LSystemBuffer::begin() const
     {
-        return buffer_.begin();
+        return buffer_.cbegin();
     }
 
     LSystemBuffer::const_iterator LSystemBuffer::end() const
     {
-        return buffer_.end();
+        return buffer_.cend();
     }
 
     LSystemBuffer::iterator LSystemBuffer::remove_const(const_iterator cit)
@@ -55,6 +61,7 @@ namespace procgui
     
     void LSystemBuffer::add_rule()
     {
+        // Add a scratch buffer: a valid empty rule.
         buffer_.push_back({true, '\0', "" });
     }
 
@@ -63,36 +70,28 @@ namespace procgui
     {
         Expects(cit != buffer_.end());
         
-        auto valid = std::get<validity>(*cit);
+        auto is_valid = std::get<validity>(*cit);
         auto pred = std::get<predecessor>(*cit);
-        auto succ = std::get<successor>(*cit);
 
-
-        if (valid && pred != '\0')
+        // If the rule is valid and not a scratch buffer, removes it from the
+        // 'LSystem'.
+        if (is_valid && pred != '\0')
         {
             lsys_::target_->remove_rule(pred);
         }
+        // Otherwise, simply remove it from the buffer.
         else
         {
             buffer_.erase(cit);
             return;
-        }
-
-        auto existing = find_existing(pred);
-        if (existing != buffer_.end())
-        {
-            if (valid)
-            {
-                std::get<validity>(*remove_const(existing)) = true;
-            }
-            lsys_::target_->add_rule(pred, std::get<successor>(*existing));
         }
     }
 
     void LSystemBuffer::change_predecessor(const_iterator cit, predecessor pred)
     {
         Expects(cit != buffer_.end());
-        
+
+        // If the predecessor is null, removes it.
         if (pred == '\0')
         {
             remove_predecessor(cit);
@@ -100,7 +99,7 @@ namespace procgui
         }
 
         auto old_pred = std::get<predecessor>(*cit);
-
+        bool old_has_duplicate = has_duplicate(cit);
         bool duplicate = find_existing(pred) != buffer_.end();
         
         const successor& succ = std::get<successor>(*cit);
@@ -109,11 +108,12 @@ namespace procgui
         if (!duplicate)// we added a pred
         {
             lsys_::target_->add_rule(pred, succ);
-
-            if (old_pred != '\0')
+            if(// !old_has_duplicate &&  TODO
+               old_pred != '\0')
             {
-                auto copy = buffer_.insert(std::next(cit), {true, old_pred, succ});
-                erase(copy);
+                // auto copy = buffer_.insert(std::next(cit), {true, old_pred, succ});
+                // erase(copy);
+                lsys_::target_->remove_rule(old_pred);
             }
         }
     }
@@ -123,14 +123,13 @@ namespace procgui
         Expects(cit != buffer_.end());
 
         auto old_pred = std::get<predecessor>(*cit);
-
-        bool duplicate = has_duplicate(cit);
+        auto is_valid = std::get<validity>(*cit);
 
         auto it = remove_const(cit);
         const successor& succ = std::get<successor>(*cit);
         *it = { true, '\0', succ };
 
-        if (!duplicate)
+        if (is_valid)
         {
             lsys_::target_->remove_rule(old_pred);
         }
@@ -176,7 +175,7 @@ namespace procgui
 
     void LSystemBuffer::apply()
     {
-        if (instruction_)
+        if(instruction_)
         {
             instruction_();
             instruction_ = nullptr;
@@ -187,6 +186,8 @@ namespace procgui
     {
         const auto& lsys_rules = lsys_::target_->get_rules();
 
+        // TODO: sync quand change pred
+        
         // gérer les ajouts
         // gérer les suppressions
         // gérer les modifications
