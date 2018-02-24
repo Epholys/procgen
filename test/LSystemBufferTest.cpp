@@ -156,22 +156,42 @@ TEST_F(LSystemBufferTest, change_predecessor_simple)
     ASSERT_FALSE(has_predecessor(buffer2, old_pred));
 }
 
-TEST_F(LSystemBufferTest, change_predecessor_duplicate)
+TEST_F(LSystemBufferTest, change_predecessor_is_duplicated)
 {
     auto first_pred = std::get<predecessor>(*buffer1.begin());
 
     buffer1.add_rule();
     auto it = std::prev(buffer1.end());
     buffer1.change_predecessor(it, first_pred);
-    buffer1.change_successor(it, "AAA");
-    buffer1.change_predecessor(it, 'A');
 
-    // TODO
     ASSERT_TRUE(has_duplicate(buffer1, buffer1.begin()));
     ASSERT_TRUE(duplicates_marked(buffer1));
     
     ASSERT_FALSE(has_duplicate(buffer2, buffer2.begin()));
 }
+
+TEST_F(LSystemBufferTest, change_predecessor_old_duplicate)
+{
+    // G -> F+G+F ; F -> G-F-G
+
+    auto first_pred = std::get<predecessor>(*buffer1.begin());
+    buffer1.add_rule();
+    auto it = std::prev(buffer1.end());
+    buffer1.change_predecessor(it, first_pred);
+    buffer1.change_successor(it, "AAA");
+    // change_predecessor_is_duplicated
+    // G -> F+G+F ; F -> G-F-G ; G -> AAA
+
+    buffer1.change_predecessor(it, 'A');
+    // change_predecessor_simple + sync
+    // G -> F+G+F ; F -> G-F-G ; A -> AAA
+    
+    ASSERT_NO_THROW(lsys->get_rule(first_pred));
+    ASSERT_NO_THROW(lsys->get_rule('A'));
+
+    ASSERT_TRUE(has_rule(buffer2, 'A', "AAA"));
+}
+
 
 
 TEST_F(LSystemBufferTest, remove_predecessor_simple)

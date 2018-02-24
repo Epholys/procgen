@@ -64,7 +64,7 @@ namespace procgui
         using validity    = bool; // If the rule is a duplicate, it is not valid.
         using predecessor = char;
         using successor   = std::string;
-        using rule        = std::tuple<validity, predecessor, successor>;
+        using rule        = std::tuple<validity, predecessor, successor>; // TODO struct
         using buffer      = std::list<rule>;
 
         // The iterators come directly from the buffer.

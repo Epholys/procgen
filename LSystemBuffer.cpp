@@ -108,13 +108,12 @@ namespace procgui
         if (!duplicate)// we added a pred
         {
             lsys_::target_->add_rule(pred, succ);
-            if(// !old_has_duplicate &&  TODO
-               old_pred != '\0')
-            {
-                // auto copy = buffer_.insert(std::next(cit), {true, old_pred, succ});
-                // erase(copy);
-                lsys_::target_->remove_rule(old_pred);
-            }
+        }
+        if(!old_has_duplicate && old_pred != '\0')
+        {
+            // auto copy = buffer_.insert(std::next(cit), {true, old_pred, succ});
+            // erase(copy);
+            lsys_::target_->remove_rule(old_pred);
         }
     }
     
@@ -186,8 +185,6 @@ namespace procgui
     {
         const auto& lsys_rules = lsys_::target_->get_rules();
 
-        // TODO: sync quand change pred
-        
         // gérer les ajouts
         // gérer les suppressions
         // gérer les modifications
