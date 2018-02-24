@@ -36,8 +36,10 @@ public:
 
     // Getters and setters
     std::string get_axiom() const;
-    const production_rules&  get_rules() const;
+    bool has_predecessor(char predecessor) const;
+    bool has_rule(char predecessor, const std::string& successor) const;
     rule get_rule(char predecessor) const;
+    const production_rules&  get_rules() const;
     const std::unordered_map<int, std::string>& get_cache() const;
 
     void set_axiom(const std::string& axiom);

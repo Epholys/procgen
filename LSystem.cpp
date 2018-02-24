@@ -21,6 +21,16 @@ std::string LSystem::get_axiom() const
     }
 }
 
+bool LSystem::has_predecessor(char predecessor) const
+{
+    return rules_.count(predecessor) > 0;
+}
+
+bool LSystem::has_rule(char predecessor, const std::string& successor) const
+{
+    return has_predecessor(predecessor) && rules_.at(predecessor) == successor;
+}
+
 const LSystem::production_rules& LSystem::get_rules() const
 {
     return rules_;
@@ -31,7 +41,7 @@ const LSystem::production_rules& LSystem::get_rules() const
 //   exists.
 LSystem::rule LSystem::get_rule(char predecessor) const
 {
-    Expects(rules_.count(predecessor) > 0);
+    Expects(has_predecessor(predecessor));
     return { predecessor, rules_.at(predecessor) };
 }
     
