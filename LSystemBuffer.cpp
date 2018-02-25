@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "LSystemBuffer.h"
 
 namespace procgui
@@ -18,6 +19,7 @@ namespace procgui
         }
     }
 
+    // TODO remove ?
     bool LSystemBuffer::has_duplicate(const_iterator cit)
     {
         // Find the duplicate of 'cit' in 'buffer_' by comparing the
@@ -32,9 +34,9 @@ namespace procgui
     {
         // Find in 'buffer_' an existing rule with the same predecessor as
         // 'pred'. 
-        return ::find_existing(buffer_.cbegin(), buffer_.cend(), pred,
-                               [](const auto& tuple, const auto& pred)
-                               { return std::get<predecessor>(tuple) == pred; });
+        return std::find_if(buffer_.cbegin(), buffer_.cend(),
+                            [pred](const auto& tuple)
+                            { return std::get<predecessor>(tuple) == pred; });
     }
 
     LSystem& LSystemBuffer::get_lsys() const
