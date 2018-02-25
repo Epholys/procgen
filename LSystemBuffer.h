@@ -136,9 +136,13 @@ namespace procgui
         void apply();
         
     private:
+        void remove_rule(predecessor pred);
+        
         // Synchronize the rule buffer with the LSystem.
         void sync();
        
+        // const_iterator find_duplicate(const_iterator cit);
+
         // Check if the rule at 'cit' has a duplicate in the buffer.
         bool has_duplicate(const_iterator cit);
 

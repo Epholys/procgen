@@ -99,7 +99,8 @@ public:
     const char new_pred1 = 'X';
     const char new_pred2 = 'Y';
     const std::string new_succ1 = "XXX";
-    const std::string new_succ2 = "ZZZ";
+    const std::string new_succ2 = "YYY";
+    const std::string new_succ3 = "ZZZ";
 };
 
 TEST_F(LSystemBufferTest, helper_has_predecessor)
@@ -356,7 +357,7 @@ TEST_F(LSystemBufferTest, erase_replacement)
     ASSERT_TRUE(has_rule(buffer2, first_pred, new_succ1));
 }
 
-TEST_F(LSystemBufferTest, advanced_sync_and_layout)
+TEST_F(LSystemBufferTest, advanced_sync_and_layout1)
 {
     // Example:
     // buffer1:    // buffer2:    
@@ -392,4 +393,69 @@ TEST_F(LSystemBufferTest, advanced_sync_and_layout)
     ASSERT_FALSE(has_duplicate(buffer1, std::prev(buffer1.end())));
     ASSERT_TRUE(has_predecessor(buffer2, new_pred1));
     ASSERT_FALSE(has_duplicate(buffer2, std::prev(buffer2.end())));
+}
+
+// Synchronize in priority the window in which we remove a rule.
+TEST_F(LSystemBufferTest, advanced_sync_and_layout2)
+{
+    // Example:
+    // buffer1:    // buffer2:    
+    // A -> AAA    // A -> AAA
+    // B -> BBB    // B -> BBB
+    
+    // buffer1.add_rule();
+    // auto end = std::prev(buffer1.end());
+    // buffer1.change_predecessor(end, new_pred1);
+    // buffer1.change_successor(end, new_succ1);
+
+    // buffer1.add_rule();
+    // end = std::prev(buffer1.end());
+    // buffer1.change_predecessor(end, new_pred1);
+    // buffer1.change_successor(end, new_succ2);
+
+    auto first_pred = std::get<predecessor>(*buffer1.begin());
+    auto first_succ = std::get<successor>(*buffer1.begin());
+    buffer2.add_rule();
+    auto end = std::prev(buffer2.end());
+    buffer2.change_predecessor(end, first_pred);
+    buffer2.change_successor(end, new_succ1);
+    
+
+    // buffer1:        // buffer2:    
+    // A -> AAA        // A -> AAA
+    // B -> BBB        // B -> BBB
+                       // A -> XXX (dupe)
+    
+    // // buffer1:        // buffer2:    
+    // // A -> AAA        // A -> AAA
+    // // B -> BBB        // B -> BBB
+    // // X -> XXX        // X -> XXX
+    // // X -> YYY (dupe) // X -> ZZZ (dupe)
+
+    
+    buffer2.change_predecessor(buffer2.begin(), new_pred1);
+
+    // buffer1:        // buffer2:    
+    // A -> XXX != AAA // 
+    // B -> BBB        // B -> BBB
+                       // A -> XXX
+    
+    // // buffer1:        // buffer2:    
+    // // A -> AAA        // A -> AAA
+    // // B -> BBB        // B -> BBB
+    // // X -> ZZZ != YYY // X -> ZZZ
+    // // X -> YYY
+    
+    ASSERT_TRUE(lsys->has_rule(first_pred, new_succ1));
+    ASSERT_TRUE(lsys->has_rule(new_pred1, first_succ));
+    ASSERT_TRUE(has_rule(buffer1, first_pred, new_succ1));
+    ASSERT_TRUE(has_rule(buffer1, new_pred1, first_succ));
+    ASSERT_TRUE(has_rule(buffer2, first_pred, new_succ1));
+    ASSERT_TRUE(has_rule(buffer2, new_pred1, first_succ));
+    // ASSERT_FALSE(has_duplicate(buffer2, std::prev(buffer2.end())));
+    // ASSERT_TRUE(lsys->has_rule(new_pred1, new_succ3));
+    // ASSERT_TRUE(has_predecessor(buffer1, new_pred1));
+    // ASSERT_TRUE(has_duplicate(buffer1, std::prev(buffer1.end())));
+    // ASSERT_TRUE(has_predecessor(buffer2, new_pred1));
+    // ASSERT_FALSE(has_duplicate(buffer2, std::prev(buffer2.end())));
 }

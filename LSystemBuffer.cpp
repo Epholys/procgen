@@ -79,7 +79,7 @@ namespace procgui
         // 'LSystem'.
         if (is_valid && pred != '\0')
         {
-            lsys_::target_->remove_rule(pred);
+            remove_rule(pred);
         }
         // Otherwise, simply remove it from the buffer.
         else
@@ -100,22 +100,40 @@ namespace procgui
             return;
         }
 
+
+        bool valid = std::get<validity>(*cit);
         auto old_pred = std::get<predecessor>(*cit);
-        bool old_has_duplicate = has_duplicate(cit);
+        // bool old_has_duplicate = has_duplicate(cit);
+        auto old_duplicate = std::find_if(buffer_.begin(), buffer_.end(),
+                                          [pred](const auto& tuple)
+                                          { return std::get<predecessor>(tuple) == pred &&
+                                            !std::get<validity>(tuple); });
+        bool old_has_duplicate= old_duplicate != buffer_.end();
         bool duplicate = find_existing(pred) != buffer_.end();
         
         const successor& succ = std::get<successor>(*cit);
         *remove_const(cit) = { !duplicate, pred, succ };
 
-        if (!duplicate)// we added a pred
+        
+        
+        if (!duplicate && old_has_duplicate && old_pred != '\0')
+        {
+            std::get<validity>(*old_duplicate) = true;
+
+            lsys_::target_->add_rule(pred, succ);
+            lsys_::target_->add_rule(old_pred, std::get<successor>(*old_duplicate));
+        }
+        else if(!duplicate)
         {
             lsys_::target_->add_rule(pred, succ);
+            if(valid && old_pred != '\0')
+                lsys_::target_->remove_rule(old_pred);
         }
-        if(!old_has_duplicate && old_pred != '\0')
+        else if (old_has_duplicate && old_pred != '\0')
         {
-            // auto copy = buffer_.insert(std::next(cit), {true, old_pred, succ});
-            // erase(copy);
-            lsys_::target_->remove_rule(old_pred);
+            std::get<validity>(*old_duplicate) = true;
+
+            lsys_::target_->add_rule(old_pred, std::get<successor>(*old_duplicate));
         }
     }
     
@@ -132,7 +150,7 @@ namespace procgui
 
         if (is_valid)
         {
-            lsys_::target_->remove_rule(old_pred);
+            remove_rule(old_pred);
         }
     }
 
@@ -150,6 +168,26 @@ namespace procgui
         if (valid)
         {
             lsys_::target_->add_rule(pred, succ);
+        }
+    }
+
+    void LSystemBuffer::remove_rule(predecessor pred)
+    {
+        // Find a duplicate
+        auto duplicate = std::find_if(buffer_.begin(), buffer_.end(),
+                                      [pred](const auto& tuple)
+                                      { return std::get<predecessor>(tuple) == pred &&
+                                              !std::get<validity>(tuple); });
+        if (duplicate != buffer_.end())
+        {
+            // If found, make it the next rule
+            std::get<validity>(*duplicate) = true;
+            lsys_::target_->add_rule(pred, std::get<successor>(*duplicate));
+        }
+        else
+        {
+            // If not found, simply remove the rule
+            lsys_::target_->remove_rule(pred);
         }
     }
     
