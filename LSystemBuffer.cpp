@@ -241,7 +241,8 @@ namespace procgui
                 for (auto jt = buffer_.begin(); jt != buffer_.end(); ++jt)
                 {
                     if (it != jt &&
-                        std::get<predecessor>(*it) == std::get<predecessor>(*jt))
+                        std::get<predecessor>(*it) == std::get<predecessor>(*jt) &&
+                        std::get<validity>(*jt))
                     {
                         duplicate = true;
                         break;
