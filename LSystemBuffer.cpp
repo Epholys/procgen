@@ -173,6 +173,15 @@ namespace procgui
 
     void LSystemBuffer::remove_rule(predecessor pred)
     {
+        auto original = std::find_if(buffer_.begin(), buffer_.end(),
+                                      [pred](const auto& tuple)
+                                      { return std::get<predecessor>(tuple) == pred &&
+                                              std::get<validity>(tuple); });
+        if (original != buffer_.end())
+        {
+            buffer_.erase(original);
+        }
+
         // Find a duplicate
         auto duplicate = std::find_if(buffer_.begin(), buffer_.end(),
                                       [pred](const auto& tuple)

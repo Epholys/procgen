@@ -301,16 +301,20 @@ TEST_F(LSystemBufferTest, change_successor_duplicate)
 
 TEST_F(LSystemBufferTest, erase_simple)
 {
+    auto size = buffer_size(buffer1);
     auto pred = std::get<predecessor>(*buffer1.begin());
     buffer1.erase(buffer1.begin());
 
     ASSERT_FALSE(lsys->has_predecessor(pred));
     ASSERT_FALSE(has_predecessor(buffer1, pred));
+    ASSERT_EQ(size-1, buffer_size(buffer1));
     ASSERT_FALSE(has_predecessor(buffer2, pred));
+    ASSERT_EQ(size-1, buffer_size(buffer2));
 }
 
 TEST_F(LSystemBufferTest, erase_duplicate)
 {
+    auto size = buffer_size(buffer1);
     auto begin = buffer1.begin();
     auto first_pred = std::get<predecessor>(*begin);
     auto first_succ = std::get<successor>(*begin);
@@ -325,9 +329,11 @@ TEST_F(LSystemBufferTest, erase_duplicate)
 
     ASSERT_TRUE(has_predecessor(buffer1, first_pred));
     ASSERT_FALSE(has_duplicate(buffer1, buffer1.begin()));
+    ASSERT_EQ(size, buffer_size(buffer1));
 
     ASSERT_TRUE(has_predecessor(buffer2, first_pred));
     ASSERT_FALSE(has_duplicate(buffer2, buffer2.begin()));
+    ASSERT_EQ(size, buffer_size(buffer1));
 }
 
 TEST_F(LSystemBufferTest, erase_empty)
@@ -341,6 +347,7 @@ TEST_F(LSystemBufferTest, erase_empty)
 
 TEST_F(LSystemBufferTest, erase_replacement)
 {
+    auto size = buffer_size(buffer1);
     auto begin  = buffer1.begin();
     auto first_pred = std::get<predecessor>(*begin);
     auto first_succ = std::get<successor>(*begin);
@@ -353,8 +360,12 @@ TEST_F(LSystemBufferTest, erase_replacement)
     buffer1.erase(begin);
 
     ASSERT_TRUE(lsys->has_rule(first_pred, new_succ1));
+    
     ASSERT_TRUE(has_rule(buffer1, first_pred, new_succ1));
+    ASSERT_EQ(size, buffer_size(buffer1));
+
     ASSERT_TRUE(has_rule(buffer2, first_pred, new_succ1));
+    ASSERT_EQ(size, buffer_size(buffer2));
 }
 
 TEST_F(LSystemBufferTest, advanced_sync_and_layout1)
