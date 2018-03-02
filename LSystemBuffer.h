@@ -59,14 +59,13 @@ namespace procgui
     class LSystemBuffer : public Observer<LSystem>
     {
     public:
-        using lsys_ = Observer<LSystem>;
+        using succ = std::string;
 
-        using successor = std::string;
         struct Rule
         {
             bool validity;
             char predecessor;
-            std::string successor;
+            succ successor;
             inline bool operator== (const Rule& other) const
                 { return validity == other.validity &&
                          predecessor == other.predecessor &&
@@ -130,7 +129,7 @@ namespace procgui
         //
         // Exception:
         //  - Precondition: 'cit' must be valid and derenferenceable.
-        void change_successor(const_iterator cit, const successor& succ);
+        void change_successor(const_iterator cit, const succ& succ);
 
         // These methods buffer to 'instruction_' the associated method.
         // It is used to prevent iterator invalidation.
@@ -138,7 +137,7 @@ namespace procgui
         void delayed_erase(const_iterator cit);
         void delayed_change_predecessor(const_iterator cit, char pred);
         void delayed_remove_predecessor(const_iterator cit);
-        void delayed_change_successor(const_iterator cit, const successor& succ);
+        void delayed_change_successor(const_iterator cit, const succ& succ);
 
         // Apply the buffered instruction.
         // If 'instruction_' is nullptr, does nothing.
@@ -163,7 +162,9 @@ namespace procgui
         // to modify 'buffer_'.
         iterator remove_const(const_iterator cit);
 
-        // The rule buffer.
+        LSystem& lsys_;
+
+// The rule buffer.
         buffer buffer_;
 
         // The buffered instruction from the 'delayed_*' methods.

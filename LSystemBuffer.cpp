@@ -4,16 +4,17 @@
 namespace procgui
 {
     LSystemBuffer::LSystemBuffer(const std::shared_ptr<LSystem>& lsys)
-        : lsys_ {lsys}
+        : Observer<LSystem> {lsys}
+        , lsys_ {*Observer<LSystem>::target_}
         , buffer_ {}
         , instruction_ {nullptr}
     {
-        lsys_::add_callback([this](){sync();});
+        Observer<LSystem>::add_callback([this](){sync();});
         
         // Initialize the buffer with the LSystem's rules.
         // By construction, there are not duplicate rules in a 'LSystem', so
         // there is no check: all rules are valid.
-        for (const auto& rule : lsys_::target_->get_rules())
+        for (const auto& rule : lsys_.get_rules())
         {
             buffer_.push_back({true, rule.first, rule.second});
         }
@@ -41,7 +42,7 @@ namespace procgui
 
     LSystem& LSystemBuffer::get_lsys() const
     {
-        return *lsys_::target_;
+        return lsys_;
     }
 
     LSystemBuffer::const_iterator LSystemBuffer::begin() const
@@ -111,7 +112,7 @@ namespace procgui
         bool old_has_duplicate= old_duplicate != buffer_.end();
         bool duplicate = find_existing(pred) != buffer_.end();
         
-        const successor& succ = cit->successor;
+        const succ& succ = cit->successor;
         *remove_const(cit) = { !duplicate, pred, succ };
 
         
@@ -120,20 +121,20 @@ namespace procgui
         {
             old_duplicate->validity = true;
 
-            lsys_::target_->add_rule(pred, succ);
-            lsys_::target_->add_rule(old_pred, old_duplicate->successor);
+            lsys_.add_rule(pred, succ);
+            lsys_.add_rule(old_pred, old_duplicate->successor);
         }
         else if(!duplicate)
         {
-            lsys_::target_->add_rule(pred, succ);
+            lsys_.add_rule(pred, succ);
             if(valid && old_pred != '\0')
-                lsys_::target_->remove_rule(old_pred);
+                lsys_.remove_rule(old_pred);
         }
         else if (old_has_duplicate && old_pred != '\0')
         {
             old_duplicate->validity = true;
 
-            lsys_::target_->add_rule(old_pred, old_duplicate->successor);
+            lsys_.add_rule(old_pred, old_duplicate->successor);
         }
     }
     
@@ -145,7 +146,7 @@ namespace procgui
         auto is_valid = cit->validity;
 
         auto it = remove_const(cit);
-        const successor& succ = cit->successor;
+        const succ& succ = cit->successor;
         *it = { true, '\0', succ };
 
         if (is_valid)
@@ -155,7 +156,7 @@ namespace procgui
     }
 
 
-    void LSystemBuffer::change_successor(const_iterator cit, const successor& succ)
+    void LSystemBuffer::change_successor(const_iterator cit, const succ& succ)
     {
         Expects(cit != buffer_.end());
 
@@ -167,7 +168,7 @@ namespace procgui
 
         if (valid)
         {
-            lsys_::target_->add_rule(pred, succ);
+            lsys_.add_rule(pred, succ);
         }
     }
 
@@ -191,12 +192,12 @@ namespace procgui
         {
             // If found, make it the next rule
             duplicate->validity = true;
-            lsys_::target_->add_rule(pred, duplicate->successor);
+            lsys_.add_rule(pred, duplicate->successor);
         }
         else
         {
             // If not found, simply remove the rule
-            lsys_::target_->remove_rule(pred);
+            lsys_.remove_rule(pred);
         }
     }
     
@@ -216,7 +217,7 @@ namespace procgui
     {
         instruction_ = [=](){ remove_predecessor(cit); };
     }
-    void LSystemBuffer::delayed_change_successor(const_iterator cit, const successor& succ)
+    void LSystemBuffer::delayed_change_successor(const_iterator cit, const succ& succ)
     {
         instruction_ = [=](){ change_successor(cit, succ); };
     }
@@ -232,7 +233,7 @@ namespace procgui
 
     void LSystemBuffer::sync()
     {
-        const auto& lsys_rules = lsys_::target_->get_rules();
+        const auto& lsys_rules = lsys_.get_rules();
 
         // gérer les ajouts
         // gérer les suppressions
@@ -298,7 +299,7 @@ namespace procgui
                 if (!duplicate)
                 {
                     it->validity = true;
-                    lsys_::target_->add_rule(it->predecessor, it->successor);
+                    lsys_.add_rule(it->predecessor, it->successor);
                 }
             }
         }
