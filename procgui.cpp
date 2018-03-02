@@ -277,11 +277,6 @@ namespace procgui
 
             ImGui::Indent(); 
 
-            using validity    = LSystemBuffer::validity; // if the rule is unique
-            using predecessor = LSystemBuffer::predecessor;
-            using successor   = LSystemBuffer::successor;
-
-
             // Iterator pointing to the rule to delete, if the [-] button is
             // clicked on.
             auto to_delete = buffer.end();
@@ -293,14 +288,11 @@ namespace procgui
             for (auto it = buffer.begin(); it != buffer.end(); ++it)
             { 
                 auto rule = *it;
-                auto is_valid = std::get<validity>(rule);
-                auto pred = std::get<predecessor>(rule);
-                auto succ = std::get<successor>(rule);
 
                 ImGui::PushID(&(*it)); // Create a scope.
                 ImGui::PushItemWidth(20);
 
-                char predec[2] { pred, '\0' };
+                char predec[2] { rule.predecessor, '\0' };
                 // Display the predecessor as an InputText
                 if (ImGui::InputText("##pred", predec, 2))
                 {
@@ -317,7 +309,7 @@ namespace procgui
 
                 // Interact with the successor. Except for the input size, does
                 // not have any constraints.
-                auto array = string_to_array<lsys_successor_size>(succ);
+                auto array = string_to_array<lsys_successor_size>(rule.successor);
                 if(ImGui::InputText("##succ", array.data(), lsys_successor_size) &&
                    predec[0] != '\0')
                 {
@@ -338,7 +330,7 @@ namespace procgui
                 }
 
                 // If the current rule is not valid, add a warning.
-                if(!is_valid)
+                if(!rule.validity)
                 {
                     ImGui::SameLine();
                     ImGui::TextColored(ImVec4(1.f,0.f,0.f,1.f), "Duplicated predecessor: %s", predec);

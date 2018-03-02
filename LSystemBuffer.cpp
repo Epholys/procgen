@@ -25,18 +25,18 @@ namespace procgui
         // Find the duplicate of 'cit' in 'buffer_' by comparing the
         // predecessors. 
         return find_duplicate(cit, buffer_.cbegin(), buffer_.cend(),
-                              [](const auto& t1, const auto& t2)
-                              { return std::get<predecessor>(t1) == std::get<predecessor>(t2); })
+                              [](const auto& r1, const auto& r2)
+                              { return r1.predecessor == r2.predecessor; })
             != buffer_.cend();
     }
 
-    LSystemBuffer::const_iterator LSystemBuffer::find_existing(predecessor pred)
+    LSystemBuffer::const_iterator LSystemBuffer::find_existing(char pred)
     {
         // Find in 'buffer_' an existing rule with the same predecessor as
         // 'pred'. 
         return std::find_if(buffer_.cbegin(), buffer_.cend(),
-                            [pred](const auto& tuple)
-                            { return std::get<predecessor>(tuple) == pred; });
+                            [pred](const auto& rule)
+                            { return rule.predecessor == pred; });
     }
 
     LSystem& LSystemBuffer::get_lsys() const
@@ -72,8 +72,8 @@ namespace procgui
     {
         Expects(cit != buffer_.end());
         
-        auto is_valid = std::get<validity>(*cit);
-        auto pred = std::get<predecessor>(*cit);
+        auto is_valid = cit->validity;
+        auto pred = cit->predecessor;
 
         // If the rule is valid and not a scratch buffer, removes it from the
         // 'LSystem'.
@@ -89,7 +89,7 @@ namespace procgui
         }
     }
 
-    void LSystemBuffer::change_predecessor(const_iterator cit, predecessor pred)
+    void LSystemBuffer::change_predecessor(const_iterator cit, char pred)
     {
         Expects(cit != buffer_.end());
 
@@ -101,27 +101,27 @@ namespace procgui
         }
 
 
-        bool valid = std::get<validity>(*cit);
-        auto old_pred = std::get<predecessor>(*cit);
+        bool valid = cit->validity;
+        auto old_pred = cit->predecessor;
         // bool old_has_duplicate = has_duplicate(cit);
         auto old_duplicate = std::find_if(buffer_.begin(), buffer_.end(),
-                                          [pred](const auto& tuple)
-                                          { return std::get<predecessor>(tuple) == pred &&
-                                            !std::get<validity>(tuple); });
+                                          [pred](const auto& rule)
+                                          { return rule.predecessor == pred &&
+                                            !rule.validity; });
         bool old_has_duplicate= old_duplicate != buffer_.end();
         bool duplicate = find_existing(pred) != buffer_.end();
         
-        const successor& succ = std::get<successor>(*cit);
+        const successor& succ = cit->successor;
         *remove_const(cit) = { !duplicate, pred, succ };
 
         
         
         if (!duplicate && old_has_duplicate && old_pred != '\0')
         {
-            std::get<validity>(*old_duplicate) = true;
+            old_duplicate->validity = true;
 
             lsys_::target_->add_rule(pred, succ);
-            lsys_::target_->add_rule(old_pred, std::get<successor>(*old_duplicate));
+            lsys_::target_->add_rule(old_pred, old_duplicate->successor);
         }
         else if(!duplicate)
         {
@@ -131,9 +131,9 @@ namespace procgui
         }
         else if (old_has_duplicate && old_pred != '\0')
         {
-            std::get<validity>(*old_duplicate) = true;
+            old_duplicate->validity = true;
 
-            lsys_::target_->add_rule(old_pred, std::get<successor>(*old_duplicate));
+            lsys_::target_->add_rule(old_pred, old_duplicate->successor);
         }
     }
     
@@ -141,11 +141,11 @@ namespace procgui
     {
         Expects(cit != buffer_.end());
 
-        auto old_pred = std::get<predecessor>(*cit);
-        auto is_valid = std::get<validity>(*cit);
+        auto old_pred = cit->predecessor;
+        auto is_valid = cit->validity;
 
         auto it = remove_const(cit);
-        const successor& succ = std::get<successor>(*cit);
+        const successor& succ = cit->successor;
         *it = { true, '\0', succ };
 
         if (is_valid)
@@ -155,14 +155,14 @@ namespace procgui
     }
 
 
-    void LSystemBuffer::change_successor(const_iterator cit, successor succ)
+    void LSystemBuffer::change_successor(const_iterator cit, const successor& succ)
     {
         Expects(cit != buffer_.end());
 
         auto it = remove_const(cit);
 
-        auto valid = std::get<validity>(*cit);
-        auto pred = std::get<predecessor>(*cit);
+        auto valid = cit->validity;
+        auto pred = cit->predecessor;
         *it = { valid, pred, succ };
 
         if (valid)
@@ -171,12 +171,12 @@ namespace procgui
         }
     }
 
-    void LSystemBuffer::remove_rule(predecessor pred)
+    void LSystemBuffer::remove_rule(char pred)
     {
         auto original = std::find_if(buffer_.begin(), buffer_.end(),
-                                      [pred](const auto& tuple)
-                                      { return std::get<predecessor>(tuple) == pred &&
-                                              std::get<validity>(tuple); });
+                                      [pred](const auto& rule)
+                                      { return rule.predecessor == pred &&
+                                              rule.validity; });
         if (original != buffer_.end())
         {
             buffer_.erase(original);
@@ -184,14 +184,14 @@ namespace procgui
 
         // Find a duplicate
         auto duplicate = std::find_if(buffer_.begin(), buffer_.end(),
-                                      [pred](const auto& tuple)
-                                      { return std::get<predecessor>(tuple) == pred &&
-                                              !std::get<validity>(tuple); });
+                                      [pred](const auto& rule)
+                                      { return rule.predecessor == pred &&
+                                              !rule.validity; });
         if (duplicate != buffer_.end())
         {
             // If found, make it the next rule
-            std::get<validity>(*duplicate) = true;
-            lsys_::target_->add_rule(pred, std::get<successor>(*duplicate));
+            duplicate->validity = true;
+            lsys_::target_->add_rule(pred, duplicate->successor);
         }
         else
         {
@@ -208,7 +208,7 @@ namespace procgui
     {
         instruction_ = [=](){ erase(cit); };
     }
-    void LSystemBuffer::delayed_change_predecessor(const_iterator cit, predecessor pred)
+    void LSystemBuffer::delayed_change_predecessor(const_iterator cit, char pred)
     {
         instruction_ = [=](){ change_predecessor(cit, pred); };
     }
@@ -216,7 +216,7 @@ namespace procgui
     {
         instruction_ = [=](){ remove_predecessor(cit); };
     }
-    void LSystemBuffer::delayed_change_successor(const_iterator cit, successor succ)
+    void LSystemBuffer::delayed_change_successor(const_iterator cit, const successor& succ)
     {
         instruction_ = [=](){ change_successor(cit, succ); };
     }
@@ -244,12 +244,12 @@ namespace procgui
         {
             char pred = rule.first;
             auto it = std::find_if(buffer_.begin(), buffer_.end(),
-                                   [pred](const auto& tuple)
-                                   { return std::get<predecessor>(tuple) == pred &&
-                                     std::get<validity>(tuple); });
+                                   [pred](const auto& rule)
+                                   { return rule.predecessor == pred &&
+                                     rule.validity; });
             if (it != buffer_.end())
             {
-                std::get<successor>(*it) = rule.second;
+                it->successor = rule.second;
             }
             else
             {
@@ -259,8 +259,8 @@ namespace procgui
 
         for (auto it = buffer_.begin(); it != buffer_.end(); )
         {
-            auto valid = std::get<validity>(*it);
-            auto pred = std::get<predecessor>(*it);
+            auto valid = it->validity;
+            auto pred = it->predecessor;
 
             if(valid && pred != '\0')
             {
@@ -282,14 +282,14 @@ namespace procgui
 
         for (auto it = buffer_.begin(); it != buffer_.end(); ++it)
         {
-            if (!std::get<validity>(*it))
+            if (!it->validity)
             {
                 bool duplicate = false;
                 for (auto jt = buffer_.begin(); jt != buffer_.end(); ++jt)
                 {
                     if (it != jt &&
-                        std::get<predecessor>(*it) == std::get<predecessor>(*jt) &&
-                        std::get<validity>(*jt))
+                        it->predecessor == jt->predecessor &&
+                        jt->validity)
                     {
                         duplicate = true;
                         break;
@@ -297,8 +297,8 @@ namespace procgui
                 }
                 if (!duplicate)
                 {
-                    std::get<validity>(*it) = true;
-                    lsys_::target_->add_rule(std::get<predecessor>(*it), std::get<successor>(*it));
+                    it->validity = true;
+                    lsys_::target_->add_rule(it->predecessor, it->successor);
                 }
             }
         }

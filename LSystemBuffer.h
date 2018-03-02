@@ -61,11 +61,20 @@ namespace procgui
     public:
         using lsys_ = Observer<LSystem>;
 
-        using validity    = bool; // If the rule is a duplicate, it is not valid.
-        using predecessor = char;
-        using successor   = std::string;
-        using rule        = std::tuple<validity, predecessor, successor>; // TODO struct
-        using buffer      = std::list<rule>;
+        using successor = std::string;
+        struct Rule
+        {
+            bool validity;
+            char predecessor;
+            std::string successor;
+            inline bool operator== (const Rule& other) const
+                { return validity == other.validity &&
+                         predecessor == other.predecessor &&
+                         successor == other.successor; }
+            inline bool operator!= (const Rule& other) const
+                { return !(*this == other); }
+        };
+        using buffer      = std::list<Rule>;
 
         // The iterators come directly from the buffer.
         // Only 'const_iterator' is accessible from the outside.
@@ -107,7 +116,7 @@ namespace procgui
         //  - Precondition: 'cit' must be valid and derenferenceable.
         //
         // 'cit' is invalidated if 'pred' is not a duplicate.
-        void change_predecessor(const_iterator cit, predecessor pred);
+        void change_predecessor(const_iterator cit, char pred);
 
         // Change the rule at 'cit' into a scratch buffer.
         // If the rule is valid, remove it from the 'LSystem'
@@ -121,22 +130,22 @@ namespace procgui
         //
         // Exception:
         //  - Precondition: 'cit' must be valid and derenferenceable.
-        void change_successor(const_iterator cit, successor succ);
+        void change_successor(const_iterator cit, const successor& succ);
 
         // These methods buffer to 'instruction_' the associated method.
         // It is used to prevent iterator invalidation.
         void delayed_add_rule();
         void delayed_erase(const_iterator cit);
-        void delayed_change_predecessor(const_iterator cit, predecessor pred);
+        void delayed_change_predecessor(const_iterator cit, char pred);
         void delayed_remove_predecessor(const_iterator cit);
-        void delayed_change_successor(const_iterator cit, successor succ);
+        void delayed_change_successor(const_iterator cit, const successor& succ);
 
         // Apply the buffered instruction.
         // If 'instruction_' is nullptr, does nothing.
         void apply();
         
     private:
-        void remove_rule(predecessor pred);
+        void remove_rule(char pred);
         
         // Synchronize the rule buffer with the LSystem.
         void sync();
@@ -148,7 +157,7 @@ namespace procgui
 
         // Find an existing rule with the predicate 'pred'.
         // If such a rule does not exists, returns 'buffer_.cend()';
-        const_iterator find_existing(predecessor pred);
+        const_iterator find_existing(char pred);
 
         // Remove the constness from 'cit'. Can only be used inside this class
         // to modify 'buffer_'.

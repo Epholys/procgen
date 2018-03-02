@@ -11,11 +11,9 @@ using namespace procgui;
 class LSystemBufferTest :  public ::testing::Test
 {
 public:
-    using validity = LSystemBuffer::validity;
-    using predecessor = LSystemBuffer::predecessor;
-    using successor = LSystemBuffer::successor;
-    using rule = LSystemBuffer::rule;
     using const_iterator = LSystemBuffer::const_iterator;
+    using successor = LSystemBuffer::successor;
+    using rule = LSystemBuffer::Rule;
 
     LSystemBufferTest()
         : buffer1 {lsys}
@@ -23,11 +21,11 @@ public:
         {
         }
 
-    bool has_predecessor (const LSystemBuffer& buff, predecessor pred) const
+    bool has_predecessor (const LSystemBuffer& buff, char pred) const
         {
-            for (auto tuple : buff)
+            for (auto rule : buff)
             {
-                if (std::get<predecessor>(tuple) == pred)
+                if (rule.predecessor == pred)
                 {
                     return true;
                 }
@@ -35,12 +33,12 @@ public:
             return false;
         }
 
-    bool has_rule (const LSystemBuffer& buff, predecessor pred, successor succ) const
+    bool has_rule (const LSystemBuffer& buff, char pred, const std::string& succ) const
         {
-            for (auto tuple : buff)
+            for (auto rule : buff)
             {
-                if (std::get<predecessor>(tuple) == pred &&
-                    std::get<successor>(tuple) == succ)
+                if (rule.predecessor == pred &&
+                    rule.successor == succ)
                 {
                     return true;
                 }
@@ -53,7 +51,7 @@ public:
             for (auto jt = buff.begin(); jt != buff.end(); ++jt)
             {
                 if (it != jt &&
-                    std::get<predecessor>(*it) == std::get<predecessor>(*jt))
+                    it->predecessor == jt->predecessor)
                 {
                     return true;
                 }
@@ -68,7 +66,7 @@ public:
                 auto jt = it;
                 while ((jt = find_duplicate(it, jt, buff.end())) != buff.end())
                 {
-                    if (std::get<validity>(*jt))
+                    if (jt->validity)
                     {
                         return false;
                     }
@@ -120,7 +118,7 @@ TEST_F(LSystemBufferTest, helper_has_duplicate)
 {
     ASSERT_FALSE(has_duplicate(buffer1, buffer1.begin()));
 
-    auto first_pred = std::get<predecessor>(*buffer1.begin());
+    auto first_pred = buffer1.begin()->predecessor;
     buffer1.add_rule();
     buffer1.change_predecessor(std::prev(buffer1.end()), first_pred);
     ASSERT_TRUE(has_duplicate(buffer1, buffer1.begin()));
@@ -158,8 +156,8 @@ TEST_F(LSystemBufferTest, add_rule)
 TEST_F(LSystemBufferTest, change_predecessor_simple)
 {
     auto begin = buffer1.begin();
-    auto old_pred = std::get<predecessor>(*begin);
-    auto old_succ = std::get<successor>(*begin);
+    auto old_pred = begin->predecessor;
+    auto old_succ = begin->successor;
     buffer1.change_predecessor(begin, new_pred1);
 
     ASSERT_TRUE(lsys->has_rule(new_pred1, old_succ));
@@ -175,8 +173,8 @@ TEST_F(LSystemBufferTest, change_predecessor_simple)
 TEST_F(LSystemBufferTest, change_predecessor_is_duplicated)
 {
     auto begin = buffer1.begin();
-    auto first_pred = std::get<predecessor>(*begin);
-    auto first_succ = std::get<successor>(*begin);
+    auto first_pred = begin->predecessor;
+    auto first_succ = begin->successor;
 
     buffer1.add_rule();
 
@@ -196,8 +194,8 @@ TEST_F(LSystemBufferTest, change_predecessor_is_duplicated)
 TEST_F(LSystemBufferTest, change_predecessor_remove_rule)
 {
     auto begin = buffer1.begin();
-    auto first_pred = std::get<predecessor>(*begin);
-    auto first_succ = std::get<successor>(*begin);
+    auto first_pred = begin->predecessor;
+    auto first_succ = begin->successor;
     
     buffer1.change_predecessor(begin, new_pred1);
 
@@ -214,8 +212,8 @@ TEST_F(LSystemBufferTest, change_predecessor_remove_rule)
 TEST_F(LSystemBufferTest, change_predecessor_remove_rule_duplicated)
 {
     auto begin = buffer1.begin();
-    auto first_pred = std::get<predecessor>(*begin);
-    auto first_succ = std::get<successor>(*begin);
+    auto first_pred = begin->predecessor;
+    auto first_succ = begin->successor;
     buffer1.add_rule();
     
     auto end = std::prev(buffer1.end());
@@ -237,7 +235,7 @@ TEST_F(LSystemBufferTest, change_predecessor_remove_rule_duplicated)
 TEST_F(LSystemBufferTest, remove_predecessor_simple)
 {
     auto begin = buffer1.begin();
-    auto pred = std::get<predecessor>(*begin);
+    auto pred = begin->predecessor;
     buffer1.remove_predecessor(begin);
 
     ASSERT_FALSE(lsys->has_predecessor(pred));
@@ -253,7 +251,7 @@ TEST_F(LSystemBufferTest, remove_predecessor_simple)
 TEST_F(LSystemBufferTest, remove_predecessor_duplicate)
 {
     auto begin = buffer1.begin();
-    auto first_pred = std::get<predecessor>(*begin);
+    auto first_pred = begin->predecessor;
 
     buffer1.add_rule();
 
@@ -271,7 +269,7 @@ TEST_F(LSystemBufferTest, change_successor_simple)
 {
     buffer1.change_successor(buffer1.begin(), new_succ1);
 
-    auto pred = std::get<predecessor>(*buffer1.begin());
+    auto pred = buffer1.begin()->predecessor;
 
     ASSERT_TRUE(lsys->has_rule(pred, new_succ1));
     ASSERT_TRUE(lsys->has_rule(pred, new_succ1));
@@ -281,8 +279,8 @@ TEST_F(LSystemBufferTest, change_successor_simple)
 TEST_F(LSystemBufferTest, change_successor_duplicate)
 {
     auto begin = buffer1.begin();
-    auto first_pred = std::get<predecessor>(*begin);
-    auto first_succ = std::get<successor>(*begin);
+    auto first_pred = begin->predecessor;
+    auto first_succ = begin->successor;
 
     buffer1.add_rule();
     
@@ -302,7 +300,7 @@ TEST_F(LSystemBufferTest, change_successor_duplicate)
 TEST_F(LSystemBufferTest, erase_simple)
 {
     auto size = buffer_size(buffer1);
-    auto pred = std::get<predecessor>(*buffer1.begin());
+    auto pred = buffer1.begin()->predecessor;
     buffer1.erase(buffer1.begin());
 
     ASSERT_FALSE(lsys->has_predecessor(pred));
@@ -316,8 +314,8 @@ TEST_F(LSystemBufferTest, erase_duplicate)
 {
     auto size = buffer_size(buffer1);
     auto begin = buffer1.begin();
-    auto first_pred = std::get<predecessor>(*begin);
-    auto first_succ = std::get<successor>(*begin);
+    auto first_pred = begin->predecessor;
+    auto first_succ = begin->successor;
 
     buffer1.add_rule();
 
@@ -349,8 +347,8 @@ TEST_F(LSystemBufferTest, erase_replacement)
 {
     auto size = buffer_size(buffer1);
     auto begin  = buffer1.begin();
-    auto first_pred = std::get<predecessor>(*begin);
-    auto first_succ = std::get<successor>(*begin);
+    auto first_pred = begin->predecessor;
+    auto first_succ = begin->successor;
     
     buffer1.add_rule();
     
@@ -424,8 +422,8 @@ TEST_F(LSystemBufferTest, advanced_sync_and_layout2)
     // buffer1.change_predecessor(end, new_pred1);
     // buffer1.change_successor(end, new_succ2);
 
-    auto first_pred = std::get<predecessor>(*buffer1.begin());
-    auto first_succ = std::get<successor>(*buffer1.begin());
+    auto first_pred = buffer1.begin()->predecessor;
+    auto first_succ = buffer1.begin()->successor;
     buffer2.add_rule();
     auto end = std::prev(buffer2.end());
     buffer2.change_predecessor(end, first_pred);
