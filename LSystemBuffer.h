@@ -151,13 +151,6 @@ namespace procgui
        
         // const_iterator find_duplicate(const_iterator cit);
 
-        // Check if the rule at 'cit' has a duplicate in the buffer.
-        bool has_duplicate(const_iterator cit);
-
-        // Find an existing rule with the predicate 'pred'.
-        // If such a rule does not exists, returns 'buffer_.cend()';
-        const_iterator find_existing(char pred);
-
         // Remove the constness from 'cit'. Can only be used inside this class
         // to modify 'buffer_'.
         iterator remove_const(const_iterator cit);

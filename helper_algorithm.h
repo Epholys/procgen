@@ -18,7 +18,7 @@ ForwardIt find_duplicate(ForwardIt model, ForwardIt first, ForwardIt last)
 }
 
 template<typename ForwardIt, typename Predicate>
-ForwardIt find_duplicate(ForwardIt model, ForwardIt first, ForwardIt last, Predicate p)
+ForwardIt find_duplicate_if(ForwardIt model, ForwardIt first, ForwardIt last, Predicate p)
 {
     for (auto it = first; it != last; ++it)
     {

@@ -20,26 +20,6 @@ namespace procgui
         }
     }
 
-    // TODO remove ?
-    bool LSystemBuffer::has_duplicate(const_iterator cit)
-    {
-        // Find the duplicate of 'cit' in 'buffer_' by comparing the
-        // predecessors. 
-        return find_duplicate(cit, buffer_.cbegin(), buffer_.cend(),
-                              [](const auto& r1, const auto& r2)
-                              { return r1.predecessor == r2.predecessor; })
-            != buffer_.cend();
-    }
-
-    LSystemBuffer::const_iterator LSystemBuffer::find_existing(char pred)
-    {
-        // Find in 'buffer_' an existing rule with the same predecessor as
-        // 'pred'. 
-        return std::find_if(buffer_.cbegin(), buffer_.cend(),
-                            [pred](const auto& rule)
-                            { return rule.predecessor == pred; });
-    }
-
     LSystem& LSystemBuffer::get_lsys() const
     {
         return lsys_;
@@ -104,13 +84,14 @@ namespace procgui
 
         bool valid = cit->validity;
         auto old_pred = cit->predecessor;
-        // bool old_has_duplicate = has_duplicate(cit);
         auto old_duplicate = std::find_if(buffer_.begin(), buffer_.end(),
                                           [pred](const auto& rule)
                                           { return rule.predecessor == pred &&
                                             !rule.validity; });
         bool old_has_duplicate= old_duplicate != buffer_.end();
-        bool duplicate = find_existing(pred) != buffer_.end();
+        bool duplicate = std::find_if(buffer_.cbegin(), buffer_.cend(),
+                                      [pred](const auto& rule)
+                                      { return rule.predecessor == pred; }) != buffer_.end();
         
         const succ& succ = cit->successor;
         *remove_const(cit) = { !duplicate, pred, succ };
@@ -260,12 +241,9 @@ namespace procgui
 
         for (auto it = buffer_.begin(); it != buffer_.end(); )
         {
-            auto valid = it->validity;
-            auto pred = it->predecessor;
-
-            if(valid && pred != '\0')
+            if(it->validity && it->predecessor != '\0')
             {
-                bool exist = lsys_rules.count(pred) > 0 ? true : false;
+                bool exist = lsys_rules.count(it->predecessor) > 0 ? true : false;
                 if (!exist)
                 {
                     it = buffer_.erase(it);
@@ -285,18 +263,12 @@ namespace procgui
         {
             if (!it->validity)
             {
-                bool duplicate = false;
-                for (auto jt = buffer_.begin(); jt != buffer_.end(); ++jt)
-                {
-                    if (it != jt &&
-                        it->predecessor == jt->predecessor &&
-                        jt->validity)
-                    {
-                        duplicate = true;
-                        break;
-                    }
-                }
-                if (!duplicate)
+                auto original = find_duplicate_if(it, buffer_.begin(), buffer_.end(),
+                                                  [](const auto& e1, const auto& e2)
+                                                  { return e1.predecessor == e2.predecessor &&
+                                                           e2.validity; });
+                bool is_duplicate = original != buffer_.end();
+                if (!is_duplicate)
                 {
                     it->validity = true;
                     lsys_.add_rule(it->predecessor, it->successor);

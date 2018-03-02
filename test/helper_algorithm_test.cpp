@@ -34,7 +34,7 @@ TEST(helper_algorithm_test, find_duplicate_it_pred)
     auto last   = v.end();
     auto penultimate = std::prev(last);
 
-    ASSERT_TRUE(find_duplicate(first, first, last, predicate) == penultimate);
-    ASSERT_TRUE(find_duplicate(first, first, penultimate, predicate) == penultimate);
-    ASSERT_TRUE(find_duplicate(second, first, last, predicate) == last);
+    ASSERT_TRUE(find_duplicate_if(first, first, last, predicate) == penultimate);
+    ASSERT_TRUE(find_duplicate_if(first, first, penultimate, predicate) == penultimate);
+    ASSERT_TRUE(find_duplicate_if(second, first, last, predicate) == last);
 }
