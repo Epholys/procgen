@@ -98,38 +98,43 @@ namespace procgui
         {
             old_duplicate_succ = old_duplicate->successor;
         }
-        bool new_is_duplicate = std::find_if(buffer_.cbegin(), buffer_.cend(),
+        bool new_is_original = std::find_if(buffer_.cbegin(), buffer_.cend(),
                                              [pred](const auto& rule)
                                              { return rule.predecessor == pred &&
-                                               rule.validity; }) != buffer_.end();
+                                               rule.validity; }) == buffer_.end();
         
         const succ& succ = cit->successor;
-        *remove_const(cit) = { !new_is_duplicate, pred, succ };
+        *remove_const(cit) = { new_is_original, pred, succ };
 
-        
-        
-        if (!new_is_duplicate && old_has_duplicate && old_pred != '\0')
-        {
-            old_duplicate->validity = true;
-
-            lsys_.add_rule(pred, succ);
-            lsys_.add_rule(old_pred, old_duplicate_succ);
-        }
-        else if(!new_is_duplicate)
+        if (old_was_original && old_pred != '\0' && !old_has_duplicate && new_is_original)
         {
             lsys_.add_rule(pred, succ);
-            if(old_was_original && old_pred != '\0')
-                lsys_.remove_rule(old_pred);
+            lsys_.remove_rule(old_pred);
         }
-        else if (old_has_duplicate && old_pred != '\0')
-        {
-            old_duplicate->validity = true;
-
-            lsys_.add_rule(old_pred, old_duplicate_succ);
-        }
-        else if (!old_has_duplicate && old_was_original && old_pred != '\0')
+        else if (old_was_original && old_pred != '\0' && !old_has_duplicate && !new_is_original)
         {
             lsys_.remove_rule(old_pred);
+        }
+        else if (old_was_original && old_pred != '\0' && old_has_duplicate && new_is_original)
+        {
+            old_duplicate->validity = true;
+
+            lsys_.add_rule(pred, succ);
+            lsys_.add_rule(old_pred, old_duplicate_succ);
+        }
+        else if (old_was_original && old_pred != '\0' && old_has_duplicate && !new_is_original)
+        {
+            old_duplicate->validity = true;
+
+            lsys_.add_rule(old_pred, old_duplicate_succ);
+        }
+        else if (!old_was_original && new_is_original)
+        {
+            lsys_.add_rule(pred, succ);
+        }
+        else if (!old_was_original && !new_is_original)
+        {
+            // Do nothing
         }
     }
     
