@@ -84,57 +84,37 @@ namespace procgui
 
         bool old_was_original = cit->validity;
         auto old_pred = cit->predecessor;
-        auto old_duplicate = std::find_if(buffer_.begin(), buffer_.end(),
-                                          [old_pred](const auto& rule)
-                                          { return rule.predecessor == old_pred &&
-                                            !rule.validity; });
-        if (!old_was_original)
-        {
-            old_duplicate = buffer_.end();
-        }
-        bool old_has_duplicate= old_duplicate != buffer_.end();
-        std::string old_duplicate_succ = "ERROR";
-        if (old_has_duplicate)
-        {
-            old_duplicate_succ = old_duplicate->successor;
-        }
+
         bool new_is_original = std::find_if(buffer_.cbegin(), buffer_.cend(),
-                                             [pred](const auto& rule)
-                                             { return rule.predecessor == pred &&
-                                               rule.validity; }) == buffer_.end();
+                                            [pred](const auto& rule)
+                                            { return rule.predecessor == pred &&
+                                              rule.validity; }) == buffer_.end();
         
         const succ& succ = cit->successor;
+
         *remove_const(cit) = { new_is_original, pred, succ };
 
-        if (old_was_original && old_pred != '\0' && !old_has_duplicate && new_is_original)
+        if (new_is_original)
         {
             lsys_.add_rule(pred, succ);
-            lsys_.remove_rule(old_pred);
         }
-        else if (old_was_original && old_pred != '\0' && !old_has_duplicate && !new_is_original)
+        if (old_was_original && old_pred != '\0')
         {
-            lsys_.remove_rule(old_pred);
-        }
-        else if (old_was_original && old_pred != '\0' && old_has_duplicate && new_is_original)
-        {
-            old_duplicate->validity = true;
+            auto old_duplicate = std::find_if(buffer_.begin(), buffer_.end(),
+                                              [old_pred](const auto& rule)
+                                              { return rule.predecessor == old_pred &&
+                                                !rule.validity; });
 
-            lsys_.add_rule(pred, succ);
-            lsys_.add_rule(old_pred, old_duplicate_succ);
-        }
-        else if (old_was_original && old_pred != '\0' && old_has_duplicate && !new_is_original)
-        {
-            old_duplicate->validity = true;
-
-            lsys_.add_rule(old_pred, old_duplicate_succ);
-        }
-        else if (!old_was_original && new_is_original)
-        {
-            lsys_.add_rule(pred, succ);
-        }
-        else if (!old_was_original && !new_is_original)
-        {
-            // Do nothing
+            if (old_duplicate == buffer_.end())
+            {
+                lsys_.remove_rule(old_pred);
+            }
+            else
+            {
+                old_duplicate->validity = true;
+                lsys_.add_rule(old_pred, old_duplicate->successor);
+                
+            }
         }
     }
     
