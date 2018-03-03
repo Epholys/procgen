@@ -82,40 +82,54 @@ namespace procgui
         }
 
 
-        bool valid = cit->validity;
+        bool old_was_original = cit->validity;
         auto old_pred = cit->predecessor;
         auto old_duplicate = std::find_if(buffer_.begin(), buffer_.end(),
-                                          [pred](const auto& rule)
-                                          { return rule.predecessor == pred &&
+                                          [old_pred](const auto& rule)
+                                          { return rule.predecessor == old_pred &&
                                             !rule.validity; });
+        if (!old_was_original)
+        {
+            old_duplicate = buffer_.end();
+        }
         bool old_has_duplicate= old_duplicate != buffer_.end();
-        bool duplicate = std::find_if(buffer_.cbegin(), buffer_.cend(),
-                                      [pred](const auto& rule)
-                                      { return rule.predecessor == pred; }) != buffer_.end();
+        std::string old_duplicate_succ = "ERROR";
+        if (old_has_duplicate)
+        {
+            old_duplicate_succ = old_duplicate->successor;
+        }
+        bool new_is_duplicate = std::find_if(buffer_.cbegin(), buffer_.cend(),
+                                             [pred](const auto& rule)
+                                             { return rule.predecessor == pred &&
+                                               rule.validity; }) != buffer_.end();
         
         const succ& succ = cit->successor;
-        *remove_const(cit) = { !duplicate, pred, succ };
+        *remove_const(cit) = { !new_is_duplicate, pred, succ };
 
         
         
-        if (!duplicate && old_has_duplicate && old_pred != '\0')
+        if (!new_is_duplicate && old_has_duplicate && old_pred != '\0')
         {
             old_duplicate->validity = true;
 
             lsys_.add_rule(pred, succ);
-            lsys_.add_rule(old_pred, old_duplicate->successor);
+            lsys_.add_rule(old_pred, old_duplicate_succ);
         }
-        else if(!duplicate)
+        else if(!new_is_duplicate)
         {
             lsys_.add_rule(pred, succ);
-            if(valid && old_pred != '\0')
+            if(old_was_original && old_pred != '\0')
                 lsys_.remove_rule(old_pred);
         }
         else if (old_has_duplicate && old_pred != '\0')
         {
             old_duplicate->validity = true;
 
-            lsys_.add_rule(old_pred, old_duplicate->successor);
+            lsys_.add_rule(old_pred, old_duplicate_succ);
+        }
+        else if (!old_has_duplicate && old_was_original && old_pred != '\0')
+        {
+            lsys_.remove_rule(old_pred);
         }
     }
     
