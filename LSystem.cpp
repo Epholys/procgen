@@ -139,7 +139,7 @@ std::string LSystem::produce(int n)
         cache_.emplace(highest->first + i + 1, tmp);
     }
 
-//TODO? notify();
+    notify();
 
     return cache_.at(n);
 }
