@@ -40,7 +40,7 @@ namespace procgui
     //   - duplication:
     //   Several rules can be duplicated. If one of these rule is removed, the
     // other one must take its place and be synchronized, even if the removed
-    // rule and its replacement are in different 'LSystemBuffer'
+    // rule and its replacement are in different 'LSystemBuffer'.
     // 
     //   - iterator invalidation:
     //   To access the buffer in the GUI, a 'const_iterator' is
@@ -50,9 +50,8 @@ namespace procgui
     // We can still directly access the 'LSystem' for all trivial attributes
     // like the axiom.
     //
-    // A 'LSystemBuffer' must be destructed before the destruction of its
-    // LSystem (non owning-reference). For the coherence of the GUI, a LSystem
-    // must have a unique LSystemBuffer associated.
+    // Invariant:
+    //   - The LSystem and the buffer must be synchronized
     //
     // Note: This class has a lot in common with 'IntepretationMapBuffer'. If a
     // third class has the same properties, all will be refactorized.
@@ -61,9 +60,11 @@ namespace procgui
     public:
         using succ = std::string;
 
+        // A production rule: 
         struct Rule
         {
-            bool validity;
+            bool validity;    // If a rule is a duplicate of an already existing
+                              // rule, it is not valid.
             char predecessor;
             succ successor;
             inline bool operator== (const Rule& other) const
@@ -73,7 +74,7 @@ namespace procgui
             inline bool operator!= (const Rule& other) const
                 { return !(*this == other); }
         };
-        using buffer      = std::list<Rule>;
+        using buffer = std::list<Rule>;
 
         // The iterators come directly from the buffer.
         // Only 'const_iterator' is accessible from the outside.
@@ -96,9 +97,7 @@ namespace procgui
         void add_rule();
 
         // Erase the rule at 'cit'.
-        // If the rule is not a scratch buffer and is valid, remove it from the
-        // LSystem.
-        // Otherwise, delete it from the buffer.
+        // Remove it from the LSystem if necessary.
         //
         // Exception:
         //  - Precondition: 'cit' must be valid and derenferenceable.
@@ -108,17 +107,17 @@ namespace procgui
 
         // Change the predecessor of the rule at 'cit' to 'pred'.
         // If the 'pred' is null, calls 'remove_predecessor()'.
-        // If the 'pred' is valid, remove the old rule and add a new one.
-        // one.
+        // Otherwise, update the buffer and the LSystem if
+        // necessary.
         //
         // Exception:
         //  - Precondition: 'cit' must be valid and derenferenceable.
         //
-        // 'cit' is invalidated if 'pred' is not a duplicate.
+        // 'cit' may be invalidated.
         void change_predecessor(const_iterator cit, char pred);
 
         // Change the rule at 'cit' into a scratch buffer.
-        // If the rule is valid, remove it from the 'LSystem'
+        // If the rule is valid, remove it from the LSystem
         //
         // Exception:
         //  - Precondition: 'cit' must be valid and derenferenceable.
@@ -144,20 +143,22 @@ namespace procgui
         void apply();
         
     private:
+        // Remove a rule from the buffer.
+        // Take care of updating the LSystem according to the existence of
+        // duplicate rules in this buffer.
         void remove_rule(char pred);
         
-        // Synchronize the rule buffer with the LSystem.
+        // Synchronize the rule buffer with the LSystems
         void sync();
        
-        // const_iterator find_duplicate(const_iterator cit);
-
         // Remove the constness from 'cit'. Can only be used inside this class
         // to modify 'buffer_'.
         iterator remove_const(const_iterator cit);
 
+        // The LSystem.
         LSystem& lsys_;
 
-// The rule buffer.
+        // The rule buffer.
         buffer buffer_;
 
         // The buffered instruction from the 'delayed_*' methods.

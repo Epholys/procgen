@@ -7,7 +7,6 @@
 
 using namespace procgui;
 
-// Sync is tested in each unit test.
 class LSystemBufferTest :  public ::testing::Test
 {
 public:
@@ -21,6 +20,9 @@ public:
         {
         }
 
+    // Helper methods:
+
+    // Check the existence of the predecessor 'pred' in 'buff'
     bool has_predecessor (const LSystemBuffer& buff, char pred) const
         {
             for (auto rule : buff)
@@ -33,6 +35,7 @@ public:
             return false;
         }
 
+    // Check the existence of the rule "'pred' -> 'succ'" in 'buff'
     bool has_rule (const LSystemBuffer& buff, char pred, const std::string& succ) const
         {
             for (auto rule : buff)
@@ -46,6 +49,7 @@ public:
             return false;
         }
 
+    // Check if 'buff' has a duplicate of the rule at 'it'.
     bool has_duplicate(const LSystemBuffer& buff, const_iterator it) const
         {
             for (auto jt = buff.begin(); jt != buff.end(); ++jt)
@@ -59,6 +63,8 @@ public:
             return false;
         }
 
+    // Check if all duplicates in 'buff' are correctly tagged with the 'valid'
+    // attribute of the buffer's rules.
     bool duplicates_marked(const LSystemBuffer& buff) const
         {
             for(auto it = buff.begin(); it != buff.end(); ++it)
@@ -74,7 +80,8 @@ public:
             }
             return true;
         }
-    
+
+    // Compute the buffer's size
     size_t buffer_size(const LSystemBuffer& buff) const
         {
             size_t n = 0;
@@ -100,6 +107,8 @@ public:
     const std::string new_succ2 = "YYY";
     const std::string new_succ3 = "ZZZ";
 };
+
+// --- Test the helper methods ---
 
 TEST_F(LSystemBufferTest, helper_has_predecessor)
 {
@@ -130,6 +139,9 @@ TEST_F(LSystemBufferTest, helper_size)
     ASSERT_EQ(2, buffer_size(buffer1));
 }
 
+// --- In the following tests, 'LSystemBuffer:sync()' is tested in the majority
+// of tests with 'buffer2' as it can not be tested separately --
+
 TEST_F(LSystemBufferTest, constructor)
 {
     // Check if all lsys' rules are here
@@ -139,8 +151,6 @@ TEST_F(LSystemBufferTest, constructor)
     {
         ASSERT_TRUE(has_rule(buffer1, it->first, it->second));
     }
-
-    // no sync
 }
 
 TEST_F(LSystemBufferTest, add_rule)
@@ -152,6 +162,9 @@ TEST_F(LSystemBufferTest, add_rule)
 
     ASSERT_NE(*std::prev(buffer2.end()), rule({true, '\0', ""}));
 }
+
+// -- 'change_predecessor()' is a complexe beast: a lot of these tests were
+// created after trial and error --
 
 TEST_F(LSystemBufferTest, change_predecessor_simple)
 {
@@ -222,7 +235,6 @@ TEST_F(LSystemBufferTest, change_predecessor_remove_rule_duplicated)
 
     buffer1.change_predecessor(end, new_pred1);
    
-    // The first rule was not removed
     ASSERT_TRUE(lsys->has_rule(first_pred, first_succ));
     ASSERT_TRUE(lsys->has_rule(new_pred1, new_succ1));
 
@@ -248,30 +260,30 @@ TEST_F(LSystemBufferTest, change_predecessor_double_duplication)
     buffer1.change_successor(end, new_succ3);
 
     // buffer1:
-    // pred1     -> succ1
-    // pred2     -> succ2
-    // new_pred1 -> new_succ1
-    //         1 ->         2 (duplicate) <-to_change
-    //         1 ->         3 (duplicate)
+    // A -> AAA
+    // B -> BBB
+    // X -> XXX
+    // X -> YYY (duplicate) <=to_change
+    // X -> ZZZ (duplicate)
 
     auto to_change = std::prev(std::prev(buffer1.end()));
     buffer1.change_predecessor(to_change, new_pred2);
 
     // buffer1:
-    // pred1     -> succ1
-    // pred2     -> succ2
-    // new_pred1 -> new_succ1
-    //         2 ->         2 
-    //         1 ->         3 (duplicate)
+    // A -> AAA
+    // B -> BBB
+    // X -> XXX
+    // Y -> YYY 
+    // X -> ZZZ (duplicate)
 
     buffer1.change_predecessor(to_change, new_pred1);
 
     // buffer1 (expected):
-    // pred1     -> succ1
-    // pred2     -> succ2
-    // new_pred1 -> new_succ1
-    //         1 ->         2 (duplicate)
-    //         1 ->         3 (duplicate)
+    // A -> AAA
+    // B -> BBB
+    // X -> XXX
+    // X -> YYY (duplicate)
+    // X -> ZZZ (duplicate)
 
     ASSERT_TRUE(lsys->has_rule(new_pred1, new_succ1));
     ASSERT_FALSE(lsys->has_predecessor(new_pred2));

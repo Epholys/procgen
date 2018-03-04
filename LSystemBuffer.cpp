@@ -56,8 +56,7 @@ namespace procgui
         auto is_valid = cit->validity;
         auto pred = cit->predecessor;
 
-        // If the rule is valid and not a scratch buffer, removes it from the
-        // 'LSystem'.
+        // If the rule is valid and not a scratch buffer, removes it.
         if (is_valid && pred != '\0')
         {
             remove_rule(pred);
@@ -74,47 +73,73 @@ namespace procgui
     {
         Expects(cit != buffer_.end());
 
-        // If the predecessor is null, removes it.
+        // If the new predecessor is null, remove it.
         if (pred == '\0')
         {
             remove_predecessor(cit);
             return;
         }
 
+        // There is 2 cases for the new rule:
+        //  1. The new rule is valid/original => add it to the LSystem.
+        //  2. The new rule is a duplicate => do nothing
+        // There is 4 cases for the old rule at 'cit': 
+        //  3. It was a duplicate rule => do nothing
+        //  4. It was an original rule without a duplicate => remove it
+        //  5. It was an original rule with a duplicate => replace it
+        //  6. It was a scratch buffer => do nothing
+
+        // Note: the order is important: 'add_rule()' for the new rule must
+        // called before the others.
+
 
         bool old_was_original = cit->validity;
         auto old_pred = cit->predecessor;
 
+        // Check if the new rule is original by finding an existing one with the
+        // new predecessor.
         bool new_is_original = std::find_if(buffer_.cbegin(), buffer_.cend(),
                                             [pred](const auto& rule)
                                             { return rule.predecessor == pred &&
                                               rule.validity; }) == buffer_.end();
-        
         const succ& succ = cit->successor;
 
+        // Modify 'buffer_' with the new predicate.
         *remove_const(cit) = { new_is_original, pred, succ };
 
-        if (new_is_original)
+        if (new_is_original) // Case 1.
         {
             lsys_.add_rule(pred, succ);
         }
+        else // Case 2.
+        {
+            // Do nothing
+        }
+        
         if (old_was_original && old_pred != '\0')
         {
+            // Try to find a duplicate of the old rule
             auto old_duplicate = std::find_if(buffer_.begin(), buffer_.end(),
                                               [old_pred](const auto& rule)
                                               { return rule.predecessor == old_pred &&
                                                 !rule.validity; });
 
-            if (old_duplicate == buffer_.end())
+            if (old_duplicate == buffer_.end()) // Case 4.
             {
+                // Note: it is not necessary to call 'this->remove_rule()' as we
+                // already checked that the old rule did not have a duplicate.
                 lsys_.remove_rule(old_pred);
             }
-            else
+            else // Case 5.
             {
                 old_duplicate->validity = true;
                 lsys_.add_rule(old_pred, old_duplicate->successor);
                 
             }
+        }
+        else // Case 3. & 6.
+        {
+            // Do nothing
         }
     }
     
@@ -122,6 +147,8 @@ namespace procgui
     {
         Expects(cit != buffer_.end());
 
+        // Turn '*cit' into a scratch buffer
+        
         auto old_pred = cit->predecessor;
         auto is_valid = cit->validity;
 
@@ -129,6 +156,7 @@ namespace procgui
         const succ& succ = cit->successor;
         *it = { true, '\0', succ };
 
+        // If it was an original rule, remove it.
         if (is_valid)
         {
             remove_rule(old_pred);
@@ -142,11 +170,12 @@ namespace procgui
 
         auto it = remove_const(cit);
 
-        auto valid = cit->validity;
+        auto is_valid = cit->validity;
         auto pred = cit->predecessor;
-        *it = { valid, pred, succ };
+        *it = { is_valid, pred, succ };
 
-        if (valid)
+        // If it was an original rule, replace it in the LSystem
+        if (is_valid && pred != '\0')
         {
             lsys_.add_rule(pred, succ);
         }
@@ -154,10 +183,15 @@ namespace procgui
 
     void LSystemBuffer::remove_rule(char pred)
     {
+        // This method is called instead of 'lsys_.remove_rule(pred)' to replace
+        // the old rule by a duplicate that is in priority in the same
+        // LSystemBuffer.
+
+        // If 'pred' designate a still valid rule, remove this rule.
         auto original = std::find_if(buffer_.begin(), buffer_.end(),
                                       [pred](const auto& rule)
                                       { return rule.predecessor == pred &&
-                                              rule.validity; });
+                                               rule.validity; });
         if (original != buffer_.end())
         {
             buffer_.erase(original);
@@ -170,13 +204,13 @@ namespace procgui
                                               !rule.validity; });
         if (duplicate != buffer_.end())
         {
-            // If found, make it the next rule
+            // If found, replace the old rule by it.
             duplicate->validity = true;
             lsys_.add_rule(pred, duplicate->successor);
         }
         else
         {
-            // If not found, simply remove the rule
+            // Otherwise, simply remove the rule.
             lsys_.remove_rule(pred);
         }
     }
@@ -213,14 +247,16 @@ namespace procgui
 
     void LSystemBuffer::sync()
     {
+        // This function is highly inefficient: the buffer and the LSystem are
+        // updated even if there weren't any modification.
+
+        
         const auto& lsys_rules = lsys_.get_rules();
 
-        // gérer les ajouts
-        // gérer les suppressions
-        // gérer les modifications
-        // gérer les \0
-        // gérer les non valides
-
+        // First step: synchronize addition int the LSystem's rules.
+        // For each rule of the LSystem, we check if it exists in the buffer. If
+        // so, we update the successor. Otherwise, we add a new rule to the
+        // buffer.
         for (const auto& rule : lsys_rules)
         {
             char pred = rule.first;
@@ -238,6 +274,9 @@ namespace procgui
             }
         }
 
+        // Second step: Sychronize deletion of the LSystem's rules:
+        // For each rule of the buffer, we check if it exists in the LSystem. If
+        // not, we remove it from the buffer.
         for (auto it = buffer_.begin(); it != buffer_.end(); )
         {
             if(it->validity && it->predecessor != '\0')
@@ -258,6 +297,13 @@ namespace procgui
             }
         }
 
+        // Final step: Synchronize rules between the LSystemBuffers: if a rule
+        // is removed in a LSystemBuffer and if it does not have a duplicate in
+        // the same LSystemBuffer, we try to find a duplicate in an other
+        // buffer.
+        // To do so, if we spot in a buffer an invalid rule without a valid one,
+        // we make it valid and update the LSystem (and so every other
+        // LSystemBuffer).
         for (auto it = buffer_.begin(); it != buffer_.end(); ++it)
         {
             if (!it->validity)
@@ -266,8 +312,7 @@ namespace procgui
                                                   [](const auto& e1, const auto& e2)
                                                   { return e1.predecessor == e2.predecessor &&
                                                            e2.validity; });
-                bool is_duplicate = original != buffer_.end();
-                if (!is_duplicate)
+                if (original == buffer_.end())
                 {
                     it->validity = true;
                     lsys_.add_rule(it->predecessor, it->successor);
