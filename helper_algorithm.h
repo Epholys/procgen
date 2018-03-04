@@ -2,7 +2,7 @@
 #define HELPER_ALGORITHM
 
 
-// TODO document
+// Find a duplicate of 'model' between [first, last)
 template<typename ForwardIt>
 ForwardIt find_duplicate(ForwardIt model, ForwardIt first, ForwardIt last)
 {
@@ -17,6 +17,7 @@ ForwardIt find_duplicate(ForwardIt model, ForwardIt first, ForwardIt last)
     return last;
 }
 
+// Find a duplicate of 'model' satisfying condition 'p' between [first, last)
 template<typename ForwardIt, typename Predicate>
 ForwardIt find_duplicate_if(ForwardIt model, ForwardIt first, ForwardIt last, Predicate p)
 {
