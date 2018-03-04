@@ -13,7 +13,8 @@
 ** Implemented
    - (Simple) L-systems
    - (Simple) Turtle interpretation
-   - Static GUI to disaplay parameters
+   - Static GUI to display parameters
+   - Dynamic GUIs to interact with the parameters
 
 ** Optimization
    Ideas:
@@ -45,7 +46,6 @@
    - *Testing suite:* [[https://github.com/google/googletest/][googletest]]
 
 ** Completing the framework?
-   - Add Licence
    - Static analysis (Coverity?)
    - Formal documentation (Doxygen?)
    - Automatic cross-compiling?

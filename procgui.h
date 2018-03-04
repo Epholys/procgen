@@ -40,7 +40,7 @@ namespace procgui {
                  const std::string& name,
                  bool main=true);
     
-    void display(const lsys::LSystem& lsys, const std::string& name, bool main=true);
+    void display(const LSystem& lsys, const std::string& name, bool main=true);
     
     void display(const drawing::InterpretationMap& map, const std::string& name, bool main=true);
 
@@ -49,9 +49,9 @@ namespace procgui {
                        const std::string& name,
                        bool main=true);
 
-    bool interact_with(LSystemBuffer& lsys_view, const std::string& name, bool main=true);
+    bool interact_with(LSystemBuffer& buffer, const std::string& name, bool main=true);
 
-    bool interact_with(InterpretationMapBuffer& map_view, const std::string& name, bool main=true);
+    bool interact_with(InterpretationMapBuffer& buffer, const std::string& name, bool main=true);
 }
 
 #endif

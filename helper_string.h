@@ -18,7 +18,7 @@
 // If the string is larger than N, the array data will be a null-terminated
 // truncated version of the string.
 template<size_t N>
-constexpr std::array<char, N> string_to_array(std::string str)
+std::array<char, N> string_to_array(std::string str)
 {
     std::array<char, N> arr {};
     arr.fill('\0');
@@ -33,7 +33,7 @@ constexpr std::array<char, N> string_to_array(std::string str)
 // If the array has a null character, the string only contains the characters
 // before it.
 template<size_t N>
-constexpr std::string array_to_string(const std::array<char, N>& arr)
+std::string array_to_string(const std::array<char, N>& arr)
 {
     return {arr.begin(),
             std::find(arr.begin(), arr.end(), '\0')};

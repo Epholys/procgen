@@ -1,4 +1,3 @@
-#include <vector>
 #include <cmath>
 
 #include <gtest/gtest.h>
@@ -6,17 +5,16 @@
 
 #include "LSystem.h"
 #include "Turtle.h"
-#include "math.h"
+
 
 using namespace std;
-using namespace lsys;
 using namespace drawing;
 using namespace math;
 
-class TurtleTest :  public ::testing::Test
+class DrawingTest :  public ::testing::Test
 {
 public:
-    TurtleTest()
+    DrawingTest()
         : turtle(parameters)
         {
             // Turtle is normally initialized inside
@@ -47,7 +45,7 @@ namespace sf
 }
 
 // Test the go_forward order.
-TEST_F(TurtleTest, go_forward)
+TEST_F(DrawingTest, go_forward)
 {
     sf::Vertex begin { parameters.starting_position };
     float newx = parameters.step * std::cos(turtle.state.angle);
@@ -62,7 +60,7 @@ TEST_F(TurtleTest, go_forward)
 }
 
 // Test the turn_right order.
-TEST_F(TurtleTest, turn_right)
+TEST_F(DrawingTest, turn_right)
 {
     turn_right_fn(turtle);
     
@@ -70,7 +68,7 @@ TEST_F(TurtleTest, turn_right)
 }
 
 // Test the turn_left order.
-TEST_F(TurtleTest, turn_left)
+TEST_F(DrawingTest, turn_left)
 {
     turn_left_fn(turtle);
     
@@ -78,7 +76,7 @@ TEST_F(TurtleTest, turn_left)
 }
 
 // Test the save_position and load_position order.
-TEST_F(TurtleTest, stack_test)
+TEST_F(DrawingTest, stack_test)
 {
     save_position_fn(turtle);
     const auto& saved_state = turtle.stack.top();
@@ -100,7 +98,7 @@ TEST_F(TurtleTest, stack_test)
 //   1. go_forward
 //   2. turn_left
 //   3. go_forward
-TEST_F(TurtleTest, compute_paths)
+TEST_F(DrawingTest, compute_paths)
 {
     go_forward_fn(turtle);
     turn_left_fn (turtle);
