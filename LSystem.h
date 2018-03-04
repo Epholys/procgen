@@ -35,16 +35,41 @@ public:
     LSystem(const std::string& axiom, const production_rules& prod);
 
     // Getters and setters
+    // Get the axiom.
     std::string get_axiom() const;
+
+    // Check if 'predecessor' exists in the rules.
     bool has_predecessor(char predecessor) const;
+
+    // Check if the rule "predecessor -> successor" exists.
     bool has_rule(char predecessor, const std::string& successor) const;
+
+    // Get the rule associated with 'predecessor'
+    // Exceptions:
+    //   - Precondition: a production rule with 'predecessor' as a predecessor
+    //   exists.
     rule get_rule(char predecessor) const;
+
+    // Get all the rules
     const production_rules&  get_rules() const;
+
+    // Get the cache
     const std::unordered_map<int, std::string>& get_cache() const;
 
+    // Set the axiom to 'axiom'
     void set_axiom(const std::string& axiom);
+
+    // Add the rule "predecessor -> successor"
+    // Note: replace the successor of an existing rule if 'predecessor' has
+    // already a rule associated.
     void add_rule(char predecessor, const std::string& successor);
+
+    // Remove the rule associated to 'predecessor'
+    // Exception:
+    //   - Precondition: 'predecessor' must have a rule associated.
     void remove_rule(char predecessor);
+
+    // Clear the rules
     void clear_rules();
         
     // Returns the result of the 'n'-th iteration of the L-System and cache

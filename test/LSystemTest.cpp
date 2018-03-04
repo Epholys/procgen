@@ -1,4 +1,3 @@
-// TODO: ALL methods
 #include <gtest/gtest.h>
 
 #include "LSystem.h"
@@ -26,6 +25,39 @@ TEST(LSystemTest, complete_ctor)
     ASSERT_EQ(lsys.get_axiom(),       "F");
     ASSERT_EQ(lsys.get_rules(),       expected_rules);
     ASSERT_EQ(lsys.get_cache().at(0), "F");
+}
+
+TEST(LSystemTest, get_axiom)
+{
+    LSystem lsys { "F", { { 'F', "F+F" } } };
+
+    ASSERT_EQ(lsys.get_axiom(), "F");
+}
+
+TEST(LSystemTest, has_predecessor)
+{
+    LSystem lsys { "F", { { 'F', "F+F" } } };
+
+    ASSERT_TRUE(lsys.has_predecessor('F'));
+    ASSERT_FALSE(lsys.has_predecessor('G'));
+}
+
+TEST(LSystemTest, has_rule)
+{
+    LSystem lsys { "F", { { 'F', "F+F" } } };
+
+    ASSERT_TRUE(lsys.has_rule('F', "F+F"));
+    ASSERT_FALSE(lsys.has_rule('F', "G-G"));
+    ASSERT_FALSE(lsys.has_rule('G', "F+F"));
+}
+
+TEST(LSystemTest, get_rule)
+{
+    LSystem lsys { "F", { { 'F', "F+F" } } };
+    auto expected_rule = std::make_pair('F', std::string("F+F"));
+    
+    ASSERT_EQ(expected_rule, lsys.get_rule('F'));
+    ASSERT_THROW(lsys.get_rule('G'), gsl::fail_fast);
 }
 
 TEST(LSystemTest, set_axiom)
@@ -60,6 +92,8 @@ TEST(LSystemTest, remove_rule)
 
     ASSERT_EQ(lsys.get_rules(), empty_rules);
     ASSERT_EQ(lsys.get_cache(), base_cache);
+
+    ASSERT_THROW(lsys.remove_rule('G'), gsl::fail_fast);
 }
 
 TEST(LSystemTest, clear_rules)

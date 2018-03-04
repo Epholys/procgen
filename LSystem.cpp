@@ -31,20 +31,17 @@ bool LSystem::has_rule(char predecessor, const std::string& successor) const
     return has_predecessor(predecessor) && rules_.at(predecessor) == successor;
 }
 
-const LSystem::production_rules& LSystem::get_rules() const
-{
-    return rules_;
-}
-
-// Exceptions:
-//   - Precondition: a production rule with 'predecessor' as a predecessor
-//   exists.
 LSystem::rule LSystem::get_rule(char predecessor) const
 {
     Expects(has_predecessor(predecessor));
     return { predecessor, rules_.at(predecessor) };
 }
-    
+
+const LSystem::production_rules& LSystem::get_rules() const
+{
+    return rules_;
+}
+
 const std::unordered_map<int, std::string>& LSystem::get_cache() const
 
 {
@@ -57,8 +54,6 @@ void LSystem::set_axiom(const std::string& axiom)
     notify();
 }
 
-// Note: replace the successor of an existing rule if 'predecessor' has
-// already a rule associated.
 void LSystem::add_rule(char predecessor, const std::string& successor)
 {
     cache_ = { {0, get_axiom()} };
@@ -66,8 +61,6 @@ void LSystem::add_rule(char predecessor, const std::string& successor)
     notify();
 }
 
-// Exception:
-//   - Precondition: 'predecessor' must have a rule associated.
 void LSystem::remove_rule(char predecessor)
 {
     auto rule = rules_.find(predecessor);
