@@ -44,18 +44,21 @@ public:
     // Get all the rules
     const rule_map&  get_rules() const;
 
+    // Get the size
+    std::size_t size() const;
+    
     // Add the rule "predecessor -> successor"
     // Note: replace the successor of an existing rule if 'predecessor' has
     // already a rule associated.
-    void add_rule(char predecessor, const Successor& successor);
+    virtual void add_rule(char predecessor, const Successor& successor);
 
     // Remove the rule associated to 'predecessor'
     // Exception:
     //   - Precondition: 'predecessor' must have a rule associated.
-    void remove_rule(char predecessor);
+    virtual void remove_rule(char predecessor);
 
     // Clear the rules
-    void clear_rules();
+    virtual void clear_rules();
 
 protected:
     rule_map rules_ = {};

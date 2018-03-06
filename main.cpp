@@ -7,7 +7,7 @@
 #include "imgui/imgui-SFML.h"
 
 #include "LSystem.h"
-#include "LSystemBuffer.h"
+#include "RuleBuffer.h"
 #include "InterpretationMapBuffer.h"
 #include "Turtle.h"
 #include "helper_math.h"

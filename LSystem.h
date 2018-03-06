@@ -47,15 +47,15 @@ public:
     // Add the rule "predecessor -> successor"
     // Note: replace the successor of an existing rule if 'predecessor' has
     // already a rule associated.
-    void add_rule(char predecessor, const RuleMap::successor& successor);
+    void add_rule(char predecessor, const RuleMap::successor& successor) override;
 
     // Remove the rule associated to 'predecessor'
     // Exception:
     //   - Precondition: 'predecessor' must have a rule associated.
-    void remove_rule(char predecessor);
+    void remove_rule(char predecessor) override;
 
     // Clear the rules
-    void clear_rules();
+    void clear_rules() override;
 
     // Returns the result of the 'n'-th iteration of the L-System and cache
     // it as well as the transitional iterations.

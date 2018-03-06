@@ -29,6 +29,12 @@ const typename RuleMap<Successor>::rule_map& RuleMap<Successor>::get_rules() con
 {
     return rules_;
 }
+template<typename Successor>
+std::size_t RuleMap<Successor>::size() const
+{
+    return rules_.size();
+}
+
 
 template<typename Successor>
 void RuleMap<Successor>::add_rule(char predecessor, const Successor& successor)
