@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "Observable.h"
+#include "RuleMap.h"
 
 // Simple L-system generation class. Starting from an axiom and
 // simple production rules, generate by iteration a result array
@@ -18,7 +19,7 @@
 //   - If an axiom is defined at construction, 'cache_.at(0)' contains it at
 //   all time.
 //   - 'cache_' is coherent with the 'rules_'.
-class LSystem : public Observable
+class LSystem : public RuleMap<std::string>
 {
 public:
     // A 'production_rule' is a sole symbol associated with an
@@ -27,31 +28,15 @@ public:
     // (terminals) are replaced by themselves.  The rules are
     // contained in a hashmap for quick access during an
     // iteration.
-    using rule = std::pair<char, std::string>;
-    using production_rules = std::unordered_map<char, std::string>;
+    using production_rules = RuleMap::rule_map;
         
     // Constructors
     LSystem() = default;
     LSystem(const std::string& axiom, const production_rules& prod);
 
-    // Getters and setters
+    // --- Getters and setters ---
     // Get the axiom.
     std::string get_axiom() const;
-
-    // Check if 'predecessor' exists in the rules.
-    bool has_predecessor(char predecessor) const;
-
-    // Check if the rule "predecessor -> successor" exists.
-    bool has_rule(char predecessor, const std::string& successor) const;
-
-    // Get the rule associated with 'predecessor'
-    // Exceptions:
-    //   - Precondition: a production rule with 'predecessor' as a predecessor
-    //   exists.
-    rule get_rule(char predecessor) const;
-
-    // Get all the rules
-    const production_rules&  get_rules() const;
 
     // Get the cache
     const std::unordered_map<int, std::string>& get_cache() const;
@@ -62,7 +47,7 @@ public:
     // Add the rule "predecessor -> successor"
     // Note: replace the successor of an existing rule if 'predecessor' has
     // already a rule associated.
-    void add_rule(char predecessor, const std::string& successor);
+    void add_rule(char predecessor, const RuleMap::successor& successor);
 
     // Remove the rule associated to 'predecessor'
     // Exception:
@@ -71,15 +56,17 @@ public:
 
     // Clear the rules
     void clear_rules();
-        
+
     // Returns the result of the 'n'-th iteration of the L-System and cache
     // it as well as the transitional iterations.
+    //
+    // Exceptions:
+    //   - Precondition: n positive.
+    //   - Throw in case of allocation problem.
+    //   - Throw at '.at()' if code is badly refactored.
     std::string produce(int n);
        
 private:
-    // The production rules applied in each iteration.
-    production_rules rules_ = {};
-
     // The cache of all calculated iterations and the axiom.
     // It contains all the iterations up to the highest iteration
     // calculated. It is clearly not optimized for memory
