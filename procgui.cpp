@@ -356,52 +356,24 @@ namespace procgui
         // --- Interpretations ---
         // [ predecessor ] -> [ interpretation ] | [-] (remove) | [+] (add)
 
-        auto& interpretations = buffer.interpretation_buffer_;
-        using validity    = InterpretationMapBuffer::validity; // == unicity
-        using predecessor = InterpretationMapBuffer::predecessor;
-            
-        // Inform 'buffer' to synchronize the map buffer with the
-        // InterpretationMap.
-        bool interpretations_modified = false;
-
         // Iterator pointing to the rule to delete, if the [-] button is
         // clicked on.
-        auto to_delete = interpretations.end();
+        auto to_delete = buffer.end();
 
-        // If the [+] button is clicked we add a rule to the LSystemBuffer.
-        bool must_add_interpretation = false;
-
-        // We use the old iterator style to save the rule in 'to_delete', if necessary.
-        for (auto it = interpretations.begin(); it != interpretations.end(); ++it)
+        // We use the old iterator style to save the rule to delete, if necessary.
+        for (auto it = buffer.begin(); it != buffer.end(); ++it)
         { 
-            auto& interp = *it;
-            auto& is_valid = std::get<validity>(interp);
-            auto& pred = std::get<predecessor>(interp);
-            auto& order = std::get<OrderEntry>(interp);
+            auto rule = *it;
 
-            ImGui::PushID(&interp); // Create a scope.
+            ImGui::PushID(&(*it)); // Create a scope.
             ImGui::PushItemWidth(20);
 
-            // Display the predecessor in as InputText
-            if (ImGui::InputText("##pred", pred.data(), 2))
+            char predec[2] { rule.predecessor, '\0' };
+            // Display the predecessor as an InputText
+            if (ImGui::InputText("##pred", predec, 2))
             {
-                // The predecessor has been modified by the user. Now...
-                interpretations_modified = true;
-                    
-                // ... check if the new predecessor already exists in the interpretations.
-                bool is_duplicate = false;
-                for(auto find_it = interpretations.begin(); find_it != interpretations.end(); ++find_it)
-                {
-                    if(find_it != it && // do not check a rule against itself
-                       std::get<predecessor>(*find_it) == pred)
-                    {
-                        is_duplicate = true;
-                        break;
-                    }                            
-                }
-
-                // If the predecessor is not unique, the rule is not valid.
-                is_valid = !is_duplicate;
+                is_modified = true;
+                buffer.delayed_change_predecessor(it, predec[0]);
             }
 
             ImGui::PopItemWidth(); ImGui::SameLine(); ImGui::Text("->"); ImGui::SameLine();
@@ -420,70 +392,53 @@ namespace procgui
             // current one.
             auto selected_interpretation_it = std::find(all_orders.begin(),
                                                         all_orders.end(),
-                                                        order);
+                                                        get_order_entry(rule.successor));
             int index = std::distance(all_orders.begin(), selected_interpretation_it);
             if(ImGui::ListBox("##order", &index, all_orders_name.data(), all_orders_name.size()))
             {
-                interpretations_modified = true;
-                order = all_orders.at(index);
+                is_modified = true;
+                buffer.delayed_change_successor(it, all_orders.at(index).order);
             }
-
-            // The [-] button. If clicked, the current iterator is saved as
-            // the one to delete. We reasonably assume a user can not click
-            // on two different buttons in the same frame.
-            // We will need to synchronize the interpretations.
+                
+                
+            // The [-] button. If clicked, the current iterator is saved as the
+            // one to delete. We reasonably assume a user can not click on two
+            // different buttons in the same frame.  We will need to synchronize
+            // the rules.
             ImGui::SameLine();
             if (ImGui::Button("-"))
             {
+                is_modified = true;
                 to_delete = it;
-                interpretations_modified = true;
             }
 
-            // For the last interpretation in the buffer, add the [+] button.
-            if (it == std::prev(interpretations.end()))
+            // If the current rule is not valid, add a warning.
+            if(!rule.validity)
             {
                 ImGui::SameLine();
-                ImGui::PushStyleGreenButton();
-                if (ImGui::Button("+"))
-                {
-                    // If the button is clicked, we must add a rule to the buffer.
-                    must_add_interpretation = true;
-                }
-                ImGui::PopStyleColor(3);
-            }
-
-            // If the current interpretation is not valid, add a warning.
-            if(!is_valid)
-            {
-                ImGui::SameLine();
-                ImGui::TextColored(ImVec4(1.f,0.f,0.f,1.f), "Duplicated predecessor: %s", pred.data());
+                ImGui::TextColored(ImVec4(1.f,0.f,0.f,1.f), "Duplicated predecessor: %s", predec);
             }
                 
             ImGui::PopID(); // End of the loop and the scope
         }
 
-        // Erase the marked interpretation if necessary
-        if (to_delete != interpretations.end())
+        ImGui::PushStyleGreenButton();
+        if (ImGui::Button("+"))
         {
-            interpretations.erase(to_delete);
-        }
-
-        // Add an interpretation if necessary
-        if (must_add_interpretation)
-        {
-            predecessor pred;
-            pred.fill('\0');
-            interpretations.push_back({true, pred, go_forward_entry});
-        }
-
-        // Synchronize the interpretations if necessary
-        if (interpretations_modified)
-        {
-            buffer.sync();
             is_modified = true;
+            buffer.delayed_add_rule();
         }
-        
-            
+        ImGui::PopStyleColor(3);
+
+        // Erase the marked rule if necessary
+        if (to_delete != buffer.end())
+        {
+            buffer.delayed_erase(to_delete);
+        }
+
+        // Apply the buffered methods.
+        buffer.apply();
+
         ImGui::Unindent(); 
 
         conclude(main);

@@ -37,16 +37,17 @@ int main(/*int argc, char* argv[]*/)
     window.setVerticalSyncEnabled(true);
     ImGui::SFML::Init(window);
 
-    std::shared_ptr<LSystem> serpinski (new LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
+    auto serpinski = std::make_shared<LSystem>(LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
     LSystemBuffer serpinski_buffer { serpinski };
-    std::shared_ptr<LSystem> plant (new LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } } });
+    auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } } });
     LSystemBuffer plant_buffer { plant };
-    InterpretationMap map { { 'F', go_forward },
-                            { 'G', go_forward },
-                            { '+', turn_left  },
-                            { '-', turn_right },
-                            { '[', save_position },
-                            { ']', load_position } };
+    auto map = std::make_shared<InterpretationMap>(InterpretationMap
+                                                     { { 'F', go_forward },
+                                                     { 'G', go_forward },
+                                                     { '+', turn_left  },
+                                                     { '-', turn_right },
+                                                     { '[', save_position },
+                                                     { ']', load_position } });
     InterpretationMapBuffer map_buffer { map };
 
     LSystemBuffer lsys_test { serpinski };
@@ -69,8 +70,8 @@ int main(/*int argc, char* argv[]*/)
 
     std::vector<sf::Vertex> v;
 
-    auto serpinski_paths = compute_path(*serpinski, map, serpinski_param);
-    auto plant_paths = compute_path(*plant, map, plant_param);
+    auto serpinski_paths = compute_path(*serpinski, *map, serpinski_param);
+    auto plant_paths = compute_path(*plant, *map, plant_param);
 
     size_t n = std::accumulate(plant_paths.begin(), plant_paths.end(), 0,
                                [](const auto& n, const auto& v) { return n + v.size(); });
@@ -96,18 +97,19 @@ int main(/*int argc, char* argv[]*/)
         bool is_modified = false;
         is_modified |= interact_with(serpinski_param, "Serpinski");
         is_modified |= interact_with(serpinski_buffer, "Serpinski");
-        // is_modified |= interact_with(map_buffer, "Serpinski");
+        is_modified |= interact_with(map_buffer, "Serpinski");
  
         // is_modified |= interact_with(map_test, "test");
-        is_modified |= interact_with(lsys_test, "test");
-        is_modified |= interact_with(lsys_test2, "test2");
-
+        // is_modified |= interact_with(lsys_test, "test");
+        // is_modified |= interact_with(lsys_test2, "test2");
+        is_modified |= interact_with(map_test, "Test");
+        
         // is_modified |= interact_with(plant_param, "plant");
         // is_modified |= interact_with(plant_buffer, "plant");
         if (is_modified)
         {
-            plant_paths = compute_path(*plant, map, plant_param);
-            serpinski_paths = compute_path(*serpinski, map, serpinski_param);
+            plant_paths = compute_path(*plant, *map, plant_param);
+            serpinski_paths = compute_path(*serpinski, *map, serpinski_param);
 
 
             size_t n = std::accumulate(plant_paths.begin(), plant_paths.end(), 0,
@@ -127,7 +129,7 @@ int main(/*int argc, char* argv[]*/)
 
         }
 
-        display(map, "interpretations");
+        display(*map, "interpretations");
 
         for(const auto& path : serpinski_paths)
         {

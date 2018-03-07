@@ -1,5 +1,5 @@
-#ifndef INTERPRETATION_MAP_VIEW_H
-#define INTERPRETATION_MAP_VIEW_H
+#ifndef INTERPRETATION_MAP_BUFFER_H
+#define INTERPRETATION_MAP_BUFFER_H
 
 
 #include <list>
@@ -9,6 +9,7 @@
 #include "gsl/gsl"
 
 #include "Turtle.h"
+#include "RuleMapBuffer.h"
 
 namespace procgui
 {
@@ -45,40 +46,7 @@ namespace procgui
     //   exists.
     OrderEntry get_order_entry(const drawing::Order& order);
 
-
-    
-    // The interface between drawing::InterpretationMap and the ImGui GUI.
-    //
-    // ImGui is a immediate-mode GUI, so it can not retain information between
-    // frame. This class hosts a interpretation (predecessor linked to an order)
-    // buffer used in 'procgui::interact_with()' to manage:
-    //   - duplicate interpretations
-    //   - adding new interpretations
-    //   - removing interpretations
-    // We can still directly access the InterpretationMap for all trivial
-    // attributes like the axiom.
-    //
-    // An InterpretationMapBuffer must be destructed before the destruction of
-    // its InterpretationMap (non owning-reference). For the coherence of the
-    // GUI, an InterpretationMap must have a unique InterpretationMapBuffer
-    // associated.
-    //
-    // Note: This class has a lot in common with 'LSystemBuffer'. If a third
-    // class has the same properties, all will be refactorized.
-    struct InterpretationMapBuffer
-    {
-        using validity = bool; // If the interpretation is a duplicate, it is
-                               // not valid.
-        using predecessor = std::array<char, 2>;
-
-        InterpretationMapBuffer(drawing::InterpretationMap& map);
-
-        // Synchronize the interpretations buffer with the IntepretationMap
-        void sync();
-
-        drawing::InterpretationMap& map_; // non-owning reference
-        std::list<std::tuple<validity, predecessor, OrderEntry>> interpretation_buffer_;
-    };
+    using InterpretationMapBuffer = RuleMapBuffer<drawing::InterpretationMap>;
 }
 
-#endif // INTERPRETATION_MAP_VIEW_H
+#endif // INTERPRETATION_MAP_BUFFER_H
