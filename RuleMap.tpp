@@ -6,6 +6,14 @@ RuleMap<Successor>::RuleMap(const rule_map& rules)
 }
 
 template<typename Successor>
+RuleMap<Successor>::RuleMap(std::initializer_list<typename rule_map::value_type> init)
+    : Observable{}
+    , rules_{init}
+{
+}
+
+
+template<typename Successor>
 bool RuleMap<Successor>::has_predecessor(char predecessor) const
 {
     return rules_.count(predecessor) > 0;

@@ -7,7 +7,6 @@
 #include <gsl/gsl>
 
 #include "Observable.h"
-#include "InterpretationMap.h"
 
 // RuleMap is a thin wrapper around an unordered_map specialized for the rules
 // 'char -> T'. Semantically, in this project, it links a symbol of a LSystem
@@ -26,6 +25,7 @@ public:
     
     RuleMap() = default;
     RuleMap(const rule_map& rules);
+    RuleMap(std::initializer_list<typename rule_map::value_type> init);
     virtual ~RuleMap() {}
 
     // --- Getters and setters ---
