@@ -7,7 +7,7 @@
 #include "imgui/imgui-SFML.h"
 
 #include "LSystem.h"
-#include "RuleBuffer.h"
+#include "RuleMapBuffer.h"
 #include "InterpretationMapBuffer.h"
 #include "Turtle.h"
 #include "helper_math.h"
@@ -41,12 +41,12 @@ int main(/*int argc, char* argv[]*/)
     LSystemBuffer serpinski_buffer { serpinski };
     std::shared_ptr<LSystem> plant (new LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } } });
     LSystemBuffer plant_buffer { plant };
-    InterpretationMap map  = { { 'F', go_forward },
-                               { 'G', go_forward },
-                               { '+', turn_left  },
-                               { '-', turn_right },
-                               { '[', save_position },
-                               { ']', load_position } };
+    InterpretationMap map { { 'F', go_forward },
+                            { 'G', go_forward },
+                            { '+', turn_left  },
+                            { '-', turn_right },
+                            { '[', save_position },
+                            { ']', load_position } };
     InterpretationMapBuffer map_buffer { map };
 
     LSystemBuffer lsys_test { serpinski };

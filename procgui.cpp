@@ -165,7 +165,7 @@ namespace procgui
             return;
         }
 
-        for(auto interpretation : map)
+        for(auto interpretation : map.get_rules())
         {
             std::string name = get_order_entry(interpretation.second).name;
             ImGui::Text("%c -> %s", interpretation.first, name.c_str());
@@ -256,8 +256,6 @@ namespace procgui
             lsys.set_axiom(array_to_string(buf));
         }
 
-        // The next part has a lot in common with 'interact_with(InterpretationMapBuffer, )'
-        // It will be refactorized if a third similar use case come.
         //  --- Production rules ---
         // [ predecessor ] -> [ successor ] [-] (remove rule) | [+] (add rule)
 
@@ -355,9 +353,6 @@ namespace procgui
 
         bool is_modified = false;
 
-        // The next part has a lot in common with 'interact_with(LSystemBuffer, )'
-        // It will be refactorized if a third similar use case come.
-        
         // --- Interpretations ---
         // [ predecessor ] -> [ interpretation ] | [-] (remove) | [+] (add)
 

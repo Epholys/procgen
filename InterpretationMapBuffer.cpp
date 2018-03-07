@@ -16,7 +16,7 @@ namespace procgui
         , interpretation_buffer_ {}
     {
         // Initialize the buffer with the InterpretationMap's interpretations.
-        for (const auto& interpretation : map)
+        for (const auto& interpretation : map.get_rules())
         {
             predecessor pred  = { interpretation.first, '\0' };
             interpretation_buffer_.push_back({true, pred, get_order_entry(interpretation.second)});
@@ -25,7 +25,7 @@ namespace procgui
 
     void InterpretationMapBuffer::sync()
     {
-        map_.clear();
+        map_.clear_rules();
         
         for (const auto& interpretation : interpretation_buffer_)
         {
@@ -33,7 +33,7 @@ namespace procgui
             if(std::get<validity>(interpretation) &&
                pred != '\0') // An empty interpretation is not synchronized.
             {
-                map_[pred] = std::get<OrderEntry>(interpretation).order;
+                map_.get_rule(pred).second = std::get<OrderEntry>(interpretation).order;
             }
         }
     }
