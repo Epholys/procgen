@@ -55,6 +55,7 @@ namespace procgui
         /* must be a derived class of RuleMap */
         static_assert(std::is_base_of<RuleMap<typename Target::successor>, Target>::value, "RuleMapBuffer must refer to a derived class of RuleMap");
 
+        using target = Target;
         using succ = typename Target::successor;
 
         // A production rule: 

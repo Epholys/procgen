@@ -46,6 +46,7 @@ namespace procgui
     //   exists.
     OrderEntry get_order_entry(const drawing::Order& order);
 
+    // Simple RuleMapBuffer
     using InterpretationMapBuffer = RuleMapBuffer<drawing::InterpretationMap>;
 }
 

@@ -1,6 +1,7 @@
 #include <cctype>
 #include <cstring>
 #include <tuple>
+#include <chrono>
 #include "procgui.h"
 #include "helper_string.h"
 
@@ -256,87 +257,23 @@ namespace procgui
             lsys.set_axiom(array_to_string(buf));
         }
 
-        //  --- Production rules ---
+        //  --- Rules ---
         // [ predecessor ] -> [ successor ] [-] (remove rule) | [+] (add rule)
 
-            
         ImGui::Text("Production rules:");
-
-        ImGui::Indent(); 
-
-        // Iterator pointing to the rule to delete, if the [-] button is
-        // clicked on.
-        auto to_delete = buffer.end();
-
-        // We use the old iterator style to save the rule to delete, if necessary.
-        for (auto it = buffer.begin(); it != buffer.end(); ++it)
-        { 
-            auto rule = *it;
-
-            ImGui::PushID(&(*it)); // Create a scope.
-            ImGui::PushItemWidth(20);
-
-            char predec[2] { rule.predecessor, '\0' };
-            // Display the predecessor as an InputText
-            if (ImGui::InputText("##pred", predec, 2))
+        is_modified |= interact_with_buffer(buffer,
+            [&buffer](auto it)
             {
-                is_modified = true;
-                buffer.delayed_change_predecessor(it, predec[0]);
-            }
-
-            ImGui::PopItemWidth(); ImGui::SameLine(); ImGui::Text("->"); ImGui::SameLine();
-
-            ImGui::PushItemWidth(200);
-
-            // Interact with the successor. Except for the input size, does not
-            // have any constraints.
-            auto array = string_to_array<lsys_successor_size>(rule.successor);
-            if(ImGui::InputText("##succ", array.data(), lsys_successor_size))
-            {
-                is_modified = true;
-                buffer.delayed_change_successor(it, array_to_string(array));
-            }
-                
-                
-            // The [-] button. If clicked, the current iterator is saved as the
-            // one to delete. We reasonably assume a user can not click on two
-            // different buttons in the same frame.  We will need to synchronize
-            // the rules.
-            ImGui::SameLine();
-            if (ImGui::Button("-"))
-            {
-                is_modified = true;
-                to_delete = it;
-            }
-
-            // If the current rule is not valid, add a warning.
-            if(!rule.validity)
-            {
-                ImGui::SameLine();
-                ImGui::TextColored(ImVec4(1.f,0.f,0.f,1.f), "Duplicated predecessor: %s", predec);
-            }
-                
-            ImGui::PopID(); // End of the loop and the scope
-        }
-
-        ImGui::PushStyleGreenButton();
-        if (ImGui::Button("+"))
-        {
-            is_modified = true;
-            buffer.delayed_add_rule();
-        }
-        ImGui::PopStyleColor(3);
-
-        // Erase the marked rule if necessary
-        if (to_delete != buffer.end())
-        {
-            buffer.delayed_erase(to_delete);
-        }
-
-        // Apply the buffered methods.
-        buffer.apply();
-            
-        ImGui::Unindent(); 
+                // Interact with the successor. Except for the input size, does not
+                // have any constraints.
+                auto array = string_to_array<lsys_successor_size>(it->successor);
+                if(ImGui::InputText("##succ", array.data(), lsys_successor_size))
+                {
+                    buffer.delayed_change_successor(it, array_to_string(array));
+                    return true;
+                }
+                return false;
+            });
 
         conclude(main);
 
@@ -351,95 +288,30 @@ namespace procgui
             return false;
         }
 
-        bool is_modified = false;
-
-        // --- Interpretations ---
-        // [ predecessor ] -> [ interpretation ] | [-] (remove) | [+] (add)
-
-        // Iterator pointing to the rule to delete, if the [-] button is
-        // clicked on.
-        auto to_delete = buffer.end();
-
-        // We use the old iterator style to save the rule to delete, if necessary.
-        for (auto it = buffer.begin(); it != buffer.end(); ++it)
-        { 
-            auto rule = *it;
-
-            ImGui::PushID(&(*it)); // Create a scope.
-            ImGui::PushItemWidth(20);
-
-            char predec[2] { rule.predecessor, '\0' };
-            // Display the predecessor as an InputText
-            if (ImGui::InputText("##pred", predec, 2))
+        bool is_modified = interact_with_buffer(buffer,
+            [&buffer](auto it)
             {
-                is_modified = true;
-                buffer.delayed_change_predecessor(it, predec[0]);
-            }
+                // ImGui::ListBox needs:
+                //   - An array of 'char *' for the different elements
+                //   - An index to select between these elements
 
-            ImGui::PopItemWidth(); ImGui::SameLine(); ImGui::Text("->"); ImGui::SameLine();
-
-            ImGui::PushItemWidth(200);
-
-            // ImGui::ListBox needs:
-            //   - An array of 'char *' for the different elements
-            //   - An index to select between these elements
-
-            // As 'all_orders_name' has the exact same order as
-            // 'all_orders', the index is common.
-            // 
-            // The index is calculated by finding in the vector the order
-            // and using the distance between the first element and the
-            // current one.
-            auto selected_interpretation_it = std::find(all_orders.begin(),
-                                                        all_orders.end(),
-                                                        get_order_entry(rule.successor));
-            int index = std::distance(all_orders.begin(), selected_interpretation_it);
-            if(ImGui::ListBox("##order", &index, all_orders_name.data(), all_orders_name.size()))
-            {
-                is_modified = true;
-                buffer.delayed_change_successor(it, all_orders.at(index).order);
-            }
-                
-                
-            // The [-] button. If clicked, the current iterator is saved as the
-            // one to delete. We reasonably assume a user can not click on two
-            // different buttons in the same frame.  We will need to synchronize
-            // the rules.
-            ImGui::SameLine();
-            if (ImGui::Button("-"))
-            {
-                is_modified = true;
-                to_delete = it;
-            }
-
-            // If the current rule is not valid, add a warning.
-            if(!rule.validity)
-            {
-                ImGui::SameLine();
-                ImGui::TextColored(ImVec4(1.f,0.f,0.f,1.f), "Duplicated predecessor: %s", predec);
-            }
-                
-            ImGui::PopID(); // End of the loop and the scope
-        }
-
-        ImGui::PushStyleGreenButton();
-        if (ImGui::Button("+"))
-        {
-            is_modified = true;
-            buffer.delayed_add_rule();
-        }
-        ImGui::PopStyleColor(3);
-
-        // Erase the marked rule if necessary
-        if (to_delete != buffer.end())
-        {
-            buffer.delayed_erase(to_delete);
-        }
-
-        // Apply the buffered methods.
-        buffer.apply();
-
-        ImGui::Unindent(); 
+                // As 'all_orders_name' has the exact same order as
+                // 'all_orders', the index is common.
+                // 
+                // The index is calculated by finding in the vector the order
+                // and using the distance between the first element and the
+                // current one.
+                auto selected_interpretation_it = std::find(all_orders.begin(),
+                                                            all_orders.end(),
+                                                            get_order_entry(it->successor));
+                int index = std::distance(all_orders.begin(), selected_interpretation_it);
+                if(ImGui::ListBox("##order", &index, all_orders_name.data(), all_orders_name.size()))
+                {
+                    buffer.delayed_change_successor(it, all_orders.at(index).order);
+                    return true;
+                }
+                return false;
+            });
 
         conclude(main);
 

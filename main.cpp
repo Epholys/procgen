@@ -96,13 +96,16 @@ int main(/*int argc, char* argv[]*/)
         window.clear();
         bool is_modified = false;
         is_modified |= interact_with(serpinski_param, "Serpinski");
-        is_modified |= interact_with(serpinski_buffer, "Serpinski");
-        is_modified |= interact_with(map_buffer, "Serpinski");
+        // is_modified |= interact_with(serpinski_buffer, "Serpinski");
+        // is_modified |= interact_with(map_buffer, "Serpinski");
  
         // is_modified |= interact_with(map_test, "test");
-        // is_modified |= interact_with(lsys_test, "test");
-        // is_modified |= interact_with(lsys_test2, "test2");
-        is_modified |= interact_with(map_test, "Test");
+        is_modified |= interact_with(lsys_test, "test");
+        is_modified |= interact_with(lsys_test, "test");
+        // is_modified |= interact_with(plant_param, "Test");
+        // is_modified |= interact_with(plant_buffer, "Test");
+        is_modified |= interact_with(map_buffer, "test");
+        // is_modified |= interact_with(map_buffer, "Test");
         
         // is_modified |= interact_with(plant_param, "plant");
         // is_modified |= interact_with(plant_buffer, "plant");
