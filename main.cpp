@@ -95,6 +95,7 @@ int main(/*int argc, char* argv[]*/)
 
         window.clear();
         bool is_modified = false;
+        procgui::new_frame();
         is_modified |= interact_with(serpinski_param, "Serpinski");
         // is_modified |= interact_with(serpinski_buffer, "Serpinski");
         // is_modified |= interact_with(map_buffer, "Serpinski");
@@ -128,8 +129,6 @@ int main(/*int argc, char* argv[]*/)
                 vx2.color = sf::Color(0);
                 v.push_back(vx2);
             }
-
-
         }
 
         display(*map, "interpretations");

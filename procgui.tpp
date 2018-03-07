@@ -2,8 +2,6 @@ template<typename Buffer>
 bool interact_with_buffer(Buffer& buffer,
                           std::function<bool(typename Buffer::const_iterator)>  predecessor_fn)
 {
-    // ImGui::PushID(&buffer);
-
     //  --- Rules ---
     // [ predecessor ] -> [ successor ] [-] (remove rule) | [+] (add rule)
 
@@ -79,8 +77,6 @@ bool interact_with_buffer(Buffer& buffer,
     buffer.apply();
             
     ImGui::Unindent();
-
-    // ImGui::PopID();
 
     return is_modified;
 }

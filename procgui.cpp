@@ -7,6 +7,15 @@
 
 using namespace math;
 
+namespace procgui
+{
+    static int call_id = 0;
+    void new_frame()
+    {
+        call_id = 0;
+    }
+}
+
 namespace
 {
     // The two next function are shared by all the 'display()' and
@@ -17,6 +26,8 @@ namespace
     // Returns 'false' if the window is collapsed, to early-out.
     bool set_up(const std::string& name, bool main)
     {
+        auto& id = procgui::call_id;
+        ++id;
         // If we're the main class, open window 'name'.
         if (main)
         {
@@ -26,11 +37,16 @@ namespace
                 // Window is collapsed, call End();
                 ImGui::End();
             }
+            else
+            {
+                ImGui::PushID(id);
+            }
             return is_active;
         }
         // Otherwise, set up a TreeNode.
         else
         {
+            ImGui::PushID(id);
             return ImGui::TreeNode(name.c_str());
         }
     }
@@ -44,12 +60,14 @@ namespace
         if (main)
         {
             ImGui::Separator();
+            ImGui::PopID();
             ImGui::End();
         }
         // Otherwise, close the TreeNode.
         else
         {
             ImGui::TreePop();
+            ImGui::PopID();
         }
     }
 }
