@@ -1,5 +1,5 @@
-#ifndef RULE_BUFFER_H
-#define RULE_BUFFER_H
+#ifndef RULE_MAP_BUFFER_H
+#define RULE_MAP_BUFFER_H
 
 
 #include <list>
@@ -22,7 +22,7 @@ namespace procgui
     //
     // This is a sensitive class, as edge cases are the rules. We must
     // manage:
-    //   - synchronization between 'RuleBuffer':
+    //   - synchronization between 'RuleMapBuffer':
     //   Several object can refer to the same Target (e.g. LSystem). A
     // synchronization is necessary between them and implemented with the
     // 'Observer<>' class. However, scratch buffers are unique to each
@@ -31,12 +31,12 @@ namespace procgui
     //   - empty rules:
     //   If a rule does not have a predecessor (a null character), it is
     // considered as a scratch buffer. They are not synchronized with the
-    // Target or others 'RuleBuffer'.
+    // Target or others 'RuleMapBuffer'.
     // 
     //   - duplication:
     //   Several rules can be duplicated. If one of these rule is removed, the
     // other one must take its place and be synchronized, even if the removed
-    // rule and its replacement are in different 'RuleBuffer'.
+    // rule and its replacement are in different 'RuleMapBuffer'.
     // 
     //   - iterator invalidation:
     //   To access the buffer in the GUI, a 'const_iterator' is
@@ -49,11 +49,11 @@ namespace procgui
     // Invariant:
     //   - The Target and the buffer must be synchronized
     template<typename Target>
-    class RuleBuffer : public Observer<Target>
+    class RuleMapBuffer : public Observer<Target>
     {
     public:
         /* must be a derived class of RuleMap */
-        static_assert(std::is_base_of<RuleMap<typename Target::successor>, Target>::value, "RuleBuffer must refer to a derived class of RuleMap");
+        static_assert(std::is_base_of<RuleMap<typename Target::successor>, Target>::value, "RuleMapBuffer must refer to a derived class of RuleMap");
 
         using succ = typename Target::successor;
 
@@ -81,7 +81,7 @@ namespace procgui
         using const_iterator = typename buffer::const_iterator;
 
         // Constructor
-        RuleBuffer(const std::shared_ptr<Target>& target_);
+        RuleMapBuffer(const std::shared_ptr<Target>& target_);
 
         // Get the Target. Its modification will be automatically synchronized
         // with the Observer pattern.
@@ -169,7 +169,7 @@ namespace procgui
         std::function<void()> instruction_;
     };
 
-    #include "RuleBuffer.tpp"
+    #include "RuleMapBuffer.tpp"
 }
 
-#endif // RULE_BUFFER_H
+#endif // RULE_MAP_BUFFER_H

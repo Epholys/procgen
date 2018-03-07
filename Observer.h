@@ -22,7 +22,7 @@ template<typename T>
 class Observer
 {
 public:
-    static_assert(std::is_base_of<Observable, T>::value);
+    static_assert(std::is_base_of<Observable, T>::value, "An observer must watch an Observable");
         
 
 // An Observer must have a observable target.

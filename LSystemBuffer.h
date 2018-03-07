@@ -2,7 +2,7 @@
 #define LSYSTEM_BUFFER_H
 
 
-#include "RuleBuffer.h"
+#include "RuleMapBuffer.h"
 
 namespace procgui
 {
@@ -11,7 +11,8 @@ namespace procgui
     // production rule.
     constexpr int lsys_successor_size = 64;
 
-    using LSystemBuffer = RuleBuffer<LSystem>;
+    // Simple implementation of the LSystemBuffer.
+    using LSystemBuffer = RuleMapBuffer<LSystem>;
 }
 
 

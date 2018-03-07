@@ -1,7 +1,7 @@
 #include <algorithm>
 
 template<typename Target>
-RuleBuffer<Target>::RuleBuffer(const std::shared_ptr<Target>& target)
+RuleMapBuffer<Target>::RuleMapBuffer(const std::shared_ptr<Target>& target)
     : Observer<Target>(target)
     , target_ {*Observer<Target>::target_}
     , buffer_ {}
@@ -19,32 +19,32 @@ RuleBuffer<Target>::RuleBuffer(const std::shared_ptr<Target>& target)
     }
 
 template<typename Target>
-Target& RuleBuffer<Target>::get_target() const
+Target& RuleMapBuffer<Target>::get_target() const
 {
     return target_;
 }
 
 template<typename Target>
-typename RuleBuffer<Target>::const_iterator RuleBuffer<Target>::begin() const
+typename RuleMapBuffer<Target>::const_iterator RuleMapBuffer<Target>::begin() const
 {
     return buffer_.cbegin();
 }
 
 template<typename Target>
-typename RuleBuffer<Target>::const_iterator RuleBuffer<Target>::end() const
+typename RuleMapBuffer<Target>::const_iterator RuleMapBuffer<Target>::end() const
 {
     return buffer_.cend();
 }
 
 template<typename Target>
-size_t RuleBuffer<Target>::size() const
+size_t RuleMapBuffer<Target>::size() const
 {
     return buffer_.size();
 }
 
 
 template<typename Target>
-typename RuleBuffer<Target>::iterator RuleBuffer<Target>::remove_const(const_iterator cit)
+typename RuleMapBuffer<Target>::iterator RuleMapBuffer<Target>::remove_const(const_iterator cit)
 {
     // https://stackoverflow.com/a/10669041/4309005
     return buffer_.erase(cit, cit);
@@ -52,7 +52,7 @@ typename RuleBuffer<Target>::iterator RuleBuffer<Target>::remove_const(const_ite
 
     
 template<typename Target>
-void RuleBuffer<Target>::add_rule()
+void RuleMapBuffer<Target>::add_rule()
 {
     // Add a scratch buffer: a valid empty rule.
     buffer_.push_back({});
@@ -60,7 +60,7 @@ void RuleBuffer<Target>::add_rule()
 
 
 template<typename Target>
-void RuleBuffer<Target>::erase(const_iterator cit)
+void RuleMapBuffer<Target>::erase(const_iterator cit)
 {
     Expects(cit != buffer_.end());
         
@@ -81,7 +81,7 @@ void RuleBuffer<Target>::erase(const_iterator cit)
 }
 
 template<typename Target>
-void RuleBuffer<Target>::change_predecessor(const_iterator cit, char pred)
+void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
 {
     Expects(cit != buffer_.end());
 
@@ -156,7 +156,7 @@ void RuleBuffer<Target>::change_predecessor(const_iterator cit, char pred)
 }
     
 template<typename Target>
-void RuleBuffer<Target>::remove_predecessor(RuleBuffer<Target>::const_iterator cit)
+void RuleMapBuffer<Target>::remove_predecessor(RuleMapBuffer<Target>::const_iterator cit)
 {
     Expects(cit != buffer_.end());
 
@@ -178,7 +178,7 @@ void RuleBuffer<Target>::remove_predecessor(RuleBuffer<Target>::const_iterator c
 
 
 template<typename Target>
-void RuleBuffer<Target>::change_successor(const_iterator cit, const succ& succ)
+void RuleMapBuffer<Target>::change_successor(const_iterator cit, const succ& succ)
 {
     Expects(cit != buffer_.end());
 
@@ -196,11 +196,11 @@ void RuleBuffer<Target>::change_successor(const_iterator cit, const succ& succ)
 }
 
 template<typename Target>
-void RuleBuffer<Target>::remove_rule(char pred)
+void RuleMapBuffer<Target>::remove_rule(char pred)
 {
     // This method is called instead of 'target_.remove_rule(pred)' to replace
     // the old rule by a duplicate that is in priority in the same
-    // RuleBuffer.
+    // RuleMapBuffer.
 
     // If 'pred' designate a still valid rule, remove this rule.
     auto original = std::find_if(buffer_.begin(), buffer_.end(),
@@ -231,33 +231,33 @@ void RuleBuffer<Target>::remove_rule(char pred)
 }
     
 template<typename Target>
-void RuleBuffer<Target>::delayed_add_rule()
+void RuleMapBuffer<Target>::delayed_add_rule()
 {
     instruction_ = [=](){ add_rule(); };
 }
 template<typename Target>
-void RuleBuffer<Target>::delayed_erase(const_iterator cit)
+void RuleMapBuffer<Target>::delayed_erase(const_iterator cit)
 {
     instruction_ = [=](){ erase(cit); };
 }
 template<typename Target>
-void RuleBuffer<Target>::delayed_change_predecessor(const_iterator cit, char pred)
+void RuleMapBuffer<Target>::delayed_change_predecessor(const_iterator cit, char pred)
 {
     instruction_ = [=](){ change_predecessor(cit, pred); };
 }
 template<typename Target>
-void RuleBuffer<Target>::delayed_remove_predecessor(const_iterator cit)
+void RuleMapBuffer<Target>::delayed_remove_predecessor(const_iterator cit)
 {
     instruction_ = [=](){ remove_predecessor(cit); };
 }
 template<typename Target>
-void RuleBuffer<Target>::delayed_change_successor(const_iterator cit, const succ& succ)
+void RuleMapBuffer<Target>::delayed_change_successor(const_iterator cit, const succ& succ)
 {
     instruction_ = [=](){ change_successor(cit, succ); };
 }
 
 template<typename Target>
-void RuleBuffer<Target>::apply()
+void RuleMapBuffer<Target>::apply()
 {
     if(instruction_)
     {
@@ -267,7 +267,7 @@ void RuleBuffer<Target>::apply()
 }
 
 template<typename Target>
-void RuleBuffer<Target>::sync()
+void RuleMapBuffer<Target>::sync()
 {
     // This function is highly inefficient: the buffer and the Target are
     // updated even if there weren't any modification.
@@ -319,12 +319,12 @@ void RuleBuffer<Target>::sync()
         }
     }
 
-    // Final step: Synchronize rules between the RuleBuffers: if a rule
-    // is removed in a RuleBuffer and if it does not have a duplicate in
-    // the same RuleBuffer, we try to find a duplicate in an other
+    // Final step: Synchronize rules between the RuleMapBuffers: if a rule
+    // is removed in a RuleMapBuffer and if it does not have a duplicate in
+    // the same RuleMapBuffer, we try to find a duplicate in an other
     // buffer.
     // To do so, if we spot in a buffer an invalid rule without a valid one, we
-    // make it valid and update the LSystem (and so every other RuleBuffer).
+    // make it valid and update the LSystem (and so every other RuleMapBuffer).
     for (auto it = buffer_.begin(); it != buffer_.end(); ++it)
     {
         if (!it->validity)

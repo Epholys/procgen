@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "RuleBuffer.h"
+#include "RuleMapBuffer.h"
 #include "helper_algorithm.h"
 
 using namespace procgui;
@@ -19,7 +19,7 @@ public:
             }
     };
     
-    using IntBuffer = RuleBuffer<IntMap>;
+    using IntBuffer = RuleMapBuffer<IntMap>;
     
     using const_iterator = IntBuffer::const_iterator;
     using successor = IntBuffer::succ;
