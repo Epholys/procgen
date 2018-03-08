@@ -96,7 +96,7 @@ int main(/*int argc, char* argv[]*/)
 
         procgui::new_frame();
         bool is_modified = false;
-        is_modified |= interact_with(serpinski_param, "Serpinski");
+        // is_modified |= interact_with(serpinski_param, "Serpinski");
         // is_modified |= interact_with(serpinski_buffer, "Serpinski");
         // is_modified |= interact_with(map_buffer, "Serpinski");
  
@@ -108,8 +108,9 @@ int main(/*int argc, char* argv[]*/)
         // is_modified |= interact_with(map_buffer, "test");
         // is_modified |= interact_with(map_buffer, "Test");
         
-        // is_modified |= interact_with(plant_param, "plant");
-        // is_modified |= interact_with(plant_buffer, "plant");
+        is_modified |= interact_with(plant_param, "plant");
+        is_modified |= interact_with(plant_buffer, "plant");
+        display(*map, "interpretations");
         if (is_modified)
         {
             plant_paths = compute_path(*plant, *map, plant_param);
@@ -131,12 +132,10 @@ int main(/*int argc, char* argv[]*/)
             }
         }
 
-        display(*map, "interpretations");
-
-        for(const auto& path : serpinski_paths)
-        {
-            window.draw(path.data(), path.size(), sf::LineStrip);
-        }
+        // for(const auto& path : serpinski_paths)
+        // {
+        //     window.draw(path.data(), path.size(), sf::LineStrip);
+        // }
 
         window.draw(v.data(), v.size(), sf::LineStrip);
 
@@ -162,14 +161,6 @@ void handle_input(sf::RenderWindow& window)
     sf::Event event;
     while (window.pollEvent(event))
     {
-        if(event.type == sf::Event::MouseButtonPressed)
-        {
-            std::cout << "buttonpressed" << std::endl;
-        }
-        else if(event.type == sf::Event::GainedFocus)
-        {
-            std::cout << "focusgained" << std::endl;
-        }
         ImGui::SFML::ProcessEvent(event);
 
         if (event.type == sf::Event::Closed ||
@@ -193,9 +184,10 @@ void handle_input(sf::RenderWindow& window)
             view.setSize(event.size.width, event.size.height);
         }
             
-        else if (has_focus && !imgui_io.WantCaptureMouse)
+        else if (has_focus) // && !imgui_io.WantCaptureMouse)
         {
-            if (event.type == sf::Event::MouseWheelMoved)
+            if(!imgui_io.WantCaptureMouse &&
+                event.type == sf::Event::MouseWheelMoved)
             {
                 auto delta = event.mouseWheel.delta;
                 if (delta>0)
@@ -210,10 +202,9 @@ void handle_input(sf::RenderWindow& window)
                 }
             }
 
-            else if (event.type == sf::Event::MouseButtonPressed &&
-                     event.mouseButton.button == sf::Mouse::Left)
+            if (event.type == sf::Event::MouseButtonPressed &&
+                event.mouseButton.button == sf::Mouse::Left)
             {
-                std::cout << "updatepos" << std::endl;
                 mouse_position = sf::Mouse::getPosition(window);
                 can_move = true;
             }
@@ -228,18 +219,11 @@ void handle_input(sf::RenderWindow& window)
         sf::IntRect window_rect (sf::Vector2i(0,0), sf::Vector2i(window.getSize()));
         if (window_rect.contains(new_position))
         {
-            std::cout << "move" << std::endl;
             sf::Vector2i mouse_delta = mouse_position - new_position;
             view.move(sf::Vector2f(mouse_delta) * zoom_level);
             mouse_position = new_position;
         }
     }
     
-    sf::RectangleShape rect_mouse ({10.f, 10.f});
-    rect_mouse.setPosition(sf::Vector2f(mouse_position));
-    rect_mouse.setFillColor(sf::Color::Red);
-    window.draw(rect_mouse);
-   
-
     window.setView(view);
 }
