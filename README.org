@@ -1,14 +1,10 @@
 * Procedural Generation Experiments
+
+#+html: <p align="center"><img src="media/screenshot.png" /></p>
+
 ** Philosophy
   - Highly interactive
   - Climbing the [[http://worrydream.com/LadderOfAbstraction/][ladder of abstraction]]
-
-** Main Roadmap
-   1. Optimize L-System and Turtle execution time and memory consumption
-      With the current algorithm, execution time and memory consumption are exponential. Memory consumption is the biggest factor, as several GB can be allocated easily (from 16 iterations).
-   1. Make an integrated and interactive GUI with = dear imgui, =
-   1. Save and load L-system models
-   1. Vizualize the turtle moving
 
 ** Implemented
    - (Simple) L-systems
@@ -16,20 +12,23 @@
    - Static GUI to display parameters
    - Dynamic GUIs to interact with the parameters
 
-** Optimization
-   Ideas:
-   - Cache L-System (excellent for multiple execution time but awful for memory consumption)
-   - Cache multi-iteration production rules (very good for execution time but bad for memory consumption)
+** Main Roadmap
+   1. Add a relatively precise hitbox to select LSystem for modification
+   1. Save and load L-system models
+   1. Add a more complex GUI (classic with a main menu bar and right-click) and polish it
+   1. Add genetic algorithm or constraint-based algorithm for new LSystem generation
 
-*** Memory allocation with Valgrind (2017-09-17 Epholys)
-    =valgrind --tool\=massif --time-unit\=B --peak-inaccuracy=0.1=
+** Other ideas
 
-    Memory usage is directly linked to the size of the L-Systems calculated. These sizes grow exponentialy, so does the memory. As an example, with a simple L-System and 16 iterations, the resulting string is composed of tens of million of symbols. Saving these symbols and the 20-bytes-long vertices associated takes at least hundreds of MB in memory.
-    Moreover, during the execution of =logo::computes_vertices=, we use a =std::vector= as data structure. Its allocation strategy (in g++ and MSVC) is to multiply the capacity by a number. As a consequence, this vector is at most "factor" times too large. In our case of hundreds of MB, it can be a serious toll. Fortunately, this vector is truncated when returned by the function.
-    
-    I don't see an *obvious* way to reduce memory consumption. Symbols and vertices are already very small. We could reduce the size of the aforementioned vector by reserving just enough bytes for the vertices. But that means we would have to approximate a small upper-bound of the result of the L-System and also how much of its symbols will produce a new vertex. A whole mathematical problem.
+** Optimization & non-breaking bugs
+   - Optimization
+     With the current algorithm, execution time and memory consumption are exponential. Memory consumption is the biggest factor, as several GB can be allocated easily (from 16 iterations).
+     - Cache multi-iteration production rules (very good for execution time but bad for memory consumption)
+     - Use raw OpenGL to reduce the size of vertices (no texcoord for example)
+     - Use `sqrt` instead of `cos` and `sin` for angles
 
-    For now, I'll do nothing: I see no reasonable case to computes and display so much iterations of a L-System. I'll concentrate on optimizing execution time (with memory consumption in mind).
+   - Bugs
+     - Correct floating point errors when using big number of iterations
 
 ** Development framework
    - *Environment:* debian stretch chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=
@@ -52,6 +51,15 @@
 
 ** Thoughts dump
   - Huge literature on the subject and extremely developed existing software. What does this project bring?
+*** Memory allocation with Valgrind (2017-09-17 Epholys)
+    =valgrind --tool\=massif --time-unit\=B --peak-inaccuracy=0.1=
+
+    Memory usage is directly linked to the size of the L-Systems calculated. These sizes grow exponentialy, so does the memory. As an example, with a simple L-System and 16 iterations, the resulting string is composed of tens of million of symbols. Saving these symbols and the 20-bytes-long vertices associated takes at least hundreds of MB in memory.
+    Moreover, during the execution of =logo::computes_vertices=, we use a =std::vector= as data structure. Its allocation strategy (in g++ and MSVC) is to multiply the capacity by a number. As a consequence, this vector is at most "factor" times too large. In our case of hundreds of MB, it can be a serious toll. Fortunately, this vector is truncated when returned by the function.
+    
+    I don't see an *obvious* way to reduce memory consumption. Symbols and vertices are already very small. We could reduce the size of the aforementioned vector by reserving just enough bytes for the vertices. But that means we would have to approximate a small upper-bound of the result of the L-System and also how much of its symbols will produce a new vertex. A whole mathematical problem.
+
+    For now, I'll do nothing: I see no reasonable case to computes and display so much iterations of a L-System. I'll concentrate on optimizing execution time (with memory consumption in mind).
 
 ** (Res)sources
 [[http://blog.rabidgremlin.com/2014/12/09/procedural-content-generation-l-systems/][Procedural content generation: L-Systems (by Rabidgremlin)]]
