@@ -3,8 +3,8 @@
 
 
 LSystem::LSystem(const std::string& axiom, const production_rules& prod)
-    : rules_{prod},
-      cache_{ {0, axiom} }
+    : RuleMap<std::string>(prod)
+    , cache_{ {0, axiom} }
     {
     }
 
@@ -21,29 +21,7 @@ std::string LSystem::get_axiom() const
     }
 }
 
-bool LSystem::has_predecessor(char predecessor) const
-{
-    return rules_.count(predecessor) > 0;
-}
-
-bool LSystem::has_rule(char predecessor, const std::string& successor) const
-{
-    return has_predecessor(predecessor) && rules_.at(predecessor) == successor;
-}
-
-LSystem::rule LSystem::get_rule(char predecessor) const
-{
-    Expects(has_predecessor(predecessor));
-    return { predecessor, rules_.at(predecessor) };
-}
-
-const LSystem::production_rules& LSystem::get_rules() const
-{
-    return rules_;
-}
-
 const std::unordered_map<int, std::string>& LSystem::get_cache() const
-
 {
     return cache_;
 }
@@ -52,36 +30,26 @@ void LSystem::set_axiom(const std::string& axiom)
 {
     cache_ = { {0, axiom} };
     notify();
-}
+} 
 
-void LSystem::add_rule(char predecessor, const std::string& successor)
+void LSystem::add_rule(char predecessor, const RuleMap::successor& successor)
 {
     cache_ = { {0, get_axiom()} };
-    rules_[predecessor] = successor;
-    notify();
+    RuleMap::add_rule(predecessor, successor);    
 }
 
 void LSystem::remove_rule(char predecessor)
 {
-    auto rule = rules_.find(predecessor);
-    Expects(rule != rules_.end());
-
     cache_ = { {0, get_axiom()} };
-    rules_.erase(rule);
-    notify();
+    RuleMap::remove_rule(predecessor);
 }
 
 void LSystem::clear_rules()
 {
     cache_ = { {0, get_axiom()} };
-    rules_.clear();
-    notify();
+    RuleMap::clear_rules();
 }                             
-    
-// Exceptions:
-//   - Precondition: n positive.
-//   - Throw in case of allocation problem.
-//   - Throw at '.at()' if code is badly refactored.
+
 // Edge Cases:
 //   - If 'cache_' is empty so does not contains the axiom, simply
 //   returns an empty string.

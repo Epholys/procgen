@@ -18,12 +18,14 @@
 // metaprogramming.
 // The main focus of this class is to automatically manage the removal of the
 // callback in the 'Observable' class using RAII.
-template<typename T,
-         typename = std::enable_if_t<std::is_base_of<Observable, T>::value>>
+template<typename T>
 class Observer
 {
 public:
-    // An Observer must have a observable target.
+    static_assert(std::is_base_of<Observable, T>::value, "An observer must watch an Observable");
+        
+
+// An Observer must have a observable target.
     // Exception:
     //  - Precondition: 't' must not be a nullptr.
     Observer() = delete;

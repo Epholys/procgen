@@ -34,32 +34,6 @@ TEST(LSystemTest, get_axiom)
     ASSERT_EQ(lsys.get_axiom(), "F");
 }
 
-TEST(LSystemTest, has_predecessor)
-{
-    LSystem lsys { "F", { { 'F', "F+F" } } };
-
-    ASSERT_TRUE(lsys.has_predecessor('F'));
-    ASSERT_FALSE(lsys.has_predecessor('G'));
-}
-
-TEST(LSystemTest, has_rule)
-{
-    LSystem lsys { "F", { { 'F', "F+F" } } };
-
-    ASSERT_TRUE(lsys.has_rule('F', "F+F"));
-    ASSERT_FALSE(lsys.has_rule('F', "G-G"));
-    ASSERT_FALSE(lsys.has_rule('G', "F+F"));
-}
-
-TEST(LSystemTest, get_rule)
-{
-    LSystem lsys { "F", { { 'F', "F+F" } } };
-    auto expected_rule = std::make_pair('F', std::string("F+F"));
-    
-    ASSERT_EQ(expected_rule, lsys.get_rule('F'));
-    ASSERT_THROW(lsys.get_rule('G'), gsl::fail_fast);
-}
-
 TEST(LSystemTest, set_axiom)
 {
     LSystem lsys { "F", { { 'F', "F+F" } } };
@@ -98,7 +72,7 @@ TEST(LSystemTest, remove_rule)
 
 TEST(LSystemTest, clear_rules)
 {
-    LSystem lsys { "F", { { 'F', "F+F" }, { 'G', "G-G" } } };
+    LSystem lsys { "F", { { 'F', "F+F" }, { 'G', "GG" } } };
     LSystem::production_rules empty_rules;
     std::unordered_map<int, std::string> base_cache { { 0, "F" } };
 

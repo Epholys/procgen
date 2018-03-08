@@ -7,7 +7,7 @@
 #include "imgui/imgui-SFML.h"
 
 #include "LSystem.h"
-#include "LSystemBuffer.h"
+#include "RuleMapBuffer.h"
 #include "InterpretationMapBuffer.h"
 #include "Turtle.h"
 #include "helper_math.h"
@@ -37,16 +37,17 @@ int main(/*int argc, char* argv[]*/)
     window.setVerticalSyncEnabled(true);
     ImGui::SFML::Init(window);
 
-    std::shared_ptr<LSystem> serpinski (new LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
+    auto serpinski = std::make_shared<LSystem>(LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
     LSystemBuffer serpinski_buffer { serpinski };
-    std::shared_ptr<LSystem> plant (new LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } } });
+    auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } } });
     LSystemBuffer plant_buffer { plant };
-    InterpretationMap map  = { { 'F', go_forward },
-                               { 'G', go_forward },
-                               { '+', turn_left  },
-                               { '-', turn_right },
-                               { '[', save_position },
-                               { ']', load_position } };
+    auto map = std::make_shared<InterpretationMap>(InterpretationMap
+                                                     { { 'F', go_forward },
+                                                     { 'G', go_forward },
+                                                     { '+', turn_left  },
+                                                     { '-', turn_right },
+                                                     { '[', save_position },
+                                                     { ']', load_position } });
     InterpretationMapBuffer map_buffer { map };
 
     LSystemBuffer lsys_test { serpinski };
@@ -69,8 +70,8 @@ int main(/*int argc, char* argv[]*/)
 
     std::vector<sf::Vertex> v;
 
-    auto serpinski_paths = compute_path(*serpinski, map, serpinski_param);
-    auto plant_paths = compute_path(*plant, map, plant_param);
+    auto serpinski_paths = compute_path(*serpinski, *map, serpinski_param);
+    auto plant_paths = compute_path(*plant, *map, plant_param);
 
     size_t n = std::accumulate(plant_paths.begin(), plant_paths.end(), 0,
                                [](const auto& n, const auto& v) { return n + v.size(); });
@@ -88,26 +89,32 @@ int main(/*int argc, char* argv[]*/)
     sf::Clock delta_clock;
     while (window.isOpen())
     {
+        window.clear();
         handle_input(window);
         
         ImGui::SFML::Update(window, delta_clock.restart());
 
-        window.clear();
+        procgui::new_frame();
         bool is_modified = false;
-        is_modified |= interact_with(serpinski_param, "Serpinski");
-        is_modified |= interact_with(serpinski_buffer, "Serpinski");
+        // is_modified |= interact_with(serpinski_param, "Serpinski");
+        // is_modified |= interact_with(serpinski_buffer, "Serpinski");
         // is_modified |= interact_with(map_buffer, "Serpinski");
  
         // is_modified |= interact_with(map_test, "test");
-        is_modified |= interact_with(lsys_test, "test");
-        is_modified |= interact_with(lsys_test2, "test2");
-
-        // is_modified |= interact_with(plant_param, "plant");
-        // is_modified |= interact_with(plant_buffer, "plant");
+        // is_modified |= interact_with(lsys_test, "test");
+        // is_modified |= interact_with(lsys_test, "test");
+        // is_modified |= interact_with(plant_param, "Test");
+        // is_modified |= interact_with(plant_buffer, "Test");
+        // is_modified |= interact_with(map_buffer, "test");
+        // is_modified |= interact_with(map_buffer, "Test");
+        
+        is_modified |= interact_with(plant_param, "plant");
+        is_modified |= interact_with(plant_buffer, "plant");
+        display(*map, "interpretations");
         if (is_modified)
         {
-            plant_paths = compute_path(*plant, map, plant_param);
-            serpinski_paths = compute_path(*serpinski, map, serpinski_param);
+            plant_paths = compute_path(*plant, *map, plant_param);
+            serpinski_paths = compute_path(*serpinski, *map, serpinski_param);
 
 
             size_t n = std::accumulate(plant_paths.begin(), plant_paths.end(), 0,
@@ -123,16 +130,12 @@ int main(/*int argc, char* argv[]*/)
                 vx2.color = sf::Color(0);
                 v.push_back(vx2);
             }
-
-
         }
 
-        display(map, "interpretations");
-
-        for(const auto& path : serpinski_paths)
-        {
-            window.draw(path.data(), path.size(), sf::LineStrip);
-        }
+        // for(const auto& path : serpinski_paths)
+        // {
+        //     window.draw(path.data(), path.size(), sf::LineStrip);
+        // }
 
         window.draw(v.data(), v.size(), sf::LineStrip);
 
@@ -151,6 +154,7 @@ void handle_input(sf::RenderWindow& window)
     static float zoom_level = 1.f;
     static sf::Vector2i mouse_position {};
     static bool has_focus = true;
+    static bool can_move = false;
     
     sf::View view = window.getView();
     ImGuiIO& imgui_io = ImGui::GetIO();
@@ -173,15 +177,17 @@ void handle_input(sf::RenderWindow& window)
         else if (event.type == sf::Event::LostFocus)
         {
             has_focus = false;
+            can_move = false;
         }
         else if (event.type == sf::Event::Resized)
         {
             view.setSize(event.size.width, event.size.height);
         }
             
-        else if (!imgui_io.WantCaptureMouse)
+        else if (has_focus) // && !imgui_io.WantCaptureMouse)
         {
-            if (event.type == sf::Event::MouseWheelMoved)
+            if(!imgui_io.WantCaptureMouse &&
+                event.type == sf::Event::MouseWheelMoved)
             {
                 auto delta = event.mouseWheel.delta;
                 if (delta>0)
@@ -196,15 +202,16 @@ void handle_input(sf::RenderWindow& window)
                 }
             }
 
-            else if (event.type == sf::Event::MouseButtonPressed &&
-                     event.mouseButton.button == sf::Mouse::Left)
+            if (event.type == sf::Event::MouseButtonPressed &&
+                event.mouseButton.button == sf::Mouse::Left)
             {
                 mouse_position = sf::Mouse::getPosition(window);
+                can_move = true;
             }
         }
     }
 
-    if (has_focus &&
+    if (has_focus && can_move &&
         !imgui_io.WantCaptureMouse &&
         sf::Mouse::isButtonPressed(sf::Mouse::Left))
     {
@@ -217,6 +224,6 @@ void handle_input(sf::RenderWindow& window)
             mouse_position = new_position;
         }
     }
-
+    
     window.setView(view);
 }

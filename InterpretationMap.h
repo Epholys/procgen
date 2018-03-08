@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "DrawingParameters.h"
+#include "RuleMap.h"
 
 // Main explanation of drawing in Turtle.h
 namespace drawing
@@ -62,7 +63,7 @@ namespace drawing
     // 'InterpretationMap' is a map linking a symbol of the vocabulary of a
     // L-system to an order. During the interpretation, if the character is
     // encountered, the associated order will be executed.
-    using InterpretationMap = std::unordered_map<char, Order>;
+    using InterpretationMap = RuleMap<Order>;
 }
 
 #endif  // DRAWING_INTERPRETATION_H

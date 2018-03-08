@@ -5,6 +5,7 @@
 
 #include "LSystem.h"
 #include "Turtle.h"
+#include "InterpretationMap.h"
 
 
 using namespace std;
@@ -25,7 +26,10 @@ public:
     LSystem lsys { "F", { { 'F', "F+G" } } };
     InterpretationMap interpretation { { 'F', go_forward },
                                         { 'G', go_forward },
-                                        { '+', turn_left  } };
+                                        { '+', turn_left  },
+                                        { '-', turn_right },
+                                        { '[', save_position },
+                                        { ']', load_position } };
     // starting_position, starting_angle, delta_angle, step, n_iter
     DrawingParameters parameters { { 100, 100 }, degree_to_rad(45.f), degree_to_rad(90.f), 10, 0 };
     impl::Turtle turtle;

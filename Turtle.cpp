@@ -21,11 +21,11 @@ namespace drawing
 
         for (auto c : res)
         {
-            if (interpretation.count(c) > 0)
+            if (interpretation.has_predecessor(c))
             {
                 // If an interpretation of the character 'c' is found,
                 // applies it to the current turtle.
-                interpretation.at(c)(turtle);
+                interpretation.get_rule(c).second(turtle);
             }
             else
             {
