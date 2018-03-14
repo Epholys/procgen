@@ -46,8 +46,7 @@ namespace
         // Otherwise, set up a TreeNode.
         else
         {
-            ImGui::PushID(id);
-            return ImGui::TreeNode(name.c_str());
+            return ImGui::CollapsingHeader(name.c_str());
         }
     }
     
@@ -62,12 +61,6 @@ namespace
             ImGui::Separator();
             ImGui::PopID();
             ImGui::End();
-        }
-        // Otherwise, close the TreeNode.
-        else
-        {
-            ImGui::TreePop();
-            ImGui::PopID();
         }
     }
 }
@@ -108,9 +101,9 @@ namespace ImGui
 
 namespace procgui
 {
-    void display(const LSystem& lsys, const std::string& name)
+    void display(const LSystem& lsys, const std::string& name, bool main)
     {
-        if( !set_up(name, true) )
+        if( !set_up(name, main) )
         {
             // Early out if the display zone is collapsed.
             return;
@@ -139,13 +132,13 @@ namespace procgui
         }
         ImGui::Unindent(); 
 
-        conclude(true);
+        conclude(main);
     }
 
     
-    void display(const drawing::DrawingParameters& parameters, const std::string& name)
+    void display(const drawing::DrawingParameters& parameters, const std::string& name, bool main)
     {
-        if( !set_up(name, true) )
+        if( !set_up(name, main) )
         {
             // Early out if the display zone is collapsed.
             return;
@@ -173,12 +166,12 @@ namespace procgui
         ImGui::Text("Step:"); ImGui::SameLine(align);
         ImGui::Text("%d", parameters.step);
 
-        conclude(true);
+        conclude(main);
     }
 
-    void display(const drawing::InterpretationMap& map, const std::string& name)
+    void display(const drawing::InterpretationMap& map, const std::string& name, bool main)
     {
-        if( !set_up(name, true) )
+        if( !set_up(name, main) )
         {
             // Early out if the display zone is collapsed.
             return;
@@ -191,14 +184,14 @@ namespace procgui
 
         }
         
-        conclude(true);
+        conclude(main);
     }
 
     
 
-    bool interact_with(drawing::DrawingParameters& parameters, const std::string& name)
+    bool interact_with(drawing::DrawingParameters& parameters, const std::string& name, bool main)
     {
-        if( !set_up(name, true) )
+        if( !set_up(name, main) )
         {
             // Early out if the display zone is collapsed.
             return false;
@@ -247,14 +240,14 @@ namespace procgui
         is_modified |= ImGui::SliderInt("Iterations", &parameters.n_iter, 0, n_iter_max);
         ImGui::SameLine(); ImGui::ShowHelpMarker("CTRL+click to directly input values. Higher values will use all of your memory and CPU");
 
-        conclude(true);
+        conclude(main);
 
         return is_modified;
     }
 
-    bool interact_with(LSystemBuffer& buffer, const std::string& name)
+    bool interact_with(LSystemBuffer& buffer, const std::string& name, bool main)
     {
-        if( !set_up(name, true) )
+        if( !set_up(name, main) )
         {
             // Early out if the display zone is collapsed.
             return false;
@@ -293,14 +286,14 @@ namespace procgui
                 return false;
             });
 
-        conclude(true);
+        conclude(main);
 
         return is_modified;
     }
 
-    bool interact_with(InterpretationMapBuffer& buffer, const std::string& name)
+    bool interact_with(InterpretationMapBuffer& buffer, const std::string& name, bool main)
     {
-        if( !set_up(name, true) )
+        if( !set_up(name, main) )
         {
             // Early out
             return false;
@@ -331,8 +324,34 @@ namespace procgui
                 return false;
             });
 
-        conclude(true);
+        conclude(main);
 
+        return is_modified;
+    }
+
+    bool interact_with(LSystemView& lsys_view, const std::string& name, bool main)
+    {
+        // To avoid collision with other window of the same name, create a
+        // unique ID for the created window. We override the mecanism of
+        // same name ==> same window for the LSystemView which is a unique
+        // window for a system.
+        std::stringstream ss;
+        ss << name << "##" << call_id;
+        if (!set_up(ss.str(), main))
+        {
+            // Early out if the display zone is collapsed.
+            return false;
+        }
+
+        // 'is_modified' is true if the DrawingParameter is modified. It does
+        // not check the LSystem or the InterpretationMap because the
+        // LSystemView is already an Observer of these classes.
+        bool is_modified = interact_with(lsys_view.get_parameters(), "Drawing Parameters", false);
+        interact_with(lsys_view.get_lsystem_buffer(), "LSystem", false);
+        interact_with(lsys_view.get_interpretation_buffer(), "Interpretation Map", false);
+
+        conclude(main);
+        
         return is_modified;
     }
 }

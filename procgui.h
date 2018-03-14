@@ -9,6 +9,7 @@
 #include "LSystem.h"
 #include "RuleMapBuffer.h"
 #include "LSystemBuffer.h"
+#include "LSystemView.h"
 #include "InterpretationMapBuffer.h"
 #include "Turtle.h"
 #include "helper_string.h"
@@ -26,7 +27,12 @@
 //
 // The 'name' parameter will be the name of the window. If 'display()' is called
 // with the same name for two different objects, even with different types, they
-// will be in the same window.
+// will be in the same window. Exception: the LSystemView which is a coherent
+// and unique window.
+//
+// The 'main' parameter defines if the GUI will be simply displayed in the
+// window (main=true) or if it will be displayed in a CollapsingHeader. Used
+// mainly internally.
 //
 // The 'interact_with()' functions return 'true' if the object was modified by
 // the GUI, 'false' otherwise.
@@ -42,25 +48,29 @@ namespace procgui {
     void new_frame();
 
     void display(const drawing::DrawingParameters& turtle,
-                 const std::string& name);
+                 const std::string& name,
+                 bool main = true);
     
-    void display(const LSystem& lsys, const std::string& name);
+    void display(const LSystem& lsys, const std::string& name, bool main = true);
     
-    void display(const drawing::InterpretationMap& map, const std::string& name);
+    void display(const drawing::InterpretationMap& map, const std::string& name, bool main = true);
 
     
     bool interact_with(drawing::DrawingParameters& turtle,
-                       const std::string& name);
+                       const std::string& name,
+                       bool main = true);
 
     // Special case for the RuleMapBuffers
     template<typename Buffer>
     bool interact_with_buffer(Buffer& buffer,
                               std::function<bool(typename Buffer::const_iterator)> predecessor_fn);
     
-    bool interact_with(LSystemBuffer& buffer, const std::string& name);
+    bool interact_with(LSystemBuffer& buffer, const std::string& name, bool main = true);
 
-    bool interact_with(InterpretationMapBuffer& buffer, const std::string& name);
+    bool interact_with(InterpretationMapBuffer& buffer, const std::string& name, bool main = true);
 
+    bool interact_with(LSystemView& lsys_view, const std::string& name, bool main = true);
+    
     #include "procgui.tpp"
 
 }
