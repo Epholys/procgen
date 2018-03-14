@@ -7,13 +7,13 @@ namespace drawing
     Turtle::Turtle(const DrawingParameters& params)
         : parameters { params }
         , state   { parameters.starting_position, parameters.starting_angle }
-        , paths      { { state.position } }
+        , vertices      { { state.position } }
     {
     }
 
-    std::vector<std::vector<sf::Vertex>> compute_path(LSystem& lsys,
-                                                      InterpretationMap& interpretation,
-                                                      const DrawingParameters& parameters)
+    std::vector<sf::Vertex> compute_vertices(LSystem& lsys,
+                                             InterpretationMap& interpretation,
+                                             const DrawingParameters& parameters)
     {
         Turtle turtle (parameters);
         
@@ -34,6 +34,6 @@ namespace drawing
             }
         }
 
-        return turtle.paths;
+        return turtle.vertices;
     }
 }
