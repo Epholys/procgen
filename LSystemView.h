@@ -30,11 +30,15 @@ namespace procgui
         void draw (sf::RenderTarget &target);
         
     private:
+        void compute_bounding_box();
+        
         LSystemBuffer lsys_buff_;
         InterpretationMapBuffer interpretation_buff_;
         drawing::DrawingParameters params_;
 
         std::vector<sf::Vertex> vertices_;
+
+        sf::FloatRect bounding_box_;
     };
 }
 
