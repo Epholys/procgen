@@ -37,10 +37,19 @@ namespace procgui
         
     private:
         void compute_bounding_box();
-        static constexpr unsigned int n_subdivision = 3;
+        static constexpr unsigned int n_subdivision = 2;
         void compute_subdivisions();
         void init_subdivisions();
         int find_index(const sf::Vertex& v) const;
+        void expand_to_neighbors();
+        struct Neighbors
+        {
+            int updiag {-1}, right {-1}, downdiag {-1}, down {-1};
+        };
+        Neighbors neighbors(int index) const;
+        int up_neighbor (int index) const;
+        int right_neighbor (int index) const;
+        int down_neighbor (int index) const;
         
         LSystemBuffer lsys_buff_;
         InterpretationMapBuffer interpretation_buff_;

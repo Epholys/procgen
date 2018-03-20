@@ -117,6 +117,8 @@ namespace procgui
                 }
             }
         }
+
+        expand_to_neighbors();
     }
 
     void LSystemView::init_subdivisions()
@@ -137,22 +139,22 @@ namespace procgui
         {
             if (v.position.x < middleX)
             {
-                index |= 1;
                 middleX -= bounding_box_.width / (2. * (i+1));
             }
             else
             {
+                index |= 1;
                 middleX += bounding_box_.width / (2. * (i+1));
             }
             index <<= 1;
             
             if (v.position.y < middleY)
             {
-                index |= 1;
                 middleY -= bounding_box_.height / (2. * (i+1));
             }
             else
             {
+                index |= 1;
                 middleY += bounding_box_.height / (2. * (i+1));
             }
 
@@ -164,6 +166,151 @@ namespace procgui
         return index;
     }
 
+    void LSystemView::expand_to_neighbors()
+    {
+        for (unsigned int index=0; index<boxes_.size(); ++index)
+        {
+            auto around = neighbors(index);
+            std::vector<float> farest_right_neighbors;
+            std::vector<float> farest_up_neighbors;
+            std::vector<float> farest_down_neighbors;
+            if (around.right != -1)
+            {
+                auto& right = boxes_.at(around.right);
+                if (!std::isnan(right.left))
+                {
+                    farest_right_neighbors.push_back(right.left);
+                }
+
+                // if (around.updiag != -1 &&
+                //     !std::isnan(boxes_.at(around.updiag).left))
+                // {
+                //     farest_right_neighbors.push_back(boxes_.at(around.updiag).left);
+                //     farest_up_neighbors.push_back(boxes_.at(around.updiag).top);
+                // }
+                // if (around.downdiag != -1 &&
+                //     !std::isnan(boxes_.at(around.downdiag).left))
+                // {
+                //     farest_right_neighbors.push_back(boxes_.at(around.downdiag).left);
+                //     farest_down_neighbors.push_back(boxes_.at(around.downdiag).top);
+                // }
+            }
+            if(around.down != -1 &&
+               !std::isnan(boxes_.at(around.down).left))
+            {
+                farest_down_neighbors.push_back(boxes_.at(around.down).top);
+            }
+
+            if (farest_right_neighbors.size() != 0)
+            {
+                auto max = std::max_element(farest_right_neighbors.begin(),
+                                            farest_right_neighbors.end());
+                auto& b = boxes_.at(index);
+                if (b.left + b.width < *max)
+                {
+                    b.width = *max - b.left;
+                }
+            }
+            
+            if (farest_up_neighbors.size() != 0)
+            {
+                auto max = std::max_element(farest_up_neighbors.begin(),
+                                            farest_up_neighbors.end());
+                auto& b = boxes_.at(index);
+                if (b.top < *max)
+                {
+                    b.height += b.top - *max;
+                    b.top = *max;
+                }
+            }
+
+            if (farest_down_neighbors.size() != 0)
+            {
+                auto max = std::max_element(farest_down_neighbors.begin(),
+                                            farest_down_neighbors.end());
+                auto& b = boxes_.at(index);
+                if (b.top + b.height < *max)
+                {
+                    b.height = *max - b.top;
+                }
+            }
+        }
+    }
+
+    LSystemView::Neighbors LSystemView::neighbors(int index) const
+    {
+        int right = right_neighbor(index);
+        int down = down_neighbor(index);
+        if (right != -1)
+        {
+            return {up_neighbor(right), right, down_neighbor(right), down };
+        }
+        else
+        {
+            return {-1, right, -1, down };
+        }
+    }
+    int LSystemView::up_neighbor (int index) const
+    {
+        for (unsigned int i=0; i<n_subdivision; ++i)
+        {
+            if ((index & (1 << (i*2))) == 1)
+            {
+                index ^= 1 << (i*2);
+                break;
+            }
+            else
+            {
+                index |= 1 << (i*2);
+            }
+            if (i == n_subdivision-1)
+            {
+                index = -1;
+            }
+        }
+        return index;
+    }
+    int LSystemView::right_neighbor (int index) const
+    {
+        for (unsigned int i=0; i<n_subdivision; ++i)
+        {
+            if ((index & (1 << (i*2+1))) == 0)
+            {
+                index |= 1 << (i*2+1);
+                break;
+            }
+            else
+            {
+                index ^= 1 << (i*2+1);
+            }
+            if (i == n_subdivision-1)
+            {
+                index = -1;
+            }
+        }
+        return index;
+    }
+    int LSystemView::down_neighbor (int index) const
+    {
+        for (unsigned int i=0; i<n_subdivision; ++i)
+        {
+            if ((index & (1 << (i*2))) == 0)
+            {
+                index |= 1 << (i*2);
+                break;
+            }
+            else
+            {
+                index ^= 1 << (i*2);
+            }
+            if (i == n_subdivision-1)
+            {
+                index = -1;
+            }
+        }
+        return index;
+    }
+        
 
     void LSystemView::draw(sf::RenderTarget &target)
     {
