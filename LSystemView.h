@@ -30,7 +30,8 @@ namespace procgui
         void draw (sf::RenderTarget &target);
         
     private:
-        void compute_bounding_box();
+        sf::FloatRect compute_bounding_box(const std::vector<sf::Vertex>& vertices) const;
+        void compute_collision_boxes();
         
         LSystemBuffer lsys_buff_;
         InterpretationMapBuffer interpretation_buff_;
@@ -39,6 +40,8 @@ namespace procgui
         std::vector<sf::Vertex> vertices_;
 
         sf::FloatRect bounding_box_;
+        static constexpr int N_COLLISION_BOXES = 16;
+        std::vector<sf::FloatRect> collision_boxes_;
     };
 }
 
