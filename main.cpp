@@ -62,7 +62,7 @@ int main(/*int argc, char* argv[]*/)
 
     LSystemView serpinski_view (serpinski, map, serpinski_param);
     LSystemView plant_view (plant, map, plant_param);
-
+    
     sf::Clock delta_clock;
     while (window.isOpen())
     {

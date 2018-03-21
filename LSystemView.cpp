@@ -90,7 +90,7 @@ namespace procgui
         {
             ++n;
             box_vertices.push_back(vertices_.at(i));
-            if (vertices_.at(i).color == sf::Color::Transparent ||
+            if (// vertices_.at(i).color == sf::Color::Transparent ||
                 n == vertices_per_box ||
                 i == vertices_.size() - 1)
             {
