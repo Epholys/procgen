@@ -37,7 +37,7 @@ namespace procgui
 
         std::vector<sf::Vertex> vertices_;
         sf::FloatRect bounding_box_;
-        static constexpr int N_SUB_BOXES = 8;
+        static constexpr int MAX_SUB_BOXES = 8;
         static constexpr int MIN_VERTICES_PER_BOX = 8;
         std::vector<sf::FloatRect> sub_boxes_;
     };
