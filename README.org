@@ -29,6 +29,7 @@
 
    - Bugs
      - Correct floating point errors when using big number of iterations
+     - Correct zoom level and drag behaviour when resizing window
 
 ** Development framework
    - *Environment:* debian stretch chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=

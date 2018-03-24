@@ -2,8 +2,7 @@
 #define LSYSTEM_VIEW
 
 
-#include <cmath>
-
+#include "geometry.h"
 #include "DrawingParameters.h"
 #include "LSystemBuffer.h"
 #include "InterpretationMapBuffer.h"
@@ -35,12 +34,16 @@ namespace procgui
         // Draw the vertices.
         void draw (sf::RenderTarget &target);
         
-    private:
+    private:        
         LSystemBuffer lsys_buff_;
         InterpretationMapBuffer interpretation_buff_;
         drawing::DrawingParameters params_;
 
         std::vector<sf::Vertex> vertices_;
+        sf::FloatRect bounding_box_;
+        static constexpr int MAX_SUB_BOXES = 8;
+        static constexpr int MIN_VERTICES_PER_BOX = 8;
+        std::vector<sf::FloatRect> sub_boxes_;
     };
 }
 
