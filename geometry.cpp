@@ -37,14 +37,13 @@ namespace geometry
     }
     
     std::vector<sf::FloatRect> compute_sub_boxes(const std::vector<sf::Vertex>& vertices,
-                                                 int max_boxes, int min_vertices)
+                                                 int max_boxes)
     {
         Expects(max_boxes > 1);
-        Expects(min_vertices > 2);
 
         std::vector<sf::FloatRect> boxes;
         int vertices_per_box = vertices.size()  / (max_boxes-1);
-        vertices_per_box = vertices_per_box < min_vertices ? min_vertices : vertices_per_box;
+        vertices_per_box = vertices_per_box < 3 ? 3 : vertices_per_box;
         
         int n = 0;
         std::vector<sf::Vertex> box_vertices;
