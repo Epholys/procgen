@@ -5,6 +5,7 @@
 
 using namespace geometry;
 
+// Create a circle
 std::vector<sf::Vertex> gen_circle()
 {
     const float PI = 3.1415;
@@ -22,3 +23,6 @@ TEST(geometry, bounding_box)
     auto box = compute_bounding_box(circle);
     ASSERT_EQ(sf::FloatRect(-1, -1, 2, 2), box);
 }
+
+// compute_sub_boxes is not tested due to the bad behaviour with a low count of
+// vertices. 

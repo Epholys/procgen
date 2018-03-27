@@ -14,6 +14,8 @@ namespace procgui
         , interpretation_buff_ {map}
         , params_ {params}
     {
+        // Invariant respected: cohesion between the LSystem/InterpretationMap
+        // and the vertices. 
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
         compute_vertices();
@@ -36,6 +38,9 @@ namespace procgui
     
     void LSystemView::compute_vertices()
     {
+        // Invariant respected: cohesion between the vertices and the bounding
+        // boxes. 
+        
         vertices_ = drawing::compute_vertices(lsys_buff_.get_target(),
                                               interpretation_buff_.get_target(),
                                               params_);
@@ -45,18 +50,23 @@ namespace procgui
     
     void LSystemView::draw(sf::RenderTarget &target)
     {
+        // Interact with the models and re-compute the vertices if there is a
+        // modification. 
         if (interact_with(*this, ""))
         {
             compute_vertices();
         }
 
+        // Early out if there are no vertices.
         if (vertices_.size() == 0)
         {
             return;
         }
-        
+
+        // Draw the vertices.
         target.draw(vertices_.data(), vertices_.size(), sf::LineStrip);
 
+        // Draw the global bounding boxes.
         std::array<sf::Vertex, 5> box =
             {{ {{ bounding_box_.left, bounding_box_.top}},
                {{ bounding_box_.left, bounding_box_.top + bounding_box_.height}},
@@ -66,6 +76,7 @@ namespace procgui
         target.draw(box.data(), box.size(), sf::LineStrip);
 
         // DEBUG
+        // Draw the sub-bounding boxes.
         for (const auto& box : sub_boxes_)
         {
             std::array<sf::Vertex, 5> rect =
