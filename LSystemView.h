@@ -6,11 +6,6 @@
 #include "DrawingParameters.h"
 #include "LSystemBuffer.h"
 #include "InterpretationMapBuffer.h"
- 
-constexpr int pow(int v, int e)
-{
-	return (e == 0) ? 1 : v * pow(v, e - 1);
-}   
 
 namespace procgui
 {
