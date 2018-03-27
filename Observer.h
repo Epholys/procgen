@@ -25,13 +25,14 @@ public:
     static_assert(std::is_base_of<Observable, T>::value, "An observer must watch an Observable");
         
 
-// An Observer must have a observable target.
+    // An Observer must have a observable target.
     // Exception:
     //  - Precondition: 't' must not be a nullptr.
     Observer() = delete;
     Observer(const std::shared_ptr<T>& t)
         : target_(t)
         , id_ { -1, false }
+        , callback_(nullptr)
         {
             Expects(t);
         }
@@ -46,6 +47,23 @@ public:
             }
         }
 
+    // As 'Observable' use a counter for each callback, we must register it
+    // again if we copy it.
+    Observer(const Observer& other)
+        {
+            target_ = other.target_;
+            callback_ = other.callback_;
+            add_callback(callback_);
+        }
+
+    Observer& operator= (const Observer& other)
+        {
+            target_ = other.target_;
+            callback_ = other.callback_;
+            add_callback(callback_);
+            return *this;
+        }
+
     // Add a callback to the target observable.
     // Usually, the callback is a method from the child class. The destructor
     // assures that the method of a destructed object is never used. However,
@@ -54,6 +72,7 @@ public:
     // you are doing.
     void add_callback(const Observable::callback& callback)
         {
+            callback_ = callback;
             if(id_.second)
             {
                 target_->remove_observer(id_.first);
@@ -73,6 +92,9 @@ protected:
     // The identifier of the registered callback.
     // If the callback is not defined, the boolean will be false.
     std::pair<int, bool> id_ { -1, false };
+
+    // The callback. Mainly used for the copy constructor.
+    Observable::callback callback_;
 };
 
 

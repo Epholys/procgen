@@ -23,7 +23,6 @@ public:
     // The type of function called after each 'notify()' call.
     using callback = std::function<void()>;
 
-    // Simply to have a constructor in the class.
     Observable() = default;
 
     // Add a callback and return its unique identifier.
