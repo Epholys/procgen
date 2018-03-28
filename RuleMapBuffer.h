@@ -166,7 +166,8 @@ namespace procgui
         // to modify 'buffer_'.
         iterator remove_const(const_iterator cit);
 
-        // The Target.
+        // The Target: ease of use instead of calling
+        // 'Observer<Target>::target_' each time.
         Target& target_;
 
         // The rule buffer.
