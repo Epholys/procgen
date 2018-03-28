@@ -20,7 +20,11 @@
 
 ** Other ideas
 
-** Optimization & non-breaking bugs
+** Next Bugs
+   - LSystemView copies does not all update themselves
+   - Copy operations on LSystemView (and others) breaks because of Observable (id counter)
+
+** Optimization & non-urgent bugs
    - Optimization
      With the current algorithm, execution time and memory consumption are exponential. Memory consumption is the biggest factor, as several GB can be allocated easily (from 16 iterations).
      - Cache multi-iteration production rules (very good for execution time but bad for memory consumption)
@@ -29,6 +33,7 @@
 
    - Bugs
      - Correct floating point errors when using big number of iterations
+     - Correct zoom level and drag behaviour when resizing window
 
 ** Development framework
    - *Environment:* debian stretch chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=

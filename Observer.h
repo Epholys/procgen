@@ -25,7 +25,7 @@ public:
     static_assert(std::is_base_of<Observable, T>::value, "An observer must watch an Observable");
         
 
-// An Observer must have a observable target.
+    // An Observer must have a observable target.
     // Exception:
     //  - Precondition: 't' must not be a nullptr.
     Observer() = delete;
@@ -35,6 +35,16 @@ public:
         {
             Expects(t);
         }
+
+    // An Observer can not be copied trivially: no callback would be send to the
+    // 'target_' but the id would be saved, making the destructor removing twice
+    // for the same id. Each child class must define these function taking care
+    // of calling 'add_callback()'.
+    Observer(const Observer& other) = delete;
+    Observer& operator=(const Observer& other) = delete;
+    Observer(const Observer&& other) = delete;
+    Observer& operator=(const Observer&& other) = delete;
+
 
     // If the callback exists, remove it from the target observable. Else, do
     // nothing. 

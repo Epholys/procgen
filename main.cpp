@@ -38,9 +38,7 @@ int main(/*int argc, char* argv[]*/)
     ImGui::SFML::Init(window);
 
     auto serpinski = std::make_shared<LSystem>(LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
-    LSystemBuffer serpinski_buffer { serpinski };
     auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } } });
-    LSystemBuffer plant_buffer { plant };
     auto map = std::make_shared<InterpretationMap>(InterpretationMap
                                                      { { 'F', go_forward },
                                                      { 'G', go_forward },
@@ -48,12 +46,6 @@ int main(/*int argc, char* argv[]*/)
                                                      { '-', turn_right },
                                                      { '[', save_position },
                                                      { ']', load_position } });
-    InterpretationMapBuffer map_buffer { map };
-
-    LSystemBuffer lsys_test { serpinski };
-    LSystemBuffer lsys_test2 { serpinski };
-    InterpretationMapBuffer map_test { map };
-    
     DrawingParameters serpinski_param;
     serpinski_param.starting_position = { 1000, 600 };
     serpinski_param.starting_angle = 0.f;
@@ -68,24 +60,9 @@ int main(/*int argc, char* argv[]*/)
     plant_param.step = 5;
     plant_param.n_iter = 6;
 
-    std::vector<sf::Vertex> v;
-
-    auto serpinski_paths = compute_path(*serpinski, *map, serpinski_param);
-    auto plant_paths = compute_path(*plant, *map, plant_param);
-
-    size_t n = std::accumulate(plant_paths.begin(), plant_paths.end(), 0,
-                               [](const auto& n, const auto& v) { return n + v.size(); });
-    v.reserve(n);
-    for(const auto& p : plant_paths) {
-        auto vx1 = p.at(0);
-        vx1.color = sf::Color(0);
-        v.push_back(vx1);
-        v.insert(v.end(), p.begin(), p.end());
-        auto vx2 = p.at(p.size()-1);
-        vx2.color = sf::Color(0);
-        v.push_back(vx2);
-    }
-
+    LSystemView serpinski_view (serpinski, map, serpinski_param);
+    LSystemView plant_view (plant, map, plant_param);
+    
     sf::Clock delta_clock;
     while (window.isOpen())
     {
@@ -95,50 +72,12 @@ int main(/*int argc, char* argv[]*/)
         ImGui::SFML::Update(window, delta_clock.restart());
 
         procgui::new_frame();
-        bool is_modified = false;
-        // is_modified |= interact_with(serpinski_param, "Serpinski");
-        // is_modified |= interact_with(serpinski_buffer, "Serpinski");
-        // is_modified |= interact_with(map_buffer, "Serpinski");
- 
-        // is_modified |= interact_with(map_test, "test");
-        // is_modified |= interact_with(lsys_test, "test");
-        // is_modified |= interact_with(lsys_test, "test");
-        // is_modified |= interact_with(plant_param, "Test");
-        // is_modified |= interact_with(plant_buffer, "Test");
-        // is_modified |= interact_with(map_buffer, "test");
-        // is_modified |= interact_with(map_buffer, "Test");
         
-        is_modified |= interact_with(plant_param, "plant");
-        is_modified |= interact_with(plant_buffer, "plant");
+        serpinski_view.draw(window);
+        plant_view.draw(window);
+
         display(*map, "interpretations");
-        if (is_modified)
-        {
-            plant_paths = compute_path(*plant, *map, plant_param);
-            serpinski_paths = compute_path(*serpinski, *map, serpinski_param);
-
-
-            size_t n = std::accumulate(plant_paths.begin(), plant_paths.end(), 0,
-                                       [](const auto& n, const auto& v) { return n + v.size(); });
-            v.clear();
-            v.reserve(n);
-            for(const auto& p : plant_paths) {
-                auto vx1 = p.at(0);
-                vx1.color = sf::Color(0);
-                v.push_back(vx1);
-                v.insert(v.end(), p.begin(), p.end());
-                auto vx2 = p.at(p.size()-1);
-                vx2.color = sf::Color(0);
-                v.push_back(vx2);
-            }
-        }
-
-        // for(const auto& path : serpinski_paths)
-        // {
-        //     window.draw(path.data(), path.size(), sf::LineStrip);
-        // }
-
-        window.draw(v.data(), v.size(), sf::LineStrip);
-
+        
         ImGui::SFML::Render(window);
         window.display();
     }

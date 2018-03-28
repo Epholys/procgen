@@ -19,7 +19,7 @@ public:
         : turtle(parameters)
         {
             // Turtle is normally initialized inside
-            // drawing::compute_paths. Manually initialized here to
+            // drawing::compute_vertices. Manually initialized here to
             // test smaller the functions.
         }
     
@@ -59,8 +59,8 @@ TEST_F(DrawingTest, go_forward)
 
     go_forward_fn(turtle);
     
-    ASSERT_EQ(turtle.paths.back().at(0), begin);
-    ASSERT_EQ(turtle.paths.back().at(1), end);
+    ASSERT_EQ(turtle.vertices.at(0), begin);
+    ASSERT_EQ(turtle.vertices.at(1), end);
 }
 
 // Test the turn_right order.
@@ -88,10 +88,8 @@ TEST_F(DrawingTest, stack_test)
     ASSERT_EQ(saved_state.angle, turtle.state.angle);
 
     go_forward_fn(turtle);
-    
-    auto paths_size = turtle.paths.size();
     load_position_fn(turtle);
-    ASSERT_EQ(paths_size+1, turtle.paths.size());
+
     ASSERT_EQ(saved_state.position, turtle.state.position);
     ASSERT_EQ(saved_state.angle, turtle.state.angle);
 
@@ -108,13 +106,13 @@ TEST_F(DrawingTest, compute_paths)
     turn_left_fn (turtle);
     go_forward_fn(turtle);
 
-    std::vector<std::vector<sf::Vertex>> norm { { turtle.paths.back().at(0),
-                                                  turtle.paths.back().at(1),
-                                                  turtle.paths.back().at(2) } };
+    std::vector<sf::Vertex> norm { turtle.vertices.at(0),
+                                   turtle.vertices.at(1),
+                                   turtle.vertices.at(2)  };
     
 
     parameters.n_iter = 1;
-    auto res = compute_path(lsys, interpretation, parameters);
+    auto res = compute_vertices(lsys, interpretation, parameters);
 
     ASSERT_EQ(res, norm);
 }

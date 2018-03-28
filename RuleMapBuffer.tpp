@@ -6,17 +6,40 @@ RuleMapBuffer<Target>::RuleMapBuffer(const std::shared_ptr<Target>& target)
     , target_ {*Observer<Target>::target_}
     , buffer_ {}
     , instruction_ {nullptr}
-    {
-        Observer<Target>::add_callback([this](){sync();});
+{
+    Observer<Target>::add_callback([this](){sync();});
         
-        // Initialize the buffer with the LSystem's rules.
-        // By construction, there are not duplicate rules in a 'LSystem', so
-        // there is no check: all rules are valid.
-        for (const auto& rule : target_.get_rules())
-        {
-            buffer_.push_back({true, rule.first, rule.second});
-        }
+    // Initialize the buffer with the LSystem's rules.
+    // By construction, there are not duplicate rules in a 'LSystem', so
+    // there is no check: all rules are valid.
+    for (const auto& rule : target_.get_rules())
+    {
+        buffer_.push_back({true, rule.first, rule.second});
     }
+}
+
+template<typename Target>
+RuleMapBuffer<Target>::RuleMapBuffer(const RuleMapBuffer& other)
+    : Observer<Target>(other.Observer<Target>::target_)
+    , target_ {other.target_}
+    , buffer_ {other.buffer_}
+    , instruction_ {nullptr}
+{
+    Observer<Target>::add_callback([this](){sync();});
+}
+
+template<typename Target>
+RuleMapBuffer<Target>& RuleMapBuffer<Target>::operator=(const RuleMapBuffer& other)
+{
+    target_ = other.target_;
+    buffer_ = other.buffer_;
+    instruction_ = nullptr;
+
+    Observer<Target>::add_callback([this](){sync();});
+    
+    return *this;
+}
+
 
 template<typename Target>
 Target& RuleMapBuffer<Target>::get_target() const

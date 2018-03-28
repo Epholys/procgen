@@ -12,7 +12,7 @@ namespace drawing
         float dx = turtle.parameters.step * std::cos(turtle.state.angle);
         float dy = turtle.parameters.step * std::sin(turtle.state.angle);
         turtle.state.position += {dx, dy};
-        turtle.paths.back().push_back(turtle.state.position);
+        turtle.vertices.push_back(turtle.state.position);
     }
 
     void turn_right_fn(Turtle& turtle)
@@ -38,9 +38,11 @@ namespace drawing
         }
         else
         {
+            turtle.vertices.push_back( {turtle.vertices.back().position, sf::Color::Transparent} );
             turtle.state.position = turtle.stack.top().position;
             turtle.state.angle = turtle.stack.top().angle;
-            turtle.paths.push_back( {turtle.stack.top().position} );
+            turtle.vertices.push_back( {turtle.stack.top().position, sf::Color::Transparent} );
+            turtle.vertices.push_back( {turtle.stack.top().position} );
             turtle.stack.pop();
         }
     }

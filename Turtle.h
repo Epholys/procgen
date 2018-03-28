@@ -54,11 +54,9 @@ namespace drawing
             std::stack<State> stack { };
             
             // Each time the Turtle changes its position, the new one is saved
-            // in a vertex. Moreover, as we can jump from position to position,
-            // we must save the different continuous paths separately, to
-            // correctly display the whole trajectory of the turtle. 'paths' is
-            // this data structure.
-            std::vector<std::vector<sf::Vertex>> paths { };
+            // in a vertex. However, we can jump from position to position, so
+            // it there is additional transparent vertices between jumps.
+            std::vector<sf::Vertex> vertices { };
         };
     }
 
@@ -66,9 +64,9 @@ namespace drawing
     // First, this function iterates 'parameters.n_iter' times the LSystem
     // 'lsys', using and modifying its cache. Then, it interprates the result
     // with 'interpretation' and 'parameters'.
-    std::vector<std::vector<sf::Vertex>> compute_path(LSystem& lsys,
-                                                      InterpretationMap& interpretation,
-                                                      const DrawingParameters& parameters);
+    std::vector<sf::Vertex> compute_vertices(LSystem& lsys,
+                                             InterpretationMap& interpretation,
+                                             const DrawingParameters& parameters);
 }
 
 

@@ -84,6 +84,12 @@ namespace procgui
         // Constructor
         RuleMapBuffer(const std::shared_ptr<Target>& target_);
 
+        // The copy constructor and the assignment operator are needed because
+        // we need to register a callback for the new object to
+        // 'Observer<Target>'
+        RuleMapBuffer(const RuleMapBuffer& other);
+        RuleMapBuffer& operator=(const RuleMapBuffer& other);
+        
         // Get the Target. Its modification will be automatically synchronized
         // with the Observer pattern.
         Target& get_target() const;
@@ -160,7 +166,8 @@ namespace procgui
         // to modify 'buffer_'.
         iterator remove_const(const_iterator cit);
 
-        // The Target.
+        // The Target: ease of use instead of calling
+        // 'Observer<Target>::target_' each time.
         Target& target_;
 
         // The rule buffer.
