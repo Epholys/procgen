@@ -107,8 +107,11 @@ std::string LSystem::produce(int n)
         cache_.emplace(highest->first + i + 1, tmp);
     }
 
-    notify();
-
+    // No 'notify()' call: this function is generally called each time there is
+    // a notification of the LSystem. A second notify would double the
+    // computation time and may double the computation time of the hungrier
+    // 'drawing::compute_vertices()' function.
+    
     return cache_.at(n);
 }
 
