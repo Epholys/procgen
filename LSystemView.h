@@ -25,9 +25,9 @@ namespace procgui
     //     'vertices_'.
     // 
     // Note:
-    //    - They contain a shared ownership of the LSystem and the
-    //    InterpretationMap via the corresponding *Buffer. As a consequence, a
-    //    copy will share the same LSystem and Map.
+    //    - LSystemView contain a shared ownership of the LSystem and the
+    //    InterpretationMap via the corresponding Observer. As a consequence, a
+    //    copy of LSystemView will share the same LSystem and Map.
     class LSystemView : public Observer<LSystem>,
                         public Observer<drawing::InterpretationMap>
     {
@@ -35,6 +35,8 @@ namespace procgui
         LSystemView(std::shared_ptr<LSystem> lsys,
                     std::shared_ptr<drawing::InterpretationMap> map,
                     drawing::DrawingParameters param);
+        LSystemView(const LSystemView& other);
+        LSystemView& operator=(const LSystemView& other);
 
         // Reference Getters
         drawing::DrawingParameters& get_parameters();
