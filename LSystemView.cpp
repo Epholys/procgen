@@ -16,6 +16,7 @@ namespace procgui
         , vertices_ {}
         , bounding_box_ {}
         , sub_boxes_ {}
+        , is_selected_ {false}
     {
         // Invariant respected: cohesion between the LSystem/InterpretationMap
         // and the vertices. 
@@ -33,6 +34,7 @@ namespace procgui
         , vertices_ {other.vertices_}
         , bounding_box_ {other.bounding_box_}
         , sub_boxes_ {other.sub_boxes_}
+        , is_selected_ {other.is_selected_}
     {
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
@@ -45,6 +47,7 @@ namespace procgui
         vertices_ = other.vertices_;
         bounding_box_ = other.bounding_box_;
         sub_boxes_ = other.sub_boxes_;
+        is_selected_ = other.is_selected_;
 
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
@@ -97,15 +100,17 @@ namespace procgui
         // Draw the vertices.
         target.draw(vertices_.data(), vertices_.size(), sf::LineStrip);
 
-        // Draw the global bounding boxes.
-        std::array<sf::Vertex, 5> box =
-            {{ {{ bounding_box_.left, bounding_box_.top}},
-               {{ bounding_box_.left, bounding_box_.top + bounding_box_.height}},
-               {{ bounding_box_.left + bounding_box_.width, bounding_box_.top + bounding_box_.height}},
-               {{ bounding_box_.left + bounding_box_.width, bounding_box_.top}},
-               {{ bounding_box_.left, bounding_box_.top}}}};
-        target.draw(box.data(), box.size(), sf::LineStrip);
-
+        if (is_selected_)
+        {
+            // Draw the global bounding boxes.
+            std::array<sf::Vertex, 5> box =
+                {{ {{ bounding_box_.left, bounding_box_.top}},
+                   {{ bounding_box_.left, bounding_box_.top + bounding_box_.height}},
+                   {{ bounding_box_.left + bounding_box_.width, bounding_box_.top + bounding_box_.height}},
+                   {{ bounding_box_.left + bounding_box_.width, bounding_box_.top}},
+                   {{ bounding_box_.left, bounding_box_.top}}}};
+            target.draw(box.data(), box.size(), sf::LineStrip);
+        }
         // DEBUG
         // Draw the sub-bounding boxes.
         for (const auto& box : sub_boxes_)
@@ -117,5 +122,22 @@ namespace procgui
                    {{ box.left + box.width, box.top}, sf::Color(255,0,0,50)}}};
             target.draw(rect.data(), rect.size(), sf::Quads);
         }
+    }
+
+    bool LSystemView::select(const sf::Vector2i& click)
+    {
+        if (is_selected_)
+        {
+            return true;
+        }
+        for (const auto& rect : sub_boxes_)
+        {
+            if (rect.contains(sf::Vector2f(click)))
+            {
+                is_selected_ = true;
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -19,6 +19,7 @@
 using namespace drawing;
 using namespace math;
 using namespace procgui;
+using namespace controller;
 
 int main()
 {
@@ -53,20 +54,26 @@ int main()
 
     LSystemView serpinski_view (serpinski, map, serpinski_param);
     LSystemView plant_view (plant, map, plant_param);
+
+    std::vector<LSystemView> views;
+    views.push_back(std::move(serpinski_view));
+    views.push_back(std::move(plant_view));
     
     sf::Clock delta_clock;
     while (window.isOpen())
     {
         window.clear();
 
-        window_controller.handle_input(window);
+        window_controller.handle_input(window, views);
         
         ImGui::SFML::Update(window, delta_clock.restart());
 
         procgui::new_frame();
         
-        serpinski_view.draw(window);
-        plant_view.draw(window);
+        for (auto& v : views)
+        {
+            v.draw(window);
+        }
 
         display(*map, "interpretations");
         

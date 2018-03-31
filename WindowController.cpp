@@ -1,86 +1,92 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
 #include "WindowController.h"
+#include "LSystemController.h"
 
-void WindowController::handle_input(sf::RenderWindow &window)
+namespace controller
 {
-    sf::View view = window.getView();
-    ImGuiIO& imgui_io = ImGui::GetIO();
-    sf::Event event;
-
-    while (window.pollEvent(event))
+    void WindowController::handle_input(sf::RenderWindow &window, std::vector<procgui::LSystemView>& views)
     {
-        // ImGui has the priority as it is the topmost GUI.
-        ImGui::SFML::ProcessEvent(event);
+        sf::View view = window.getView();
+        ImGuiIO& imgui_io = ImGui::GetIO();
+        sf::Event event;
 
-        // Close the Window if necessary
-        if (event.type == sf::Event::Closed ||
-            (event.type == sf::Event::KeyPressed &&
-             event.key.code == sf::Keyboard::Escape))
+        while (window.pollEvent(event))
         {
-            window.close();
-        }
+            // ImGui has the priority as it is the topmost GUI.
+            ImGui::SFML::ProcessEvent(event);
 
-        else if (event.type == sf::Event::GainedFocus)
-        {
-            has_focus_ = true;
-            // Note: the view can not move yet: the old position of the mouse is
-            // still in memory, it must be updated.
-        }
-        else if (event.type == sf::Event::LostFocus)
-        {
-            has_focus_ = false;
-            view_can_move_ = false;
-        }
-        else if (event.type == sf::Event::Resized)
-        {
-            view.setSize(event.size.width, event.size.height);
-        }
-
-        else if (has_focus_)
-        {
-            if(!imgui_io.WantCaptureMouse &&
-               event.type == sf::Event::MouseWheelMoved)
+            // Close the Window if necessary
+            if (event.type == sf::Event::Closed ||
+                (event.type == sf::Event::KeyPressed &&
+                 event.key.code == sf::Keyboard::Escape))
             {
-                // Adjust the zoom level
-                auto delta = event.mouseWheel.delta;
-                if (delta>0)
+                window.close();
+            }
+
+            else if (event.type == sf::Event::GainedFocus)
+            {
+                has_focus_ = true;
+                // Note: the view can not move yet: the old position of the mouse is
+                // still in memory, it must be updated.
+            }
+            else if (event.type == sf::Event::LostFocus)
+            {
+                has_focus_ = false;
+                view_can_move_ = false;
+            }
+            else if (event.type == sf::Event::Resized)
+            {
+                view.setSize(event.size.width, event.size.height);
+            }
+
+            else if (has_focus_)
+            {
+                if(!imgui_io.WantCaptureMouse &&
+                   event.type == sf::Event::MouseWheelMoved)
                 {
-                    zoom_level_ *= 0.9f;
-                    view.zoom(0.9f);
+                    // Adjust the zoom level
+                    auto delta = event.mouseWheel.delta;
+                    if (delta>0)
+                    {
+                        zoom_level_ *= 0.9f;
+                        view.zoom(0.9f);
+                    }
+                    else if (delta<0)
+                    {
+                        zoom_level_ *= 1.1f;
+                        view.zoom(1.1f);
+                    }
                 }
-                else if (delta<0)
+
+                if (event.type == sf::Event::MouseButtonPressed &&
+                    event.mouseButton.button == sf::Mouse::Left)
                 {
-                    zoom_level_ *= 1.1f;
-                    view.zoom(1.1f);
+                    // Update the mouse position and finally signal that the view
+                    // can now move.
+                    mouse_position_ = sf::Mouse::getPosition(window);
+                    view_can_move_ = true;
                 }
             }
 
-            if (event.type == sf::Event::MouseButtonPressed &&
-                event.mouseButton.button == sf::Mouse::Left)
+            handle_input_views(views, event);
+        }
+
+        // Dragging behaviour
+        if (has_focus_ && view_can_move_ &&
+            !imgui_io.WantCaptureMouse &&
+            sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            sf::Vector2i new_position = sf::Mouse::getPosition(window);
+            sf::IntRect window_rect (sf::Vector2i(0,0), sf::Vector2i(window.getSize()));
+            if (window_rect.contains(new_position))
             {
-                // Update the mouse position and finally signal that the view
-                // can now move.
-                mouse_position_ = sf::Mouse::getPosition(window);
-                view_can_move_ = true;
+                sf::Vector2i mouse_delta = mouse_position_ - new_position;
+                view.move(sf::Vector2f(mouse_delta) * zoom_level_);
+                mouse_position_ = new_position;
             }
         }
-    }
-
-    // Dragging behaviour
-    if (has_focus_ && view_can_move_ &&
-        !imgui_io.WantCaptureMouse &&
-        sf::Mouse::isButtonPressed(sf::Mouse::Left))
-    {
-        sf::Vector2i new_position = sf::Mouse::getPosition(window);
-        sf::IntRect window_rect (sf::Vector2i(0,0), sf::Vector2i(window.getSize()));
-        if (window_rect.contains(new_position))
-        {
-            sf::Vector2i mouse_delta = mouse_position_ - new_position;
-            view.move(sf::Vector2f(mouse_delta) * zoom_level_);
-            mouse_position_ = new_position;
-        }
-    }
     
-    window.setView(view);
+        window.setView(view);
+    }
 }

@@ -48,7 +48,9 @@ namespace procgui
         void compute_vertices();
 
         // Draw the vertices.
-        void draw (sf::RenderTarget &target);
+        void draw(sf::RenderTarget &target);
+
+        bool select(const sf::Vector2i& click);
         
     private:        
         // The LSystem's buffer and by extension the LSystem (with shared
@@ -72,6 +74,8 @@ namespace procgui
         // if a mouse click select this View.
         static constexpr int MAX_SUB_BOXES = 8;
         std::vector<sf::FloatRect> sub_boxes_;
+
+        bool is_selected_;
     };
 }
 
