@@ -24,14 +24,14 @@ namespace
     // Open a window named 'name' if 'main' is true.  Otherwise, set up a
     // TreeNode named 'name', to inline the GUI in a existing window.
     // Returns 'false' if the window is collapsed, to early-out.
-    bool set_up(const std::string& name, bool main)
+    bool set_up(const std::string& name, bool main, bool* open = nullptr)
     {
         auto& id = procgui::call_id;
         ++id;
         // If we're the main class, open window 'name'.
         if (main)
         {
-            bool is_active = ImGui::Begin(name.c_str());
+            bool is_active = ImGui::Begin(name.c_str(), open);
             if(!is_active)
             {
                 // Window is collapsed, call End();
@@ -329,15 +329,21 @@ namespace procgui
         return is_modified;
     }
 
-    bool interact_with(LSystemView& lsys_view, const std::string& name, bool main)
+    bool interact_with(LSystemView& lsys_view, const std::string& name, bool main, bool* open)
     {
         // To avoid collision with other window of the same name, create a
         // unique ID for the created window. We override the mecanism of
         // same name ==> same window for the LSystemView which is a unique
         // window for a system.
+        
+        if (open && !(*open))
+        {
+            return false;
+        }
+
         std::stringstream ss;
         ss << name << "##" << call_id;
-        if (!set_up(ss.str(), main))
+        if (!set_up(ss.str(), main, open))
         {
             // Early out if the display zone is collapsed.
             return false;

@@ -86,11 +86,13 @@ namespace procgui
     {
         // Interact with the models and re-compute the vertices if there is a
         // modification. 
-        if (interact_with(*this, ""))
+        if (interact_with(*this, "", true, &is_selected_))
         {
             compute_vertices();
         }
 
+        
+        
         // Early out if there are no vertices.
         if (vertices_.size() == 0)
         {

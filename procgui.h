@@ -69,7 +69,7 @@ namespace procgui {
 
     bool interact_with(InterpretationMapBuffer& buffer, const std::string& name, bool main = true);
 
-    bool interact_with(LSystemView& lsys_view, const std::string& name, bool main = true);
+    bool interact_with(LSystemView& lsys_view, const std::string& name, bool main = true, bool* open = nullptr);
     
     #include "procgui.tpp"
 
