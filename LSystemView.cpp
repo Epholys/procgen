@@ -113,6 +113,7 @@ namespace procgui
                    {{ bounding_box_.left, bounding_box_.top}}}};
             target.draw(box.data(), box.size(), sf::LineStrip);
         }
+
         // DEBUG
         // Draw the sub-bounding boxes.
         for (const auto& box : sub_boxes_)
@@ -126,7 +127,7 @@ namespace procgui
         }
     }
 
-    bool LSystemView::select(const sf::Vector2i& click)
+    bool LSystemView::select(const sf::Vector2f& click)
     {
         if (is_selected_)
         {

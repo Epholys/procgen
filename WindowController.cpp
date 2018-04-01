@@ -7,7 +7,7 @@ namespace controller
 {
     void WindowController::handle_input(sf::RenderWindow &window, std::vector<procgui::LSystemView>& views)
     {
-        sf::View view = window.getView();
+        sf::View window_view = window.getView();
         ImGuiIO& imgui_io = ImGui::GetIO();
         sf::Event event;
 
@@ -37,7 +37,7 @@ namespace controller
             }
             else if (event.type == sf::Event::Resized)
             {
-                view.setSize(event.size.width, event.size.height);
+                window_view.setSize(event.size.width, event.size.height);
             }
 
             else if (has_focus_)
@@ -50,12 +50,12 @@ namespace controller
                     if (delta>0)
                     {
                         zoom_level_ *= 0.9f;
-                        view.zoom(0.9f);
+                        window_view.zoom(0.9f);
                     }
                     else if (delta<0)
                     {
                         zoom_level_ *= 1.1f;
-                        view.zoom(1.1f);
+                        window_view.zoom(1.1f);
                     }
                 }
 
@@ -69,7 +69,7 @@ namespace controller
                 }
             }
 
-            handle_input_views(views, event);
+            handle_input_views(views, event, window_view, zoom_level_);
         }
 
         // Dragging behaviour
@@ -82,11 +82,11 @@ namespace controller
             if (window_rect.contains(new_position))
             {
                 sf::Vector2i mouse_delta = mouse_position_ - new_position;
-                view.move(sf::Vector2f(mouse_delta) * zoom_level_);
+                window_view.move(sf::Vector2f(mouse_delta) * zoom_level_);
                 mouse_position_ = new_position;
             }
         }
     
-        window.setView(view);
+        window.setView(window_view);
     }
 }
