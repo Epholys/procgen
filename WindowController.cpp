@@ -38,7 +38,8 @@ namespace controller
 
             // Close the Window if necessary
             if (event.type == sf::Event::Closed ||
-                (event.type == sf::Event::KeyPressed &&
+                (!imgui_io.WantCaptureKeyboard &&
+                 event.type == sf::Event::KeyPressed &&
                  event.key.code == sf::Keyboard::Escape))
             {
                 window.close();

@@ -1,11 +1,15 @@
 #include "LSystemController.h"
 #include "WindowController.h"
+#include "imgui/imgui.h"
 
 namespace controller
 {
     void handle_input_views(std::vector<procgui::LSystemView>& views, const sf::Event& event)
     {
-        if (event.type == sf::Event::MouseButtonPressed &&
+        ImGuiIO& imgui_io = ImGui::GetIO();
+
+        if (!imgui_io.WantCaptureMouse &&
+            event.type == sf::Event::MouseButtonPressed &&
             event.mouseButton.button == sf::Mouse::Left)
         {
             auto to_select = views.end();
