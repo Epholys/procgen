@@ -95,8 +95,6 @@ namespace procgui
             compute_vertices();
         }
 
-        
-        
         // Early out if there are no vertices.
         if (vertices_.size() == 0)
         {
@@ -120,15 +118,15 @@ namespace procgui
 
         // DEBUG
         // Draw the sub-bounding boxes.
-        for (const auto& box : sub_boxes_)
-        {
-            std::array<sf::Vertex, 5> rect =
-                {{ {{ box.left, box.top}, sf::Color(255,0,0,50)},
-                   {{ box.left, box.top + box.height}, sf::Color(255,0,0,50)},
-                   {{ box.left + box.width, box.top + box.height}, sf::Color(255,0,0,50)},
-                   {{ box.left + box.width, box.top}, sf::Color(255,0,0,50)}}};
-            target.draw(rect.data(), rect.size(), sf::Quads);
-        }
+        // for (const auto& box : sub_boxes_)
+        // {
+        //     std::array<sf::Vertex, 5> rect =
+        //         {{ {{ box.left, box.top}, sf::Color(255,0,0,50)},
+        //            {{ box.left, box.top + box.height}, sf::Color(255,0,0,50)},
+        //            {{ box.left + box.width, box.top + box.height}, sf::Color(255,0,0,50)},
+        //            {{ box.left + box.width, box.top}, sf::Color(255,0,0,50)}}};
+        //     target.draw(rect.data(), rect.size(), sf::Quads);
+        // }
     }
 
     bool LSystemView::is_selected() const

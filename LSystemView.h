@@ -21,7 +21,7 @@ namespace procgui
     // Invariant:
     //     - The 'vertices_' must correspond to the 'lsys_buff_',
     //     'interpretation_buff_', and 'params_'.
-    //     - The 'bounding_box_' and 'sub_boxes_' myst correspond with teh
+    //     - The 'bounding_box_' and 'sub_boxes_' must correspond with the
     //     'vertices_'.
     // 
     // Note:
@@ -51,11 +51,17 @@ namespace procgui
         // Draw the vertices.
         void draw(sf::RenderTarget &target);
 
+        // Getter to is_selected_.
         bool is_selected() const;
+
+        // Check if 'click' is inside one of the 'bounding_box_'
         bool is_inside(const sf::Vector2f& click) const;
+
+        // Select the view.
         void select();
         
-    private:        
+    private:
+        // The window's name.
         std::string name_;
 
         // The LSystem's buffer and by extension the LSystem (with shared
@@ -80,6 +86,7 @@ namespace procgui
         static constexpr int MAX_SUB_BOXES = 8;
         std::vector<sf::FloatRect> sub_boxes_;
 
+        // True if the window is selected.
         bool is_selected_;
     };
 }

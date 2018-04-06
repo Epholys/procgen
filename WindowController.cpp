@@ -85,6 +85,8 @@ namespace controller
                 {
                     // Update the mouse position and finally signal that the view_
                     // can now move.
+                    // Note: the mouse position does not need to be relative to
+                    // the drawing, so real_mouse_position() is not necessary.
                     mouse_position_ = sf::Mouse::getPosition(window);
                     view_can_move_ = true;
                 }
