@@ -127,20 +127,25 @@ namespace procgui
         }
     }
 
-    bool LSystemView::select(const sf::Vector2f& click)
+    bool LSystemView::is_selected() const
     {
-        if (is_selected_)
-        {
-            return true;
-        }
+        return is_selected_;
+    }
+
+    bool LSystemView::is_inside(const sf::Vector2f& click) const
+    {
         for (const auto& rect : sub_boxes_)
         {
             if (rect.contains(sf::Vector2f(click)))
             {
-                is_selected_ = true;
                 return true;
             }
         }
         return false;
+    }
+    
+    void LSystemView::select()
+    {
+        is_selected_ = true;
     }
 }

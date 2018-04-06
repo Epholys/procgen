@@ -50,7 +50,9 @@ namespace procgui
         // Draw the vertices.
         void draw(sf::RenderTarget &target);
 
-        bool select(const sf::Vector2f& click);
+        bool is_selected() const;
+        bool is_inside(const sf::Vector2f& click) const;
+        void select();
         
     private:        
         // The LSystem's buffer and by extension the LSystem (with shared

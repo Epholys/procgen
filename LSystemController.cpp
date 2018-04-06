@@ -8,12 +8,25 @@ namespace controller
         if (event.type == sf::Event::MouseButtonPressed &&
             event.mouseButton.button == sf::Mouse::Left)
         {
-            for (auto& v : views)
+            auto to_select = views.end();
+            for (auto it = views.begin(); it != views.end(); ++it)
             {
-                if (v.select(WindowController::real_mouse_position({event.mouseButton.x, event.mouseButton.y})))
+                if (it->is_inside(WindowController::real_mouse_position(
+                                    {event.mouseButton.x,
+                                     event.mouseButton.y})))
                 {
-                    break;
+                    to_select = it;
+                    if (it->is_selected())
+                    {
+                        to_select = views.end();
+                        break;
+                    }
+
                 }
+            }
+            if (to_select != views.end())
+            {
+                to_select->select();
             }
         }
     }
