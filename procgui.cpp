@@ -342,7 +342,7 @@ namespace procgui
         }
 
         std::stringstream ss;
-        ss << name << "##" << call_id;
+        ss << name << "##" << static_cast<const void *>(&lsys_view);
         if (!set_up(ss.str(), main, open))
         {
             // Early out if the display zone is collapsed.
