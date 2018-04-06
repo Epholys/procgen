@@ -8,32 +8,35 @@
 
 namespace controller
 {
-// WindowController is the hub for all the inputs. The main code in
-// 'handle_input()' manages the 'sf::View' of the window: resizing, zooming, and
-// dragging the view. All the others component of this application needing input
-// (imgui, *Views) are called in this call but managed elsewhere.
+    // WindowController is the hub for all the inputs. The main code in
+    // 'handle_input()' manages the 'sf::View' of the window: resizing, zooming, and
+    // dragging the view. All the others component of this application needing input
+    // (imgui, *Views) are called in this call but managed elsewhere.
     class WindowController
     {
     public:
         // Just to signal that there is a default constructor.
-        WindowController() = default;
+        WindowController() = delete;
 
         // Hub of all the input of the application, manages locally the 'sf::View'
         // of the 'window'.
-        void handle_input(sf::RenderWindow& window, std::vector<procgui::LSystemView>& views);
+        static void handle_input(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views);
+
+        static sf::Vector2f real_mouse_position(sf::Vector2i mouse_click);
     
     private:
-        // Current zoom level (useful for dragging)
-        float zoom_level_ {1.f};
+        static sf::View view_;
+
+        static float zoom_level_;
 
         // Current mouse position
-        sf::Vector2i mouse_position_ {};
+        static sf::Vector2i mouse_position_;
 
         // Does the window have the focus?
-        bool has_focus_ {true};
+        static bool has_focus_;
 
         // Signal that the view can be dragged.
-        bool view_can_move_ {false};
+        static bool view_can_move_;
     };
 }
 

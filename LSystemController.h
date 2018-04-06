@@ -7,7 +7,7 @@
 
 namespace controller
 {
-    void handle_input_views(std::vector<procgui::LSystemView>& views, const sf::Event& event, const sf::View window_view, float zoom_level);
+    void handle_input_views(std::vector<procgui::LSystemView>& views, const sf::Event& event);
 }
 
 

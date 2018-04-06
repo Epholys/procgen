@@ -27,8 +27,6 @@ int main()
     window.setVerticalSyncEnabled(true);
     ImGui::SFML::Init(window);
 
-    WindowController window_controller;
-    
     auto serpinski = std::make_shared<LSystem>(LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
     auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } } });
     auto map = std::make_shared<InterpretationMap>(InterpretationMap
@@ -64,7 +62,7 @@ int main()
     {
         window.clear();
 
-        window_controller.handle_input(window, views);
+        WindowController::handle_input(window, views);
         
         ImGui::SFML::Update(window, delta_clock.restart());
 

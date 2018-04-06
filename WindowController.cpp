@@ -5,12 +5,32 @@
 
 namespace controller
 {
-    void WindowController::handle_input(sf::RenderWindow &window, std::vector<procgui::LSystemView>& views)
+    sf::View WindowController::view_ {};
+
+    float WindowController::zoom_level_ {1.f};
+
+    sf::Vector2i WindowController::mouse_position_ {};
+
+    bool WindowController::has_focus_ {true};
+
+    bool WindowController::view_can_move_ {false};
+
+    
+    sf::Vector2f WindowController::real_mouse_position(sf::Vector2i mouse_click)
     {
-        sf::View window_view = window.getView();
+        auto size = view_.getSize();
+        auto center = view_.getCenter();
+        sf::Vector2f upright {center.x - size.x/2, center.y - size.y/2};
+        sf::Vector2f position {mouse_click.x*zoom_level_ + upright.x,
+                               mouse_click.y*zoom_level_ + upright.y};
+        return position;
+    }
+
+    void WindowController::handle_input(sf::RenderWindow &window, std::vector<procgui::LSystemView>& lsys_views)
+    {
         ImGuiIO& imgui_io = ImGui::GetIO();
         sf::Event event;
-
+        
         while (window.pollEvent(event))
         {
             // ImGui has the priority as it is the topmost GUI.
@@ -27,7 +47,7 @@ namespace controller
             else if (event.type == sf::Event::GainedFocus)
             {
                 has_focus_ = true;
-                // Note: the view can not move yet: the old position of the mouse is
+                // Note: the view_ can not move yet: the old position of the mouse is
                 // still in memory, it must be updated.
             }
             else if (event.type == sf::Event::LostFocus)
@@ -37,7 +57,7 @@ namespace controller
             }
             else if (event.type == sf::Event::Resized)
             {
-                window_view.setSize(event.size.width, event.size.height);
+                view_.setSize(event.size.width, event.size.height);
             }
 
             else if (has_focus_)
@@ -50,26 +70,26 @@ namespace controller
                     if (delta>0)
                     {
                         zoom_level_ *= 0.9f;
-                        window_view.zoom(0.9f);
+                        view_.zoom(0.9f);
                     }
                     else if (delta<0)
                     {
                         zoom_level_ *= 1.1f;
-                        window_view.zoom(1.1f);
+                        view_.zoom(1.1f);
                     }
                 }
 
                 if (event.type == sf::Event::MouseButtonPressed &&
                     event.mouseButton.button == sf::Mouse::Left)
                 {
-                    // Update the mouse position and finally signal that the view
+                    // Update the mouse position and finally signal that the view_
                     // can now move.
                     mouse_position_ = sf::Mouse::getPosition(window);
                     view_can_move_ = true;
                 }
             }
 
-            handle_input_views(views, event, window_view, zoom_level_);
+            handle_input_views(lsys_views, event);
         }
 
         // Dragging behaviour
@@ -82,11 +102,11 @@ namespace controller
             if (window_rect.contains(new_position))
             {
                 sf::Vector2i mouse_delta = mouse_position_ - new_position;
-                window_view.move(sf::Vector2f(mouse_delta) * zoom_level_);
+                view_.move(sf::Vector2f(mouse_delta) * zoom_level_);
                 mouse_position_ = new_position;
             }
         }
     
-        window.setView(window_view);
+        window.setView(view_);
     }
 }
