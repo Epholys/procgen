@@ -21,7 +21,7 @@ namespace procgui
     // Invariant:
     //     - The 'vertices_' must correspond to the 'lsys_buff_',
     //     'interpretation_buff_', and 'params_'.
-    //     - The 'bounding_box_' and 'sub_boxes_' myst correspond with teh
+    //     - The 'bounding_box_' and 'sub_boxes_' must correspond with the
     //     'vertices_'.
     // 
     // Note:
@@ -32,7 +32,8 @@ namespace procgui
                         public Observer<drawing::InterpretationMap>
     {
     public:
-        LSystemView(std::shared_ptr<LSystem> lsys,
+        LSystemView(const std::string& name,
+                    std::shared_ptr<LSystem> lsys,
                     std::shared_ptr<drawing::InterpretationMap> map,
                     drawing::DrawingParameters param);
         LSystemView(const LSystemView& other);
@@ -48,9 +49,21 @@ namespace procgui
         void compute_vertices();
 
         // Draw the vertices.
-        void draw (sf::RenderTarget &target);
+        void draw(sf::RenderTarget &target);
+
+        // Getter to is_selected_.
+        bool is_selected() const;
+
+        // Check if 'click' is inside one of the 'bounding_box_'
+        bool is_inside(const sf::Vector2f& click) const;
+
+        // Select the view.
+        void select();
         
-    private:        
+    private:
+        // The window's name.
+        std::string name_;
+
         // The LSystem's buffer and by extension the LSystem (with shared
         // ownership). 
         LSystemBuffer lsys_buff_;
@@ -72,6 +85,9 @@ namespace procgui
         // if a mouse click select this View.
         static constexpr int MAX_SUB_BOXES = 8;
         std::vector<sf::FloatRect> sub_boxes_;
+
+        // True if the window is selected.
+        bool is_selected_;
     };
 }
 
