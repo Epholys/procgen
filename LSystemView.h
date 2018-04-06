@@ -49,6 +49,7 @@ namespace procgui
 
         // Draw the vertices.
         void draw(sf::RenderTarget &target);
+        void start();
 
         bool select(const sf::Vector2f& click);
         
@@ -76,6 +77,9 @@ namespace procgui
         std::vector<sf::FloatRect> sub_boxes_;
 
         bool is_selected_;
+
+        sf::Clock clock_;
+        bool progressive_drawing_;
     };
 }
 

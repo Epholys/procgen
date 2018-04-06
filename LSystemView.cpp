@@ -17,6 +17,8 @@ namespace procgui
         , bounding_box_ {}
         , sub_boxes_ {}
         , is_selected_ {false}
+        , clock_ {}
+        , progressive_drawing_ {false}
     {
         // Invariant respected: cohesion between the LSystem/InterpretationMap
         // and the vertices. 
@@ -35,6 +37,8 @@ namespace procgui
         , bounding_box_ {other.bounding_box_}
         , sub_boxes_ {other.sub_boxes_}
         , is_selected_ {other.is_selected_}
+        , clock_ {other.clock_}
+        , progressive_drawing_ {other.progressive_drawing_}
     {
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
@@ -48,6 +52,8 @@ namespace procgui
         bounding_box_ = other.bounding_box_;
         sub_boxes_ = other.sub_boxes_;
         is_selected_ = other.is_selected_;
+        clock_ = other.clock_;
+        progressive_drawing_ = other.progressive_drawing_;
 
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
@@ -81,6 +87,12 @@ namespace procgui
         bounding_box_ = geometry::compute_bounding_box(vertices_);
         sub_boxes_ = geometry::compute_sub_boxes(vertices_, MAX_SUB_BOXES);
     }
+
+    void LSystemView::start()
+    {
+        progressive_drawing_ = true;
+        clock_.restart();
+    }
     
     void LSystemView::draw(sf::RenderTarget &target)
     {
@@ -100,8 +112,19 @@ namespace procgui
         }
 
         // Draw the vertices.
-        target.draw(vertices_.data(), vertices_.size(), sf::LineStrip);
-
+        size_t n_vertices = vertices_.size();
+        if (progressive_drawing_)
+        {
+            const float step = 1; // milliseconds
+            n_vertices = clock_.getElapsedTime().asMilliseconds() / step;
+            if (n_vertices >= vertices_.size())
+            {
+                n_vertices = vertices_.size();
+                progressive_drawing_ = false;
+            }
+        }
+        target.draw(vertices_.data(), n_vertices, sf::LineStrip);
+        
         if (is_selected_)
         {
             // Draw the global bounding boxes.
@@ -116,15 +139,15 @@ namespace procgui
 
         // DEBUG
         // Draw the sub-bounding boxes.
-        for (const auto& box : sub_boxes_)
-        {
-            std::array<sf::Vertex, 5> rect =
-                {{ {{ box.left, box.top}, sf::Color(255,0,0,50)},
-                   {{ box.left, box.top + box.height}, sf::Color(255,0,0,50)},
-                   {{ box.left + box.width, box.top + box.height}, sf::Color(255,0,0,50)},
-                   {{ box.left + box.width, box.top}, sf::Color(255,0,0,50)}}};
-            target.draw(rect.data(), rect.size(), sf::Quads);
-        }
+        // for (const auto& box : sub_boxes_)
+        // {
+        //     std::array<sf::Vertex, 5> rect =
+        //         {{ {{ box.left, box.top}, sf::Color(255,0,0,50)},
+        //            {{ box.left, box.top + box.height}, sf::Color(255,0,0,50)},
+        //            {{ box.left + box.width, box.top + box.height}, sf::Color(255,0,0,50)},
+        //            {{ box.left + box.width, box.top}, sf::Color(255,0,0,50)}}};
+        //     target.draw(rect.data(), rect.size(), sf::Quads);
+        // }
     }
 
     bool LSystemView::select(const sf::Vector2f& click)

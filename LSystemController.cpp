@@ -21,5 +21,13 @@ namespace controller
                 }
             }
         }
+        else if (event.type == sf::Event::KeyPressed &&
+                 event.key.code == sf::Keyboard::Space)
+        {
+            for (auto& v : views)
+            {
+                v.start();
+            }
+        }
     }
 }
