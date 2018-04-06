@@ -5,11 +5,13 @@ namespace procgui
 {
     using namespace drawing;
     
-    LSystemView::LSystemView(std::shared_ptr<LSystem> lsys,
+    LSystemView::LSystemView(const std::string& name,
+                             std::shared_ptr<LSystem> lsys,
                              std::shared_ptr<drawing::InterpretationMap> map,
                              drawing::DrawingParameters params)
         : Observer<LSystem> {lsys}
         , Observer<InterpretationMap> {map}
+        , name_ {name}
         , lsys_buff_ {lsys}
         , interpretation_buff_ {map}
         , params_ {params}
@@ -28,6 +30,7 @@ namespace procgui
     LSystemView::LSystemView(const LSystemView& other)
         : Observer<LSystem> {other.Observer<LSystem>::target_}
         , Observer<InterpretationMap> {other.Observer<InterpretationMap>::target_}
+        , name_ {other.name_}
         , lsys_buff_ {other.lsys_buff_}
         , interpretation_buff_ {other.interpretation_buff_}
         , params_ {other.params_}
@@ -41,6 +44,7 @@ namespace procgui
     }
     LSystemView& LSystemView::operator=(const LSystemView& other)
     {
+        name_ = other.name_;
         lsys_buff_ = other.lsys_buff_;
         interpretation_buff_ = other.interpretation_buff_;
         params_ = other.params_;
@@ -86,7 +90,7 @@ namespace procgui
     {
         // Interact with the models and re-compute the vertices if there is a
         // modification. 
-        if (interact_with(*this, "", true, &is_selected_))
+        if (interact_with(*this, name_, true, &is_selected_))
         {
             compute_vertices();
         }

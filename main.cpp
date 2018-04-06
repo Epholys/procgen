@@ -50,8 +50,8 @@ int main()
     plant_param.step = 5;
     plant_param.n_iter = 6;
 
-    LSystemView serpinski_view (serpinski, map, serpinski_param);
-    LSystemView plant_view (plant, map, plant_param);
+    LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
+    LSystemView plant_view ("Plant", plant, map, plant_param);
 
     std::vector<LSystemView> views;
     views.push_back(std::move(serpinski_view));

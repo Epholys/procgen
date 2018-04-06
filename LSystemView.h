@@ -32,7 +32,8 @@ namespace procgui
                         public Observer<drawing::InterpretationMap>
     {
     public:
-        LSystemView(std::shared_ptr<LSystem> lsys,
+        LSystemView(const std::string& name,
+                    std::shared_ptr<LSystem> lsys,
                     std::shared_ptr<drawing::InterpretationMap> map,
                     drawing::DrawingParameters param);
         LSystemView(const LSystemView& other);
@@ -55,6 +56,8 @@ namespace procgui
         void select();
         
     private:        
+        std::string name_;
+
         // The LSystem's buffer and by extension the LSystem (with shared
         // ownership). 
         LSystemBuffer lsys_buff_;
