@@ -28,6 +28,8 @@ namespace controller
         // window. This method get the mouse position with the application
         // coordinates relative to the drawing of the application.
         static sf::Vector2f real_mouse_position(sf::Vector2i mouse_click);
+
+        static sf::Vector2i get_mouse_position();
     
     private:
         // The view modified by the user and given to the window.

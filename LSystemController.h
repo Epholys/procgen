@@ -7,8 +7,16 @@
 
 namespace controller
 {
-    // Handle 'event' for the 'views'.
-    void handle_input_views(std::vector<procgui::LSystemView>& views, const sf::Event& event);
+    struct ctrl
+    {
+    
+        procgui::LSystemView* under_mouse = nullptr;
+    
+        // Handle 'event' for the 'views'.
+        void handle_input_views(std::vector<procgui::LSystemView>& views, const sf::Event& event);
+
+        void handle_delta(sf::Vector2f delta);
+    };
 }
 
 
