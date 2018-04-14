@@ -73,7 +73,7 @@ int main()
         }
 
         display(*map, "interpretations");
-        
+
         ImGui::SFML::Render(window);
         window.display();
     }

@@ -41,11 +41,13 @@ namespace procgui
         LSystemView(const LSystemView& other);
         LSystemView& operator=(const LSystemView& other);
 
+        LSystemView clone();
+        
         // Reference Getters
         drawing::DrawingParameters& get_parameters();
         LSystemBuffer& get_lsystem_buffer();
         InterpretationMapBuffer& get_interpretation_buffer();
-
+        sf::FloatRect get_bounding_box() const;
         
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();
@@ -61,7 +63,8 @@ namespace procgui
 
         // Select the view.
         void select();
-        
+
+                
     private:
         // The window's name.
         std::string name_;

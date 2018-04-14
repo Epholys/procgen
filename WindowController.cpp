@@ -31,9 +31,22 @@ namespace controller
     {
         if (ImGui::BeginPopupContextVoid())
         {
-            if(ImGui::MenuItem("New LSystem"))
+            if (ImGui::MenuItem("New LSystem"))
             {
                 lsys_views.emplace_back(real_mouse_position(sf::Mouse::getPosition(window)));
+            }
+            if (ImGui::MenuItem("Paste"))
+            {
+                const auto& saved = LSystemController::saved_view();
+                if (saved)
+                {
+                    auto view = *saved;
+                    auto box = view.get_bounding_box();
+                    sf::Vector2f middle = {box.left + box.width/2, box.top + box.height/2};
+                    view.get_parameters().starting_position = real_mouse_position(sf::Mouse::getPosition(window)) + middle;
+                    view.compute_vertices();
+                    lsys_views.emplace_back(view);
+                }
             }
             ImGui::EndPopup();
         }
@@ -108,7 +121,14 @@ namespace controller
             LSystemController::handle_input(lsys_views, event);
         }
 
-        right_click_menu(window, lsys_views);
+        if (LSystemController::has_priority())
+        {
+            LSystemController::right_click_menu();
+        }
+        else
+        {
+            right_click_menu(window, lsys_views);
+        }
 
         // Dragging behaviour
         if (has_focus_ && view_can_move_ &&

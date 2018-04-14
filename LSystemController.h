@@ -2,6 +2,7 @@
 #define LSYSTEM_CONTROLLER
 
 
+#include <optional>
 #include "SFML/Graphics.hpp"
 #include "LSystemView.h"
 
@@ -20,6 +21,8 @@ namespace controller
         // If the mouse if above a LSystemView ('under_mouse_'),
         // LSystemController has the priority.
         static bool has_priority();
+
+        static const std::optional<procgui::LSystemView>& saved_view();
         
         // Handle 'event' for the 'views'.
         static void handle_input(std::vector<procgui::LSystemView>& views, const sf::Event& event);
@@ -27,10 +30,14 @@ namespace controller
         // Handle the dragging behaviour.
         static void handle_delta(sf::Vector2f delta);
 
+        static void right_click_menu();
+
     private:
         // The LSystemView below the mouse. nullptr if there is
         // nothing. Non-owning pointer.
         static procgui::LSystemView* under_mouse_;
+
+        static std::optional<procgui::LSystemView> saved_view_;
     };
 }
 

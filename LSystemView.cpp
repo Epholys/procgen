@@ -35,7 +35,7 @@ namespace procgui
             drawing::DrawingParameters({position}))
     {
     }
-    
+
     LSystemView::LSystemView(const LSystemView& other)
         : Observer<LSystem> {other.Observer<LSystem>::target_}
         , Observer<InterpretationMap> {other.Observer<InterpretationMap>::target_}
@@ -46,13 +46,15 @@ namespace procgui
         , vertices_ {other.vertices_}
         , bounding_box_ {other.bounding_box_}
         , sub_boxes_ {other.sub_boxes_}
-        , is_selected_ {other.is_selected_}
+        , is_selected_ {false}
     {
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
     }
     LSystemView& LSystemView::operator=(const LSystemView& other)
     {
+        Observer<LSystem> {other.Observer<LSystem>::target_};
+        Observer<InterpretationMap> {other.Observer<InterpretationMap>::target_};
         name_ = other.name_;
         lsys_buff_ = other.lsys_buff_;
         interpretation_buff_ = other.interpretation_buff_;
@@ -60,7 +62,7 @@ namespace procgui
         vertices_ = other.vertices_;
         bounding_box_ = other.bounding_box_;
         sub_boxes_ = other.sub_boxes_;
-        is_selected_ = other.is_selected_;
+        is_selected_ = false;
 
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
@@ -68,6 +70,16 @@ namespace procgui
         return *this;
     }
 
+    LSystemView LSystemView::clone()
+    {
+        return LSystemView(
+            name_,
+            std::make_shared<LSystem>(LSystem(lsys_buff_.get_target())),
+            std::make_shared<drawing::InterpretationMap>(drawing::InterpretationMap(interpretation_buff_.get_target())),
+            params_
+            );
+    }
+    
 
     drawing::DrawingParameters& LSystemView::get_parameters()
     {
@@ -80,6 +92,10 @@ namespace procgui
     InterpretationMapBuffer& LSystemView::get_interpretation_buffer()
     {
         return interpretation_buff_;
+    }
+    sf::FloatRect LSystemView::get_bounding_box() const
+    {
+        return bounding_box_;
     }
 
     
