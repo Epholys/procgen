@@ -36,6 +36,8 @@ namespace procgui
                     std::shared_ptr<LSystem> lsys,
                     std::shared_ptr<drawing::InterpretationMap> map,
                     drawing::DrawingParameters param);
+        // Create a default LSystemView at 'position'.
+        LSystemView(const sf::Vector2f& position);
         LSystemView(const LSystemView& other);
         LSystemView& operator=(const LSystemView& other);
 

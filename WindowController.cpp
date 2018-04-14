@@ -1,3 +1,4 @@
+#include <memory>
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
 #include "WindowController.h"
@@ -26,6 +27,18 @@ namespace controller
         return position;
     }
 
+    void WindowController::right_click_menu(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views)
+    {
+        if (ImGui::BeginPopupContextVoid())
+        {
+            if(ImGui::MenuItem("New LSystem"))
+            {
+                lsys_views.emplace_back(real_mouse_position(sf::Mouse::getPosition(window)));
+            }
+            ImGui::EndPopup();
+        }
+    }
+    
     void WindowController::handle_input(sf::RenderWindow &window, std::vector<procgui::LSystemView>& lsys_views)
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
@@ -91,9 +104,11 @@ namespace controller
                     view_can_move_ = true;
                 }
             }
-
+            
             LSystemController::handle_input(lsys_views, event);
         }
+
+        right_click_menu(window, lsys_views);
 
         // Dragging behaviour
         if (has_focus_ && view_can_move_ &&

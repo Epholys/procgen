@@ -15,6 +15,7 @@ namespace procgui
 {
     // An OrderEntry is the simple association of an 'drawing::Order' to a
     // string identifier. This string is used in the GUI to select an order.
+    // OrderEntry is necessary beyond 'drawing::Order' to interact in the GUI.
     struct OrderEntry
     {
         drawing::Order order;

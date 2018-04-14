@@ -62,11 +62,10 @@ int main()
     {
         window.clear();
 
-        WindowController::handle_input(window, views);
-        
         ImGui::SFML::Update(window, delta_clock.restart());
-
         procgui::new_frame();
+
+        WindowController::handle_input(window, views);
         
         for (auto& v : views)
         {

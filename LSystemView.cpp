@@ -27,6 +27,15 @@ namespace procgui
         compute_vertices();
     }
 
+    LSystemView::LSystemView(const sf::Vector2f& position)
+        : LSystemView(
+            "",
+            std::make_shared<LSystem>(LSystem("F+F+F+F", {})),
+            std::make_shared<drawing::InterpretationMap>(drawing::default_interpretation_map),
+            drawing::DrawingParameters({position}))
+    {
+    }
+    
     LSystemView::LSystemView(const LSystemView& other)
         : Observer<LSystem> {other.Observer<LSystem>::target_}
         , Observer<InterpretationMap> {other.Observer<InterpretationMap>::target_}
