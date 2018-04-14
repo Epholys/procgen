@@ -4,7 +4,14 @@
 
 namespace controller
 {
-    void ctrl::handle_input_views(std::vector<procgui::LSystemView>& views, const sf::Event& event)
+    procgui::LSystemView* LSystemController::under_mouse_ = nullptr;
+
+    bool LSystemController::has_priority()
+    {
+        return under_mouse_ != nullptr;
+    }
+
+    void LSystemController::handle_input(std::vector<procgui::LSystemView>& views, const sf::Event& event)
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
 
@@ -27,7 +34,7 @@ namespace controller
                     to_select = it;
                     if (it->is_selected())
                     {
-                        under_mouse = &(*it);
+                        under_mouse_ = &(*it);
                         already_selected = true;
 
                         // ... unless an other one is selected at this
@@ -40,24 +47,24 @@ namespace controller
             }
             if (to_select != views.end())
             {
-                under_mouse = &(*to_select);
+                under_mouse_ = &(*to_select);
                 
                 to_select->select();
             }
             else if (!already_selected)
             {
-                under_mouse = nullptr;
+                under_mouse_ = nullptr;
             }
         }
     }
 
-    void ctrl::handle_delta(sf::Vector2f delta)
+    void LSystemController::handle_delta(sf::Vector2f delta)
     {
-        if (under_mouse)
+        if (under_mouse_)
         {
-            auto& parameters = under_mouse->get_parameters();
+            auto& parameters = under_mouse_->get_parameters();
             parameters.starting_position -= delta;
-            under_mouse->compute_vertices();
+            under_mouse_->compute_vertices();
         }
     }
 }

@@ -13,16 +13,15 @@
    - Dynamic GUIs to interact with the parameters
 
 ** Main Roadmap
-   1. Add a relatively precise hitbox to select LSystem for modification
-   1. Save and load L-system models
-   1. Add a more complex GUI (classic with a main menu bar and right-click) and polish it
-   1. Add genetic algorithm or constraint-based algorithm for new LSystem generation
+   1. Right-click manipulations (copy/paste, new LSystem, ...)
+   2. Save and load L-system models
+   3. Add a more complex GUI and polish it
+   4. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
+   5. Add genetic algorithm or constraint-based algorithm for new LSystem generation
 
 ** Other ideas
 
 ** Next Bugs
-   - LSystemView copies does not all update themselves
-   - Copy operations on LSystemView (and others) breaks because of Observable (id counter)
 
 ** Optimization & non-urgent bugs
    - Optimization

@@ -28,8 +28,6 @@ namespace controller
 
     void WindowController::handle_input(sf::RenderWindow &window, std::vector<procgui::LSystemView>& lsys_views)
     {
-        static ctrl c;
-
         ImGuiIO& imgui_io = ImGui::GetIO();
         sf::Event event;
         
@@ -94,7 +92,7 @@ namespace controller
                 }
             }
 
-            c.handle_input_views(lsys_views, event);
+            LSystemController::handle_input(lsys_views, event);
         }
 
         // Dragging behaviour
@@ -107,9 +105,11 @@ namespace controller
             if (window_rect.contains(new_position))
             {
                 sf::Vector2i mouse_delta = mouse_position_ - new_position;
-                if (c.under_mouse)
+                if (LSystemController::has_priority())
                 {
-                    c.handle_delta(sf::Vector2f(mouse_delta) * zoom_level_);
+                    // If LSystemView management has priority, let them have the
+                    // control over the dragging behaviour.
+                    LSystemController::handle_delta(sf::Vector2f(mouse_delta) * zoom_level_);
                 }
                 else
                 {
