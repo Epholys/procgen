@@ -16,6 +16,8 @@
    1. Right-click manipulations (copy/paste, new LSystem, ...)
    2. Save and load L-system models
    3. Add a more complex GUI and polish it
+      * Slider speed
+      * Color-coded LSystems windows
    4. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
    5. Add genetic algorithm or constraint-based algorithm for new LSystem generation
 
@@ -35,7 +37,7 @@
      - Correct zoom level and drag behaviour when resizing window
 
 ** Development framework
-   - *Environment:* debian stretch chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=
+   - *Environment:* debian sid chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=
    - *Dependencies:*
      - SFML / 2.4.1 / [[https://www.sfml-dev.org/][Website]] / installed from packages/
      - dear imgui, / 1.5 / [[https://github.com/ocornut/imgui][Github Repository]] / installed via [[https://github.com/ocornut/imgui/releases/tag/v1.50][release 1.5]]
@@ -44,7 +46,7 @@
    - *Coding rule:* [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]] with GSL
      - Difference: [[https://en.wikipedia.org/wiki/Indentation_style#Allman_style][Allman indentation Style]]
      - Difference: When using ImGui ; ImGui style of coding
-   - *Compilation:* =make=
+   - *Compilation:* =make= and C++17 needed
    - *Testing suite:* [[https://github.com/google/googletest/][googletest]]
 
 ** Completing the framework?
