@@ -20,9 +20,9 @@
 #ifndef GSL_SPAN_H
 #define GSL_SPAN_H
 
-#include <gsl/gsl_assert>
-#include <gsl/gsl_byte>
-#include <gsl/gsl_util>
+#include "gsl_assert"
+#include "gsl_byte"
+#include "gsl_util"
 
 #include <array>
 #include <iterator>
