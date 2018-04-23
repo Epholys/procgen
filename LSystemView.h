@@ -39,7 +39,7 @@ namespace procgui
         // Create a default LSystemView at 'position'.
         LSystemView(const sf::Vector2f& position);
         LSystemView(const LSystemView& other);
-        LSystemView& operator=(const LSystemView& other);
+        LSystemView& operator=(LSystemView other);
 
         LSystemView clone();
         
@@ -66,6 +66,9 @@ namespace procgui
 
                 
     private:
+        void swap(LSystemView& other);
+
+        
         // The window's name.
         std::string name_;
 

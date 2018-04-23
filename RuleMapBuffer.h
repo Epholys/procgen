@@ -88,7 +88,7 @@ namespace procgui
         // we need to register a callback for the new object to
         // 'Observer<Target>'
         RuleMapBuffer(const RuleMapBuffer& other);
-        RuleMapBuffer& operator=(const RuleMapBuffer& other);
+        RuleMapBuffer& operator=(RuleMapBuffer other);
         
         // Get the Target. Its modification will be automatically synchronized
         // with the Observer pattern.
@@ -154,6 +154,8 @@ namespace procgui
         void apply();
         
     private:
+        void swap(RuleMapBuffer& other);
+
         // Remove a rule from the buffer.
         // Take care of updating the Target according to the existence of
         // duplicate rules in this buffer.

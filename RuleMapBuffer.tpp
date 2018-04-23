@@ -3,11 +3,11 @@
 template<typename Target>
 RuleMapBuffer<Target>::RuleMapBuffer(const std::shared_ptr<Target>& target)
     : Observer<Target>(target)
-    , target_ {*Observer<Target>::target_}
+    , target_ {*Observer<Target>::get_target()}
     , buffer_ {}
     , instruction_ {nullptr}
 {
-    Observer<Target>::add_callback([this](){sync();});
+    this->add_callback([this](){sync();});
         
     // Initialize the buffer with the LSystem's rules.
     // By construction, there are not duplicate rules in a 'LSystem', so
@@ -20,7 +20,7 @@ RuleMapBuffer<Target>::RuleMapBuffer(const std::shared_ptr<Target>& target)
 
 template<typename Target>
 RuleMapBuffer<Target>::RuleMapBuffer(const RuleMapBuffer& other)
-    : Observer<Target>(other.Observer<Target>::target_)
+    : Observer<Target>(other.Observer<Target>::get_target())
     , target_ {other.target_}
     , buffer_ {other.buffer_}
     , instruction_ {nullptr}
@@ -29,15 +29,28 @@ RuleMapBuffer<Target>::RuleMapBuffer(const RuleMapBuffer& other)
 }
 
 template<typename Target>
-RuleMapBuffer<Target>& RuleMapBuffer<Target>::operator=(const RuleMapBuffer& other)
+RuleMapBuffer<Target>& RuleMapBuffer<Target>::operator=(RuleMapBuffer other)
 {
-    target_ = other.target_;
-    buffer_ = other.buffer_;
-    instruction_ = nullptr;
-
-    Observer<Target>::add_callback([this](){sync();});
-    
+    swap(other);
     return *this;
+}
+
+template<typename Target>
+void RuleMapBuffer<Target>::swap(RuleMapBuffer& other)
+{
+    using std::swap;
+
+    // Not a pure swap but Observer<T> must be manually swapped.
+    const auto& tmp = Observer<Target>::get_target();
+    this->set_target(other.Observer<Target>::get_target());
+    other.Observer<Target>::set_target(tmp);
+    
+    this->add_callback([this](){sync();});
+    other.Observer<Target>::add_callback([&other](){other.sync();});
+
+    swap(target_, other.target_);
+    swap(buffer_, other.buffer_);
+    swap(instruction_, other.instruction_);
 }
 
 

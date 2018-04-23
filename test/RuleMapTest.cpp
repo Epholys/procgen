@@ -20,6 +20,8 @@ TEST(RuleMapTest, complete_ctor)
     ASSERT_EQ(map.get_rules(), expected_rules);
 }
 
+// TODO: operator= ; ctor(other)
+
 TEST(RuleMapTest, has_predecessor)
 {
     RuleMap<int> map { { 'A', 0 } };
