@@ -64,7 +64,7 @@ public:
     // you are doing.
     void add_callback(const Observable::callback& callback)
         {
-            if(id_.second)
+            if (id_.second)
             {
                 target_->remove_observer(id_.first);
                 id_.first = target_->add_observer(callback);
@@ -75,8 +75,24 @@ public:
                 id_.second = true;
             }
         }
+    
+    void set_target(const std::shared_ptr<T> t)
+        {
+            if (id_.second)
+            {
+                target_->remove_observer(id_.first);
+                id_.first = -1;
+                id_.second = false;
+            }
+            target_ = t;
+        }
 
-protected:
+    const std::shared_ptr<T>& get_target() const
+        {
+            return target_;
+        }
+    
+private:
     // The target observable.
     std::shared_ptr<T> target_;
 

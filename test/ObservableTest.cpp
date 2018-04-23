@@ -51,7 +51,7 @@ struct C : public Observer<A>
         
     void update()
         {
-            n = Observer<A>::target_->n;
+            n = Observer<A>::get_target()->n;
         }
 
     int n { -1 };
@@ -70,11 +70,11 @@ struct D : public Observer<A>, public Observer<B>
         
     void update_n()
         {
-            n = Observer<A>::target_->n;
+            n = Observer<A>::get_target()->n;
         }
     void update_m()
         {
-            m = Observer<B>::target_->n;
+            m = Observer<B>::get_target()->n;
         }
 
     int n { -1 };
@@ -120,4 +120,20 @@ TEST(ObservableTest, multiple)
     ASSERT_TRUE(a1->empty());
     ASSERT_TRUE(a2->empty());
     ASSERT_TRUE(b3->empty());
+}
+
+TEST(ObservableTest, set_target)
+{
+    auto a1 = std::make_shared<A>(0);
+    auto a2 = std::make_shared<A>(0);
+    C c (a1);
+
+    c.set_target(a2);
+    c.add_callback([&c](){c.update();});
+    a1->increment();
+    a2->increment();
+
+    ASSERT_TRUE(a1->empty());
+    ASSERT_FALSE(a2->empty());
+    ASSERT_EQ(1, c.n);
 }
