@@ -3,7 +3,7 @@
 template<typename Target>
 RuleMapBuffer<Target>::RuleMapBuffer(const std::shared_ptr<Target>& target)
     : Observer<Target>(target)
-    , target_ {*Observer<Target>::get_target()}
+    // , target_ {*Observer<Target>::get_target()}
     , buffer_ {}
     , instruction_ {nullptr}
 {
@@ -12,7 +12,7 @@ RuleMapBuffer<Target>::RuleMapBuffer(const std::shared_ptr<Target>& target)
     // Initialize the buffer with the LSystem's rules.
     // By construction, there are not duplicate rules in a 'LSystem', so
     // there is no check: all rules are valid.
-    for (const auto& rule : target_.get_rules())
+    for (const auto& rule : observer_target().get_rules())
     {
         buffer_.push_back({true, rule.first, rule.second});
     }
@@ -21,7 +21,7 @@ RuleMapBuffer<Target>::RuleMapBuffer(const std::shared_ptr<Target>& target)
 template<typename Target>
 RuleMapBuffer<Target>::RuleMapBuffer(const RuleMapBuffer& other)
     : Observer<Target>(other.Observer<Target>::get_target())
-    , target_ {*Observer<Target>::get_target()}
+    // , target_ {*Observer<Target>::get_target()}
     , buffer_ {other.buffer_}
     , instruction_ {nullptr}
 {
@@ -41,24 +41,24 @@ void RuleMapBuffer<Target>::swap(RuleMapBuffer& other)
     using std::swap;
 
     // Not a pure swap but Observer<T> must be manually swapped.
-    const auto& tmp = Observer<Target>::get_target();
+    auto tmp = Observer<Target>::get_target();
     this->set_target(other.Observer<Target>::get_target());
     other.Observer<Target>::set_target(tmp);
     
     this->add_callback([this](){sync();});
     other.Observer<Target>::add_callback([&other](){other.sync();});
 
-    target_ = *Observer<Target>::get_target();
-    other.target_ = *other.Observer<Target>::get_target();
+    // target_ = *Observer<Target>::get_target();
+    // other.target_ = *other.Observer<Target>::get_target();
     swap(buffer_, other.buffer_);
     swap(instruction_, other.instruction_);
 }
 
 
 template<typename Target>
-Target& RuleMapBuffer<Target>::get_target() const
+Target& RuleMapBuffer<Target>::observer_target() const
 {
-    return target_;
+    return *(this->get_target());
 }
 
 template<typename Target>
@@ -158,7 +158,7 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
 
     if (new_is_original) // Case 1.
     {
-        target_.add_rule(pred, succ);
+        observer_target().add_rule(pred, succ);
     }
     else // Case 2.
     {
@@ -177,12 +177,12 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
         {
             // Note: it is not necessary to call 'this->remove_rule()' as we
             // already checked that the old rule did not have a duplicate.
-            target_.remove_rule(old_pred);
+            observer_target().remove_rule(old_pred);
         }
         else // Case 5.
         {
             old_duplicate->validity = true;
-            target_.add_rule(old_pred, old_duplicate->successor);
+            observer_target().add_rule(old_pred, old_duplicate->successor);
                 
         }
     }
@@ -228,14 +228,14 @@ void RuleMapBuffer<Target>::change_successor(const_iterator cit, const succ& suc
     // If it was an original rule, replace it in the Target
     if (is_valid && pred != '\0')
     {
-        target_.add_rule(pred, succ);
+        observer_target().add_rule(pred, succ);
     }
 }
 
 template<typename Target>
 void RuleMapBuffer<Target>::remove_rule(char pred)
 {
-    // This method is called instead of 'target_.remove_rule(pred)' to replace
+    // This method is called instead of 'observer_target().remove_rule(pred)' to replace
     // the old rule by a duplicate that is in priority in the same
     // RuleMapBuffer.
 
@@ -258,12 +258,12 @@ void RuleMapBuffer<Target>::remove_rule(char pred)
     {
         // If found, replace the old rule by it.
         duplicate->validity = true;
-        target_.add_rule(pred, duplicate->successor);
+        observer_target().add_rule(pred, duplicate->successor);
     }
     else
     {
         // Otherwise, simply remove the rule.
-        target_.remove_rule(pred);
+        observer_target().remove_rule(pred);
     }
 }
     
@@ -310,7 +310,7 @@ void RuleMapBuffer<Target>::sync()
     // updated even if there weren't any modification.
 
         
-    const auto& rules = target_.get_rules();
+    const auto& rules = observer_target().get_rules();
 
     // First step: synchronize addition into the Target's rules.
     // For each rule of the Target, we check if it exists in the buffer. If
@@ -373,7 +373,7 @@ void RuleMapBuffer<Target>::sync()
             if (original == buffer_.end())
             {
                 it->validity = true;
-                target_.add_rule(it->predecessor, it->successor);
+                observer_target().add_rule(it->predecessor, it->successor);
             }
         }
     }

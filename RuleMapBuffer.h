@@ -89,9 +89,9 @@ namespace procgui
         RuleMapBuffer(const RuleMapBuffer& other);
         RuleMapBuffer& operator=(RuleMapBuffer other);
         
-        // Get the Target. Its modification will be automatically synchronized
-        // with the Observer pattern.
-        Target& get_target() const;
+        // // Get the Target. Its modification will be automatically synchronized
+        // // with the Observer pattern.
+        // Target& get_target() const;
 
         // Access the underlying buffer without allowing modifications. Every
         // modification should be done with the associated functions.
@@ -153,6 +153,8 @@ namespace procgui
         void apply();
         
     private:
+        Target& observer_target() const;
+
         void swap(RuleMapBuffer& other);
 
         // Remove a rule from the buffer.
@@ -167,9 +169,9 @@ namespace procgui
         // to modify 'buffer_'.
         iterator remove_const(const_iterator cit);
 
-        // The Target: ease of use instead of calling
-        // 'Observer<Target>::target_' each time.
-        Target& target_;
+        // // The Target: ease of use instead of calling
+        // // 'Observer<Target>::target_' each time.
+        // Target& target_;
 
         // The rule buffer.
         buffer buffer_;

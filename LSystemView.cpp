@@ -62,14 +62,14 @@ namespace procgui
         using std::swap;
 
         // Not a pure swap but Observer<T> must be manually swapped.
-        const auto& tmp_lsys = Observer<LSystem>::get_target();
+        auto tmp_lsys = Observer<LSystem>::get_target();
         Observer<LSystem>::set_target(other.Observer<LSystem>::get_target());
         other.Observer<LSystem>::set_target(tmp_lsys);
     
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         other.Observer<LSystem>::add_callback([&other](){other.compute_vertices();});
 
-        const auto& tmp_map = Observer<InterpretationMap>::get_target();
+        auto tmp_map = Observer<InterpretationMap>::get_target();
         Observer<InterpretationMap>::set_target(other.Observer<InterpretationMap>::get_target());
         other.Observer<InterpretationMap>::set_target(tmp_map);
     
@@ -91,8 +91,8 @@ namespace procgui
     {
         return LSystemView(
             name_,
-            std::make_shared<LSystem>(LSystem(lsys_buff_.get_target())),
-            std::make_shared<drawing::InterpretationMap>(drawing::InterpretationMap(interpretation_buff_.get_target())),
+            std::make_shared<LSystem>(LSystem(*lsys_buff_.get_target())),
+            std::make_shared<drawing::InterpretationMap>(drawing::InterpretationMap(*interpretation_buff_.get_target())),
             params_
             );
     }
