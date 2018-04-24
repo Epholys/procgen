@@ -76,7 +76,7 @@ public:
             }
         }
     
-    void set_target(const std::shared_ptr<T> t)
+    void set_target(const std::shared_ptr<T>& t)
         {
             if (id_.second)
             {

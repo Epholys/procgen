@@ -21,7 +21,7 @@ RuleMapBuffer<Target>::RuleMapBuffer(const std::shared_ptr<Target>& target)
 template<typename Target>
 RuleMapBuffer<Target>::RuleMapBuffer(const RuleMapBuffer& other)
     : Observer<Target>(other.Observer<Target>::get_target())
-    , target_ {other.target_}
+    , target_ {*Observer<Target>::get_target()}
     , buffer_ {other.buffer_}
     , instruction_ {nullptr}
 {
@@ -48,7 +48,8 @@ void RuleMapBuffer<Target>::swap(RuleMapBuffer& other)
     this->add_callback([this](){sync();});
     other.Observer<Target>::add_callback([&other](){other.sync();});
 
-    swap(target_, other.target_);
+    target_ = *Observer<Target>::get_target();
+    other.target_ = *other.Observer<Target>::get_target();
     swap(buffer_, other.buffer_);
     swap(instruction_, other.instruction_);
 }
