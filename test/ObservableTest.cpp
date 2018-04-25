@@ -137,3 +137,5 @@ TEST(ObservableTest, set_target)
     ASSERT_FALSE(a2->empty());
     ASSERT_EQ(1, c.n);
 }
+
+// TODO ctor op= ?

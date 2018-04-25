@@ -51,6 +51,26 @@ namespace procgui
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
     }
+
+    LSystemView::LSystemView(LSystemView&& other)
+        : Observer<LSystem> {other.Observer<LSystem>::get_target()}
+        , Observer<InterpretationMap> {other.Observer<InterpretationMap>::get_target()}
+        , name_ {other.name_}
+        , lsys_buff_ {std::move(other.lsys_buff_)}
+        , interpretation_buff_ {std::move(other.interpretation_buff_)}
+        , params_ {other.params_}
+        , vertices_ {other.vertices_}
+        , bounding_box_ {other.bounding_box_}
+        , sub_boxes_ {other.sub_boxes_}
+        , is_selected_ {false}
+    {
+        Observer<LSystem>::add_callback([this](){compute_vertices();});
+        Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
+
+        other.Observer<LSystem>::set_target(nullptr);
+        other.Observer<InterpretationMap>::set_target(nullptr);
+    }
+
     LSystemView& LSystemView::operator=(LSystemView other)
     {
         swap(other);
@@ -83,18 +103,26 @@ namespace procgui
         swap(vertices_, other.vertices_);
         swap(bounding_box_, other.bounding_box_);
         swap(sub_boxes_, other.sub_boxes_);
-
-        is_selected_ = false;
+        swap(is_selected_, other.is_selected_);
     }
 
     LSystemView LSystemView::clone()
-    {
+    {        
         return LSystemView(
             name_,
-            std::make_shared<LSystem>(LSystem(*lsys_buff_.get_target())),
-            std::make_shared<drawing::InterpretationMap>(drawing::InterpretationMap(*interpretation_buff_.get_target())),
+            std::make_shared<LSystem>(*lsys_buff_.get_target()),
+            std::make_shared<drawing::InterpretationMap>(*interpretation_buff_.get_target()),
             params_
             );
+
+        // auto lsys (*lsys_buff_.get_target());
+        // auto map  (*interpretation_buff_.get_target());
+        // return LSystemView(
+        //     name_,
+        //     std::shared_ptr<LSystem>(&lsys),
+        //     std::shared_ptr<drawing::InterpretationMap>(&map),
+        //     params_
+        //     );
     }
     
 

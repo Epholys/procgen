@@ -24,6 +24,9 @@ public:
     using callback = std::function<void()>;
 
     Observable() = default;
+    Observable(const Observable& other);
+    Observable(Observable&& other);
+    Observable& operator=(Observable other);
 
     // Add a callback and return its unique identifier.
     // Exception:

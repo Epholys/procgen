@@ -43,7 +43,7 @@ namespace controller
                     auto view = *saved;
                     auto box = view.get_bounding_box();
                     sf::Vector2f middle = {box.left + box.width/2, box.top + box.height/2};
-                    view.get_parameters().starting_position = real_mouse_position(sf::Mouse::getPosition(window)) + middle;
+                    view.get_parameters().starting_position = real_mouse_position(sf::Mouse::getPosition(window) + sf::Vector2i(middle));
                     view.compute_vertices();
                     lsys_views.emplace_back(view);
                 }

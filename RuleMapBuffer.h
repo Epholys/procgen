@@ -88,6 +88,7 @@ namespace procgui
         // 'Observer<Target>'
         RuleMapBuffer(const RuleMapBuffer& other);
         RuleMapBuffer& operator=(RuleMapBuffer other);
+        RuleMapBuffer(RuleMapBuffer&& other);
         
         // // Get the Target. Its modification will be automatically synchronized
         // // with the Observer pattern.

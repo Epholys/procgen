@@ -40,6 +40,7 @@ namespace procgui
         LSystemView(const sf::Vector2f& position);
         LSystemView(const LSystemView& other);
         LSystemView& operator=(LSystemView other);
+        LSystemView(LSystemView&& other);
 
         LSystemView clone();
         

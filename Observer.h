@@ -2,6 +2,7 @@
 #define OBSERVER_H
 
 
+#include <iostream>
 #include <memory>
 #include <type_traits>
 #include <utility>
@@ -33,7 +34,6 @@ public:
         : target_(t)
         , id_ { -1, false }
         {
-            Expects(t);
         }
 
     // An Observer can not be copied trivially: no callback would be send to the
@@ -50,7 +50,7 @@ public:
     // nothing. 
     virtual ~Observer()
         {
-            if (id_.second)
+            if (target_ && id_.second)
             {
                 target_->remove_observer(id_.first);
             }
@@ -64,12 +64,12 @@ public:
     // you are doing.
     void add_callback(const Observable::callback& callback)
         {
-            if (id_.second)
+            if (target_ && id_.second)
             {
                 target_->remove_observer(id_.first);
                 id_.first = target_->add_observer(callback);
             }
-            else
+            else if (target_)
             {
                 id_.first = target_->add_observer(callback);
                 id_.second = true;
@@ -78,7 +78,8 @@ public:
     
     void set_target(const std::shared_ptr<T>& t)
         {
-            if (id_.second)
+            
+            if (target_ && id_.second)
             {
                 target_->remove_observer(id_.first);
                 id_.first = -1;
