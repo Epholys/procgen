@@ -2,6 +2,7 @@
 #define LSYSTEM_CONTROLLER
 
 
+#include <chrono>
 #include <optional>
 #include "SFML/Graphics.hpp"
 #include "LSystemView.h"
@@ -38,6 +39,9 @@ namespace controller
         static procgui::LSystemView* under_mouse_;
 
         static std::optional<procgui::LSystemView> saved_view_;
+
+        static const std::chrono::duration<unsigned long long, std::milli> double_click_time_;
+        static std::chrono::time_point<std::chrono::steady_clock> click_time_;
     };
 }
 

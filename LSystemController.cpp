@@ -7,6 +7,12 @@ namespace controller
     procgui::LSystemView* LSystemController::under_mouse_ {nullptr};
     
     std::optional<procgui::LSystemView> LSystemController::saved_view_ {};
+
+    const std::chrono::duration<unsigned long long, std::milli> LSystemController::double_click_time_
+    {std::chrono::milliseconds(300)};
+
+    std::chrono::time_point<std::chrono::steady_clock> LSystemController::click_time_ {};
+
     
     bool LSystemController::has_priority()
     {
@@ -26,6 +32,16 @@ namespace controller
         if (!imgui_io.WantCaptureMouse &&
             event.type == sf::Event::MouseButtonPressed)
         {
+            bool double_click = false;
+            if (event.mouseButton.button == sf::Mouse::Left)
+            {
+                if (std::chrono::steady_clock::now() - click_time_ < double_click_time_)
+                {
+                    double_click = true;
+                }
+                click_time_ = std::chrono::steady_clock::now();
+            }
+            
             // We want to have a specific behaviour : if a click is inside the
             // hitboxes of a LSystemView, we select it UNLESS an other view is
             // already selected at this click.
@@ -56,7 +72,7 @@ namespace controller
             {
                 under_mouse_ = &(*to_select);
 
-                if (event.mouseButton.button == sf::Mouse::Left)
+                if (double_click)
                 {
                     to_select->select();
                 }
