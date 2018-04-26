@@ -8,6 +8,9 @@ Observable::Observable(const Observable&)
 Observable::Observable(Observable&& other)
     : Observable{}
 {
+    id_ = other.id_;
+    observers_ = other.observers_;
+    
     other.id_ = {0};
     other.observers_ = {};
 }

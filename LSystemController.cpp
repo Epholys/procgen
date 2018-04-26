@@ -32,6 +32,8 @@ namespace controller
         if (!imgui_io.WantCaptureMouse &&
             event.type == sf::Event::MouseButtonPressed)
         {
+            // We have a double-click when the previous click is closer to the
+            // present than 'double_click_time_'.
             bool double_click = false;
             if (event.mouseButton.button == sf::Mouse::Left)
             {
@@ -43,8 +45,8 @@ namespace controller
             }
             
             // We want to have a specific behaviour : if a click is inside the
-            // hitboxes of a LSystemView, we select it UNLESS an other view is
-            // already selected at this click.
+            // hitboxes of a LSystemView, we select it for 'under_mouse_' UNLESS
+            // an other view is already selected at this click.
             auto to_select = views.end();
             bool already_selected = false;
             for (auto it = views.begin(); it != views.end(); ++it)
@@ -98,6 +100,7 @@ namespace controller
     {
         if (ImGui::BeginPopupContextVoid())
         {
+            // Cloning is deep-copying the LSystem.
             if (ImGui::MenuItem("Clone"))
             {
                 saved_view_ = under_mouse_->clone();

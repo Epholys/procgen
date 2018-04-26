@@ -14,18 +14,19 @@
 
 ** Main Roadmap
    1. Right-click manipulations (copy/paste, new LSystem, ...)
-   2. Save and load L-system models
-   3. Add a more complex GUI and polish it
+   2. Keyboard Shortcut for the right click
+   3. Save and load L-system models
+   4. Add a more complex GUI and polish it
       * Slider speed
       * Color-coded LSystems windows
-   4. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
-   5. Add genetic algorithm or constraint-based algorithm for new LSystem generation
+   5. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
+   6. Add genetic algorithm or constraint-based algorithm for new LSystem generation
 
 ** Other ideas
 
 ** Next Bugs
 
-** Optimization & non-urgent bugs
+** Optimization, non-urgent bugs and cleanup
    - Optimization
      With the current algorithm, execution time and memory consumption are exponential. Memory consumption is the biggest factor, as several GB can be allocated easily (from 16 iterations).
      - Cache multi-iteration production rules (very good for execution time but bad for memory consumption)
@@ -35,6 +36,9 @@
    - Bugs
      - Correct floating point errors when using big number of iterations
      - Correct zoom level and drag behaviour when resizing window
+
+   - Cleanup
+     - All reference getters should be called 'ref_...' and not 'get_...'
 
 ** Development framework
    - *Environment:* debian sid chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=

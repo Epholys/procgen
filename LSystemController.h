@@ -10,7 +10,7 @@
 namespace controller
 {
     // LSystemController manages the behaviour of the LSystemViews beyond the
-    // GUI: selection and dragging for example.
+    // GUI: selection, dragging and riglt-click for example.
     //
     // This class is a singleton implemented as a static class.
     class LSystemController
@@ -23,24 +23,33 @@ namespace controller
         // LSystemController has the priority.
         static bool has_priority();
 
-        static const std::optional<procgui::LSystemView>& saved_view();
-        
         // Handle 'event' for the 'views'.
         static void handle_input(std::vector<procgui::LSystemView>& views, const sf::Event& event);
 
         // Handle the dragging behaviour.
         static void handle_delta(sf::Vector2f delta);
 
+        // Interact with a menu when right-clicking on a LSystemView (cloning,
+        // duplicating, ...) 
         static void right_click_menu();
+
+        // Getter for saved_view_;
+        static const std::optional<procgui::LSystemView>& saved_view();
 
     private:
         // The LSystemView below the mouse. nullptr if there is
         // nothing. Non-owning pointer.
         static procgui::LSystemView* under_mouse_;
 
+        // When copying or duplicating in a right-click, we save the LSystemView
+        // in this variable. optional<> is used to initialize an empty variable
+        // when starting up the application.
         static std::optional<procgui::LSystemView> saved_view_;
 
+        // The delay between two click before considering a double-click. Based
+        // on the imgui time.
         static const std::chrono::duration<unsigned long long, std::milli> double_click_time_;
+        // Previous left-click timestamp.
         static std::chrono::time_point<std::chrono::steady_clock> click_time_;
     };
 }

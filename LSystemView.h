@@ -38,16 +38,20 @@ namespace procgui
                     drawing::DrawingParameters param);
         // Create a default LSystemView at 'position'.
         LSystemView(const sf::Vector2f& position);
+        // The rule-of-five is necessary with the 'Observer<>' callbacks
+        // behaviour. Deep-copy.
         LSystemView(const LSystemView& other);
         LSystemView& operator=(LSystemView other);
         LSystemView(LSystemView&& other);
 
+        // Clone the LSystemView into an independant other view.
         LSystemView clone();
         
         // Reference Getters
         drawing::DrawingParameters& get_parameters();
         LSystemBuffer& get_lsystem_buffer();
         InterpretationMapBuffer& get_interpretation_buffer();
+        // Getters
         sf::FloatRect get_bounding_box() const;
         
         // Compute the vertices of the turtle interpretation of the LSystem.
@@ -67,9 +71,9 @@ namespace procgui
 
                 
     private:
+        // Used in assignment and move operator.
         void swap(LSystemView& other);
 
-        
         // The window's name.
         std::string name_;
 

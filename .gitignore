@@ -27,3 +27,5 @@ GPATH
 GRTAGS
 GTAGS
 
+# valgrind
+valgrind*

@@ -2,7 +2,6 @@
 #define OBSERVER_H
 
 
-#include <iostream>
 #include <memory>
 #include <type_traits>
 #include <utility>
@@ -78,7 +77,6 @@ public:
     
     void set_target(const std::shared_ptr<T>& t)
         {
-            
             if (target_ && id_.second)
             {
                 target_->remove_observer(id_.first);

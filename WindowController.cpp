@@ -35,11 +35,14 @@ namespace controller
             {
                 lsys_views.emplace_back(real_mouse_position(sf::Mouse::getPosition(window)));
             }
+            ImGui::Separator();
             if (ImGui::MenuItem("Paste"))
             {
                 const auto& saved = LSystemController::saved_view();
                 if (saved)
                 {
+                    // Before adding the view to the vector<>, update
+                    // 'starting_position' to the new location.
                     auto view = *saved;
                     auto box = view.get_bounding_box();
                     sf::Vector2f middle = {box.left + box.width/2, box.top + box.height/2};
@@ -122,6 +125,7 @@ namespace controller
             LSystemController::handle_input(lsys_views, event);
         }
 
+        // The right-click menu depends on the location of the mouse.
         if (LSystemController::has_priority())
         {
             LSystemController::right_click_menu();

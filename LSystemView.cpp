@@ -34,6 +34,7 @@ namespace procgui
             std::make_shared<drawing::InterpretationMap>(drawing::default_interpretation_map),
             drawing::DrawingParameters({position}))
     {
+        // Arbitrary default LSystem.
     }
 
     LSystemView::LSystemView(const LSystemView& other)
@@ -46,8 +47,9 @@ namespace procgui
         , vertices_ {other.vertices_}
         , bounding_box_ {other.bounding_box_}
         , sub_boxes_ {other.sub_boxes_}
-        , is_selected_ {false}
+        , is_selected_ {other.is_selected_}
     {
+        // Manually managing Observer<> callbacks.
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
     }
@@ -62,11 +64,13 @@ namespace procgui
         , vertices_ {other.vertices_}
         , bounding_box_ {other.bounding_box_}
         , sub_boxes_ {other.sub_boxes_}
-        , is_selected_ {false}
+        , is_selected_ {other.is_selected_}
     {
+        // Manually managing Observer<> callbacks.
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
 
+        // Remove callbacks of the moved 'other'.
         other.Observer<LSystem>::set_target(nullptr);
         other.Observer<InterpretationMap>::set_target(nullptr);
     }
@@ -81,7 +85,9 @@ namespace procgui
     {
         using std::swap;
 
-        // Not a pure swap but Observer<T> must be manually swapped.
+        // Not a pure swap but Observer<> must be manually swaped:
+        //  - swap the targets.
+        //  - add correct callback.
         auto tmp_lsys = Observer<LSystem>::get_target();
         Observer<LSystem>::set_target(other.Observer<LSystem>::get_target());
         other.Observer<LSystem>::set_target(tmp_lsys);
@@ -108,21 +114,13 @@ namespace procgui
 
     LSystemView LSystemView::clone()
     {        
+        // Deep copy.
         return LSystemView(
             name_,
             std::make_shared<LSystem>(*lsys_buff_.get_target()),
             std::make_shared<drawing::InterpretationMap>(*interpretation_buff_.get_target()),
             params_
             );
-
-        // auto lsys (*lsys_buff_.get_target());
-        // auto map  (*interpretation_buff_.get_target());
-        // return LSystemView(
-        //     name_,
-        //     std::shared_ptr<LSystem>(&lsys),
-        //     std::shared_ptr<drawing::InterpretationMap>(&map),
-        //     params_
-        //     );
     }
     
 

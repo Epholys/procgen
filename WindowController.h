@@ -12,7 +12,7 @@ namespace controller
     // WindowController is the hub for all the inputs. The main code in
     // 'handle_input()' manages the 'sf::View' of the window: resizing, zooming, and
     // dragging the view. All the others component of this application needing input
-    // (imgui, *Views) are called in this call but managed elsewhere.
+    // (imgui, *Views) are called in this class but managed elsewhere.
     //
     // WindowController is a singleton implemented as a static class.
     class WindowController
@@ -30,6 +30,7 @@ namespace controller
         // coordinates relative to the drawing of the application.
         static sf::Vector2f real_mouse_position(sf::Vector2i mouse_click);
 
+        // The right-click menu managing creation of LSystemViews
         static void right_click_menu(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views);
         
     private:

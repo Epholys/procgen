@@ -24,6 +24,8 @@ public:
     using callback = std::function<void()>;
 
     Observable() = default;
+    // The rule-of-five is necessary as the 'observers_' must not be copied from
+    // an Observable to another (but can be moved).
     Observable(const Observable& other);
     Observable(Observable&& other);
     Observable& operator=(Observable other);
