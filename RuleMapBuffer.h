@@ -55,7 +55,6 @@ namespace procgui
         /* must be a derived class of RuleMap */
         static_assert(std::is_base_of<RuleMap<typename Target::successor>, Target>::value, "RuleMapBuffer must refer to a derived class of RuleMap");
 
-        using target = Target;
         using succ = typename Target::successor;
 
         // A production rule: 
@@ -88,12 +87,9 @@ namespace procgui
         // we need to register a callback for the new object to
         // 'Observer<Target>'
         RuleMapBuffer(const RuleMapBuffer& other);
-        RuleMapBuffer& operator=(const RuleMapBuffer& other);
+        RuleMapBuffer& operator=(RuleMapBuffer other);
+        RuleMapBuffer(RuleMapBuffer&& other);
         
-        // Get the Target. Its modification will be automatically synchronized
-        // with the Observer pattern.
-        Target& get_target() const;
-
         // Access the underlying buffer without allowing modifications. Every
         // modification should be done with the associated functions.
         const_iterator begin() const;
@@ -154,6 +150,10 @@ namespace procgui
         void apply();
         
     private:
+        Target& observer_target() const;
+
+        void swap(RuleMapBuffer& other);
+
         // Remove a rule from the buffer.
         // Take care of updating the Target according to the existence of
         // duplicate rules in this buffer.
@@ -165,11 +165,7 @@ namespace procgui
         // Remove the constness from 'cit'. Can only be used inside this class
         // to modify 'buffer_'.
         iterator remove_const(const_iterator cit);
-
-        // The Target: ease of use instead of calling
-        // 'Observer<Target>::target_' each time.
-        Target& target_;
-
+        
         // The rule buffer.
         buffer buffer_;
 

@@ -257,7 +257,7 @@ namespace procgui
         bool is_modified = false;
 
         // The LSystem itelf
-        LSystem& lsys = buffer.get_target();
+        LSystem& lsys = *buffer.get_target();
         
         // --- Axiom ---
         auto buf = string_to_array<lsys_successor_size>(lsys.get_axiom());

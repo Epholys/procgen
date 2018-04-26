@@ -50,31 +50,28 @@ int main()
     plant_param.step = 5;
     plant_param.n_iter = 6;
 
+    // LSystemView plant_view ("Plant", plant, map, plant_param);
     LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
-    LSystemView plant_view ("Plant", plant, map, plant_param);
 
     std::vector<LSystemView> views;
+    // views.push_back(std::move(plant_view));
     views.push_back(std::move(serpinski_view));
-    views.push_back(std::move(plant_view));
     
     sf::Clock delta_clock;
     while (window.isOpen())
     {
         window.clear();
 
-        WindowController::handle_input(window, views);
-        
         ImGui::SFML::Update(window, delta_clock.restart());
-
         procgui::new_frame();
+
+        WindowController::handle_input(window, views);
         
         for (auto& v : views)
         {
             v.draw(window);
         }
 
-        display(*map, "interpretations");
-        
         ImGui::SFML::Render(window);
         window.display();
     }

@@ -19,9 +19,9 @@
 #ifndef GSL_STRING_SPAN_H
 #define GSL_STRING_SPAN_H
 
-#include <gsl/gsl_assert>
-#include <gsl/gsl_util>
-#include <gsl/span>
+#include "gsl_assert"
+#include "gsl_util"
+#include "span"
 
 #include <cstdint>
 #include <cstring>

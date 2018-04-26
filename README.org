@@ -13,18 +13,20 @@
    - Dynamic GUIs to interact with the parameters
 
 ** Main Roadmap
-   1. Add a relatively precise hitbox to select LSystem for modification
-   1. Save and load L-system models
-   1. Add a more complex GUI (classic with a main menu bar and right-click) and polish it
-   1. Add genetic algorithm or constraint-based algorithm for new LSystem generation
+   1. Right-click manipulations (copy/paste, new LSystem, ...)
+   2. Keyboard Shortcut for the right click
+   3. Save and load L-system models
+   4. Add a more complex GUI and polish it
+      * Slider speed
+      * Color-coded LSystems windows
+   5. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
+   6. Add genetic algorithm or constraint-based algorithm for new LSystem generation
 
 ** Other ideas
 
 ** Next Bugs
-   - LSystemView copies does not all update themselves
-   - Copy operations on LSystemView (and others) breaks because of Observable (id counter)
 
-** Optimization & non-urgent bugs
+** Optimization, non-urgent bugs and cleanup
    - Optimization
      With the current algorithm, execution time and memory consumption are exponential. Memory consumption is the biggest factor, as several GB can be allocated easily (from 16 iterations).
      - Cache multi-iteration production rules (very good for execution time but bad for memory consumption)
@@ -35,8 +37,11 @@
      - Correct floating point errors when using big number of iterations
      - Correct zoom level and drag behaviour when resizing window
 
+   - Cleanup
+     - All reference getters should be called 'ref_...' and not 'get_...'
+
 ** Development framework
-   - *Environment:* debian stretch chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=
+   - *Environment:* debian sid chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=
    - *Dependencies:*
      - SFML / 2.4.1 / [[https://www.sfml-dev.org/][Website]] / installed from packages/
      - dear imgui, / 1.5 / [[https://github.com/ocornut/imgui][Github Repository]] / installed via [[https://github.com/ocornut/imgui/releases/tag/v1.50][release 1.5]]
@@ -46,7 +51,7 @@
    - *Coding rule:* [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]] with GSL
      - Difference: [[https://en.wikipedia.org/wiki/Indentation_style#Allman_style][Allman indentation Style]]
      - Difference: When using ImGui ; ImGui style of coding
-   - *Compilation:* =make=
+   - *Compilation:* =make= and C++17 needed
    - *Testing suite:* [[https://github.com/google/googletest/][googletest]]
 
 ** Completing the framework?

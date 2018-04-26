@@ -1,3 +1,4 @@
+#include <memory>
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
 #include "WindowController.h"
@@ -10,7 +11,7 @@ namespace controller
     float WindowController::zoom_level_ {1.f};
 
     sf::Vector2i WindowController::mouse_position_ {};
-
+    
     bool WindowController::has_focus_ {true};
 
     bool WindowController::view_can_move_ {false};
@@ -26,6 +27,35 @@ namespace controller
         return position;
     }
 
+    void WindowController::right_click_menu(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views)
+    {
+        if (ImGui::BeginPopupContextVoid())
+        {
+            if (ImGui::MenuItem("New LSystem"))
+            {
+                lsys_views.emplace_back(real_mouse_position(sf::Mouse::getPosition(window)));
+            }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Paste"))
+            {
+                const auto& saved = LSystemController::saved_view();
+                if (saved)
+                {
+                    // Before adding the view to the vector<>, update
+                    // 'starting_position' to the new location.
+                    auto view = *saved;
+                    auto box = view.get_bounding_box();
+                    sf::Vector2f middle = {box.left + box.width/2, box.top + box.height/2};
+                    middle = view.get_parameters().starting_position - middle;
+                    view.get_parameters().starting_position = real_mouse_position(sf::Mouse::getPosition(window)) + middle;
+                    view.compute_vertices();
+                    lsys_views.emplace_back(view);
+                }
+            }
+            ImGui::EndPopup();
+        }
+    }
+    
     void WindowController::handle_input(sf::RenderWindow &window, std::vector<procgui::LSystemView>& lsys_views)
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
@@ -91,8 +121,18 @@ namespace controller
                     view_can_move_ = true;
                 }
             }
+            
+            LSystemController::handle_input(lsys_views, event);
+        }
 
-            handle_input_views(lsys_views, event);
+        // The right-click menu depends on the location of the mouse.
+        if (LSystemController::has_priority())
+        {
+            LSystemController::right_click_menu();
+        }
+        else
+        {
+            right_click_menu(window, lsys_views);
         }
 
         // Dragging behaviour
@@ -105,7 +145,16 @@ namespace controller
             if (window_rect.contains(new_position))
             {
                 sf::Vector2i mouse_delta = mouse_position_ - new_position;
-                view_.move(sf::Vector2f(mouse_delta) * zoom_level_);
+                if (LSystemController::has_priority())
+                {
+                    // If LSystemView management has priority, let them have the
+                    // control over the dragging behaviour.
+                    LSystemController::handle_delta(sf::Vector2f(mouse_delta) * zoom_level_);
+                }
+                else
+                {
+                    view_.move(sf::Vector2f(mouse_delta) * zoom_level_);
+                }
                 mouse_position_ = new_position;
             }
         }

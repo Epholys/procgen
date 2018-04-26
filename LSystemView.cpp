@@ -27,9 +27,19 @@ namespace procgui
         compute_vertices();
     }
 
+    LSystemView::LSystemView(const sf::Vector2f& position)
+        : LSystemView(
+            "",
+            std::make_shared<LSystem>(LSystem("F+F+F+F", {})),
+            std::make_shared<drawing::InterpretationMap>(drawing::default_interpretation_map),
+            drawing::DrawingParameters({position}))
+    {
+        // Arbitrary default LSystem.
+    }
+
     LSystemView::LSystemView(const LSystemView& other)
-        : Observer<LSystem> {other.Observer<LSystem>::target_}
-        , Observer<InterpretationMap> {other.Observer<InterpretationMap>::target_}
+        : Observer<LSystem> {other.Observer<LSystem>::get_target()}
+        , Observer<InterpretationMap> {other.Observer<InterpretationMap>::get_target()}
         , name_ {other.name_}
         , lsys_buff_ {other.lsys_buff_}
         , interpretation_buff_ {other.interpretation_buff_}
@@ -39,26 +49,80 @@ namespace procgui
         , sub_boxes_ {other.sub_boxes_}
         , is_selected_ {other.is_selected_}
     {
+        // Manually managing Observer<> callbacks.
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
     }
-    LSystemView& LSystemView::operator=(const LSystemView& other)
-    {
-        name_ = other.name_;
-        lsys_buff_ = other.lsys_buff_;
-        interpretation_buff_ = other.interpretation_buff_;
-        params_ = other.params_;
-        vertices_ = other.vertices_;
-        bounding_box_ = other.bounding_box_;
-        sub_boxes_ = other.sub_boxes_;
-        is_selected_ = other.is_selected_;
 
+    LSystemView::LSystemView(LSystemView&& other)
+        : Observer<LSystem> {other.Observer<LSystem>::get_target()}
+        , Observer<InterpretationMap> {other.Observer<InterpretationMap>::get_target()}
+        , name_ {other.name_}
+        , lsys_buff_ {std::move(other.lsys_buff_)}
+        , interpretation_buff_ {std::move(other.interpretation_buff_)}
+        , params_ {other.params_}
+        , vertices_ {other.vertices_}
+        , bounding_box_ {other.bounding_box_}
+        , sub_boxes_ {other.sub_boxes_}
+        , is_selected_ {other.is_selected_}
+    {
+        // Manually managing Observer<> callbacks.
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
 
+        // Remove callbacks of the moved 'other'.
+        other.Observer<LSystem>::set_target(nullptr);
+        other.Observer<InterpretationMap>::set_target(nullptr);
+    }
+
+    LSystemView& LSystemView::operator=(LSystemView other)
+    {
+        swap(other);
         return *this;
     }
 
+    void LSystemView::swap(LSystemView& other)
+    {
+        using std::swap;
+
+        // Not a pure swap but Observer<> must be manually swaped:
+        //  - swap the targets.
+        //  - add correct callback.
+        auto tmp_lsys = Observer<LSystem>::get_target();
+        Observer<LSystem>::set_target(other.Observer<LSystem>::get_target());
+        other.Observer<LSystem>::set_target(tmp_lsys);
+    
+        Observer<LSystem>::add_callback([this](){compute_vertices();});
+        other.Observer<LSystem>::add_callback([&other](){other.compute_vertices();});
+
+        auto tmp_map = Observer<InterpretationMap>::get_target();
+        Observer<InterpretationMap>::set_target(other.Observer<InterpretationMap>::get_target());
+        other.Observer<InterpretationMap>::set_target(tmp_map);
+    
+        Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
+        other.Observer<InterpretationMap>::add_callback([&other](){other.compute_vertices();});
+
+        swap(name_, other.name_);
+        swap(lsys_buff_, other.lsys_buff_);
+        swap(interpretation_buff_, other.interpretation_buff_);
+        swap(params_, other.params_);
+        swap(vertices_, other.vertices_);
+        swap(bounding_box_, other.bounding_box_);
+        swap(sub_boxes_, other.sub_boxes_);
+        swap(is_selected_, other.is_selected_);
+    }
+
+    LSystemView LSystemView::clone()
+    {        
+        // Deep copy.
+        return LSystemView(
+            name_,
+            std::make_shared<LSystem>(*lsys_buff_.get_target()),
+            std::make_shared<drawing::InterpretationMap>(*interpretation_buff_.get_target()),
+            params_
+            );
+    }
+    
 
     drawing::DrawingParameters& LSystemView::get_parameters()
     {
@@ -72,6 +136,10 @@ namespace procgui
     {
         return interpretation_buff_;
     }
+    sf::FloatRect LSystemView::get_bounding_box() const
+    {
+        return bounding_box_;
+    }
 
     
     void LSystemView::compute_vertices()
@@ -79,8 +147,8 @@ namespace procgui
         // Invariant respected: cohesion between the vertices and the bounding
         // boxes. 
         
-        vertices_ = drawing::compute_vertices(*Observer<LSystem>::target_,
-                                              *Observer<InterpretationMap>::target_,
+        vertices_ = drawing::compute_vertices(*Observer<LSystem>::get_target(),
+                                              *Observer<InterpretationMap>::get_target(),
                                               params_);
         bounding_box_ = geometry::compute_bounding_box(vertices_);
         sub_boxes_ = geometry::compute_sub_boxes(vertices_, MAX_SUB_BOXES);

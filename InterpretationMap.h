@@ -64,6 +64,15 @@ namespace drawing
     // L-system to an order. During the interpretation, if the character is
     // encountered, the associated order will be executed.
     using InterpretationMap = RuleMap<Order>;
+
+
+    // The default interpretation map used when creating new LSystems.
+    const InterpretationMap default_interpretation_map 
+    { { 'F', go_forward },
+      { '+', turn_left  },
+      { '-', turn_right },
+      { '[', save_position },
+      { ']', load_position } };
 }
 
 #endif  // DRAWING_INTERPRETATION_H

@@ -21,3 +21,11 @@ optimization/
 
 # imgui ini file
 imgui.ini
+
+# GTAGS
+GPATH
+GRTAGS
+GTAGS
+
+# valgrind
+valgrind*
