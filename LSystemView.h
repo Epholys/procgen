@@ -46,6 +46,8 @@ namespace procgui
 
         // Clone the LSystemView into an independant other view.
         LSystemView clone();
+
+        LSystemView duplicate();
         
         // Reference Getters
         drawing::DrawingParameters& get_parameters();

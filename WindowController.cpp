@@ -36,21 +36,19 @@ namespace controller
                 lsys_views.emplace_back(real_mouse_position(sf::Mouse::getPosition(window)));
             }
             ImGui::Separator();
-            if (ImGui::MenuItem("Paste"))
+            if (LSystemController::saved_view() && ImGui::MenuItem("Paste"))
             {
                 const auto& saved = LSystemController::saved_view();
-                if (saved)
-                {
-                    // Before adding the view to the vector<>, update
-                    // 'starting_position' to the new location.
-                    auto view = *saved;
-                    auto box = view.get_bounding_box();
-                    sf::Vector2f middle = {box.left + box.width/2, box.top + box.height/2};
-                    middle = view.get_parameters().starting_position - middle;
-                    view.get_parameters().starting_position = real_mouse_position(sf::Mouse::getPosition(window)) + middle;
-                    view.compute_vertices();
-                    lsys_views.emplace_back(view);
-                }
+
+                // Before adding the view to the vector<>, update
+                // 'starting_position' to the new location.
+                auto view = *saved;
+                auto box = view.get_bounding_box();
+                sf::Vector2f middle = {box.left + box.width/2, box.top + box.height/2};
+                middle = view.get_parameters().starting_position - middle;
+                view.get_parameters().starting_position = real_mouse_position(sf::Mouse::getPosition(window)) + middle;
+                view.compute_vertices();
+                lsys_views.emplace_back(view);
             }
             ImGui::EndPopup();
         }

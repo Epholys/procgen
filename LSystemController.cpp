@@ -105,6 +105,10 @@ namespace controller
             {
                 saved_view_ = under_mouse_->clone();
             }
+            if (ImGui::MenuItem("Duplicate"))
+            {
+                saved_view_ = under_mouse_->duplicate();
+            }
             ImGui::EndPopup();
         }
     }

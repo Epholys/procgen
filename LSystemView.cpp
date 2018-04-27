@@ -122,6 +122,16 @@ namespace procgui
             params_
             );
     }
+
+    LSystemView LSystemView::duplicate()
+    {
+        return LSystemView(
+            name_,
+            lsys_buff_.get_target(),
+            interpretation_buff_.get_target(),
+            params_);
+    }
+
     
 
     drawing::DrawingParameters& LSystemView::get_parameters()
