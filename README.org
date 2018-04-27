@@ -13,14 +13,14 @@
    - Dynamic GUIs to interact with the parameters
 
 ** Main Roadmap
-   1. Right-click manipulations (copy/paste, new LSystem, ...)
-   2. Keyboard Shortcut for the right click
-   3. Save and load L-system models
-   4. Add a more complex GUI and polish it
+   1. Save and load L-system models
+   2. Add a more complex GUI and polish it
       * Slider speed
       * Color-coded LSystems windows
-   5. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
-   6. Add genetic algorithm or constraint-based algorithm for new LSystem generation
+      * Unique permanent ID to LSystemView to avoid window redefinition
+      * Using `SetNextWindow*()` to a more pretty default
+   3. Add genetic algorithm or constraint-based algorithm for new LSystem generation
+   4. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
 
 ** Other ideas
 

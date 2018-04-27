@@ -32,6 +32,8 @@ namespace controller
 
         // The right-click menu managing creation of LSystemViews
         static void right_click_menu(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views);
+
+        static void paste_view(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views);
         
     private:
         // The view modified by the user and given to the window.
