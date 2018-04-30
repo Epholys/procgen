@@ -50,11 +50,14 @@ namespace procgui
         LSystemView duplicate();
         
         // Reference Getters
-        drawing::DrawingParameters& get_parameters();
-        LSystemBuffer& get_lsystem_buffer();
-        InterpretationMapBuffer& get_interpretation_buffer();
+        drawing::DrawingParameters& ref_parameters();
+        LSystemBuffer& ref_lsystem_buffer();
+        InterpretationMapBuffer& ref_interpretation_buffer();
         // Getters
         sf::FloatRect get_bounding_box() const;
+        const drawing::DrawingParameters& get_parameters() const;
+        const LSystemBuffer& get_lsystem_buffer() const;
+        const InterpretationMapBuffer& get_interpretation_buffer() const;
         
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();

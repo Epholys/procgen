@@ -37,9 +37,6 @@
      - Correct floating point errors when using big number of iterations
      - Correct zoom level and drag behaviour when resizing window
 
-   - Cleanup
-     - All reference getters should be called 'ref_...' and not 'get_...'
-
 ** Development framework
    - *Environment:* debian sid chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=
    - *Dependencies:*

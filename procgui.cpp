@@ -352,9 +352,9 @@ namespace procgui
         // 'is_modified' is true if the DrawingParameter is modified. It does
         // not check the LSystem or the InterpretationMap because the
         // LSystemView is already an Observer of these classes.
-        bool is_modified = interact_with(lsys_view.get_parameters(), "Drawing Parameters", false);
-        interact_with(lsys_view.get_lsystem_buffer(), "LSystem", false);
-        interact_with(lsys_view.get_interpretation_buffer(), "Interpretation Map", false);
+        bool is_modified = interact_with(lsys_view.ref_parameters(), "Drawing Parameters", false);
+        interact_with(lsys_view.ref_lsystem_buffer(), "LSystem", false);
+        interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map", false);
 
         conclude(main);
         

@@ -134,21 +134,33 @@ namespace procgui
 
     
 
-    drawing::DrawingParameters& LSystemView::get_parameters()
+    drawing::DrawingParameters& LSystemView::ref_parameters()
     {
         return params_;
     }
-    LSystemBuffer& LSystemView::get_lsystem_buffer()
+    LSystemBuffer& LSystemView::ref_lsystem_buffer()
     {
         return lsys_buff_;
     }
-    InterpretationMapBuffer& LSystemView::get_interpretation_buffer()
+    InterpretationMapBuffer& LSystemView::ref_interpretation_buffer()
     {
         return interpretation_buff_;
     }
     sf::FloatRect LSystemView::get_bounding_box() const
     {
         return bounding_box_;
+    }
+    const drawing::DrawingParameters& LSystemView::get_parameters() const
+    {
+        return params_;
+    }
+    const LSystemBuffer& LSystemView::get_lsystem_buffer() const
+    {
+        return lsys_buff_;
+    }
+    const InterpretationMapBuffer& LSystemView::get_interpretation_buffer() const
+    {
+        return interpretation_buff_;
     }
 
     
