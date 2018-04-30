@@ -27,30 +27,38 @@ namespace controller
         return position;
     }
 
+    void WindowController::paste_view(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views)
+    {
+        if (!LSystemController::saved_view())
+        {
+            return;
+        }
+        const auto& saved = LSystemController::saved_view();
+
+        // Before adding the view to the vector<>, update
+        // 'starting_position' to the new location.
+        auto view = *saved;
+        auto box = view.get_bounding_box();
+        sf::Vector2f middle = {box.left + box.width/2, box.top + box.height/2};
+        middle = view.get_parameters().starting_position - middle;
+        view.get_parameters().starting_position = real_mouse_position(sf::Mouse::getPosition(window)) + middle;
+        view.compute_vertices();
+        lsys_views.emplace_back(view);
+
+    }
+    
     void WindowController::right_click_menu(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views)
     {
         if (ImGui::BeginPopupContextVoid())
         {
-            if (ImGui::MenuItem("New LSystem"))
+            if (ImGui::MenuItem("New LSystem", "Ctrl+N"))
             {
                 lsys_views.emplace_back(real_mouse_position(sf::Mouse::getPosition(window)));
             }
             ImGui::Separator();
-            if (ImGui::MenuItem("Paste"))
+            if (ImGui::MenuItem("Paste", "Ctrl+V"))
             {
-                const auto& saved = LSystemController::saved_view();
-                if (saved)
-                {
-                    // Before adding the view to the vector<>, update
-                    // 'starting_position' to the new location.
-                    auto view = *saved;
-                    auto box = view.get_bounding_box();
-                    sf::Vector2f middle = {box.left + box.width/2, box.top + box.height/2};
-                    middle = view.get_parameters().starting_position - middle;
-                    view.get_parameters().starting_position = real_mouse_position(sf::Mouse::getPosition(window)) + middle;
-                    view.compute_vertices();
-                    lsys_views.emplace_back(view);
-                }
+                paste_view(window, lsys_views);
             }
             ImGui::EndPopup();
         }
@@ -73,6 +81,22 @@ namespace controller
                  event.key.code == sf::Keyboard::Escape))
             {
                 window.close();
+            }
+
+            else if (!imgui_io.WantCaptureKeyboard &&
+                     event.type == sf::Event::KeyPressed &&
+                     (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
+                      sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))
+            {
+                if (event.key.code == sf::Keyboard::V)
+                {
+                    paste_view(window, lsys_views);
+                }
+                else if (event.key.code == sf::Keyboard::N)
+                {
+                    lsys_views.emplace_back(real_mouse_position(sf::Mouse::getPosition(window)));
+                }
+                                
             }
 
             else if (event.type == sf::Event::GainedFocus)

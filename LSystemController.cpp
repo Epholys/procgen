@@ -84,6 +84,25 @@ namespace controller
                 under_mouse_ = nullptr;
             }
         }
+
+        else if (!imgui_io.WantCaptureKeyboard &&
+                 event.type == sf::Event::KeyPressed &&
+                 (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
+                  sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)) &&
+                 under_mouse_ != nullptr &&
+                 under_mouse_->is_selected())
+        {
+            if (event.key.code == sf::Keyboard::C)
+            {
+                saved_view_ = under_mouse_->clone();
+            }
+            else if (event.key.code == sf::Keyboard::X)
+            {
+                saved_view_ = under_mouse_->duplicate();
+            }
+
+        }
+
     }
 
     void LSystemController::handle_delta(sf::Vector2f delta)
@@ -101,9 +120,13 @@ namespace controller
         if (ImGui::BeginPopupContextVoid())
         {
             // Cloning is deep-copying the LSystem.
-            if (ImGui::MenuItem("Clone"))
+            if (ImGui::MenuItem("Clone", "Ctrl+C"))
             {
                 saved_view_ = under_mouse_->clone();
+            }
+            if (ImGui::MenuItem("Duplicate", "Ctrl+X"))
+            {
+                saved_view_ = under_mouse_->duplicate();
             }
             ImGui::EndPopup();
         }
