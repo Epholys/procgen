@@ -13,6 +13,7 @@
 #include "helper_math.h"
 #include "procgui.h"
 #include "WindowController.h"
+#include "serializer.h"
 
 #include <functional>
 
@@ -20,6 +21,7 @@ using namespace drawing;
 using namespace math;
 using namespace procgui;
 using namespace controller;
+using namespace saveload;
 
 int main()
 {
@@ -50,9 +52,11 @@ int main()
     plant_param.step = 5;
     plant_param.n_iter = 6;
 
-    // LSystemView plant_view ("Plant", plant, map, plant_param);
+    LSystemView plant_view ("Plant", plant, map, plant_param);
     LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
 
+    std::cout << print_lsystem(plant_view) << "\n\n" << print_lsystem(serpinski_view);
+    
     std::vector<LSystemView> views;
     // views.push_back(std::move(plant_view));
     views.push_back(std::move(serpinski_view));
