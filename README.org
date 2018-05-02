@@ -44,6 +44,7 @@
      - dear imgui, / 1.5 / [[https://github.com/ocornut/imgui][Github Repository]] / installed via [[https://github.com/ocornut/imgui/releases/tag/v1.50][release 1.5]]
      - googletest / 1.8.0 / [[https://github.com/google/googletest][Github Repository]] / installed from packages
      - GSL (Guidelines Support Library) / 2017-06-27 / [[https://github.com/Microsoft/GSL][Github Repository]] / cloned from the repository
+     - cereal / 1.2.2 / [[https://uscilab.github.io/cereal/index.html][Website]] / downloaded from the website
    - *Coding rule:* [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]] with GSL
      - Difference: [[https://en.wikipedia.org/wiki/Indentation_style#Allman_style][Allman indentation Style]]
      - Difference: When using ImGui ; ImGui style of coding
