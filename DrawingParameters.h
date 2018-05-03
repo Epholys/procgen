@@ -3,8 +3,11 @@
 
 
 
+#include <cmath>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
+
+#include "cereal/cereal.hpp"
 
 #include "helper_math.h"
 
@@ -32,11 +35,32 @@ namespace drawing
         // When 'move_forward' order is executed, the Turtle will move
         // forward 'step' pixels (at default zoom level). Initialized
         // at an arbitrary value. 
-        int step { 20 };
+        float step { 20 };
 
         // The number of iterations done by the L-system.
         int n_iter { 0 };
+
+    private:
+        friend class cereal::access;
+        
+        template <class Archive>
+        void save (Archive& ar, const std::uint32_t) const
+            {
+                ar(CEREAL_NVP(starting_angle),
+                   cereal::make_nvp("delta_angle", std::round(math::rad_to_degree(delta_angle))),
+                   CEREAL_NVP(step),
+                   CEREAL_NVP(n_iter));
+            }
+        
+        template <class Archive>
+        void load (Archive& ar, const std::uint32_t)
+            {
+                ar(starting_angle, delta_angle, step, n_iter);
+                delta_angle = math::degree_to_rad(delta_angle);
+            }
+
     };
+    
 }
 
 #endif

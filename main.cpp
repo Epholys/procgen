@@ -1,10 +1,12 @@
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 
 #include <SFML/Graphics.hpp>
 
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
+#include "cereal/archives/json.hpp"
 
 #include "LSystem.h"
 #include "RuleMapBuffer.h"
@@ -55,11 +57,39 @@ int main()
     LSystemView plant_view ("Plant", plant, map, plant_param);
     LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
 
-    std::cout << print_lsystem(plant_view) << "\n\n" << print_lsystem(serpinski_view);
+    // std::cout << print_lsystem(plant_view) << "\n\n" << print_lsystem(serpinski_view);
+
+    {
+        cereal::JSONOutputArchive archive (std::cout);
+        
+        archive(cereal::make_nvp("LSystem", *serpinski));
+        archive(cereal::make_nvp("DrawingParameters", serpinski_param));
+        archive(cereal::make_nvp("Interpretation Map", *map));
+    }
+
+    LSystemView clone({0,0});
+    {
+        std::ifstream ifs("serpinksi.lsys");
+        cereal::JSONInputArchive ar (ifs);
+
+        LSystem lsys;
+        DrawingParameters params;
+        InterpretationMap map;
+        ar(lsys);
+        ar(params);
+        ar(map);
+        params.starting_position = {400, 600};
+
+        clone = LSystemView("clone",
+                            std::make_shared<LSystem>(lsys),
+                            std::make_shared<InterpretationMap>(map),
+                            params);
+    }
     
     std::vector<LSystemView> views;
     // views.push_back(std::move(plant_view));
     views.push_back(std::move(serpinski_view));
+    views.push_back(std::move(clone));
     
     sf::Clock delta_clock;
     while (window.isOpen())

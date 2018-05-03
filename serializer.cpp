@@ -120,7 +120,7 @@ namespace saveload
         SerializedTree::ChildrenVec data;
         for (const auto& rule : map.get_rules())
         {
-            add_node(data, std::string()+rule.first, procgui::get_order_entry(rule.second).name);
+            add_node(data, std::string()+rule.first, rule.second.name);
         }
 
         tree->key = "InterpretationMap";
