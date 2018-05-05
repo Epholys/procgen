@@ -2,6 +2,9 @@
 #define LSYSTEM_VIEW
 
 
+#include "cereal/cereal.hpp"
+#include "cereal/access.hpp"
+
 #include "geometry.h"
 #include "DrawingParameters.h"
 #include "LSystemBuffer.h"
@@ -106,6 +109,31 @@ namespace procgui
 
         // True if the window is selected.
         bool is_selected_;
+
+        friend class cereal::access;
+
+        template<class Archive>
+        void save (Archive& ar, const std::uint32_t) const
+            {
+                ar(cereal::make_nvp("LSystem", *Observer<LSystem>::get_target()),
+                   cereal::make_nvp("DrawingParameters", params_),
+                   cereal::make_nvp("Interpretation Map", *Observer<drawing::InterpretationMap>::get_target()));
+            }
+
+        template<class Archive>
+        void load (Archive& ar, const std::uint32_t)
+            {
+                LSystem lsys;
+                drawing::DrawingParameters params;
+                drawing::InterpretationMap map;
+                ar(cereal::make_nvp("LSystem", lsys),
+                   cereal::make_nvp("DrawingParameters", params),
+                   cereal::make_nvp("Interpretation Map", map));
+                *this = LSystemView("",
+                          std::make_shared<LSystem>(lsys),
+                          std::make_shared<drawing::InterpretationMap>(map),
+                          params);
+            }
     };
 }
 

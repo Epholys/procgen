@@ -61,29 +61,18 @@ int main()
 
     {
         cereal::JSONOutputArchive archive (std::cout);
-        
-        archive(cereal::make_nvp("LSystem", *serpinski));
-        archive(cereal::make_nvp("DrawingParameters", serpinski_param));
-        archive(cereal::make_nvp("Interpretation Map", *map));
+        archive(serpinski_view);
     }
+
 
     LSystemView clone({0,0});
     {
         std::ifstream ifs("serpinksi.lsys");
         cereal::JSONInputArchive ar (ifs);
 
-        LSystem lsys;
-        DrawingParameters params;
-        InterpretationMap map;
-        ar(lsys);
-        ar(params);
-        ar(map);
-        params.starting_position = {400, 600};
-
-        clone = LSystemView("clone",
-                            std::make_shared<LSystem>(lsys),
-                            std::make_shared<InterpretationMap>(map),
-                            params);
+        ar(clone);
+        clone.ref_parameters().starting_position = {400, 600};
+        clone.compute_vertices();
     }
     
     std::vector<LSystemView> views;
