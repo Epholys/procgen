@@ -2,6 +2,7 @@
 #include "WindowController.h"
 #include "imgui/imgui.h"
 
+
 namespace controller
 {
     procgui::LSystemView* LSystemController::under_mouse_ {nullptr};
@@ -22,6 +23,10 @@ namespace controller
     const std::optional<procgui::LSystemView>& LSystemController::saved_view()
     {
         return saved_view_;
+    }
+    const procgui::LSystemView* LSystemController::under_mouse()
+    {
+        return under_mouse_;
     }
 
     
@@ -127,6 +132,10 @@ namespace controller
             if (ImGui::MenuItem("Duplicate", "Ctrl+X"))
             {
                 saved_view_ = under_mouse_->duplicate();
+            }
+            if (ImGui::MenuItem("Save", "Ctrl+S"))
+            {
+                WindowController::save_window_open_ = true;
             }
             ImGui::EndPopup();
         }

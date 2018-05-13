@@ -34,7 +34,11 @@ namespace controller
         static void right_click_menu(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views);
 
         static void paste_view(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views);
+
+        static bool save_window_open_;
+        static void save_window();
         
+
     private:
         // The view modified by the user and given to the window.
         static sf::View view_;

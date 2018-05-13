@@ -65,7 +65,7 @@ int main()
 
     LSystemView clone({0,0});
     {
-        std::ifstream ifs("serpinksi.lsys");
+        std::ifstream ifs("saves/serpinksi.lsys");
         cereal::JSONInputArchive ar (ifs);
 
         ar(clone);

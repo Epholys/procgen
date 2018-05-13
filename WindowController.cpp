@@ -1,8 +1,16 @@
+#include <fstream>
 #include <memory>
+#include <experimental/filesystem>
+
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
+#include "cereal/archives/json.hpp"
+
+#include "helper_string.h"
 #include "WindowController.h"
 #include "LSystemController.h"
+
+namespace fs = std::experimental::filesystem;
 
 namespace controller
 {
@@ -15,6 +23,8 @@ namespace controller
     bool WindowController::has_focus_ {true};
 
     bool WindowController::view_can_move_ {false};
+
+    bool WindowController::save_window_open_ {false};
 
     
     sf::Vector2f WindowController::real_mouse_position(sf::Vector2i mouse_click)
@@ -56,19 +66,98 @@ namespace controller
                 lsys_views.emplace_back(real_mouse_position(sf::Mouse::getPosition(window)));
             }
             ImGui::Separator();
-            if (ImGui::MenuItem("Paste", "Ctrl+V"))
+            if (LSystemController::saved_view() && ImGui::MenuItem("Paste", "Ctrl+V"))
             {
                 paste_view(window, lsys_views);
             }
             ImGui::EndPopup();
         }
     }
+
+    void WindowController::save_window()
+    {
+        const std::string popup_name = "Save LSystem to file";
+        static std::array<char, 64> filename;
+        ImGui::OpenPopup(popup_name.c_str());
+        if (ImGui::BeginPopupModal(popup_name.c_str(), &save_window_open_, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Separator();
+            fs::path save_dir = fs::u8path(u8"saves");
+            try
+            {
+                for (const auto& file : fs::directory_iterator(save_dir))
+                {
+                    if (fs::is_regular_file(file.path()) &&
+                        ImGui::Selectable(file.path().filename().c_str()))
+                    {
+                        filename = string_to_array<filename.size()>(file.path().filename());
+                    }
+                }
+            }
+            catch (const fs::filesystem_error& e)
+            {
+                ImGui::OpenPopup("Error");
+                if (ImGui::BeginPopupModal("Error"))
+                {
+                    ImGui::Text(e.what());
+                    ImGui::EndPopup();
+                }
+            }
+
+            ImGui::Separator();
+
+            ImGui::CaptureKeyboardFromApp();
+            ImGui::InputText("Filename", filename.data(), filename.size());
+            
+            ImGui::Separator();
+
+            static bool open_error_popup = false;
+            if (ImGui::Button("Save"))
+            {
+                std::ofstream ofs (save_dir/array_to_string(filename));
+
+                if(!ofs.is_open())
+                {
+                    open_error_popup = true;
+                }
+                else
+                {
+                    cereal::JSONOutputArchive archive (ofs);
+                    if (LSystemController::under_mouse())
+                    {
+                        archive(*LSystemController::under_mouse());
+                    }
+                        save_window_open_ = false;
+                }
+            }
+
+            if (open_error_popup)
+            {
+                ImGui::OpenPopup("Error");
+                if (ImGui::BeginPopupModal("Error", &open_error_popup))
+                {
+                    std::string message = "Error: can't open file: " + array_to_string(filename);
+                    ImGui::Text(message.c_str());
+                    ImGui::EndPopup();
+                }
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel"))
+            {
+                save_window_open_ = false;
+            }
+            
+            ImGui::EndPopup();
+        }
+    }
+
     
     void WindowController::handle_input(sf::RenderWindow &window, std::vector<procgui::LSystemView>& lsys_views)
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
         sf::Event event;
-        
+
         while (window.pollEvent(event))
         {
             // ImGui has the priority as it is the topmost GUI.
@@ -82,6 +171,7 @@ namespace controller
             {
                 window.close();
             }
+
 
             else if (!imgui_io.WantCaptureKeyboard &&
                      event.type == sf::Event::KeyPressed &&
@@ -147,6 +237,11 @@ namespace controller
             }
             
             LSystemController::handle_input(lsys_views, event);
+        }
+
+        if (save_window_open_)
+        {
+            save_window();
         }
 
         // The right-click menu depends on the location of the mouse.

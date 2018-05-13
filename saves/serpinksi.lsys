@@ -5,8 +5,8 @@
             "cereal_class_version": 0,
             "axiom": "F",
             "production_rules": {
-                "G": "F+G+F",
-                "F": "G-F-G"
+                "F": "G-F-G",
+                "G": "F+G+F"
             }
         },
         "DrawingParameters": {
@@ -18,12 +18,12 @@
         },
         "Interpretation Map": {
             "cereal_class_version": 0,
-            "]": "Load position",
-            "-": "Turn right",
-            "+": "Turn left",
-            "G": "Go forward",
+            "F": "Go forward",
             "[": "Save Position",
-            "F": "Go forward"
+            "G": "Go forward",
+            "+": "Turn left",
+            "]": "Load position",
+            "-": "Turn right"
         }
     }
 }
