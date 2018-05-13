@@ -18,9 +18,7 @@ namespace drawing
     // necessary to interpret the result of a L-system. Each attribute
     // can be freely initialized and modified, there are no invariant.
     // During an interpretation, this structure will not be
-    // modified. Some attributes like 'delta_angle' or 'step' could
-    // be, in the future, removed from this struct and moved to the
-    // 'Turtle' struct to allow more flexibility.
+    // modified.
     struct DrawingParameters
     {
         // The starting position and angle of the Turtle.
@@ -41,6 +39,7 @@ namespace drawing
         int n_iter { 0 };
 
     private:
+        // Serialization
         friend class cereal::access;
         
         template <class Archive>

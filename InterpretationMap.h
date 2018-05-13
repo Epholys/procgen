@@ -33,9 +33,9 @@ namespace drawing
         LOAD_POSITION,
     };
 
-    // An 'Order' is the association of an 'order_fn' and an identifier to allow
-    // equality comparison between orders, as 'std::function<>' does not have
-    // it.
+    // An 'Order' is the association of an 'order_fn', an identifier to allow
+    // equality comparison between orders (as 'std::function<>' does not have
+    // it) and a name used in the GUI and the serialization.
     struct Order {
         OrderID id;
         order_fn order;
@@ -60,17 +60,19 @@ namespace drawing
     const Order save_position { OrderID::SAVE_POSITION, save_position_fn, "Save Position" };
     const Order load_position { OrderID::LOAD_POSITION, load_position_fn, "Load position" };
         
-    // TODO comment
+    // All the orders available.
     const std::vector<Order> all_orders { go_forward, turn_right, turn_left,
-
                                           save_position, load_position };
+    // All the names of the orders (used in the GUI).
+    // Note: They must be in the same strict order as 'all_orders'.
     const std::vector<const char*> all_orders_name =
         [](){ std::vector<const char*> v;
               for(const auto& o : all_orders)
                   v.push_back(o.name.c_str());
               return v; }();
 
-
+    // Minimal serialization for Orders: we save and load only the associated
+    // name.
     template<class Archive>
     std::string save_minimal (Archive&, const Order& order)
     {
@@ -85,10 +87,6 @@ namespace drawing
         Expects(it != end(all_orders));
         order = *it;
     }
-    
-    // WARNING: if new orders are added, do not forget to complete the order
-    // database in 'InterpretationMapBuffer.h'. These informations are in two
-    // files due to separation of concerns: the database is specific to the GUI.
 
     // 'InterpretationMap' is a map linking a symbol of the vocabulary of a
     // L-system to an order. During the interpretation, if the character is
@@ -96,17 +94,21 @@ namespace drawing
     class InterpretationMap : public RuleMap<Order>
     {
     public:
+        // Constructors simply redirecting to RuleMap<Order> constructors.
         InterpretationMap() = default;
         InterpretationMap(const rule_map& rules);
         InterpretationMap(std::initializer_list<typename rule_map::value_type> init);
         virtual ~InterpretationMap() {}
 
     private:
+        // Serialization
         friend class cereal::access;
 
         template<class Archive>
         void save (Archive& ar, const std::uint32_t) const
             {
+                // Custom save to have a pretty map between predecessors and
+                // orders.
                 for(const auto& i : rules_)
                     ar(cereal::make_nvp(std::string()+i.first, i.second));
             }
@@ -114,6 +116,8 @@ namespace drawing
         template<class Archive>
         void load (Archive& ar, const std::uint32_t)
             {
+                // Complex loading as we do not save the 'map' in a standard
+                // way.
                 rules_.clear();
 
                 auto hint = rules_.begin();

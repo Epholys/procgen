@@ -110,6 +110,8 @@ namespace procgui
         // True if the window is selected.
         bool is_selected_;
 
+
+        // Serialization
         friend class cereal::access;
 
         template<class Archive>

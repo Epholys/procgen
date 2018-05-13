@@ -16,10 +16,8 @@
 
 namespace cereal
 {
-    //! Saving for std::map<std::string, std::string> for text based archives
-    // Note that this shows off some internal cereal traits such as EnableIf,
-    // which will only allow this template to be instantiated if its predicates
-    // are true
+    // Saving for std::map<std::string, std::string> for text based archives
+    // Copied from https://uscilab.github.io/cereal/archive_specialization.html (MIT License)
     template <class Archive, class C, class A,
               traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
     void save( Archive & ar, std::unordered_map<char, std::string, C, A> const& map )
@@ -28,7 +26,7 @@ namespace cereal
             ar(cereal::make_nvp(std::string()+i.first, i.second));
     }
 
-    //! Loading for std::map<std::string, std::string> for text based archives
+    // Loading for std::map<char, std::string> for text based archives
     template <class Archive, class C, class A,
               traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
     void load( Archive & ar, std::unordered_map<char, std::string, C, A>& map)

@@ -304,7 +304,6 @@ namespace procgui
         bool is_modified = interact_with_buffer(buffer,
             [&buffer](auto it)
             {
-                // TODO comment
                 // ImGui::ListBox needs:
                 //   - An array of 'char *' for the different elements
                 //   - An index to select between these elements

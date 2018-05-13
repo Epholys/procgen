@@ -27,7 +27,7 @@ namespace drawing
     // by some attributes of DrawingParameters to allow more
     // flexibility.
     // Note: Turtle is placed into an implementation namespace as it
-    // is only instanciated and used in 'compute_paths()' to
+    // is only instanciated and used in 'compute_vertices()' to
     // generate the vertices.
     namespace impl
     {
@@ -60,7 +60,7 @@ namespace drawing
         };
     }
 
-    // Compute all paths of a turtle interpretation of a L-system.
+    // Compute all vertices of a turtle interpretation of a L-system.
     // First, this function iterates 'parameters.n_iter' times the LSystem
     // 'lsys', using and modifying its cache. Then, it interprates the result
     // with 'interpretation' and 'parameters'.

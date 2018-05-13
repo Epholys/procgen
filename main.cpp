@@ -15,7 +15,6 @@
 #include "helper_math.h"
 #include "procgui.h"
 #include "WindowController.h"
-#include "serializer.h"
 
 #include <functional>
 
@@ -23,7 +22,6 @@ using namespace drawing;
 using namespace math;
 using namespace procgui;
 using namespace controller;
-using namespace saveload;
 
 int main()
 {
