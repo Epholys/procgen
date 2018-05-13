@@ -84,9 +84,11 @@ profiling : main
 
 
 # Each .o file is compiled with its associated *.cpp file.
-# (Exception: Test files: see below)
 %.o : %.cpp
 	$(CXX) $(CXXFLAGS) $(MACROFLAGS) -c $^ -o $@ $(IFLAGS)
+
+$(TEST_DIR)/%.o : $(TEST_DIR)/%.cpp
+	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -c $^ -o $@ $(IFLAGS)
 
 
 # Compiles and archives googletest internals.
@@ -107,7 +109,7 @@ $(TEST_DIR)/gtest_main.a : $(TEST_DIR)/gtest-all.o $(TEST_DIR)/gtest_main.o
 	$(AR) $(ARFLAGS) $@ $^
 
 # Compiles every *Test.cpp.
-$(TEST_DIR)/%Test.o : $(TEST_DIR)/%Test.cpp
-	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -c $^ -o $@ $(IFLAGS)
+# $(TEST_DIR)/%Test.o : $(TEST_DIR)/%Test.cpp
+#	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -c $^ -o $@ $(IFLAGS)
 
 
