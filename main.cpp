@@ -54,29 +54,10 @@ int main()
 
     LSystemView plant_view ("Plant", plant, map, plant_param);
     LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
-
-    // std::cout << print_lsystem(plant_view) << "\n\n" << print_lsystem(serpinski_view);
-
-    {
-        cereal::JSONOutputArchive archive (std::cout);
-        archive(serpinski_view);
-    }
-
-
-    LSystemView clone({0,0});
-    {
-        std::ifstream ifs("saves/serpinksi.lsys");
-        cereal::JSONInputArchive ar (ifs);
-
-        ar(clone);
-        clone.ref_parameters().starting_position = {400, 600};
-        clone.compute_vertices();
-    }
     
     std::vector<LSystemView> views;
     // views.push_back(std::move(plant_view));
     views.push_back(std::move(serpinski_view));
-    views.push_back(std::move(clone));
     
     sf::Clock delta_clock;
     while (window.isOpen())

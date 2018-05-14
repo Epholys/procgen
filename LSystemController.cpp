@@ -133,6 +133,7 @@ namespace controller
             {
                 saved_view_ = under_mouse_->duplicate();
             }
+            ImGui::Separator();
             if (ImGui::MenuItem("Save", "Ctrl+S"))
             {
                 WindowController::save_window_open_ = true;

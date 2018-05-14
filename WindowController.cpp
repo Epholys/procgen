@@ -76,8 +76,11 @@ namespace controller
 
     void WindowController::save_window()
     {
-        const std::string popup_name = "Save LSystem to file";
         static std::array<char, 64> filename;
+        static bool dir_error_popup = false;
+        static bool file_error_popup = false;
+
+        const std::string popup_name = "Save LSystem to file";
         ImGui::OpenPopup(popup_name.c_str());
         if (ImGui::BeginPopupModal(popup_name.c_str(), &save_window_open_, ImGuiWindowFlags_AlwaysAutoResize))
         {
@@ -96,11 +99,22 @@ namespace controller
             }
             catch (const fs::filesystem_error& e)
             {
+                dir_error_popup = true;
+            }
+
+            if (dir_error_popup)
+            {
                 ImGui::OpenPopup("Error");
-                if (ImGui::BeginPopupModal("Error"))
+                if (ImGui::BeginPopupModal("Error", &dir_error_popup))
                 {
-                    ImGui::Text(e.what());
+                    std::string error_message = "Error: can't open directory: "+save_dir.filename().string();
+                    ImGui::Text(error_message.c_str());
                     ImGui::EndPopup();
+                }
+                if (!dir_error_popup)
+                {
+                    save_window_open_ = false;
+                    ImGui::CloseCurrentPopup();
                 }
             }
 
@@ -108,17 +122,18 @@ namespace controller
 
             ImGui::CaptureKeyboardFromApp();
             ImGui::InputText("Filename", filename.data(), filename.size());
+            std::string trimmed_filename = array_to_string(filename);
+            trim(trimmed_filename);
             
             ImGui::Separator();
 
-            static bool open_error_popup = false;
-            if (ImGui::Button("Save"))
+            if (ImGui::Button("Save") && !trimmed_filename.empty())
             {
-                std::ofstream ofs (save_dir/array_to_string(filename));
+                std::ofstream ofs (save_dir/trimmed_filename);
 
                 if(!ofs.is_open())
                 {
-                    open_error_popup = true;
+                    file_error_popup = true;
                 }
                 else
                 {
@@ -131,12 +146,12 @@ namespace controller
                 }
             }
 
-            if (open_error_popup)
+            if (file_error_popup)
             {
                 ImGui::OpenPopup("Error");
-                if (ImGui::BeginPopupModal("Error", &open_error_popup))
+                if (ImGui::BeginPopupModal("Error", &file_error_popup))
                 {
-                    std::string message = "Error: can't open file: " + array_to_string(filename);
+                    std::string message = "Error: can't open file: '" + array_to_string(filename) + "'";
                     ImGui::Text(message.c_str());
                     ImGui::EndPopup();
                 }
@@ -146,6 +161,7 @@ namespace controller
             if (ImGui::Button("Cancel"))
             {
                 save_window_open_ = false;
+                ImGui::CloseCurrentPopup();
             }
             
             ImGui::EndPopup();
@@ -245,6 +261,8 @@ namespace controller
         }
 
         // The right-click menu depends on the location of the mouse.
+        // We do not check if the mouse's right button was clicked, imgui takes
+        // care of that.
         if (LSystemController::has_priority())
         {
             LSystemController::right_click_menu();
