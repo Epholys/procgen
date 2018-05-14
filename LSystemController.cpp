@@ -105,9 +105,11 @@ namespace controller
             {
                 saved_view_ = under_mouse_->duplicate();
             }
-
+            else if (event.key.code == sf::Keyboard::S)
+            {
+                WindowController::save_menu_open_ = true;
+            }
         }
-
     }
 
     void LSystemController::handle_delta(sf::Vector2f delta)
@@ -136,7 +138,7 @@ namespace controller
             ImGui::Separator();
             if (ImGui::MenuItem("Save", "Ctrl+S"))
             {
-                WindowController::save_window_open_ = true;
+                WindowController::save_menu_open_ = true;
             }
             ImGui::EndPopup();
         }
