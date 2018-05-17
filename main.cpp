@@ -1,10 +1,12 @@
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 
 #include <SFML/Graphics.hpp>
 
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
+#include "cereal/archives/json.hpp"
 
 #include "LSystem.h"
 #include "RuleMapBuffer.h"
@@ -50,9 +52,9 @@ int main()
     plant_param.step = 5;
     plant_param.n_iter = 6;
 
-    // LSystemView plant_view ("Plant", plant, map, plant_param);
+    LSystemView plant_view ("Plant", plant, map, plant_param);
     LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
-
+    
     std::vector<LSystemView> views;
     // views.push_back(std::move(plant_view));
     views.push_back(std::move(serpinski_view));

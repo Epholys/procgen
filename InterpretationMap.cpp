@@ -46,4 +46,13 @@ namespace drawing
             turtle.stack.pop();
         }
     }
+
+    InterpretationMap::InterpretationMap(const rule_map& rules)
+        : RuleMap<Order>(rules)
+    {
+    }
+    InterpretationMap::InterpretationMap(std::initializer_list<typename rule_map::value_type> init)
+        : RuleMap<Order>(init)
+    {
+    }
 }

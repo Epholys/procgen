@@ -2,6 +2,9 @@
 #define LSYSTEM_VIEW
 
 
+#include "cereal/cereal.hpp"
+#include "cereal/access.hpp"
+
 #include "geometry.h"
 #include "DrawingParameters.h"
 #include "LSystemBuffer.h"
@@ -50,11 +53,14 @@ namespace procgui
         LSystemView duplicate();
         
         // Reference Getters
-        drawing::DrawingParameters& get_parameters();
-        LSystemBuffer& get_lsystem_buffer();
-        InterpretationMapBuffer& get_interpretation_buffer();
+        drawing::DrawingParameters& ref_parameters();
+        LSystemBuffer& ref_lsystem_buffer();
+        InterpretationMapBuffer& ref_interpretation_buffer();
         // Getters
         sf::FloatRect get_bounding_box() const;
+        const drawing::DrawingParameters& get_parameters() const;
+        const LSystemBuffer& get_lsystem_buffer() const;
+        const InterpretationMapBuffer& get_interpretation_buffer() const;
         
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();
@@ -103,6 +109,33 @@ namespace procgui
 
         // True if the window is selected.
         bool is_selected_;
+
+
+        // Serialization
+        friend class cereal::access;
+
+        template<class Archive>
+        void save (Archive& ar, const std::uint32_t) const
+            {
+                ar(cereal::make_nvp("LSystem", *Observer<LSystem>::get_target()),
+                   cereal::make_nvp("DrawingParameters", params_),
+                   cereal::make_nvp("Interpretation Map", *Observer<drawing::InterpretationMap>::get_target()));
+            }
+
+        template<class Archive>
+        void load (Archive& ar, const std::uint32_t)
+            {
+                LSystem lsys;
+                drawing::DrawingParameters params;
+                drawing::InterpretationMap map;
+                ar(cereal::make_nvp("LSystem", lsys),
+                   cereal::make_nvp("DrawingParameters", params),
+                   cereal::make_nvp("Interpretation Map", map));
+                *this = LSystemView("",
+                          std::make_shared<LSystem>(lsys),
+                          std::make_shared<drawing::InterpretationMap>(map),
+                          params);
+            }
     };
 }
 

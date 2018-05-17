@@ -2,6 +2,7 @@
 #define HELPER_STRING_H
 
 
+#include <locale>
 #include <array>
 #include <string>
 #include <algorithm>
@@ -38,6 +39,13 @@ std::string array_to_string(const std::array<char, N>& arr)
     return {arr.begin(),
             std::find(arr.begin(), arr.end(), '\0')};
 }
+
+
+std::string& ltrim(std::string& str);
+std::string& rtrim(std::string& str);
+std::string& trim(std::string& str);
+
+bool is_single_word(const std::string& str);
 
 
 #endif // HELPER_STRING_H

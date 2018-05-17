@@ -61,6 +61,7 @@ public:
     virtual void clear_rules();
 
 protected:
+
     rule_map rules_ = {};
 };
 

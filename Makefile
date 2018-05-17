@@ -10,7 +10,7 @@
 ### Flags passed to the C++ compiler: common, macros, include and linking flags.
 CXXFLAGS   += -std=c++17 -g -O0 -Wall -Wextra -pthread
 MACROFLAGS += -DGSL_THROW_ON_CONTRACT_VIOLATION
-LFLAGS     += -lsfml-system -lsfml-window -lsfml-graphics -lGL
+LFLAGS     += -lsfml-system -lsfml-window -lsfml-graphics -lGL -lstdc++fs
 IFLAGS     += -I.
 
 # Special optimization flags for release and profiling
@@ -84,9 +84,11 @@ profiling : main
 
 
 # Each .o file is compiled with its associated *.cpp file.
-# (Exception: Test files: see below)
 %.o : %.cpp
 	$(CXX) $(CXXFLAGS) $(MACROFLAGS) -c $^ -o $@ $(IFLAGS)
+
+$(TEST_DIR)/%.o : $(TEST_DIR)/%.cpp
+	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -c $^ -o $@ $(IFLAGS)
 
 
 # Compiles and archives googletest internals.
@@ -107,7 +109,7 @@ $(TEST_DIR)/gtest_main.a : $(TEST_DIR)/gtest-all.o $(TEST_DIR)/gtest_main.o
 	$(AR) $(ARFLAGS) $@ $^
 
 # Compiles every *Test.cpp.
-$(TEST_DIR)/%Test.o : $(TEST_DIR)/%Test.cpp
-	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -c $^ -o $@ $(IFLAGS)
+# $(TEST_DIR)/%Test.o : $(TEST_DIR)/%Test.cpp
+#	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -c $^ -o $@ $(IFLAGS)
 
 

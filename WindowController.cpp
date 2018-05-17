@@ -1,8 +1,15 @@
+#include <fstream>
 #include <memory>
+
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
+#include "cereal/archives/json.hpp"
+
+#include "helper_string.h"
 #include "WindowController.h"
 #include "LSystemController.h"
+
+namespace fs = std::experimental::filesystem;
 
 namespace controller
 {
@@ -11,11 +18,16 @@ namespace controller
     float WindowController::zoom_level_ {1.f};
 
     sf::Vector2i WindowController::mouse_position_ {};
+    sf::Vector2f WindowController::mouse_position_to_load_;
     
     bool WindowController::has_focus_ {true};
 
     bool WindowController::view_can_move_ {false};
 
+    bool WindowController::save_menu_open_ {false};
+    bool WindowController::load_menu_open_ {false};
+
+    fs::path WindowController::save_dir_ = fs::u8path(u8"saves");
     
     sf::Vector2f WindowController::real_mouse_position(sf::Vector2i mouse_click)
     {
@@ -27,24 +39,24 @@ namespace controller
         return position;
     }
 
-    void WindowController::paste_view(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views)
+    void WindowController::paste_view(std::vector<procgui::LSystemView>& lsys_views,
+                                      const std::optional<procgui::LSystemView>& view,
+                                      const sf::Vector2f& position)
     {
-        if (!LSystemController::saved_view())
+        if (!view)
         {
             return;
         }
-        const auto& saved = LSystemController::saved_view();
 
         // Before adding the view to the vector<>, update
         // 'starting_position' to the new location.
-        auto view = *saved;
-        auto box = view.get_bounding_box();
+        auto pasted_view = *view;
+        auto box = pasted_view.get_bounding_box();
         sf::Vector2f middle = {box.left + box.width/2, box.top + box.height/2};
-        middle = view.get_parameters().starting_position - middle;
-        view.get_parameters().starting_position = real_mouse_position(sf::Mouse::getPosition(window)) + middle;
-        view.compute_vertices();
-        lsys_views.emplace_back(view);
-
+        middle = pasted_view.get_parameters().starting_position - middle;
+        pasted_view.ref_parameters().starting_position = position + middle;
+        pasted_view.compute_vertices();
+        lsys_views.emplace_back(pasted_view);
     }
     
     void WindowController::right_click_menu(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views)
@@ -55,12 +67,248 @@ namespace controller
             {
                 lsys_views.emplace_back(real_mouse_position(sf::Mouse::getPosition(window)));
             }
-            ImGui::Separator();
-            if (ImGui::MenuItem("Paste", "Ctrl+V"))
+            if (ImGui::MenuItem("Load LSystem", "Ctrl+O"))
             {
-                paste_view(window, lsys_views);
+                mouse_position_to_load_ = real_mouse_position(sf::Mouse::getPosition(window));
+                load_menu_open_ = true;
+            }
+            ImGui::Separator();
+            if (LSystemController::saved_view() && ImGui::MenuItem("Paste", "Ctrl+V"))
+            {
+                paste_view(lsys_views, LSystemController::saved_view(), real_mouse_position(sf::Mouse::getPosition(window)));
             }
             ImGui::EndPopup();
+        }
+    }
+
+    void WindowController::save_menu()
+    {
+        // The file name in which will be save the LSystem.
+        static std::array<char, FILENAME_LENGTH_> filename;
+        // Flag to let the directory error popup open between frames.
+        static bool dir_error_popup = false;
+        // Flag to let the file error popup open between frames.
+        static bool file_error_popup = false;
+
+        ImGui::SetNextWindowPosCenter();
+        if (ImGui::Begin("Save LSystem to file", &save_menu_open_, ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
+        {
+            // Avoid interaction with the background when saving a file.
+            ImGui::CaptureKeyboardFromApp();
+            ImGui::CaptureMouseFromApp();
+
+            ImGui::Separator();
+            try
+            {
+                // For each file of the 'save_dir_' directory...
+                for (const auto& file : fs::directory_iterator(save_dir_))
+                { 
+                    // ... displays it in a selectable list ...
+                   if (fs::is_regular_file(file.path()) &&
+                        ImGui::Selectable(file.path().filename().c_str()))
+                    {
+                        // ... and set 'filename' to it when clicked (to overwrite this file).
+                        filename = string_to_array<filename.size()>(file.path().filename());
+                    }
+                }
+            }
+            catch (const fs::filesystem_error& e)
+            {
+                // If we can't open 'save_dir_', open an error popup.
+
+                dir_error_popup = true;
+            }
+
+            if (dir_error_popup)
+            {
+                ImGui::OpenPopup("Error");
+                if (ImGui::BeginPopupModal("Error", &dir_error_popup))
+                {
+                    std::string error_message = "Error: can't open directory: "+save_dir_.filename().string();
+                    ImGui::Text(error_message.c_str());
+                    ImGui::EndPopup();
+                }
+                if (!dir_error_popup)
+                {
+                    // Close the save menu when closing the error popup: if we
+                    // can not open the directory, we can not save anything.
+                    save_menu_open_ = false;
+                }
+            }
+
+            ImGui::Separator();
+
+            // InputText for the file's name.
+            ImGui::InputText("Filename", filename.data(), filename.size());
+            std::string trimmed_filename = array_to_string(filename);
+            trim(trimmed_filename);
+            
+            ImGui::Separator();
+
+            // Save button (with a simple check for a empty filename)
+            if (ImGui::Button("Save") && !trimmed_filename.empty())
+            {
+                // Open the output file.
+                std::ofstream ofs (save_dir_/trimmed_filename);
+
+                // Open the error popup if we can not open the file.
+                if(!ofs.is_open())
+                {
+                    file_error_popup = true;
+                }
+                else
+                {
+                    // Save the LSystemView in the file.
+                    cereal::JSONOutputArchive archive (ofs);
+                    if (LSystemController::under_mouse()) // Virtually useless check.
+                    {
+                        archive(*LSystemController::under_mouse());
+                    }
+                    save_menu_open_ = false;
+                }
+            }
+
+            // File error popup if we can not open the output file.
+            if (file_error_popup)
+            {
+                ImGui::OpenPopup("Error");
+                if (ImGui::BeginPopupModal("Error", &file_error_popup))
+                {
+                    std::string message = "Error: can't open file: '" + array_to_string(filename) + "'";
+                    ImGui::Text(message.c_str());
+                    ImGui::EndPopup();
+                }
+            }
+
+            // Fast close the save menu
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel"))
+            {
+                save_menu_open_ = false;
+            }
+            
+            ImGui::End();
+        }
+    }
+
+    void WindowController::load_menu(std::vector<procgui::LSystemView>& lsys_views)
+    {
+        // The file name in which will be save the LSystem.
+        static std::array<char, FILENAME_LENGTH_> filename;
+        // Flag to let the directory error popup open between frames.
+        static bool dir_error_popup = false;
+        // Flag to let the file error popup open between frames.
+        static bool file_error_popup = false;
+
+        ImGui::SetNextWindowPosCenter();
+        if (ImGui::Begin("Load LSystem from file", &load_menu_open_, ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
+        {
+            // Avoid interaction with the background when saving a file.
+            ImGui::CaptureKeyboardFromApp();
+            ImGui::CaptureMouseFromApp();
+
+            ImGui::Separator();
+            try
+            {
+                // For each file of the 'save_dir_' directory...
+                for (const auto& file : fs::directory_iterator(save_dir_))
+                {
+                    // ... displays it in a selectable list ...
+                    if (fs::is_regular_file(file.path()) &&
+                        ImGui::Selectable(file.path().filename().c_str()))
+                    {
+                        // ... and set 'filename' to it when clicked (to
+                        // load this file).
+                        filename = string_to_array<filename.size()>(file.path().filename());
+                    }
+                }
+            }
+            catch (const fs::filesystem_error& e)
+            {
+                // If we can't open 'save_dir_', open an error popup.
+                dir_error_popup = true;
+            }
+
+            if (dir_error_popup)
+            {
+                ImGui::OpenPopup("Error");
+                if (ImGui::BeginPopupModal("Error", &dir_error_popup))
+                {
+                    std::string error_message = "Error: can't open directory: "+save_dir.filename().string();
+                    ImGui::Text(error_message.c_str());
+                    ImGui::EndPopup();
+                }
+                if (!dir_error_popup)
+                {
+                    // Close the load menu when closing the error popup: if we
+                    // can not open the directory, we can not load anything.
+                    load_menu_open_ = false;
+                }
+            }
+
+            ImGui::Separator();
+
+            // Simple informative text
+            std::string tmp = "File to load: '"+array_to_string(filename)+"'";
+            ImGui::Text(tmp.c_str());
+            ImGui::SameLine();
+
+            if (ImGui::Button("Load"))
+            {
+                // Open the input file.
+                std::ifstream ifs (save_dir_/array_to_string(filename));
+
+                // Open the error popup if we can not open the file.
+                if(!ifs.is_open())
+                {
+                    file_error_popup = true;
+                }
+                else
+                {
+                    // Create a default LSystemView.
+                    procgui::LSystemView loaded_view({0,0});
+                    try
+                    {
+                        // Load it from the file.
+                        cereal::JSONInputArchive archive (ifs);
+                        archive(loaded_view);
+                    }
+                    catch (const cereal::RapidJSONException& e)
+                    {
+                        // If the file is not in the correct format, open the
+                        // error popup. 
+                        file_error_popup = true;
+                    }
+                    if (!file_error_popup)
+                    {
+                        // Paste the new LSystemView at the correct position.
+                        auto tmp = std::make_optional(loaded_view);
+                        paste_view(lsys_views, tmp, mouse_position_to_load_);
+                        load_menu_open_ = false;
+                    }
+                }
+            }
+
+            // File error popup if we can not open the file or if it is in the
+            // wrong format.
+            if (file_error_popup)
+            {
+                ImGui::OpenPopup("Error");
+                if (ImGui::BeginPopupModal("Error", &file_error_popup))
+                {
+                    std::string message = "Error: can't open file: '" + array_to_string(filename) + "' (or wrong format)";
+                    ImGui::Text(message.c_str());
+                    ImGui::EndPopup();
+                }
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel"))
+            {
+                load_menu_open_ = false;
+            }
+            
+            ImGui::End();
         }
     }
     
@@ -68,7 +316,7 @@ namespace controller
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
         sf::Event event;
-        
+
         while (window.pollEvent(event))
         {
             // ImGui has the priority as it is the topmost GUI.
@@ -83,6 +331,7 @@ namespace controller
                 window.close();
             }
 
+
             else if (!imgui_io.WantCaptureKeyboard &&
                      event.type == sf::Event::KeyPressed &&
                      (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
@@ -90,13 +339,19 @@ namespace controller
             {
                 if (event.key.code == sf::Keyboard::V)
                 {
-                    paste_view(window, lsys_views);
+                    paste_view(lsys_views,
+                               LSystemController::saved_view(),
+                               real_mouse_position(sf::Mouse::getPosition(window)));
                 }
                 else if (event.key.code == sf::Keyboard::N)
                 {
                     lsys_views.emplace_back(real_mouse_position(sf::Mouse::getPosition(window)));
                 }
-                                
+                else if (event.key.code == sf::Keyboard::O)
+                {
+                    mouse_position_to_load_ = real_mouse_position(sf::Mouse::getPosition(window));
+                    load_menu_open_ = true;
+                }
             }
 
             else if (event.type == sf::Event::GainedFocus)
@@ -149,7 +404,18 @@ namespace controller
             LSystemController::handle_input(lsys_views, event);
         }
 
+        if (save_menu_open_)
+        {
+            save_menu();
+        }
+        if (load_menu_open_)
+        {
+            load_menu(lsys_views);
+        }
+        
         // The right-click menu depends on the location of the mouse.
+        // We do not check if the mouse's right button was clicked, imgui takes
+        // care of that.
         if (LSystemController::has_priority())
         {
             LSystemController::right_click_menu();

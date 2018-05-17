@@ -7,8 +7,46 @@
 #include <iostream>
 #include <algorithm>
 
+#include "cereal/cereal.hpp"
+#include "cereal/types/unordered_map.hpp"
+
 #include "Observable.h"
 #include "RuleMap.h"
+
+
+namespace cereal
+{
+    // Saving for std::map<std::string, std::string> for text based archives
+    // Copied from https://uscilab.github.io/cereal/archive_specialization.html (MIT License)
+    template <class Archive, class C, class A,
+              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
+    void save( Archive & ar, std::unordered_map<char, std::string, C, A> const& map )
+    {
+        for(const auto& i : map)
+            ar(cereal::make_nvp(std::string()+i.first, i.second));
+    }
+
+    // Loading for std::map<char, std::string> for text based archives
+    template <class Archive, class C, class A,
+              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
+    void load( Archive & ar, std::unordered_map<char, std::string, C, A>& map)
+    {
+        map.clear();
+
+        auto hint = map.begin();
+        while(true)
+        {
+            const auto namePtr = ar.getNodeName();
+
+            if(!namePtr)
+                break;
+
+            std::string key = namePtr;
+            std::string value; ar(value);
+            hint = map.emplace_hint(hint, key.at(0), std::move (value));
+        }
+    }
+}
 
 // Simple L-system generation class. Starting from an axiom and
 // simple production rules, generate by iteration a result array
@@ -67,6 +105,16 @@ public:
     std::string produce(int n);
        
 private:
+
+    friend class cereal::access;
+    
+    template <class Archive>
+    void serialize (Archive& ar, const std::uint32_t)
+        {
+            ar(cereal::make_nvp("axiom", cache_[0]),
+               cereal::make_nvp("production_rules", rules_));
+        }
+    
     // The cache of all calculated iterations and the axiom.
     // It contains all the iterations up to the highest iteration
     // calculated. It is clearly not optimized for memory
@@ -75,6 +123,6 @@ private:
     // L-System.
     std::unordered_map<int, std::string> cache_ = {};
 };
-   
+
 #endif
 

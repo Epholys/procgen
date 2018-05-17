@@ -33,8 +33,9 @@ namespace controller
         // duplicating, ...) 
         static void right_click_menu();
 
-        // Getter for saved_view_;
+        // Getters
         static const std::optional<procgui::LSystemView>& saved_view();
+        static const procgui::LSystemView* under_mouse();
 
     private:
         // The LSystemView below the mouse. nullptr if there is

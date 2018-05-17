@@ -164,7 +164,7 @@ namespace procgui
 
         // --- Step ---
         ImGui::Text("Step:"); ImGui::SameLine(align);
-        ImGui::Text("%d", parameters.step);
+        ImGui::Text("%f", parameters.step);
 
         conclude(main);
     }
@@ -179,7 +179,7 @@ namespace procgui
 
         for(auto interpretation : map.get_rules())
         {
-            std::string name = get_order_entry(interpretation.second).name;
+            std::string name = interpretation.second.name;
             ImGui::Text("%c -> %s", interpretation.first, name.c_str());
 
         }
@@ -230,7 +230,7 @@ namespace procgui
         }
 
         // --- Step ---
-        is_modified |= ImGui::DragInt("Step", &parameters.step);
+        is_modified |= ImGui::DragFloat("Step", &parameters.step);
 
         // --- Iterations ---
         // Arbitrary value to avoid resource depletion happening with higher
@@ -299,6 +299,8 @@ namespace procgui
             return false;
         }
 
+        using namespace drawing;
+        
         bool is_modified = interact_with_buffer(buffer,
             [&buffer](auto it)
             {
@@ -314,11 +316,11 @@ namespace procgui
                 // current one.
                 auto selected_interpretation_it = std::find(all_orders.begin(),
                                                             all_orders.end(),
-                                                            get_order_entry(it->successor));
+                                                            it->successor);
                 int index = std::distance(all_orders.begin(), selected_interpretation_it);
                 if(ImGui::ListBox("##order", &index, all_orders_name.data(), all_orders_name.size()))
                 {
-                    buffer.delayed_change_successor(it, all_orders.at(index).order);
+                    buffer.delayed_change_successor(it, all_orders.at(index));
                     return true;
                 }
                 return false;
@@ -352,9 +354,9 @@ namespace procgui
         // 'is_modified' is true if the DrawingParameter is modified. It does
         // not check the LSystem or the InterpretationMap because the
         // LSystemView is already an Observer of these classes.
-        bool is_modified = interact_with(lsys_view.get_parameters(), "Drawing Parameters", false);
-        interact_with(lsys_view.get_lsystem_buffer(), "LSystem", false);
-        interact_with(lsys_view.get_interpretation_buffer(), "Interpretation Map", false);
+        bool is_modified = interact_with(lsys_view.ref_parameters(), "Drawing Parameters", false);
+        interact_with(lsys_view.ref_lsystem_buffer(), "LSystem", false);
+        interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map", false);
 
         conclude(main);
         
