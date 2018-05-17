@@ -1,5 +1,6 @@
 #include "procgui.h"
 #include "LSystemView.h"
+#include "helper_math.h"
 
 namespace procgui
 {
@@ -202,24 +203,33 @@ namespace procgui
             return;
         }
 
+        sf::Transform transform;
+        transform.translate(params_.starting_position)
+                 .rotate(math::rad_to_degree(params_.starting_angle));                 
         // Draw the vertices.
-        target.draw(vertices_.data(), vertices_.size(), sf::LineStrip);
+        target.draw(vertices_.data(), vertices_.size(), sf::LineStrip, transform);
 
         if (is_selected_)
         {
+            auto bounding = transform.transformRect(bounding_box_);
             // Draw the global bounding boxes.
             std::array<sf::Vertex, 5> box =
-                {{ {{ bounding_box_.left, bounding_box_.top}},
-                   {{ bounding_box_.left, bounding_box_.top + bounding_box_.height}},
-                   {{ bounding_box_.left + bounding_box_.width, bounding_box_.top + bounding_box_.height}},
-                   {{ bounding_box_.left + bounding_box_.width, bounding_box_.top}},
-                   {{ bounding_box_.left, bounding_box_.top}}}};
+                {{ {{ bounding.left, bounding.top}},
+                   {{ bounding.left, bounding.top + bounding.height}},
+                   {{ bounding.left + bounding.width, bounding.top + bounding.height}},
+                   {{ bounding.left + bounding.width, bounding.top}},
+                   {{ bounding.left, bounding.top}}}};
             target.draw(box.data(), box.size(), sf::LineStrip);
         }
 
-        // DEBUG
-        // Draw the sub-bounding boxes.
-        // for (const auto& box : sub_boxes_)
+        // // DEBUG
+        // // Draw the sub-bounding boxes.
+        // decltype(sub_boxes_) subs;
+        // for (auto& box : sub_boxes_)
+        // {
+        //     subs.push_back(transform.transformRect(box));
+        // }
+        // for (const auto& box : subs)
         // {
         //     std::array<sf::Vertex, 5> rect =
         //         {{ {{ box.left, box.top}, sf::Color(255,0,0,50)},
@@ -237,7 +247,17 @@ namespace procgui
 
     bool LSystemView::is_inside(const sf::Vector2f& click) const
     {
-        for (const auto& rect : sub_boxes_)
+        sf::Transform transform;
+        transform.translate(params_.starting_position)
+                 .rotate(math::rad_to_degree(params_.starting_angle));                 
+        decltype(sub_boxes_) boxes;
+        for (auto& box : sub_boxes_)
+        {
+            boxes.push_back(transform.transformRect(box));
+        }
+
+        
+        for (const auto& rect : boxes)
         {
             if (rect.contains(sf::Vector2f(click)))
             {

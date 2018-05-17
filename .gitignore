@@ -28,4 +28,5 @@ GRTAGS
 GTAGS
 
 # valgrind
-valgrind*
+*.suppression
+

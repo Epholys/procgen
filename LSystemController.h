@@ -41,6 +41,7 @@ namespace controller
         static const procgui::LSystemView* under_mouse();
 
     private:
+        // Delete the LSystemView with identifier 'id' in 'views'
         static void delete_view(std::list<procgui::LSystemView>& views, int id);
         
         // The LSystemView below the mouse. nullptr if there is

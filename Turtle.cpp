@@ -6,7 +6,7 @@ namespace drawing
 
     Turtle::Turtle(const DrawingParameters& params)
         : parameters { params }
-        , state   { parameters.starting_position, parameters.starting_angle }
+        , state {}
         , vertices      { { state.position } }
     {
     }

@@ -51,7 +51,7 @@ namespace sf
 // Test the go_forward order.
 TEST_F(DrawingTest, go_forward)
 {
-    sf::Vertex begin { parameters.starting_position };
+    sf::Vertex begin ( {0.f, 0.f} );
     float newx = parameters.step * std::cos(turtle.state.angle);
     float newy = parameters.step * std::sin(turtle.state.angle);
     sf::Vector2f end_pos = begin.position + sf::Vector2f (newx, newy);
@@ -68,7 +68,7 @@ TEST_F(DrawingTest, turn_right)
 {
     turn_right_fn(turtle);
     
-    ASSERT_FLOAT_EQ(turtle.state.angle, parameters.starting_angle + parameters.delta_angle);
+    ASSERT_FLOAT_EQ(turtle.state.angle, parameters.delta_angle);
 }
 
 // Test the turn_left order.
@@ -76,7 +76,7 @@ TEST_F(DrawingTest, turn_left)
 {
     turn_left_fn(turtle);
     
-    ASSERT_FLOAT_EQ(turtle.state.angle, parameters.starting_angle - parameters.delta_angle);
+    ASSERT_FLOAT_EQ(turtle.state.angle, -parameters.delta_angle);
 }
 
 // Test the save_position and load_position order.

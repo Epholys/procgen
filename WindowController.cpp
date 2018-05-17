@@ -55,7 +55,6 @@ namespace controller
         sf::Vector2f middle = {box.left + box.width/2, box.top + box.height/2};
         middle = pasted_view.get_parameters().starting_position - middle;
         pasted_view.ref_parameters().starting_position = position + middle;
-        pasted_view.compute_vertices();
         lsys_views.emplace_front(pasted_view);
     }
     

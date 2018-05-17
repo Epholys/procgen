@@ -5,8 +5,8 @@
             "cereal_class_version": 0,
             "axiom": "X",
             "production_rules": {
-                "X": "F[-X]+X",
-                "F": "FF"
+                "F": "FF",
+                "X": "F[-X]+X"
             }
         },
         "DrawingParameters": {
@@ -18,11 +18,11 @@
         },
         "Interpretation Map": {
             "cereal_class_version": 0,
-            "]": "Load position",
-            "-": "Turn right",
-            "+": "Turn left",
+            "F": "Go forward",
             "[": "Save Position",
-            "F": "Go forward"
+            "+": "Turn left",
+            "]": "Load position",
+            "-": "Turn right"
         }
     }
 }

@@ -127,7 +127,6 @@ namespace controller
         {
             auto& parameters = under_mouse_->ref_parameters();
             parameters.starting_position -= delta;
-            under_mouse_->compute_vertices();
         }
     }
 
