@@ -4,7 +4,10 @@
 
 #include <chrono>
 #include <optional>
+#include <list>
+
 #include "SFML/Graphics.hpp"
+
 #include "LSystemView.h"
 
 namespace controller
@@ -24,7 +27,7 @@ namespace controller
         static bool has_priority();
 
         // Handle 'event' for the 'views'.
-        static void handle_input(std::vector<procgui::LSystemView>& views, const sf::Event& event);
+        static void handle_input(std::list<procgui::LSystemView>& views, const sf::Event& event);
 
         // Handle the dragging behaviour.
         static void handle_delta(sf::Vector2f delta);

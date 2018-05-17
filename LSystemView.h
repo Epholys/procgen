@@ -61,6 +61,7 @@ namespace procgui
         const drawing::DrawingParameters& get_parameters() const;
         const LSystemBuffer& get_lsystem_buffer() const;
         const InterpretationMapBuffer& get_interpretation_buffer() const;
+        int get_id() const;
         
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();
@@ -81,6 +82,11 @@ namespace procgui
     private:
         // Used in assignment and move operator.
         void swap(LSystemView& other);
+
+        // Unique identifier for each instance (with a growing id_count_).
+        // Used in the GUI
+        static int id_count_;
+        int id_;
 
         // The window's name.
         std::string name_;

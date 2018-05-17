@@ -4,6 +4,8 @@
 namespace procgui
 {
     using namespace drawing;
+
+    int LSystemView::id_count_ = 0;
     
     LSystemView::LSystemView(const std::string& name,
                              std::shared_ptr<LSystem> lsys,
@@ -11,6 +13,7 @@ namespace procgui
                              drawing::DrawingParameters params)
         : Observer<LSystem> {lsys}
         , Observer<InterpretationMap> {map}
+        , id_{id_count_++}
         , name_ {name}
         , lsys_buff_ {lsys}
         , interpretation_buff_ {map}
@@ -40,6 +43,7 @@ namespace procgui
     LSystemView::LSystemView(const LSystemView& other)
         : Observer<LSystem> {other.Observer<LSystem>::get_target()}
         , Observer<InterpretationMap> {other.Observer<InterpretationMap>::get_target()}
+        , id_ {id_count_++}
         , name_ {other.name_}
         , lsys_buff_ {other.lsys_buff_}
         , interpretation_buff_ {other.interpretation_buff_}
@@ -57,6 +61,7 @@ namespace procgui
     LSystemView::LSystemView(LSystemView&& other)
         : Observer<LSystem> {other.Observer<LSystem>::get_target()}
         , Observer<InterpretationMap> {other.Observer<InterpretationMap>::get_target()}
+        , id_ {other.id_}
         , name_ {other.name_}
         , lsys_buff_ {std::move(other.lsys_buff_)}
         , interpretation_buff_ {std::move(other.interpretation_buff_)}
@@ -102,6 +107,7 @@ namespace procgui
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
         other.Observer<InterpretationMap>::add_callback([&other](){other.compute_vertices();});
 
+        swap(id_, other.id_);
         swap(name_, other.name_);
         swap(lsys_buff_, other.lsys_buff_);
         swap(interpretation_buff_, other.interpretation_buff_);
@@ -162,6 +168,11 @@ namespace procgui
     {
         return interpretation_buff_;
     }
+    int LSystemView::get_id() const
+    {
+        return id_;
+    }
+
 
     
     void LSystemView::compute_vertices()

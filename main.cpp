@@ -55,8 +55,8 @@ int main()
     LSystemView plant_view ("Plant", plant, map, plant_param);
     LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
     
-    std::vector<LSystemView> views;
-    // views.push_back(std::move(plant_view));
+    std::list<LSystemView> views;
+    views.push_back(std::move(plant_view));
     views.push_back(std::move(serpinski_view));
     
     sf::Clock delta_clock;

@@ -30,7 +30,7 @@ namespace controller
     }
 
     
-    void LSystemController::handle_input(std::vector<procgui::LSystemView>& views, const sf::Event& event)
+    void LSystemController::handle_input(std::list<procgui::LSystemView>& views, const sf::Event& event)
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
 

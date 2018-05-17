@@ -2,7 +2,7 @@
 #define WINDOW_CONTROLLER_H
 
 
-#include <vector>
+#include <list>
 #include <experimental/filesystem>
 
 #include <SFML/Graphics.hpp>
@@ -26,7 +26,7 @@ namespace controller
 
         // Hub of all the input of the application, manages locally the 'sf::View'
         // of the 'window'.
-        static void handle_input(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views);
+        static void handle_input(sf::RenderWindow& window, std::list<procgui::LSystemView>& lsys_views);
 
         // The 'sf::Mouse::getPosition()' give the absolute position in a
         // window. This method get the mouse position with the application
@@ -42,13 +42,13 @@ namespace controller
     private:
         // Helper method to paste 'view' at 'position' and add it to
         // 'lsys_views'. 
-        static void paste_view(std::vector<procgui::LSystemView>& lsys_views,
+        static void paste_view(std::list<procgui::LSystemView>& lsys_views,
                                const std::optional<procgui::LSystemView>& view,
                                const sf::Vector2f& position);
 
         // The right-click menu managing everything between
         // creation/copy-pasting of LSystemViews, saving and loading.
-        static void right_click_menu(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_view);
+        static void right_click_menu(sf::RenderWindow& window, std::list<procgui::LSystemView>& lsys_view);
 
         // Display and interact with the save menu window.
         // Managed the window, opening and saving into a file.
@@ -59,7 +59,7 @@ namespace controller
 
         // Display and interact with the load menu window. Load from files the
         // LSystems into 'lsys_views'.
-        static void load_menu(std::vector<procgui::LSystemView>& lsys_views);
+        static void load_menu(std::list<procgui::LSystemView>& lsys_views);
 
         // When ordering the load menu to open, save the current mouse position
         // to load the LSystemView at this position instead of the center.
