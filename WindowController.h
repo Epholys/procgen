@@ -30,8 +30,7 @@ namespace controller
         // coordinates relative to the drawing of the application.
         static sf::Vector2f real_mouse_position(sf::Vector2i mouse_click);
 
-        static void paste_view(sf::RenderWindow& window,
-                               std::vector<procgui::LSystemView>& lsys_views,
+        static void paste_view(std::vector<procgui::LSystemView>& lsys_views,
                                const std::optional<procgui::LSystemView>& view,
                                const sf::Vector2f& position);
 
@@ -42,7 +41,7 @@ namespace controller
         static void right_click_menu(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_view);
         static void save_menu();
         static bool load_menu_open_;
-        static void load_menu(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views);
+        static void load_menu(std::vector<procgui::LSystemView>& lsys_views);
         static sf::Vector2f mouse_position_to_load_;
         
         // The view modified by the user and given to the window.

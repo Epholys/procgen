@@ -39,8 +39,7 @@ namespace controller
         return position;
     }
 
-    void WindowController::paste_view(sf::RenderWindow& window,
-                                      std::vector<procgui::LSystemView>& lsys_views,
+    void WindowController::paste_view(std::vector<procgui::LSystemView>& lsys_views,
                                       const std::optional<procgui::LSystemView>& view,
                                       const sf::Vector2f& position)
     {
@@ -77,7 +76,7 @@ namespace controller
             ImGui::Separator();
             if (LSystemController::saved_view() && ImGui::MenuItem("Paste", "Ctrl+V"))
             {
-                paste_view(window, lsys_views, LSystemController::saved_view(), real_mouse_position(sf::Mouse::getPosition(window)));
+                paste_view(lsys_views, LSystemController::saved_view(), real_mouse_position(sf::Mouse::getPosition(window)));
             }
             ImGui::EndPopup();
         }
@@ -85,14 +84,12 @@ namespace controller
 
     void WindowController::save_menu()
     {
-        ImGui::PushStyleColor(ImGuiCol_ModalWindowDarkening, {});
         static std::array<char, 64> filename;
         static bool dir_error_popup = false;
         static bool file_error_popup = false;
 
-        const std::string popup_name = "Save LSystem to file";
-        ImGui::OpenPopup(popup_name.c_str());
-        if (ImGui::BeginPopupModal(popup_name.c_str(), &save_menu_open_, ImGuiWindowFlags_AlwaysAutoResize))
+        ImGui::SetNextWindowPosCenter();
+        if (ImGui::Begin("Save LSystem to file", &save_menu_open_, ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
         {
             ImGui::Separator();
             fs::path save_dir = fs::u8path(u8"saves");
@@ -124,7 +121,6 @@ namespace controller
                 if (!dir_error_popup)
                 {
                     save_menu_open_ = false;
-                    ImGui::CloseCurrentPopup();
                 }
             }
 
@@ -171,24 +167,20 @@ namespace controller
             if (ImGui::Button("Cancel"))
             {
                 save_menu_open_ = false;
-                ImGui::CloseCurrentPopup();
             }
             
-            ImGui::EndPopup();
+            ImGui::End();
         }
-        ImGui::PopStyleColor();
     }
 
-    void WindowController::load_menu(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views)
+    void WindowController::load_menu(std::vector<procgui::LSystemView>& lsys_views)
     {
-        ImGui::PushStyleColor(ImGuiCol_ModalWindowDarkening, {});
         static std::array<char, 64> filename;
         static bool dir_error_popup = false;
         static bool file_error_popup = false;
 
-        const std::string popup_name = "Load LSystem from file";
-        ImGui::OpenPopup(popup_name.c_str());
-        if (ImGui::BeginPopupModal(popup_name.c_str(), &load_menu_open_, ImGuiWindowFlags_AlwaysAutoResize))
+        ImGui::SetNextWindowPosCenter();
+        if (ImGui::Begin("Load LSystem from file", &load_menu_open_, ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
         {
             ImGui::Separator();
             fs::path save_dir = fs::u8path(u8"saves");
@@ -220,7 +212,6 @@ namespace controller
                 if (!dir_error_popup)
                 {
                     load_menu_open_ = false;
-                    ImGui::CloseCurrentPopup();
                 }
             }
 
@@ -253,7 +244,7 @@ namespace controller
                     if (!file_error_popup)
                     {
                         auto tmp = std::make_optional(loaded_view);
-                        paste_view(window, lsys_views, tmp, mouse_position_to_load_);
+                        paste_view(lsys_views, tmp, mouse_position_to_load_);
                         load_menu_open_ = false;
                         ImGui::CloseCurrentPopup();
                     }
@@ -275,12 +266,10 @@ namespace controller
             if (ImGui::Button("Cancel"))
             {
                 load_menu_open_ = false;
-                ImGui::CloseCurrentPopup();
             }
             
-            ImGui::EndPopup();
+            ImGui::End();
         }
-        ImGui::PopStyleColor();
     }
     
     void WindowController::handle_input(sf::RenderWindow &window, std::vector<procgui::LSystemView>& lsys_views)
@@ -310,8 +299,7 @@ namespace controller
             {
                 if (event.key.code == sf::Keyboard::V)
                 {
-                    paste_view(window,
-                               lsys_views,
+                    paste_view(lsys_views,
                                LSystemController::saved_view(),
                                real_mouse_position(sf::Mouse::getPosition(window)));
                 }
@@ -382,7 +370,7 @@ namespace controller
         }
         if (load_menu_open_)
         {
-            load_menu(window, lsys_views);
+            load_menu(lsys_views);
         }
         
         // The right-click menu depends on the location of the mouse.
