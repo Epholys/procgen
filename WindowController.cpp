@@ -1,6 +1,5 @@
 #include <fstream>
 #include <memory>
-#include <experimental/filesystem>
 
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
@@ -28,6 +27,7 @@ namespace controller
     bool WindowController::save_menu_open_ {false};
     bool WindowController::load_menu_open_ {false};
 
+    fs::path WindowController::save_dir_ = fs::u8path(u8"saves");
     
     sf::Vector2f WindowController::real_mouse_position(sf::Vector2i mouse_click)
     {
@@ -57,7 +57,6 @@ namespace controller
         pasted_view.ref_parameters().starting_position = position + middle;
         pasted_view.compute_vertices();
         lsys_views.emplace_back(pasted_view);
-
     }
     
     void WindowController::right_click_menu(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views)
@@ -84,28 +83,39 @@ namespace controller
 
     void WindowController::save_menu()
     {
-        static std::array<char, 64> filename;
+        // The file name in which will be save the LSystem.
+        static std::array<char, FILENAME_LENGTH_> filename;
+        // Flag to let the directory error popup open between frames.
         static bool dir_error_popup = false;
+        // Flag to let the file error popup open between frames.
         static bool file_error_popup = false;
 
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Save LSystem to file", &save_menu_open_, ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
         {
+            // Avoid interaction with the background when saving a file.
+            ImGui::CaptureKeyboardFromApp();
+            ImGui::CaptureMouseFromApp();
+
             ImGui::Separator();
-            fs::path save_dir = fs::u8path(u8"saves");
             try
             {
-                for (const auto& file : fs::directory_iterator(save_dir))
-                {
-                    if (fs::is_regular_file(file.path()) &&
+                // For each file of the 'save_dir_' directory...
+                for (const auto& file : fs::directory_iterator(save_dir_))
+                { 
+                    // ... displays it in a selectable list ...
+                   if (fs::is_regular_file(file.path()) &&
                         ImGui::Selectable(file.path().filename().c_str()))
                     {
+                        // ... and set 'filename' to it when clicked (to overwrite this file).
                         filename = string_to_array<filename.size()>(file.path().filename());
                     }
                 }
             }
             catch (const fs::filesystem_error& e)
             {
+                // If we can't open 'save_dir_', open an error popup.
+
                 dir_error_popup = true;
             }
 
@@ -114,44 +124,51 @@ namespace controller
                 ImGui::OpenPopup("Error");
                 if (ImGui::BeginPopupModal("Error", &dir_error_popup))
                 {
-                    std::string error_message = "Error: can't open directory: "+save_dir.filename().string();
+                    std::string error_message = "Error: can't open directory: "+save_dir_.filename().string();
                     ImGui::Text(error_message.c_str());
                     ImGui::EndPopup();
                 }
                 if (!dir_error_popup)
                 {
+                    // Close the save menu when closing the error popup: if we
+                    // can not open the directory, we can not save anything.
                     save_menu_open_ = false;
                 }
             }
 
             ImGui::Separator();
 
-            ImGui::CaptureKeyboardFromApp();
+            // InputText for the file's name.
             ImGui::InputText("Filename", filename.data(), filename.size());
             std::string trimmed_filename = array_to_string(filename);
             trim(trimmed_filename);
             
             ImGui::Separator();
 
+            // Save button (with a simple check for a empty filename)
             if (ImGui::Button("Save") && !trimmed_filename.empty())
             {
-                std::ofstream ofs (save_dir/trimmed_filename);
+                // Open the output file.
+                std::ofstream ofs (save_dir_/trimmed_filename);
 
+                // Open the error popup if we can not open the file.
                 if(!ofs.is_open())
                 {
                     file_error_popup = true;
                 }
                 else
                 {
+                    // Save the LSystemView in the file.
                     cereal::JSONOutputArchive archive (ofs);
-                    if (LSystemController::under_mouse())
+                    if (LSystemController::under_mouse()) // Virtually useless check.
                     {
                         archive(*LSystemController::under_mouse());
                     }
-                        save_menu_open_ = false;
+                    save_menu_open_ = false;
                 }
             }
 
+            // File error popup if we can not open the output file.
             if (file_error_popup)
             {
                 ImGui::OpenPopup("Error");
@@ -163,6 +180,7 @@ namespace controller
                 }
             }
 
+            // Fast close the save menu
             ImGui::SameLine();
             if (ImGui::Button("Cancel"))
             {
@@ -175,28 +193,39 @@ namespace controller
 
     void WindowController::load_menu(std::vector<procgui::LSystemView>& lsys_views)
     {
-        static std::array<char, 64> filename;
+        // The file name in which will be save the LSystem.
+        static std::array<char, FILENAME_LENGTH_> filename;
+        // Flag to let the directory error popup open between frames.
         static bool dir_error_popup = false;
+        // Flag to let the file error popup open between frames.
         static bool file_error_popup = false;
 
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Load LSystem from file", &load_menu_open_, ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
         {
+            // Avoid interaction with the background when saving a file.
+            ImGui::CaptureKeyboardFromApp();
+            ImGui::CaptureMouseFromApp();
+
             ImGui::Separator();
-            fs::path save_dir = fs::u8path(u8"saves");
             try
             {
-                for (const auto& file : fs::directory_iterator(save_dir))
+                // For each file of the 'save_dir_' directory...
+                for (const auto& file : fs::directory_iterator(save_dir_))
                 {
+                    // ... displays it in a selectable list ...
                     if (fs::is_regular_file(file.path()) &&
                         ImGui::Selectable(file.path().filename().c_str()))
                     {
+                        // ... and set 'filename' to it when clicked (to
+                        // load this file).
                         filename = string_to_array<filename.size()>(file.path().filename());
                     }
                 }
             }
             catch (const fs::filesystem_error& e)
             {
+                // If we can't open 'save_dir_', open an error popup.
                 dir_error_popup = true;
             }
 
@@ -211,46 +240,57 @@ namespace controller
                 }
                 if (!dir_error_popup)
                 {
+                    // Close the load menu when closing the error popup: if we
+                    // can not open the directory, we can not load anything.
                     load_menu_open_ = false;
                 }
             }
 
             ImGui::Separator();
 
+            // Simple informative text
             std::string tmp = "File to load: '"+array_to_string(filename)+"'";
             ImGui::Text(tmp.c_str());
             ImGui::SameLine();
 
             if (ImGui::Button("Load"))
             {
-                std::ifstream ifs (save_dir/array_to_string(filename));
+                // Open the input file.
+                std::ifstream ifs (save_dir_/array_to_string(filename));
 
+                // Open the error popup if we can not open the file.
                 if(!ifs.is_open())
                 {
                     file_error_popup = true;
                 }
                 else
                 {
+                    // Create a default LSystemView.
                     procgui::LSystemView loaded_view({0,0});
                     try
                     {
+                        // Load it from the file.
                         cereal::JSONInputArchive archive (ifs);
                         archive(loaded_view);
                     }
                     catch (const cereal::RapidJSONException& e)
                     {
+                        // If the file is not in the correct format, open the
+                        // error popup. 
                         file_error_popup = true;
                     }
                     if (!file_error_popup)
                     {
+                        // Paste the new LSystemView at the correct position.
                         auto tmp = std::make_optional(loaded_view);
                         paste_view(lsys_views, tmp, mouse_position_to_load_);
                         load_menu_open_ = false;
-                        ImGui::CloseCurrentPopup();
                     }
                 }
             }
 
+            // File error popup if we can not open the file or if it is in the
+            // wrong format.
             if (file_error_popup)
             {
                 ImGui::OpenPopup("Error");
