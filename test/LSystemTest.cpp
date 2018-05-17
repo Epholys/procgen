@@ -109,3 +109,8 @@ TEST(LSystemTest, wild_derivation)
     ASSERT_EQ(lsys.produce(5), iter_5);
 }
 
+TEST(LSystemTest, serialization)
+{
+    LSystem lsys;
+    
+}

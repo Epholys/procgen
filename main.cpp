@@ -7,12 +7,14 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
 #include "cereal/archives/json.hpp"
+#include "cereal/types/vector.hpp"
 
 #include "LSystem.h"
 #include "RuleMapBuffer.h"
 #include "InterpretationMapBuffer.h"
 #include "Turtle.h"
 #include "helper_math.h"
+#include "helper_serialization.h"
 #include "procgui.h"
 #include "WindowController.h"
 
@@ -58,6 +60,12 @@ int main()
     std::list<LSystemView> views;
     views.push_back(std::move(plant_view));
     views.push_back(std::move(serpinski_view));
+
+    sf::Vector2f v { 10.f, 10.f };
+    {
+        cereal::JSONOutputArchive ar (std::cout);
+        ar(v);
+    }
     
     sf::Clock delta_clock;
     while (window.isOpen())
