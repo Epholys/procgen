@@ -234,7 +234,7 @@ namespace controller
                 ImGui::OpenPopup("Error");
                 if (ImGui::BeginPopupModal("Error", &dir_error_popup))
                 {
-                    std::string error_message = "Error: can't open directory: "+save_dir.filename().string();
+                    std::string error_message = "Error: can't open directory: "+save_dir_.filename().string();
                     ImGui::Text(error_message.c_str());
                     ImGui::EndPopup();
                 }
