@@ -418,7 +418,7 @@ namespace controller
         // care of that.
         if (LSystemController::has_priority())
         {
-            LSystemController::right_click_menu();
+            LSystemController::right_click_menu(lsys_views);
         }
         else
         {

@@ -34,13 +34,15 @@ namespace controller
 
         // Interact with a menu when right-clicking on a LSystemView (cloning,
         // duplicating, ...) 
-        static void right_click_menu();
+        static void right_click_menu(std::list<procgui::LSystemView>& views);
 
         // Getters
         static const std::optional<procgui::LSystemView>& saved_view();
         static const procgui::LSystemView* under_mouse();
 
     private:
+        static void delete_view(std::list<procgui::LSystemView>& views, int id);
+        
         // The LSystemView below the mouse. nullptr if there is
         // nothing. Non-owning pointer.
         static procgui::LSystemView* under_mouse_;

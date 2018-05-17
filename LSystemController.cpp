@@ -92,6 +92,15 @@ namespace controller
 
         else if (!imgui_io.WantCaptureKeyboard &&
                  event.type == sf::Event::KeyPressed &&
+                 event.key.code == sf::Keyboard::Delete &&
+                 under_mouse_ &&
+                 under_mouse_->is_selected())
+        {
+            delete_view(views, under_mouse_->get_id());
+        }
+
+        else if (!imgui_io.WantCaptureKeyboard &&
+                 event.type == sf::Event::KeyPressed &&
                  (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
                   sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)) &&
                  under_mouse_ != nullptr &&
@@ -122,18 +131,31 @@ namespace controller
         }
     }
 
-    void LSystemController::right_click_menu()
+    void LSystemController::delete_view(std::list<procgui::LSystemView>& views, int id)
+    {
+        auto to_delete = std::find_if(begin(views), end(views),
+                                      [id](const auto& v){return v.get_id() == id;});
+        Expects(to_delete != end(views));
+        views.erase(to_delete);
+    }
+
+
+    void LSystemController::right_click_menu(std::list<procgui::LSystemView>& views)
     {
         if (ImGui::BeginPopupContextVoid())
         {
             // Cloning is deep-copying the LSystem.
-            if (ImGui::MenuItem("Clone", "Ctrl+C"))
+            if (ImGui::MenuItem("Clone", "Ctrl+C") && under_mouse_)
             {
                 saved_view_ = under_mouse_->clone();
             }
-            if (ImGui::MenuItem("Duplicate", "Ctrl+X"))
+            if (ImGui::MenuItem("Duplicate", "Ctrl+X") && under_mouse_)
             {
                 saved_view_ = under_mouse_->duplicate();
+            }
+            if (ImGui::MenuItem("Delete", "Del") && under_mouse_)
+            {
+                delete_view(views, under_mouse_->get_id());
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Save", "Ctrl+S"))
