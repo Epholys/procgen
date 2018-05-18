@@ -10,7 +10,6 @@
 #include "cereal/cereal.hpp"
 
 #include "helper_math.h"
-#include "helper_serialization.h"
 
 // Main explanation of drawing in Turtle.h
 namespace drawing
@@ -46,9 +45,8 @@ namespace drawing
         template <class Archive>
         void save (Archive& ar, const std::uint32_t) const
             {
-                ar(// CEREAL_NVP(starting_position),
-                   CEREAL_NVP(starting_angle),
-                   cereal::make_nvp("delta_angle", std::round(math::rad_to_degree(delta_angle))),
+                ar(CEREAL_NVP(starting_angle),
+                   cereal::make_nvp("delta_angle", math::rad_to_degree(delta_angle)),
                    CEREAL_NVP(step),
                    CEREAL_NVP(n_iter));
             }
@@ -56,8 +54,7 @@ namespace drawing
         template <class Archive>
         void load (Archive& ar, const std::uint32_t)
             {
-                ar(// starting_position, 
-                   starting_angle, delta_angle, step, n_iter);
+                ar(starting_angle, delta_angle, step, n_iter);
                 delta_angle = math::degree_to_rad(delta_angle);
             }
 

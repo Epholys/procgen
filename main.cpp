@@ -14,7 +14,6 @@
 #include "InterpretationMapBuffer.h"
 #include "Turtle.h"
 #include "helper_math.h"
-#include "helper_serialization.h"
 #include "procgui.h"
 #include "WindowController.h"
 
@@ -61,12 +60,6 @@ int main()
     views.push_back(std::move(plant_view));
     views.push_back(std::move(serpinski_view));
 
-    sf::Vector2f v { 10.f, 10.f };
-    {
-        cereal::JSONOutputArchive ar (std::cout);
-        ar(v);
-    }
-    
     sf::Clock delta_clock;
     while (window.isOpen())
     {

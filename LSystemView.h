@@ -123,7 +123,8 @@ namespace procgui
         template<class Archive>
         void save (Archive& ar, const std::uint32_t) const
             {
-                ar(cereal::make_nvp("LSystem", *Observer<LSystem>::get_target()),
+                ar(cereal::make_nvp("name", name_),
+                   cereal::make_nvp("LSystem", *Observer<LSystem>::get_target()),
                    cereal::make_nvp("DrawingParameters", params_),
                    cereal::make_nvp("Interpretation Map", *Observer<drawing::InterpretationMap>::get_target()));
             }
@@ -131,13 +132,15 @@ namespace procgui
         template<class Archive>
         void load (Archive& ar, const std::uint32_t)
             {
+                std::string name;
                 LSystem lsys;
                 drawing::DrawingParameters params;
                 drawing::InterpretationMap map;
-                ar(cereal::make_nvp("LSystem", lsys),
-                   cereal::make_nvp("DrawingParameters", params),
-                   cereal::make_nvp("Interpretation Map", map));
-                *this = LSystemView("",
+                ar(name,
+                    cereal::make_nvp("LSystem", lsys),
+                    cereal::make_nvp("DrawingParameters", params),
+                    cereal::make_nvp("Interpretation Map", map));
+                *this = LSystemView(name,
                           std::make_shared<LSystem>(lsys),
                           std::make_shared<drawing::InterpretationMap>(map),
                           params);

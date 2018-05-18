@@ -1,5 +1,6 @@
+#include <sstream>
 #include <gtest/gtest.h>
-
+#include "cereal/archives/json.hpp"
 #include "LSystem.h"
 
 
@@ -111,6 +112,19 @@ TEST(LSystemTest, wild_derivation)
 
 TEST(LSystemTest, serialization)
 {
-    LSystem lsys;
-    
+    LSystem olsys ("FG", { {'F', "F+G"}, {'G', "G-F" } });
+    LSystem ilsys;
+
+    std::stringstream ss;
+    {
+        cereal::JSONOutputArchive oarchive (ss);
+        oarchive(olsys);
+    }
+    {
+        cereal::JSONInputArchive iarchive (ss);
+        iarchive(ilsys);
+    }
+
+    ASSERT_EQ(olsys.get_axiom(), ilsys.get_axiom());
+    ASSERT_EQ(olsys.get_rules(), ilsys.get_rules());
 }

@@ -1,7 +1,9 @@
 #include <cmath>
+#include <sstream>
 
 #include <gtest/gtest.h>
 #include <SFML/Graphics.hpp>
+#include "cereal/archives/json.hpp"
 
 #include "LSystem.h"
 #include "Turtle.h"
@@ -115,4 +117,21 @@ TEST_F(DrawingTest, compute_paths)
     auto res = compute_vertices(lsys, interpretation, parameters);
 
     ASSERT_EQ(res, norm);
+}
+
+TEST_F(DrawingTest, serialization)
+{
+    InterpretationMap imap;
+        
+    std::stringstream ss;
+    {
+        cereal::JSONOutputArchive oarchive (ss);
+        oarchive(interpretation);
+    }
+    {
+        cereal::JSONInputArchive iarchive (ss);
+        iarchive(imap);
+    }
+
+    ASSERT_EQ(interpretation.get_rules(), imap.get_rules());
 }

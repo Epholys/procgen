@@ -155,7 +155,12 @@ namespace procgui
     }
     sf::FloatRect LSystemView::get_bounding_box() const
     {
-        return bounding_box_;
+        auto box = bounding_box_;
+        sf::Transform transform;
+        transform.translate(params_.starting_position)
+                 .rotate(math::rad_to_degree(params_.starting_angle));                 
+        box = transform.transformRect(bounding_box_);
+        return box;
     }
     const drawing::DrawingParameters& LSystemView::get_parameters() const
     {

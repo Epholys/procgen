@@ -14,13 +14,11 @@ TEST(DrawingParametersTest, serialization)
         cereal::JSONOutputArchive oarchive (ss);
         oarchive(oparams);
     }
-    std::cout << ss.str();
     {
         cereal::JSONInputArchive iarchive (ss);
         iarchive(iparams);
     }
 
-    ASSERT_EQ (oparams.starting_position, iparams.starting_position);
     ASSERT_FLOAT_EQ(oparams.starting_angle, iparams.starting_angle);
     ASSERT_FLOAT_EQ(oparams.delta_angle, iparams.delta_angle);
     ASSERT_FLOAT_EQ(oparams.step, iparams.step);

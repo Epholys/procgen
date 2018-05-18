@@ -1,6 +1,7 @@
 {
-    "value0": {
+    "LSystemView": {
         "cereal_class_version": 0,
+	"name": "fern",
         "LSystem": {
             "cereal_class_version": 0,
             "axiom": "X",
