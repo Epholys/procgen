@@ -1,6 +1,6 @@
 template<typename Buffer>
 bool interact_with_buffer(Buffer& buffer,
-                          std::function<bool(typename Buffer::const_iterator)>  predecessor_fn)
+                          std::function<bool(typename Buffer::const_iterator)>  successor_fn)
 {
     //  --- Rules ---
     // [ predecessor ] -> [ successor ] [-] (remove rule) | [+] (add rule)
@@ -34,7 +34,8 @@ bool interact_with_buffer(Buffer& buffer,
 
         ImGui::PushItemWidth(200);
 
-        is_modified |= predecessor_fn(it);
+        // Successor function
+        is_modified |= successor_fn(it);
         
         // The [-] button. If clicked, the current iterator is saved as the
         // one to delete. We reasonably assume a user can not click on two

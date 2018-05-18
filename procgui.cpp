@@ -29,6 +29,7 @@ namespace
     {
         auto& id = procgui::call_id;
         ++id;
+        
         // If we're the main class, open window 'name'.
         if (main)
         {
@@ -47,7 +48,12 @@ namespace
         // Otherwise, set up a TreeNode.
         else
         {
-            return ImGui::CollapsingHeader(name.c_str());
+            if(ImGui::CollapsingHeader(name.c_str()))
+            {
+                ImGui::PushID(id);
+                return true;
+            }
+            return false;
         }
     }
     
@@ -55,12 +61,13 @@ namespace
     // Otherwise, close the current TreeNode.
     void conclude(bool main)
     {
+        ImGui::PopID();
+
         // If we're the main class, stop appending to the current
         // window.
         if (main)
         {
             ImGui::Separator();
-            ImGui::PopID();
             ImGui::End();
         }
     }
