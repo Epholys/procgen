@@ -32,11 +32,22 @@ namespace drawing
         SAVE_POSITION,
         LOAD_POSITION,
     };
-
+    
+    void go_forward_fn(impl::Turtle& turtle);
+    // "Turn right" means "turn clockwise" AS SEEN ON THE SCREEN.
+    void turn_right_fn(impl::Turtle& turtle);
+    void turn_left_fn(impl::Turtle& turtle);
+    void save_position_fn(impl::Turtle& turtle);
+    void load_position_fn(impl::Turtle& turtle);
+    
     // An 'Order' is the association of an 'order_fn', an identifier to allow
     // equality comparison between orders (as 'std::function<>' does not have
     // it) and a name used in the GUI and the serialization.
     struct Order {
+        Order() : Order(OrderID::GO_FORWARD,go_forward_fn, "Go forward") {}
+        Order(OrderID id, const order_fn& fn, const std::string& name)
+            : id{id}, order{fn}, name{name} {}
+        
         OrderID id;
         order_fn order;
         std::string name;
@@ -46,13 +57,6 @@ namespace drawing
     {
         return lhs.id == rhs.id;
     }
-    
-    void go_forward_fn(impl::Turtle& turtle);
-    // "Turn right" means "turn clockwise" AS SEEN ON THE SCREEN.
-    void turn_right_fn(impl::Turtle& turtle);
-    void turn_left_fn(impl::Turtle& turtle);
-    void save_position_fn(impl::Turtle& turtle);
-    void load_position_fn(impl::Turtle& turtle);
     
     const Order go_forward    { OrderID::GO_FORWARD,    go_forward_fn, "Go forward" };
     const Order turn_right    { OrderID::TURN_RIGHT,    turn_right_fn, "Turn right" };
