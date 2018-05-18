@@ -45,8 +45,8 @@ namespace drawing
 
             // The current position and angle of the turtle.
             struct State {
-                sf::Vector2f position { 0, 0 };
-                float angle { 0 };
+                sf::Vector2<double> position { 0, 0 };
+                double angle { 0 };
             };
             State state { };
 

@@ -34,8 +34,8 @@
      - Use `sqrt` instead of `cos` and `sin` for angles to calculate vertex's position
 
    - Bugs
-     - Correct floating point errors when using big number of iterations (using double)
      - Correct zoom level and drag behaviour when resizing window (in Gnome)
+     - *Maybe* using arbitrary floating point precision (even with doubles some geometric LSystems are not so geometric anymore)
 
    - Cleanup
      - Make 'DrawingParameters' an Observable

@@ -7,7 +7,7 @@ namespace drawing
     Turtle::Turtle(const DrawingParameters& params)
         : parameters { params }
         , state {}
-        , vertices      { { state.position } }
+        , vertices      { { sf::Vector2f(state.position) } }
     {
     }
 
