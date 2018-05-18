@@ -45,8 +45,8 @@ namespace drawing
         template <class Archive>
         void save (Archive& ar, const std::uint32_t) const
             {
-                ar(CEREAL_NVP(starting_angle),
-                   cereal::make_nvp("delta_angle", math::rad_to_degree(delta_angle)),
+                ar(cereal::make_nvp("starting_angle", std::round(math::rad_to_degree(starting_angle)*1000)/1000),
+                   cereal::make_nvp("delta_angle", std::round(math::rad_to_degree(delta_angle)*1000)/1000),
                    CEREAL_NVP(step),
                    CEREAL_NVP(n_iter));
             }
@@ -55,7 +55,9 @@ namespace drawing
         void load (Archive& ar, const std::uint32_t)
             {
                 ar(starting_angle, delta_angle, step, n_iter);
+                starting_angle = math::degree_to_rad(starting_angle);
                 delta_angle = math::degree_to_rad(delta_angle);
+                
             }
 
     };

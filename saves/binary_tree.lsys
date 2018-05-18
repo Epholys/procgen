@@ -1,29 +1,29 @@
 {
     "LSystemView": {
         "cereal_class_version": 0,
-	"name": "binary_tree",
+        "name": "binary_tree",
         "LSystem": {
             "cereal_class_version": 0,
             "axiom": "X",
             "production_rules": {
-                "F": "FF",
-                "X": "F[-X]+X"
+                "X": "F[-X]+X",
+                "F": "FF"
             }
         },
         "DrawingParameters": {
             "cereal_class_version": 0,
-            "starting_angle": 4.886917591094971,
+            "starting_angle": 280.0,
             "delta_angle": 30.0,
             "step": 20.0,
             "n_iter": 5
         },
         "Interpretation Map": {
             "cereal_class_version": 0,
-            "F": "Go forward",
-            "[": "Save Position",
-            "+": "Turn left",
             "]": "Load position",
-            "-": "Turn right"
+            "-": "Turn right",
+            "+": "Turn left",
+            "[": "Save Position",
+            "F": "Go forward"
         }
     }
 }
