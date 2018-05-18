@@ -11,14 +11,13 @@
    - (Simple) Turtle interpretation
    - Static GUI to display parameters
    - Dynamic GUIs to interact with the parameters
+   - Basic and necessary user interactions (mouse dragging, adding, removing, copy-pasting)
+   - Saving and loading LSystems to and from files
 
 ** Main Roadmap
-   1. Save and load L-system models
    2. Add a more complex GUI and polish it
       * Slider speed
       * Color-coded LSystems windows
-      * Unique permanent ID to LSystemView to avoid window redefinition
-      * Using `SetNextWindow*()` to a more pretty default
    3. Add genetic algorithm or constraint-based algorithm for new LSystem generation
    4. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
 

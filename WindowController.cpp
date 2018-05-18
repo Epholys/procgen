@@ -1,5 +1,4 @@
 #include <fstream>
-#include <memory>
 
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
@@ -317,16 +316,14 @@ namespace controller
         }
     }
     
-    void WindowController::handle_input(sf::RenderWindow &window, std::list<procgui::LSystemView>& lsys_views)
+    void WindowController::handle_input(std::vector<sf::Event> events,
+                                        sf::RenderWindow &window,
+                                        std::list<procgui::LSystemView>& lsys_views)
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
-        sf::Event event;
 
-        while (window.pollEvent(event))
+        for(const auto& event : events)
         {
-            // ImGui has the priority as it is the topmost GUI.
-            ImGui::SFML::ProcessEvent(event);
-
             // Close the Window if necessary
             if (event.type == sf::Event::Closed ||
                 (!imgui_io.WantCaptureKeyboard &&

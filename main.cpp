@@ -26,6 +26,7 @@ using namespace controller;
 
 int main()
 {
+ // TODO: global window size (1600 used in procgui.cpp
     sf::RenderWindow window(sf::VideoMode(1600, 900), "Procgen");
     window.setVerticalSyncEnabled(true);
     ImGui::SFML::Init(window);
@@ -65,15 +66,26 @@ int main()
     {
         window.clear();
 
-        ImGui::SFML::Update(window, delta_clock.restart());
-        procgui::new_frame();
-
-        WindowController::handle_input(window, views);
+        std::vector<sf::Event> events;
+        sf::Event event;
+        // ImGui has the priority as it is the topmost GUI.
+        // The events are then redistributed in the rest of the application.
+        while(window.pollEvent(event))
+        {
+            events.push_back(event);
+            ImGui::SFML::ProcessEvent(event);
+        }
         
+        procgui::new_frame();
+        ImGui::SFML::Update(window, delta_clock.restart());
+        
+        WindowController::handle_input(events, window, views);
+ 
         for (auto& v : views)
         {
             v.draw(window);
         }
+        
 
         ImGui::SFML::Render(window);
         window.display();

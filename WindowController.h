@@ -26,7 +26,9 @@ namespace controller
 
         // Hub of all the input of the application, manages locally the 'sf::View'
         // of the 'window'.
-        static void handle_input(sf::RenderWindow& window, std::list<procgui::LSystemView>& lsys_views);
+        static void handle_input(std::vector<sf::Event> events,
+                                 sf::RenderWindow& window,
+                                 std::list<procgui::LSystemView>& lsys_views);
 
         // The 'sf::Mouse::getPosition()' give the absolute position in a
         // window. This method get the mouse position with the application
