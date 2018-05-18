@@ -9,6 +9,7 @@
 #include "DrawingParameters.h"
 #include "LSystemBuffer.h"
 #include "InterpretationMapBuffer.h"
+#include "color.h"
 
 namespace procgui
 {
@@ -62,6 +63,7 @@ namespace procgui
         const LSystemBuffer& get_lsystem_buffer() const;
         const InterpretationMapBuffer& get_interpretation_buffer() const;
         int get_id() const;
+        sf::Color get_color() const;
         
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();
@@ -84,9 +86,10 @@ namespace procgui
         void swap(LSystemView& other);
 
         // Unique identifier for each instance (with a growing id_count_).
-        // Used in the GUI
+        // Used in the GUI.
         static int id_count_;
         int id_;
+        sf::Color color_id_; // Color associated to the id (%100).
 
         // The window's name.
         std::string name_;

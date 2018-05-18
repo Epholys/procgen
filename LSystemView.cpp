@@ -15,6 +15,7 @@ namespace procgui
         : Observer<LSystem> {lsys}
         , Observer<InterpretationMap> {map}
         , id_{id_count_++}
+        , color_id_{color::unique_col_100(id_)}
         , name_ {name}
         , lsys_buff_ {lsys}
         , interpretation_buff_ {map}
@@ -45,6 +46,7 @@ namespace procgui
         : Observer<LSystem> {other.Observer<LSystem>::get_target()}
         , Observer<InterpretationMap> {other.Observer<InterpretationMap>::get_target()}
         , id_ {id_count_++}
+        , color_id_{color::unique_col_100(id_)}
         , name_ {other.name_}
         , lsys_buff_ {other.lsys_buff_}
         , interpretation_buff_ {other.interpretation_buff_}
@@ -63,6 +65,7 @@ namespace procgui
         : Observer<LSystem> {other.Observer<LSystem>::get_target()}
         , Observer<InterpretationMap> {other.Observer<InterpretationMap>::get_target()}
         , id_ {other.id_}
+        , color_id_{other.color_id_}
         , name_ {other.name_}
         , lsys_buff_ {std::move(other.lsys_buff_)}
         , interpretation_buff_ {std::move(other.interpretation_buff_)}
@@ -109,6 +112,7 @@ namespace procgui
         other.Observer<InterpretationMap>::add_callback([&other](){other.compute_vertices();});
 
         swap(id_, other.id_);
+        swap(color_id_, other.color_id_);
         swap(name_, other.name_);
         swap(lsys_buff_, other.lsys_buff_);
         swap(interpretation_buff_, other.interpretation_buff_);
@@ -178,7 +182,10 @@ namespace procgui
     {
         return id_;
     }
-
+    sf::Color LSystemView::get_color() const
+    {
+        return color_id_;
+    }
 
     
     void LSystemView::compute_vertices()
@@ -219,11 +226,11 @@ namespace procgui
             auto bounding = transform.transformRect(bounding_box_);
             // Draw the global bounding boxes.
             std::array<sf::Vertex, 5> box =
-                {{ {{ bounding.left, bounding.top}},
-                   {{ bounding.left, bounding.top + bounding.height}},
-                   {{ bounding.left + bounding.width, bounding.top + bounding.height}},
-                   {{ bounding.left + bounding.width, bounding.top}},
-                   {{ bounding.left, bounding.top}}}};
+                {{ {{ bounding.left, bounding.top}, color_id_},
+                   {{ bounding.left, bounding.top + bounding.height}, color_id_},
+                   {{ bounding.left + bounding.width, bounding.top + bounding.height}, color_id_},
+                   {{ bounding.left + bounding.width, bounding.top}, color_id_},
+                   {{ bounding.left, bounding.top}, color_id_}}};
             target.draw(box.data(), box.size(), sf::LineStrip);
         }
 

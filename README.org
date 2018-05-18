@@ -30,7 +30,7 @@
      With the current algorithm, execution time and memory consumption are exponential. Memory consumption is the biggest factor, as several GB can be allocated easily (from 16 iterations).
      - Cache multi-iteration production rules (*very good* for execution time (from O(x^n) to O(n)) but bad for memory consumption). Useful when calculating L-System productions but not for vertices computation, which is the biggest time hog.
      - Compute the vertices from the position (0,0) and use sf::RenderStates to define real position and angle: *huge* gain for the most common operation: moving around the vertices.
-     - Use raw OpenGL vertices instead of SFML's sf::Vertex to reduce their size (no texcoord for example)
+    - Use raw OpenGL vertices instead of SFML's sf::Vertex to reduce their size (no texcoord for example)
      - Use `sqrt` instead of `cos` and `sin` for angles to calculate vertex's position
 
    - Bugs

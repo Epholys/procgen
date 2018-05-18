@@ -366,6 +366,11 @@ namespace procgui
             pos.y = pos.y + 150 > windowY ? windowY-150 : pos.y;
             ImGui::SetNextWindowPos({pos.x,pos.y}, ImGuiSetCond_Appearing);
             ImGui::SetNextWindowSize({500,150}, ImGuiSetCond_Appearing);
+
+            auto color = lsys_view.get_color();
+            ImGui::PushStyleColor(ImGuiCol_TitleBg, ImColor(color.r, color.g, color.b));
+            ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImColor(color.r, color.g, color.b));
+            ImGui::PushStyleColor(ImGuiCol_CloseButton, ImColor::HSV(.2,.2,.2, .5));
         }
         if (!set_up(ss.str(), main, open))
         {
@@ -381,6 +386,10 @@ namespace procgui
         interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map", false);
 
         conclude(main);
+        if (main)
+        {
+            ImGui::PopStyleColor(3);
+        }
         
         return is_modified;
     }
