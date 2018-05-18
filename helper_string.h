@@ -45,7 +45,5 @@ std::string& ltrim(std::string& str);
 std::string& rtrim(std::string& str);
 std::string& trim(std::string& str);
 
-bool is_single_word(const std::string& str);
-
 
 #endif // HELPER_STRING_H
