@@ -39,6 +39,12 @@ namespace controller
         return position;
     }
 
+    sf::Vector2i WindowController::get_mouse_position()
+    {
+        return mouse_position_;
+    }
+
+
     void WindowController::paste_view(std::list<procgui::LSystemView>& lsys_views,
                                       const std::optional<procgui::LSystemView>& view,
                                       const sf::Vector2f& position)

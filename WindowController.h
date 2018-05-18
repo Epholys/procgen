@@ -33,6 +33,9 @@ namespace controller
         // coordinates relative to the drawing of the application.
         static sf::Vector2f real_mouse_position(sf::Vector2i mouse_click);
 
+        // Get the absolute mouse position
+        static sf::Vector2i get_mouse_position();
+        
         // Public flag to message WindowController to start the save menu. It is
         // also used to let the window open between frames.
         // The save menu is managed in this class with the load menu, but can be

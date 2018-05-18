@@ -4,6 +4,7 @@
 #include <chrono>
 #include "procgui.h"
 #include "helper_string.h"
+#include "WindowController.h"
 
 using namespace math;
 
@@ -31,7 +32,7 @@ namespace
         // If we're the main class, open window 'name'.
         if (main)
         {
-            bool is_active = ImGui::Begin(name.c_str(), open);
+            bool is_active = ImGui::Begin(name.c_str(), open, ImGuiWindowFlags_NoSavedSettings);
             if(!is_active)
             {
                 // Window is collapsed, call End();
@@ -342,9 +343,20 @@ namespace procgui
         {
             return false;
         }
-
         std::stringstream ss;
         ss << name << "##" << lsys_view.get_id();
+        if (main)
+        {
+            sf::Vector2f pos = sf::Vector2f(controller::WindowController::get_mouse_position());
+            pos -= {250,50};
+            /*TODO:global window size*/
+            pos.x = pos.x < 0 ? 0 : pos.x;
+            pos.x = pos.x + 500 > 1600 ? 1100 : pos.x;
+            pos.y = pos.y < 0 ? 0 : pos.y;
+            pos.y = pos.y + 150 > 900 ? 750 : pos.y;
+            ImGui::SetNextWindowPos({pos.x,pos.y}, ImGuiSetCond_Appearing);
+            ImGui::SetNextWindowSize({500,150}, ImGuiSetCond_Appearing);
+        }
         if (!set_up(ss.str(), main, open))
         {
             // Early out if the display zone is collapsed.
