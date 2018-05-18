@@ -16,8 +16,7 @@
 #include "helper_math.h"
 #include "procgui.h"
 #include "WindowController.h"
-
-#include <functional>
+#include "RenderWindow.h"
 
 using namespace drawing;
 using namespace math;
@@ -26,8 +25,7 @@ using namespace controller;
 
 int main()
 {
- // TODO: global window size (1600 used in procgui.cpp
-    sf::RenderWindow window(sf::VideoMode(1600, 900), "Procgen");
+    sf::RenderWindow window(sf::VideoMode(window::window_size.x, window::window_size.y), "Procgen");
     window.setVerticalSyncEnabled(true);
     ImGui::SFML::Init(window);
 

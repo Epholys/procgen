@@ -5,6 +5,7 @@
 #include "procgui.h"
 #include "helper_string.h"
 #include "WindowController.h"
+#include "RenderWindow.h"
 
 using namespace math;
 
@@ -356,11 +357,13 @@ namespace procgui
         {
             sf::Vector2f pos = sf::Vector2f(controller::WindowController::get_mouse_position());
             pos -= {250,50};
-            /*TODO:global window size*/
+
+            int windowX = window::window_size.x;
+            int windowY = window::window_size.y;
             pos.x = pos.x < 0 ? 0 : pos.x;
-            pos.x = pos.x + 500 > 1600 ? 1100 : pos.x;
+            pos.x = pos.x + 500 > windowX ? windowX-500 : pos.x;
             pos.y = pos.y < 0 ? 0 : pos.y;
-            pos.y = pos.y + 150 > 900 ? 750 : pos.y;
+            pos.y = pos.y + 150 > windowY ? windowY-150 : pos.y;
             ImGui::SetNextWindowPos({pos.x,pos.y}, ImGuiSetCond_Appearing);
             ImGui::SetNextWindowSize({500,150}, ImGuiSetCond_Appearing);
         }
