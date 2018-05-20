@@ -7,6 +7,7 @@ namespace procgui
     using namespace drawing;
 
     int LSystemView::id_count_ = 0;
+    colors::UniqueColor LSystemView::color_gen_ {};
     
     LSystemView::LSystemView(const std::string& name,
                              std::shared_ptr<LSystem> lsys,
@@ -15,7 +16,7 @@ namespace procgui
         : Observer<LSystem> {lsys}
         , Observer<InterpretationMap> {map}
         , id_{id_count_++}
-        , color_id_{color::unique_col_100(id_)}
+        , color_id_{color_gen_.register_id(id_)}
         , name_ {name}
         , lsys_buff_ {lsys}
         , interpretation_buff_ {map}
@@ -46,7 +47,7 @@ namespace procgui
         : Observer<LSystem> {other.Observer<LSystem>::get_target()}
         , Observer<InterpretationMap> {other.Observer<InterpretationMap>::get_target()}
         , id_ {id_count_++}
-        , color_id_{color::unique_col_100(id_)}
+        , color_id_{color_gen_.register_id(id_)}
         , name_ {other.name_}
         , lsys_buff_ {other.lsys_buff_}
         , interpretation_buff_ {other.interpretation_buff_}
@@ -82,6 +83,8 @@ namespace procgui
         // Remove callbacks of the moved 'other'.
         other.Observer<LSystem>::set_target(nullptr);
         other.Observer<InterpretationMap>::set_target(nullptr);
+
+        other.id_ = -1;
     }
 
     LSystemView& LSystemView::operator=(LSystemView other)
@@ -122,6 +125,15 @@ namespace procgui
         swap(sub_boxes_, other.sub_boxes_);
         swap(is_selected_, other.is_selected_);
     }
+
+    LSystemView::~LSystemView()
+    {
+        if (id_ != -1)
+        {
+            color_gen_.remove_id(id_);
+        }
+    }
+
 
     LSystemView LSystemView::clone()
     {        

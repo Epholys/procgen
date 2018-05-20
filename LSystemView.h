@@ -9,7 +9,7 @@
 #include "DrawingParameters.h"
 #include "LSystemBuffer.h"
 #include "InterpretationMapBuffer.h"
-#include "color.h"
+#include "colors.h"
 
 namespace procgui
 {
@@ -47,7 +47,8 @@ namespace procgui
         LSystemView(const LSystemView& other);
         LSystemView& operator=(LSystemView other);
         LSystemView(LSystemView&& other);
-
+        ~LSystemView();
+        
         // Clone the LSystemView into an independant other view.
         LSystemView clone();
 
@@ -88,6 +89,7 @@ namespace procgui
         // Unique identifier for each instance (with a growing id_count_).
         // Used in the GUI.
         static int id_count_;
+        static colors::UniqueColor color_gen_;
         int id_;
         sf::Color color_id_; // Color associated to the id (%100).
 
