@@ -9,7 +9,8 @@
 #include "DrawingParameters.h"
 #include "LSystemBuffer.h"
 #include "InterpretationMapBuffer.h"
-#include "colors.h"
+#include "UniqueColor.h"
+#include "VertexPainter.h"
 
 namespace procgui
 {
@@ -111,6 +112,7 @@ namespace procgui
 
         // The vertices of the View. Computer at each modification.
         std::vector<sf::Vertex> vertices_;
+        std::shared_ptr<colors::VertexPainter> painter_;
 
         // The global bounding box of the drawing.
         sf::FloatRect bounding_box_;

@@ -1,5 +1,5 @@
-#ifndef COLORS_H
-#define COLORS_H
+#ifndef UNIQUE_COLOR_H
+#define UNIQUE_COLOR_H
 
 
 #include <unordered_map>
@@ -62,4 +62,4 @@ namespace colors
 }
 
 
-#endif // COLORS_HPP
+#endif // UNIQUE_COLOR_HPP

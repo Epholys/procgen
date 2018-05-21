@@ -2,7 +2,7 @@
 #include <cmath>
 #include <gsl/gsl>
 #include "imgui/imgui.h"
-#include "colors.h"
+#include "UniqueColor.h"
 
 namespace colors
 {

@@ -27,7 +27,7 @@ RuleMapBuffer<Target>::RuleMapBuffer(const RuleMapBuffer& other)
 template<typename Target>
 RuleMapBuffer<Target>::RuleMapBuffer(RuleMapBuffer&& other)
     : Observer<Target>(other.Observer<Target>::get_target())
-    , buffer_ {other.buffer_}
+    , buffer_ {std::move(other.buffer_)}
     , instruction_ {nullptr}
 {
     Observer<Target>::add_callback([this](){sync();});

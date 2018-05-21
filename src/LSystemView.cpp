@@ -22,6 +22,7 @@ namespace procgui
         , interpretation_buff_ {map}
         , params_ {params}
         , vertices_ {}
+        , painter_{std::make_shared<colors::VertexPainter>()}
         , bounding_box_ {}
         , sub_boxes_ {}
         , is_selected_ {false}
@@ -53,6 +54,7 @@ namespace procgui
         , interpretation_buff_ {other.interpretation_buff_}
         , params_ {other.params_}
         , vertices_ {other.vertices_}
+        , painter_ {other.painter_}
         , bounding_box_ {other.bounding_box_}
         , sub_boxes_ {other.sub_boxes_}
         , is_selected_ {other.is_selected_}
@@ -66,14 +68,15 @@ namespace procgui
         : Observer<LSystem> {other.Observer<LSystem>::get_target()}
         , Observer<InterpretationMap> {other.Observer<InterpretationMap>::get_target()}
         , id_ {other.id_}
-        , color_id_{other.color_id_}
-        , name_ {other.name_}
+        , color_id_{std::move(other.color_id_)}
+        , name_ {std::move(other.name_)}
         , lsys_buff_ {std::move(other.lsys_buff_)}
         , interpretation_buff_ {std::move(other.interpretation_buff_)}
-        , params_ {other.params_}
-        , vertices_ {other.vertices_}
-        , bounding_box_ {other.bounding_box_}
-        , sub_boxes_ {other.sub_boxes_}
+        , params_ {std::move(other.params_)}
+        , vertices_ {std::move(other.vertices_)}
+        , painter_ {std::move(other.painter_)}
+        , bounding_box_ {std::move(other.bounding_box_)}
+        , sub_boxes_ {std::move(other.sub_boxes_)}
         , is_selected_ {other.is_selected_}
     {
         // Manually managing Observer<> callbacks.
@@ -86,6 +89,10 @@ namespace procgui
 
         // the 'other' object must not matter in the 'color_gen_' anymore.
         other.id_ = -1;
+        other.color_id_ = sf::Color::Black;
+        other.params_ = {};
+        other.bounding_box_ = {};
+        other.is_selected_ = false;
     }
 
     LSystemView& LSystemView::operator=(LSystemView other)
@@ -122,6 +129,7 @@ namespace procgui
         swap(interpretation_buff_, other.interpretation_buff_);
         swap(params_, other.params_);
         swap(vertices_, other.vertices_);
+        swap(painter_, other.painter_);
         swap(bounding_box_, other.bounding_box_);
         swap(sub_boxes_, other.sub_boxes_);
         swap(is_selected_, other.is_selected_);
@@ -212,6 +220,11 @@ namespace procgui
                                               params_);
         bounding_box_ = geometry::compute_bounding_box(vertices_);
         sub_boxes_ = geometry::compute_sub_boxes(vertices_, MAX_SUB_BOXES);
+
+        sf::Transform transform;
+        transform.translate(params_.starting_position)
+            .rotate(math::rad_to_degree(params_.starting_angle));                 
+        painter_->paint_vertices(vertices_, bounding_box_, transform);
     }
     
     void LSystemView::draw(sf::RenderTarget &target)
