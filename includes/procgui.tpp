@@ -58,9 +58,9 @@ bool interact_with_buffer(Buffer& buffer,
         ImGui::PopID(); // End of the loop and the scope
     }
 
-    ImGui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(2/7.0f, 0.6f, 0.6f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor::HSV(2/7.0f, 0.7f, 0.7f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor::HSV(2/7.0f, 0.8f, 0.8f));
+    ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(2/7.0f, 0.6f, 0.6f)));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(2/7.0f, 0.7f, 0.7f)));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(2/7.0f, 0.8f, 0.8f)));
     if (ImGui::Button("+"))
     {
         is_modified = true;

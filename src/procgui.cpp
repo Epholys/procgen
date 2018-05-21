@@ -95,9 +95,9 @@ namespace ImGui
     // WARNING: Use these with 'ImGui::PopStyleColor(3)'.
     template<int hue> void PushStyleColoredButton()
     {
-        ImGui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(hue/7.0f, 0.6f, 0.6f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor::HSV(hue/7.0f, 0.7f, 0.7f));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor::HSV(hue/7.0f, 0.8f, 0.8f));
+        ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue/7.0f, 0.6f, 0.6f)));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue/7.0f, 0.7f, 0.7f)));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue/7.0f, 0.8f, 0.8f)));
     }
     auto PushStyleRedButton = PushStyleColoredButton<0>;
     auto PushStyleYellowButton = PushStyleColoredButton<1>;
@@ -376,9 +376,10 @@ namespace procgui
             // The window's title background is set to the unique color
             // associated with the 'lsys_view_'.
             auto color = lsys_view.get_color();
-            ImGui::PushStyleColor(ImGuiCol_TitleBg, ImColor(color.r, color.g, color.b));
-            ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImColor(color.r, color.g, color.b));
-            ImGui::PushStyleColor(ImGuiCol_CloseButton, ImColor::HSV(.2,.2,.2, .5));
+            ImGui::PushStyleColor(ImGuiCol_TitleBg,
+                                  static_cast<ImVec4>(ImColor(color.r, color.g, color.b)));
+            ImGui::PushStyleColor(ImGuiCol_TitleBgActive,
+                                  static_cast<ImVec4>(ImColor(color.r, color.g, color.b)));
         }
         if (!set_up(ss.str(), main, open))
         {
@@ -396,7 +397,7 @@ namespace procgui
         conclude(main);
         if (main)
         {
-            ImGui::PopStyleColor(3);
+            ImGui::PopStyleColor(2);
         }
         
         return is_modified;
