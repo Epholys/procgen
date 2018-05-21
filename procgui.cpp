@@ -4,6 +4,8 @@
 #include <chrono>
 #include "procgui.h"
 #include "helper_string.h"
+#include "WindowController.h"
+#include "RenderWindow.h"
 
 using namespace math;
 
@@ -28,10 +30,11 @@ namespace
     {
         auto& id = procgui::call_id;
         ++id;
+        
         // If we're the main class, open window 'name'.
         if (main)
         {
-            bool is_active = ImGui::Begin(name.c_str(), open);
+            bool is_active = ImGui::Begin(name.c_str(), open, ImGuiWindowFlags_NoSavedSettings);
             if(!is_active)
             {
                 // Window is collapsed, call End();
@@ -46,7 +49,12 @@ namespace
         // Otherwise, set up a TreeNode.
         else
         {
-            return ImGui::CollapsingHeader(name.c_str());
+            if(ImGui::CollapsingHeader(name.c_str()))
+            {
+                ImGui::PushID(id);
+                return true;
+            }
+            return false;
         }
     }
     
@@ -54,12 +62,13 @@ namespace
     // Otherwise, close the current TreeNode.
     void conclude(bool main)
     {
+        ImGui::PopID();
+
         // If we're the main class, stop appending to the current
         // window.
         if (main)
         {
             ImGui::Separator();
-            ImGui::PopID();
             ImGui::End();
         }
     }
@@ -149,22 +158,22 @@ namespace procgui
 
         // --- Starting Position ---
         ImGui::Text("Starting Position:"); ImGui::SameLine(align);
-        ImGui::Text("x: %#.f", parameters.starting_position.x); ImGui::SameLine();
-        ImGui::Text("y: %#.f", parameters.starting_position.y);
+        ImGui::Text("x: %.f", parameters.starting_position.x); ImGui::SameLine();
+        ImGui::Text("y: %.f", parameters.starting_position.y);
 
         // --- Starting Angle ---
         ImGui::Text("Starting Angle:"); ImGui::SameLine(align);
-        ImGui::Text("%#.lf", math::rad_to_degree(parameters.starting_angle)); ImGui::SameLine();
+        ImGui::Text("%.lf", math::rad_to_degree(parameters.starting_angle)); ImGui::SameLine();
         ImGui::Text("degree");
             
         // --- Angle Delta ---
         ImGui::Text("Angle Delta:"); ImGui::SameLine(align);
-        ImGui::Text("%#.lf", math::rad_to_degree(parameters.delta_angle)); ImGui::SameLine();
+        ImGui::Text("%.lf", math::rad_to_degree(parameters.delta_angle)); ImGui::SameLine();
         ImGui::Text("degree");
 
         // --- Step ---
         ImGui::Text("Step:"); ImGui::SameLine(align);
-        ImGui::Text("%f", parameters.step);
+        ImGui::Text("%.1lf", parameters.step);
 
         conclude(main);
     }
@@ -204,9 +213,9 @@ namespace procgui
         float pos[2] = { parameters.starting_position.x,
                          parameters.starting_position.y };
         if ( ImGui::DragFloat2("Starting position", pos,
-                               1.f, 0.f, 0.f, "%#.lf") )
+                               1.f, 0.f, 0.f, "%.lf") )
         {
-            is_modified = true;
+            // is_modified_ is not set: the render state take care of translating the view.
             parameters.starting_position.x = pos[0];
             parameters.starting_position.y = pos[1];
         }
@@ -214,23 +223,23 @@ namespace procgui
         // --- Starting angle ---
         float starting_angle_deg = math::rad_to_degree(parameters.starting_angle);
         if ( ImGui::DragFloat("Starting Angle", &starting_angle_deg,
-                              1.f, 0.f, 360.f, "%#.lf") )
+                              1.f, 0.f, 360.f, "%.lf") )
         {
-            is_modified = true;
+            // is_modified_ is not set: the render state take care of rotating the view.
             parameters.starting_angle = math::degree_to_rad(starting_angle_deg);
         }
 
         // --- Angle Delta ---
         float delta_angle_deg = math::rad_to_degree(parameters.delta_angle);
         if ( ImGui::DragFloat("Angle Delta", &delta_angle_deg,
-                              1.f, 0.f, 360.f, "%#.lf") )
+                              1.f, 0.f, 360.f, "%.lf") )
         {
             is_modified = true;
             parameters.delta_angle = math::degree_to_rad(delta_angle_deg);
         }
 
         // --- Step ---
-        is_modified |= ImGui::DragFloat("Step", &parameters.step);
+        is_modified |= ImGui::DragFloat("Step", &parameters.step, 0.2f, 0.f, 0.f, "%#.1lf");
 
         // --- Iterations ---
         // Arbitrary value to avoid resource depletion happening with higher
@@ -342,9 +351,35 @@ namespace procgui
         {
             return false;
         }
-
         std::stringstream ss;
-        ss << name << "##" << static_cast<const void *>(&lsys_view);
+        ss << name << "##" << lsys_view.get_id(); // Each window of LSystemView
+                                                  // is conserved by its id.
+        if (main)
+        {
+            // Make the window appear at the mouse double-click position with a
+            // correct size.
+            // Warning: lots of arbitrary values.
+            sf::Vector2f pos = sf::Vector2f(controller::WindowController::get_mouse_position());
+            pos -= {250,50}; // Shift the window position to make its center
+                             // appear a the mouse position.
+
+            // Shift the window position to always appear on-screen in its entirety.
+            int windowX = window::window_size.x;
+            int windowY = window::window_size.y;
+            pos.x = pos.x < 0 ? 0 : pos.x;
+            pos.x = pos.x + 500 > windowX ? windowX-500 : pos.x;
+            pos.y = pos.y < 0 ? 0 : pos.y;
+            pos.y = pos.y + 150 > windowY ? windowY-150 : pos.y;
+            ImGui::SetNextWindowPos({pos.x,pos.y}, ImGuiSetCond_Appearing);
+            ImGui::SetNextWindowSize({500,150}, ImGuiSetCond_Appearing);
+
+            // The window's title background is set to the unique color
+            // associated with the 'lsys_view_'.
+            auto color = lsys_view.get_color();
+            ImGui::PushStyleColor(ImGuiCol_TitleBg, ImColor(color.r, color.g, color.b));
+            ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImColor(color.r, color.g, color.b));
+            ImGui::PushStyleColor(ImGuiCol_CloseButton, ImColor::HSV(.2,.2,.2, .5));
+        }
         if (!set_up(ss.str(), main, open))
         {
             // Early out if the display zone is collapsed.
@@ -359,6 +394,10 @@ namespace procgui
         interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map", false);
 
         conclude(main);
+        if (main)
+        {
+            ImGui::PopStyleColor(3);
+        }
         
         return is_modified;
     }

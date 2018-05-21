@@ -1,6 +1,7 @@
 {
-    "value0": {
+    "LSystemView": {
         "cereal_class_version": 0,
+        "name": "binary_tree",
         "LSystem": {
             "cereal_class_version": 0,
             "axiom": "X",
@@ -11,7 +12,7 @@
         },
         "DrawingParameters": {
             "cereal_class_version": 0,
-            "starting_angle": 4.886917591094971,
+            "starting_angle": 280.0,
             "delta_angle": 30.0,
             "step": 20.0,
             "n_iter": 5

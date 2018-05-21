@@ -1,4 +1,3 @@
-// TODO trim
 #include <gtest/gtest.h>
 
 #include "helper_string.h"
@@ -23,4 +22,15 @@ TEST(helper_string_test, array_to_string)
 
     ASSERT_EQ(array_to_string(short_arr), short_expected);
     ASSERT_EQ(array_to_string(long_arr), long_expected);
+}
+
+TEST(helper_string_test, trim)
+{
+    std::string word1 = "\tTEST  ";
+    std::string word2 = word1;
+    std::string word3 = word1;
+    
+    ASSERT_EQ("TEST  ", ltrim(word1));
+    ASSERT_EQ("\tTEST", rtrim(word2));
+    ASSERT_EQ("TEST", trim(word3));
 }

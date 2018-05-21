@@ -1,9 +1,13 @@
 #include "procgui.h"
 #include "LSystemView.h"
+#include "helper_math.h"
 
 namespace procgui
 {
     using namespace drawing;
+
+    int LSystemView::id_count_ = 0;
+    colors::UniqueColor LSystemView::color_gen_ {};
     
     LSystemView::LSystemView(const std::string& name,
                              std::shared_ptr<LSystem> lsys,
@@ -11,6 +15,8 @@ namespace procgui
                              drawing::DrawingParameters params)
         : Observer<LSystem> {lsys}
         , Observer<InterpretationMap> {map}
+        , id_{id_count_++}
+        , color_id_{color_gen_.register_id(id_)}
         , name_ {name}
         , lsys_buff_ {lsys}
         , interpretation_buff_ {map}
@@ -40,6 +46,8 @@ namespace procgui
     LSystemView::LSystemView(const LSystemView& other)
         : Observer<LSystem> {other.Observer<LSystem>::get_target()}
         , Observer<InterpretationMap> {other.Observer<InterpretationMap>::get_target()}
+        , id_ {id_count_++}
+        , color_id_{color_gen_.register_id(id_)}
         , name_ {other.name_}
         , lsys_buff_ {other.lsys_buff_}
         , interpretation_buff_ {other.interpretation_buff_}
@@ -57,6 +65,8 @@ namespace procgui
     LSystemView::LSystemView(LSystemView&& other)
         : Observer<LSystem> {other.Observer<LSystem>::get_target()}
         , Observer<InterpretationMap> {other.Observer<InterpretationMap>::get_target()}
+        , id_ {other.id_}
+        , color_id_{other.color_id_}
         , name_ {other.name_}
         , lsys_buff_ {std::move(other.lsys_buff_)}
         , interpretation_buff_ {std::move(other.interpretation_buff_)}
@@ -73,6 +83,9 @@ namespace procgui
         // Remove callbacks of the moved 'other'.
         other.Observer<LSystem>::set_target(nullptr);
         other.Observer<InterpretationMap>::set_target(nullptr);
+
+        // the 'other' object must not matter in the 'color_gen_' anymore.
+        other.id_ = -1;
     }
 
     LSystemView& LSystemView::operator=(LSystemView other)
@@ -102,6 +115,8 @@ namespace procgui
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
         other.Observer<InterpretationMap>::add_callback([&other](){other.compute_vertices();});
 
+        swap(id_, other.id_);
+        swap(color_id_, other.color_id_);
         swap(name_, other.name_);
         swap(lsys_buff_, other.lsys_buff_);
         swap(interpretation_buff_, other.interpretation_buff_);
@@ -111,6 +126,16 @@ namespace procgui
         swap(sub_boxes_, other.sub_boxes_);
         swap(is_selected_, other.is_selected_);
     }
+
+    LSystemView::~LSystemView()
+    {
+        // Unregister the id unless the object was moved.
+        if (id_ != -1)
+        {
+            color_gen_.remove_id(id_);
+        }
+    }
+
 
     LSystemView LSystemView::clone()
     {        
@@ -148,7 +173,12 @@ namespace procgui
     }
     sf::FloatRect LSystemView::get_bounding_box() const
     {
-        return bounding_box_;
+        auto box = bounding_box_;
+        sf::Transform transform;
+        transform.translate(params_.starting_position)
+                 .rotate(math::rad_to_degree(params_.starting_angle));                 
+        box = transform.transformRect(bounding_box_);
+        return box;
     }
     const drawing::DrawingParameters& LSystemView::get_parameters() const
     {
@@ -161,6 +191,14 @@ namespace procgui
     const InterpretationMapBuffer& LSystemView::get_interpretation_buffer() const
     {
         return interpretation_buff_;
+    }
+    int LSystemView::get_id() const
+    {
+        return id_;
+    }
+    sf::Color LSystemView::get_color() const
+    {
+        return color_id_;
     }
 
     
@@ -191,24 +229,33 @@ namespace procgui
             return;
         }
 
+        sf::Transform transform;
+        transform.translate(params_.starting_position)
+                 .rotate(math::rad_to_degree(params_.starting_angle));                 
         // Draw the vertices.
-        target.draw(vertices_.data(), vertices_.size(), sf::LineStrip);
+        target.draw(vertices_.data(), vertices_.size(), sf::LineStrip, transform);
 
         if (is_selected_)
         {
-            // Draw the global bounding boxes.
+            auto bounding = transform.transformRect(bounding_box_);
+            // Draw the global bounding boxes with the unique color.
             std::array<sf::Vertex, 5> box =
-                {{ {{ bounding_box_.left, bounding_box_.top}},
-                   {{ bounding_box_.left, bounding_box_.top + bounding_box_.height}},
-                   {{ bounding_box_.left + bounding_box_.width, bounding_box_.top + bounding_box_.height}},
-                   {{ bounding_box_.left + bounding_box_.width, bounding_box_.top}},
-                   {{ bounding_box_.left, bounding_box_.top}}}};
+                {{ {{ bounding.left, bounding.top}, color_id_},
+                   {{ bounding.left, bounding.top + bounding.height}, color_id_},
+                   {{ bounding.left + bounding.width, bounding.top + bounding.height}, color_id_},
+                   {{ bounding.left + bounding.width, bounding.top}, color_id_},
+                   {{ bounding.left, bounding.top}, color_id_}}};
             target.draw(box.data(), box.size(), sf::LineStrip);
         }
 
-        // DEBUG
-        // Draw the sub-bounding boxes.
-        // for (const auto& box : sub_boxes_)
+        // // DEBUG
+        // // Draw the sub-bounding boxes.
+        // decltype(sub_boxes_) subs;
+        // for (auto& box : sub_boxes_)
+        // {
+        //     subs.push_back(transform.transformRect(box));
+        // }
+        // for (const auto& box : subs)
         // {
         //     std::array<sf::Vertex, 5> rect =
         //         {{ {{ box.left, box.top}, sf::Color(255,0,0,50)},
@@ -226,7 +273,17 @@ namespace procgui
 
     bool LSystemView::is_inside(const sf::Vector2f& click) const
     {
-        for (const auto& rect : sub_boxes_)
+        sf::Transform transform;
+        transform.translate(params_.starting_position)
+                 .rotate(math::rad_to_degree(params_.starting_angle));                 
+        decltype(sub_boxes_) boxes;
+        for (auto& box : sub_boxes_)
+        {
+            boxes.push_back(transform.transformRect(box));
+        }
+
+        
+        for (const auto& rect : boxes)
         {
             if (rect.contains(sf::Vector2f(click)))
             {

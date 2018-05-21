@@ -9,6 +9,7 @@
 #include "DrawingParameters.h"
 #include "LSystemBuffer.h"
 #include "InterpretationMapBuffer.h"
+#include "colors.h"
 
 namespace procgui
 {
@@ -17,7 +18,7 @@ namespace procgui
     // DrawingParameters.
     // It manages mainly three things:
     //     - The vertices of the corresponding drawing,
-    //     - The interactive GUI of the parameters,
+    //     - The interactive GUI of the parameters (with unique identifiers),
     //     - The selection of itself by the user and by extension the bounding
     //     boxes.
     //
@@ -26,7 +27,7 @@ namespace procgui
     //     'interpretation_buff_', and 'params_'.
     //     - The 'bounding_box_' and 'sub_boxes_' must correspond with the
     //     'vertices_'.
-    // 
+    //
     // Note:
     //    - LSystemView contain a shared ownership of the LSystem and the
     //    InterpretationMap via the corresponding Observer. As a consequence, a
@@ -46,7 +47,8 @@ namespace procgui
         LSystemView(const LSystemView& other);
         LSystemView& operator=(LSystemView other);
         LSystemView(LSystemView&& other);
-
+        ~LSystemView();
+        
         // Clone the LSystemView into an independant other view.
         LSystemView clone();
 
@@ -61,6 +63,8 @@ namespace procgui
         const drawing::DrawingParameters& get_parameters() const;
         const LSystemBuffer& get_lsystem_buffer() const;
         const InterpretationMapBuffer& get_interpretation_buffer() const;
+        int get_id() const;
+        sf::Color get_color() const;
         
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();
@@ -81,6 +85,15 @@ namespace procgui
     private:
         // Used in assignment and move operator.
         void swap(LSystemView& other);
+
+        // Unique identifier for each instance (with a growing id_count_).
+        // Used in the GUI.
+        static int id_count_;
+        int id_;
+        // The unique color generator. Each id is associated with a unique
+        // color. Static as shared between every objects.
+        static colors::UniqueColor color_gen_;
+        sf::Color color_id_; // Color associated to the id.
 
         // The window's name.
         std::string name_;
@@ -117,7 +130,8 @@ namespace procgui
         template<class Archive>
         void save (Archive& ar, const std::uint32_t) const
             {
-                ar(cereal::make_nvp("LSystem", *Observer<LSystem>::get_target()),
+                ar(cereal::make_nvp("name", name_),
+                   cereal::make_nvp("LSystem", *Observer<LSystem>::get_target()),
                    cereal::make_nvp("DrawingParameters", params_),
                    cereal::make_nvp("Interpretation Map", *Observer<drawing::InterpretationMap>::get_target()));
             }
@@ -125,13 +139,15 @@ namespace procgui
         template<class Archive>
         void load (Archive& ar, const std::uint32_t)
             {
+                std::string name;
                 LSystem lsys;
                 drawing::DrawingParameters params;
                 drawing::InterpretationMap map;
-                ar(cereal::make_nvp("LSystem", lsys),
-                   cereal::make_nvp("DrawingParameters", params),
-                   cereal::make_nvp("Interpretation Map", map));
-                *this = LSystemView("",
+                ar(name,
+                    cereal::make_nvp("LSystem", lsys),
+                    cereal::make_nvp("DrawingParameters", params),
+                    cereal::make_nvp("Interpretation Map", map));
+                *this = LSystemView(name,
                           std::make_shared<LSystem>(lsys),
                           std::make_shared<drawing::InterpretationMap>(map),
                           params);

@@ -11,16 +11,12 @@
    - (Simple) Turtle interpretation
    - Static GUI to display parameters
    - Dynamic GUIs to interact with the parameters
+   - Basic and necessary user interactions (mouse dragging, adding, removing, copy-pasting)
+   - Saving and loading LSystems to and from files
 
 ** Main Roadmap
-   1. Save and load L-system models
-   2. Add a more complex GUI and polish it
-      * Slider speed
-      * Color-coded LSystems windows
-      * Unique permanent ID to LSystemView to avoid window redefinition
-      * Using `SetNextWindow*()` to a more pretty default
-   3. Add genetic algorithm or constraint-based algorithm for new LSystem generation
    4. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
+   3. Add genetic algorithm or constraint-based algorithm for new LSystem generation
 
 ** Other ideas
 
@@ -31,12 +27,12 @@
      With the current algorithm, execution time and memory consumption are exponential. Memory consumption is the biggest factor, as several GB can be allocated easily (from 16 iterations).
      - Cache multi-iteration production rules (*very good* for execution time (from O(x^n) to O(n)) but bad for memory consumption). Useful when calculating L-System productions but not for vertices computation, which is the biggest time hog.
      - Compute the vertices from the position (0,0) and use sf::RenderStates to define real position and angle: *huge* gain for the most common operation: moving around the vertices.
-     - Use raw OpenGL vertices instead of SFML's sf::Vertex to reduce their size (no texcoord for example)
+    - Use raw OpenGL vertices instead of SFML's sf::Vertex to reduce their size (no texcoord for example)
      - Use `sqrt` instead of `cos` and `sin` for angles to calculate vertex's position
 
    - Bugs
-     - Correct floating point errors when using big number of iterations (using double)
      - Correct zoom level and drag behaviour when resizing window (in Gnome)
+     - *Maybe* using arbitrary floating point precision (even with doubles some geometric LSystems are not so geometric anymore)
 
    - Cleanup
      - Make 'DrawingParameters' an Observable
@@ -55,6 +51,10 @@
      - Difference: When using ImGui ; ImGui style of coding
    - *Compilation:* =make= and C++17 needed
    - *Testing suite:* [[https://github.com/google/googletest/][googletest]]
+
+Warnings:
+   - The save format is not yet stable, the save files may not be compatible between two commits. It is however possible to manually edit them to support the new features. the 'saves' directory will always be populated with valid examples.
+   - The API is not stable (and will probably never be, as this is a software and not a library)
 
 ** Completing the framework?
    - Static analysis (Coverity?)

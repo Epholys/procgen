@@ -4,7 +4,10 @@
 
 #include <chrono>
 #include <optional>
+#include <list>
+
 #include "SFML/Graphics.hpp"
+
 #include "LSystemView.h"
 
 namespace controller
@@ -24,20 +27,23 @@ namespace controller
         static bool has_priority();
 
         // Handle 'event' for the 'views'.
-        static void handle_input(std::vector<procgui::LSystemView>& views, const sf::Event& event);
+        static void handle_input(std::list<procgui::LSystemView>& views, const sf::Event& event);
 
         // Handle the dragging behaviour.
         static void handle_delta(sf::Vector2f delta);
 
         // Interact with a menu when right-clicking on a LSystemView (cloning,
         // duplicating, ...) 
-        static void right_click_menu();
+        static void right_click_menu(std::list<procgui::LSystemView>& views);
 
         // Getters
         static const std::optional<procgui::LSystemView>& saved_view();
         static const procgui::LSystemView* under_mouse();
 
     private:
+        // Delete the LSystemView with identifier 'id' in 'views'
+        static void delete_view(std::list<procgui::LSystemView>& views, int id);
+        
         // The LSystemView below the mouse. nullptr if there is
         // nothing. Non-owning pointer.
         static procgui::LSystemView* under_mouse_;

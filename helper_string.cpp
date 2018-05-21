@@ -19,9 +19,3 @@ std::string& trim(std::string& str)
     return ltrim(rtrim(str));
 }
 
-bool is_single_word(const std::string& str)
-{
-    return
-        std::find_if(begin(str), end(str), [](char c){return std::isspace<char>(c, std::locale());})
-        == end(str);
-}

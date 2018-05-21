@@ -63,7 +63,7 @@ namespace procgui {
     // Special case for the RuleMapBuffers
     template<typename Buffer>
     bool interact_with_buffer(Buffer& buffer,
-                              std::function<bool(typename Buffer::const_iterator)> predecessor_fn);
+                              std::function<bool(typename Buffer::const_iterator)> successor_fn);
     
     bool interact_with(LSystemBuffer& buffer, const std::string& name, bool main = true);
 

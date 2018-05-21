@@ -1,5 +1,4 @@
 #include <fstream>
-#include <memory>
 
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
@@ -39,7 +38,13 @@ namespace controller
         return position;
     }
 
-    void WindowController::paste_view(std::vector<procgui::LSystemView>& lsys_views,
+    sf::Vector2i WindowController::get_mouse_position()
+    {
+        return mouse_position_;
+    }
+
+
+    void WindowController::paste_view(std::list<procgui::LSystemView>& lsys_views,
                                       const std::optional<procgui::LSystemView>& view,
                                       const sf::Vector2f& position)
     {
@@ -55,17 +60,16 @@ namespace controller
         sf::Vector2f middle = {box.left + box.width/2, box.top + box.height/2};
         middle = pasted_view.get_parameters().starting_position - middle;
         pasted_view.ref_parameters().starting_position = position + middle;
-        pasted_view.compute_vertices();
-        lsys_views.emplace_back(pasted_view);
+        lsys_views.emplace_front(pasted_view);
     }
     
-    void WindowController::right_click_menu(sf::RenderWindow& window, std::vector<procgui::LSystemView>& lsys_views)
+    void WindowController::right_click_menu(sf::RenderWindow& window, std::list<procgui::LSystemView>& lsys_views)
     {
         if (ImGui::BeginPopupContextVoid())
         {
             if (ImGui::MenuItem("New LSystem", "Ctrl+N"))
             {
-                lsys_views.emplace_back(real_mouse_position(sf::Mouse::getPosition(window)));
+                lsys_views.emplace_front(real_mouse_position(sf::Mouse::getPosition(window)));
             }
             if (ImGui::MenuItem("Load LSystem", "Ctrl+O"))
             {
@@ -162,7 +166,7 @@ namespace controller
                     cereal::JSONOutputArchive archive (ofs);
                     if (LSystemController::under_mouse()) // Virtually useless check.
                     {
-                        archive(*LSystemController::under_mouse());
+                        archive(cereal::make_nvp("LSystemView", *LSystemController::under_mouse()));
                     }
                     save_menu_open_ = false;
                 }
@@ -191,7 +195,7 @@ namespace controller
         }
     }
 
-    void WindowController::load_menu(std::vector<procgui::LSystemView>& lsys_views)
+    void WindowController::load_menu(std::list<procgui::LSystemView>& lsys_views)
     {
         // The file name in which will be save the LSystem.
         static std::array<char, FILENAME_LENGTH_> filename;
@@ -312,16 +316,14 @@ namespace controller
         }
     }
     
-    void WindowController::handle_input(sf::RenderWindow &window, std::vector<procgui::LSystemView>& lsys_views)
+    void WindowController::handle_input(std::vector<sf::Event> events,
+                                        sf::RenderWindow &window,
+                                        std::list<procgui::LSystemView>& lsys_views)
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
-        sf::Event event;
 
-        while (window.pollEvent(event))
+        for(const auto& event : events)
         {
-            // ImGui has the priority as it is the topmost GUI.
-            ImGui::SFML::ProcessEvent(event);
-
             // Close the Window if necessary
             if (event.type == sf::Event::Closed ||
                 (!imgui_io.WantCaptureKeyboard &&
@@ -345,7 +347,7 @@ namespace controller
                 }
                 else if (event.key.code == sf::Keyboard::N)
                 {
-                    lsys_views.emplace_back(real_mouse_position(sf::Mouse::getPosition(window)));
+                    lsys_views.emplace_front(real_mouse_position(sf::Mouse::getPosition(window)));
                 }
                 else if (event.key.code == sf::Keyboard::O)
                 {
@@ -418,7 +420,7 @@ namespace controller
         // care of that.
         if (LSystemController::has_priority())
         {
-            LSystemController::right_click_menu();
+            LSystemController::right_click_menu(lsys_views);
         }
         else
         {

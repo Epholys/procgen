@@ -6,8 +6,8 @@ namespace drawing
 
     Turtle::Turtle(const DrawingParameters& params)
         : parameters { params }
-        , state   { parameters.starting_position, parameters.starting_angle }
-        , vertices      { { state.position } }
+        , state {}
+        , vertices      { { sf::Vector2f(state.position) } }
     {
     }
 
