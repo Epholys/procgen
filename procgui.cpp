@@ -158,22 +158,22 @@ namespace procgui
 
         // --- Starting Position ---
         ImGui::Text("Starting Position:"); ImGui::SameLine(align);
-        ImGui::Text("x: %#.f", parameters.starting_position.x); ImGui::SameLine();
-        ImGui::Text("y: %#.f", parameters.starting_position.y);
+        ImGui::Text("x: %.f", parameters.starting_position.x); ImGui::SameLine();
+        ImGui::Text("y: %.f", parameters.starting_position.y);
 
         // --- Starting Angle ---
         ImGui::Text("Starting Angle:"); ImGui::SameLine(align);
-        ImGui::Text("%#.lf", math::rad_to_degree(parameters.starting_angle)); ImGui::SameLine();
+        ImGui::Text("%.lf", math::rad_to_degree(parameters.starting_angle)); ImGui::SameLine();
         ImGui::Text("degree");
             
         // --- Angle Delta ---
         ImGui::Text("Angle Delta:"); ImGui::SameLine(align);
-        ImGui::Text("%#.lf", math::rad_to_degree(parameters.delta_angle)); ImGui::SameLine();
+        ImGui::Text("%.lf", math::rad_to_degree(parameters.delta_angle)); ImGui::SameLine();
         ImGui::Text("degree");
 
         // --- Step ---
         ImGui::Text("Step:"); ImGui::SameLine(align);
-        ImGui::Text("%f", parameters.step);
+        ImGui::Text("%.1lf", parameters.step);
 
         conclude(main);
     }
@@ -213,7 +213,7 @@ namespace procgui
         float pos[2] = { parameters.starting_position.x,
                          parameters.starting_position.y };
         if ( ImGui::DragFloat2("Starting position", pos,
-                               1.f, 0.f, 0.f, "%#.lf") )
+                               1.f, 0.f, 0.f, "%.lf") )
         {
             // is_modified_ is not set: the render state take care of translating the view.
             parameters.starting_position.x = pos[0];
@@ -223,7 +223,7 @@ namespace procgui
         // --- Starting angle ---
         float starting_angle_deg = math::rad_to_degree(parameters.starting_angle);
         if ( ImGui::DragFloat("Starting Angle", &starting_angle_deg,
-                              1.f, 0.f, 360.f, "%#.lf") )
+                              1.f, 0.f, 360.f, "%.lf") )
         {
             // is_modified_ is not set: the render state take care of rotating the view.
             parameters.starting_angle = math::degree_to_rad(starting_angle_deg);
@@ -232,14 +232,14 @@ namespace procgui
         // --- Angle Delta ---
         float delta_angle_deg = math::rad_to_degree(parameters.delta_angle);
         if ( ImGui::DragFloat("Angle Delta", &delta_angle_deg,
-                              1.f, 0.f, 360.f, "%#.lf") )
+                              1.f, 0.f, 360.f, "%.lf") )
         {
             is_modified = true;
             parameters.delta_angle = math::degree_to_rad(delta_angle_deg);
         }
 
         // --- Step ---
-        is_modified |= ImGui::DragFloat("Step", &parameters.step);
+        is_modified |= ImGui::DragFloat("Step", &parameters.step, 0.2f, 0.f, 0.f, "%#.1lf");
 
         // --- Iterations ---
         // Arbitrary value to avoid resource depletion happening with higher
