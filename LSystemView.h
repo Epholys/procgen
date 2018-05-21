@@ -18,7 +18,7 @@ namespace procgui
     // DrawingParameters.
     // It manages mainly three things:
     //     - The vertices of the corresponding drawing,
-    //     - The interactive GUI of the parameters,
+    //     - The interactive GUI of the parameters (with unique identifiers),
     //     - The selection of itself by the user and by extension the bounding
     //     boxes.
     //
@@ -27,7 +27,7 @@ namespace procgui
     //     'interpretation_buff_', and 'params_'.
     //     - The 'bounding_box_' and 'sub_boxes_' must correspond with the
     //     'vertices_'.
-    // 
+    //
     // Note:
     //    - LSystemView contain a shared ownership of the LSystem and the
     //    InterpretationMap via the corresponding Observer. As a consequence, a
@@ -89,9 +89,11 @@ namespace procgui
         // Unique identifier for each instance (with a growing id_count_).
         // Used in the GUI.
         static int id_count_;
-        static colors::UniqueColor color_gen_;
         int id_;
-        sf::Color color_id_; // Color associated to the id (%100).
+        // The unique color generator. Each id is associated with a unique
+        // color. Static as shared between every objects.
+        static colors::UniqueColor color_gen_;
+        sf::Color color_id_; // Color associated to the id.
 
         // The window's name.
         std::string name_;

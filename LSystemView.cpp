@@ -84,6 +84,7 @@ namespace procgui
         other.Observer<LSystem>::set_target(nullptr);
         other.Observer<InterpretationMap>::set_target(nullptr);
 
+        // the 'other' object must not matter in the 'color_gen_' anymore.
         other.id_ = -1;
     }
 
@@ -128,6 +129,7 @@ namespace procgui
 
     LSystemView::~LSystemView()
     {
+        // Unregister the id unless the object was moved.
         if (id_ != -1)
         {
             color_gen_.remove_id(id_);
@@ -236,7 +238,7 @@ namespace procgui
         if (is_selected_)
         {
             auto bounding = transform.transformRect(bounding_box_);
-            // Draw the global bounding boxes.
+            // Draw the global bounding boxes with the unique color.
             std::array<sf::Vertex, 5> box =
                 {{ {{ bounding.left, bounding.top}, color_id_},
                    {{ bounding.left, bounding.top + bounding.height}, color_id_},

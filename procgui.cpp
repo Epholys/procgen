@@ -352,12 +352,18 @@ namespace procgui
             return false;
         }
         std::stringstream ss;
-        ss << name << "##" << lsys_view.get_id();
+        ss << name << "##" << lsys_view.get_id(); // Each window of LSystemView
+                                                  // is conserved by its id.
         if (main)
         {
+            // Make the window appear at the mouse double-click position with a
+            // correct size.
+            // Warning: lots of arbitrary values.
             sf::Vector2f pos = sf::Vector2f(controller::WindowController::get_mouse_position());
-            pos -= {250,50};
+            pos -= {250,50}; // Shift the window position to make its center
+                             // appear a the mouse position.
 
+            // Shift the window position to always appear on-screen in its entirety.
             int windowX = window::window_size.x;
             int windowY = window::window_size.y;
             pos.x = pos.x < 0 ? 0 : pos.x;
@@ -367,6 +373,8 @@ namespace procgui
             ImGui::SetNextWindowPos({pos.x,pos.y}, ImGuiSetCond_Appearing);
             ImGui::SetNextWindowSize({500,150}, ImGuiSetCond_Appearing);
 
+            // The window's title background is set to the unique color
+            // associated with the 'lsys_view_'.
             auto color = lsys_view.get_color();
             ImGui::PushStyleColor(ImGuiCol_TitleBg, ImColor(color.r, color.g, color.b));
             ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImColor(color.r, color.g, color.b));
