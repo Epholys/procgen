@@ -15,11 +15,8 @@
    - Saving and loading LSystems to and from files
 
 ** Main Roadmap
-   2. Add a more complex GUI and polish it
-      * Slider speed
-      * Color-coded LSystems windows
-   3. Add genetic algorithm or constraint-based algorithm for new LSystem generation
    4. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
+   3. Add genetic algorithm or constraint-based algorithm for new LSystem generation
 
 ** Other ideas
 
@@ -53,6 +50,10 @@
      - Difference: When using ImGui ; ImGui style of coding
    - *Compilation:* =make= and C++17 needed
    - *Testing suite:* [[https://github.com/google/googletest/][googletest]]
+
+Warnings:
+   - The save format is not yet stable, the save files may not be compatible between two commits. It is however possible to manually edit them to support the new features. the 'saves' directory will always be populated with valid examples.
+   - The API is not stable (and will probably never be, as this is a software and not a library)
 
 ** Completing the framework?
    - Static analysis (Coverity?)
