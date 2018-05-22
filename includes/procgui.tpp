@@ -41,12 +41,16 @@ bool interact_with_buffer(Buffer& buffer,
         // one to delete. We reasonably assume a user can not click on two
         // different buttons in the same frame.  We will need to synchronize
         // the rules.
+        ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(0, 0.6f, 0.6f)));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(0, 0.7f, 0.7f)));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(0, 0.8f, 0.8f)));
         ImGui::SameLine();
         if (ImGui::Button("-"))
         {
             is_modified = true;
             to_delete = it;
         }
+        ImGui::PopStyleColor(3);
 
         // If the current rule is not valid, add a warning.
         if(!rule.validity)

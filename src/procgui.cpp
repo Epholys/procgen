@@ -388,12 +388,25 @@ namespace procgui
 
             ImGui::EndGroup();
             ImGui::PopID();
-            if (i != keys.size()-1)
-            {
-                ImGui::SameLine();
-            }
+            ImGui::SameLine();
         }
 
+        ImGui::PushStyleGreenButton();
+        if (ImGui::Button("+"))
+        {
+            is_modified = true;
+            keys.push_back({sf::Color::White, 1.f});
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::SameLine();
+        ImGui::PushStyleRedButton();
+        if (ImGui::Button("-") && keys.size() > 2)
+        {
+            is_modified = true;
+            keys.pop_back();
+        }
+        ImGui::PopStyleColor(3);
+        
         auto k = colors::LinearGradient::sanitize_keys(keys);
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 pos = ImGui::GetCursorScreenPos();
