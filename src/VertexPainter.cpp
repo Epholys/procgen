@@ -30,8 +30,11 @@ namespace colors
         }
     }
 
-    bool VertexPainter::interact_with()
+    void VertexPainter::interact_with()
     {
-        return procgui::interact_with(generator_, "");
+        if(procgui::interact_with(generator_, ""))
+        {
+            notify();
+        }
     }
 }

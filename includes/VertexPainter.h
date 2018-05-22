@@ -4,11 +4,12 @@
 
 #include <memory>
 #include <SFML/Graphics.hpp>
+#include "Observable.h"
 #include "ColorsGenerator.h"
 
 namespace colors
 {
-    class VertexPainter
+    class VertexPainter : public Observable
     {
     public:
         VertexPainter();
@@ -16,9 +17,9 @@ namespace colors
         
         void paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box);
 
-        bool interact_with();
+        void interact_with();
+
     private:
-        void swap(VertexPainter& other);
 
         std::shared_ptr<ColorGenerator> generator_;
     };

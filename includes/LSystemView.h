@@ -34,9 +34,15 @@ namespace procgui
     //    InterpretationMap via the corresponding Observer. As a consequence, a
     //    copy of LSystemView will share the same LSystem and Map.
     class LSystemView : public Observer<LSystem>,
-                        public Observer<drawing::InterpretationMap>
+                        public Observer<drawing::InterpretationMap>,
+                        public Observer<colors::VertexPainter>
     {
     public:
+        LSystemView(const std::string& name,
+                    std::shared_ptr<LSystem> lsys,
+                    std::shared_ptr<drawing::InterpretationMap> map,
+                    drawing::DrawingParameters param,
+                    std::shared_ptr<colors::VertexPainter> painter);
         LSystemView(const std::string& name,
                     std::shared_ptr<LSystem> lsys,
                     std::shared_ptr<drawing::InterpretationMap> map,
@@ -59,17 +65,20 @@ namespace procgui
         drawing::DrawingParameters& ref_parameters();
         LSystemBuffer& ref_lsystem_buffer();
         InterpretationMapBuffer& ref_interpretation_buffer();
+        colors::VertexPainter& ref_vertex_painter();
         // Getters
         sf::FloatRect get_bounding_box() const;
         const drawing::DrawingParameters& get_parameters() const;
         const LSystemBuffer& get_lsystem_buffer() const;
         const InterpretationMapBuffer& get_interpretation_buffer() const;
+        const colors::VertexPainter& get_vertex_painter();
         int get_id() const;
         sf::Color get_color() const;
         sf::Transform get_transform() const;
         
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();
+        void paint_vertices();
 
         // Draw the vertices.
         void draw(sf::RenderTarget &target);
@@ -113,7 +122,6 @@ namespace procgui
 
         // The vertices of the View. Computer at each modification.
         std::vector<sf::Vertex> vertices_;
-        std::shared_ptr<colors::VertexPainter> painter_;
 
         // The global bounding box of the drawing.
         sf::FloatRect bounding_box_;
