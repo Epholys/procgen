@@ -40,8 +40,9 @@ namespace colors
         const keys& get_keys() const;
         void set_keys(const keys& keys);
 
+        static keys sanitize_keys(const keys& colors);
+
     private:
-        keys sanitize_keys();
         
         keys key_colors_;
     };

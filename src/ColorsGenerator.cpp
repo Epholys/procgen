@@ -33,9 +33,9 @@ namespace colors
         Expects(key_colors_.size() >= 2);
     }
 
-    LinearGradient::keys LinearGradient::sanitize_keys()
+    LinearGradient::keys LinearGradient::sanitize_keys(const keys& colors)
     {
-        auto keys = key_colors_;
+        auto keys = colors;
         for (auto& p : keys)
         {
             p.second = p.second < 0. ? 0. : p.second;
@@ -65,7 +65,7 @@ namespace colors
         f = f < 0. ? 0. : f;
         f = f > 1. ? 1. : f;
 
-        auto keys = sanitize_keys();
+        auto keys = sanitize_keys(key_colors_);
 
         auto superior_it = std::find_if(begin(keys), end(keys),
                                 [f](const auto& p){return f <= p.second;});
@@ -74,7 +74,15 @@ namespace colors
         auto inferior_idx = superior_idx == 0 ? 0 : superior_idx-1;
         const auto& superior = keys.at(superior_idx);
         const auto& inferior = keys.at(inferior_idx);
-        float factor = (f - inferior.second) / (superior.second - inferior.second);
+        float factor = 0.f;
+        if (superior == inferior)
+        {
+            factor = 1.f;
+        }
+        else
+        {
+            factor = (f - inferior.second) / (superior.second - inferior.second);
+        }
 
         sf::Color color;
         color.r = inferior.first.r * (1-factor) + superior.first.r * factor;

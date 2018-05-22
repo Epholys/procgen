@@ -363,7 +363,7 @@ namespace procgui
         
         return is_modified;
     }
-    bool interact_with(colors::ConstantColor& gen)
+    bool interact_with(colors::ConstantColor&)
     {
         return false;
     }
@@ -393,6 +393,24 @@ namespace procgui
                 ImGui::SameLine();
             }
         }
+
+        auto k = colors::LinearGradient::sanitize_keys(keys);
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        ImVec2 pos = ImGui::GetCursorScreenPos();
+        ImVec2 size {300., 15.};
+        for (unsigned i=0; i<k.size()-1; ++i)
+        {
+            const auto& col1 = k.at(i).first;
+            const auto& col2 = k.at(i+1).first;
+            const auto& f = k.at(i+1).second;
+            draw_list->AddRectFilledMultiColor(pos, ImVec2(size.x*f, pos.y+size.y),
+                                               IM_COL32(col1.r, col1.g, col1.b, col1.a),
+                                               IM_COL32(col2.r, col2.g, col2.b, col2.a),
+                                               IM_COL32(col2.r, col2.g, col2.b, col2.a),
+                                               IM_COL32(col1.r, col1.g, col1.b, col1.a));
+            pos.x += size.x*f - pos.x;
+        }
+        ImGui::Dummy(size);
         if (is_modified)
         {
             gen.set_keys(keys);
