@@ -18,6 +18,7 @@ namespace colors
     class ConstantColor : public ColorGenerator
     {
     public:
+        ConstantColor();
         ConstantColor(const sf::Color& color);
 
         sf::Color get(float f) override;
@@ -30,12 +31,18 @@ namespace colors
     {
     public:
         using keys = std::vector<std::pair<sf::Color, float>>;
-        
+
+        LinearGradient();
         LinearGradient(const keys& key_colors);
 
         sf::Color get(float f) override;
-        
+
+        const keys& get_keys() const;
+        void set_keys(const keys& keys);
+
     private:
+        keys sanitize_keys();
+        
         keys key_colors_;
     };
 }

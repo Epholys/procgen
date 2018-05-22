@@ -13,6 +13,7 @@
 #include "InterpretationMapBuffer.h"
 #include "Turtle.h"
 #include "helper_string.h"
+#include "ColorsGenerator.h"
 
 
 // Define 'display()' and 'interact_with()' for the structs and classes to
@@ -70,6 +71,10 @@ namespace procgui {
     bool interact_with(InterpretationMapBuffer& buffer, const std::string& name, bool main = true);
 
     bool interact_with(LSystemView& lsys_view, const std::string& name, bool main = true, bool* open = nullptr);
+
+    bool interact_with(std::shared_ptr<colors::ColorGenerator> gen, const std::string& name, bool main = true);
+    bool interact_with(colors::ConstantColor& gen);
+    bool interact_with(colors::LinearGradient& gen);
     
     #include "procgui.tpp"
 

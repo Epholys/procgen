@@ -1,4 +1,5 @@
 #include "VertexPainter.h"
+#include "procgui.h"
 
 namespace colors
 {
@@ -27,5 +28,10 @@ namespace colors
             color.a = v.color.a;
             v.color = color;
         }
+    }
+
+    bool VertexPainter::interact_with()
+    {
+        return procgui::interact_with(generator_, "");
     }
 }

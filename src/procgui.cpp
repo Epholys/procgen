@@ -340,6 +340,66 @@ namespace procgui
         return is_modified;
     }
 
+    bool interact_with(std::shared_ptr<colors::ColorGenerator> gen, const std::string& name, bool main)
+    {
+        if (!set_up(name, main))
+        {
+            return false;
+        }
+
+        bool is_modified = false;    
+        auto constant = std::dynamic_pointer_cast<colors::ConstantColor>(gen);
+        auto gradient = std::dynamic_pointer_cast<colors::LinearGradient>(gen);
+        if (constant)
+        {
+            is_modified = interact_with(*constant);
+        }
+        else if (gradient)
+        {
+            is_modified = interact_with(*gradient);
+        }
+
+        conclude(main);
+        
+        return is_modified;
+    }
+    bool interact_with(colors::ConstantColor& gen)
+    {
+        return false;
+    }
+    bool interact_with(colors::LinearGradient& gen)
+    {
+        bool is_modified = false;
+        
+        auto keys = gen.get_keys();
+        for (unsigned i=0; i<keys.size(); ++i)
+        {
+            ImGui::PushID(i);
+            ImGui::BeginGroup();
+
+            auto& sfcolor = keys.at(i).first;
+            ImVec4 imcolor = sfcolor;
+            is_modified |= ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf);
+            sfcolor = imcolor;
+            
+            ImGui::PushItemWidth(50);
+            is_modified |= ImGui::DragFloat("", &keys.at(i).second, 0.01, 0., 1., "%.2f");
+            ImGui::PopItemWidth();
+
+            ImGui::EndGroup();
+            ImGui::PopID();
+            if (i != keys.size()-1)
+            {
+                ImGui::SameLine();
+            }
+        }
+        if (is_modified)
+        {
+            gen.set_keys(keys);
+        }
+        return is_modified;
+    }
+
     bool interact_with(LSystemView& lsys_view, const std::string& name, bool main, bool* open)
     {
         // To avoid collision with other window of the same name, create a

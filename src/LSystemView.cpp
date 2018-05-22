@@ -233,6 +233,10 @@ namespace procgui
         {
             compute_vertices();
         }
+        if (painter_->interact_with())
+        {
+            painter_->paint_vertices(vertices_, bounding_box_);
+        }
 
         // Early out if there are no vertices.
         if (vertices_.size() == 0)
