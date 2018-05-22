@@ -225,7 +225,7 @@ namespace procgui
         if ( ImGui::DragFloat("Starting Angle", &starting_angle_deg,
                               1.f, 0.f, 360.f, "%.lf") )
         {
-            // is_modified_ is not set: the render state take care of rotating the view.
+            is_modified = true;
             parameters.starting_angle = math::degree_to_rad(starting_angle_deg);
         }
 

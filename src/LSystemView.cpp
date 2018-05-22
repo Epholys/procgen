@@ -181,12 +181,7 @@ namespace procgui
     }
     sf::FloatRect LSystemView::get_bounding_box() const
     {
-        auto box = bounding_box_;
-        sf::Transform transform;
-        transform.translate(params_.starting_position)
-                 .rotate(math::rad_to_degree(params_.starting_angle));                 
-        box = transform.transformRect(bounding_box_);
-        return box;
+        get_transform().transformRect(bounding_box_);
     }
     const drawing::DrawingParameters& LSystemView::get_parameters() const
     {
@@ -208,6 +203,13 @@ namespace procgui
     {
         return color_id_;
     }
+    sf::Transform LSystemView::get_transform() const
+    {
+        sf::Transform transform;
+        transform.translate(params_.starting_position);
+        return transform;
+    }
+
 
     
     void LSystemView::compute_vertices()
@@ -220,11 +222,7 @@ namespace procgui
                                               params_);
         bounding_box_ = geometry::compute_bounding_box(vertices_);
         sub_boxes_ = geometry::compute_sub_boxes(vertices_, MAX_SUB_BOXES);
-
-        sf::Transform transform;
-        transform.translate(params_.starting_position)
-            .rotate(math::rad_to_degree(params_.starting_angle));                 
-        painter_->paint_vertices(vertices_, bounding_box_, transform);
+        painter_->paint_vertices(vertices_, bounding_box_); /* un-transformed vertices and bounding box */
     }
     
     void LSystemView::draw(sf::RenderTarget &target)
@@ -242,33 +240,25 @@ namespace procgui
             return;
         }
 
-        sf::Transform transform;
-        transform.translate(params_.starting_position)
-                 .rotate(math::rad_to_degree(params_.starting_angle));                 
         // Draw the vertices.
-        target.draw(vertices_.data(), vertices_.size(), sf::LineStrip, transform);
+        target.draw(vertices_.data(), vertices_.size(), sf::LineStrip, get_transform());
 
         if (is_selected_)
         {
-            auto bounding = transform.transformRect(bounding_box_);
+            auto box = get_transform().transformRect(bounding_box_);
             // Draw the global bounding boxes with the unique color.
-            std::array<sf::Vertex, 5> box =
-                {{ {{ bounding.left, bounding.top}, color_id_},
-                   {{ bounding.left, bounding.top + bounding.height}, color_id_},
-                   {{ bounding.left + bounding.width, bounding.top + bounding.height}, color_id_},
-                   {{ bounding.left + bounding.width, bounding.top}, color_id_},
-                   {{ bounding.left, bounding.top}, color_id_}}};
-            target.draw(box.data(), box.size(), sf::LineStrip);
+            std::array<sf::Vertex, 5> rect =
+                {{ {{ box.left, box.top}, color_id_},
+                   {{ box.left, box.top + box.height}, color_id_},
+                   {{ box.left + box.width, box.top + box.height}, color_id_},
+                   {{ box.left + box.width, box.top}, color_id_},
+                   {{ box.left, box.top}, color_id_}}};
+            target.draw(rect.data(), rect.size(), sf::LineStrip);
         }
 
         // // DEBUG
         // // Draw the sub-bounding boxes.
-        // decltype(sub_boxes_) subs;
-        // for (auto& box : sub_boxes_)
-        // {
-        //     subs.push_back(transform.transformRect(box));
-        // }
-        // for (const auto& box : subs)
+        // for (const auto& box : sub_boxes_)
         // {
         //     std::array<sf::Vertex, 5> rect =
         //         {{ {{ box.left, box.top}, sf::Color(255,0,0,50)},
@@ -286,17 +276,12 @@ namespace procgui
 
     bool LSystemView::is_inside(const sf::Vector2f& click) const
     {
-        sf::Transform transform;
-        transform.translate(params_.starting_position)
-                 .rotate(math::rad_to_degree(params_.starting_angle));                 
-        decltype(sub_boxes_) boxes;
-        for (auto& box : sub_boxes_)
+        decltype(sub_boxes_) subs;
+        for (const auto& box : sub_boxes_)
         {
-            boxes.push_back(transform.transformRect(box));
+            subs.push_back(get_transform().transformRect(box));
         }
-
-        
-        for (const auto& rect : boxes)
+        for (const auto& rect : subs)
         {
             if (rect.contains(sf::Vector2f(click)))
             {

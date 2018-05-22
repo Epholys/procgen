@@ -66,6 +66,7 @@ namespace procgui
         const InterpretationMapBuffer& get_interpretation_buffer() const;
         int get_id() const;
         sf::Color get_color() const;
+        sf::Transform get_transform() const;
         
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();

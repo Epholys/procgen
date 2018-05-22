@@ -14,7 +14,7 @@ namespace colors
         VertexPainter();
         VertexPainter(std::shared_ptr<ColorGenerator> gen);
         
-        void paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box, sf::Transform transform);
+        void paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box);
         
     private:
         void swap(VertexPainter& other);
