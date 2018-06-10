@@ -98,4 +98,22 @@ namespace geometry
         return boxes;
     }
 
+    bool intersection (const sf::Vector2f& a, const sf::Vector2f& u, const sf::Vector2f& b, const sf::Vector2f v, sf::Vector2f& intersection)
+    {
+        float dx = b.x - a.x;
+        float dy = b.y - a.y;
+        float det = v.x * u.y - v.y * u.x;
+        if (det != 0)
+        {
+            float t = (dy * v.x - dx * v.y) / det;
+            intersection = a + t * u;
+            return true;
+        }
+        return false;
+    }
+
+    float distance (const sf::Vector2f& a, const sf::Vector2f& b)
+    {
+        return std::sqrt(std::pow(b.x-a.x, 2)+std::pow(b.y-a.y, 2));
+    }
 }

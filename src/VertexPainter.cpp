@@ -30,12 +30,13 @@ namespace colors
         std::vector<Line> bounds (4);
         bounds.at(Upper) = {{bounding_box.left, bounding_box.top}, {1,0}};
         bounds.at(Rightmost) = {{bounding_box.left+bounding_box.width, bounding_box.top}, {0,1}};
-        bounds.at(Bottom) = {{bounding_box.left+bounding_box.width, bounding_box.top+bounding_box.height}, {-1,0}};
-        bounds.at(Leftmost) = {{bounding_box.left, bounding_box.top+bounding_box.height}, {0,-1}};
+        bounds.at(Bottom) = {{bounding_box.left, bounding_box.top+bounding_box.height}, {1,0}};
+        bounds.at(Leftmost) = {{bounding_box.left, bounding_box.top}, {0,1}};
                 
-        const float angle = 45.;
+        float angle = 45.;
+        
         std::pair<Line, Line> higher_bounds; // at the direction pointed by the angle
-        if (angle >= 0 && angle < 180.)
+        if (angle >= 0. && angle < 180.)
         {
             higher_bounds.first = bounds.at(Upper);
         }
@@ -54,7 +55,7 @@ namespace colors
         
         const sf::Vector2f middle {bounding_box.left+bounding_box.width/2.f,
                                    bounding_box.top+bounding_box.height/2.f};
-        const sf::Vector2f direction {std::cos(math::degree_to_rad(angle)), std::sin(math::degree_to_rad(angle))};
+        const sf::Vector2f direction {std::cos(math::degree_to_rad(angle)), -std::sin(math::degree_to_rad(angle))};
 
         sf::Vector2f intersection {middle};
         geometry::intersection(middle, direction, higher_bounds.first.point, higher_bounds.first.direction, intersection);
@@ -78,22 +79,58 @@ namespace colors
         float AB_squared = AB.x*AB.x + AB.y*AB.y;
         if (AB_squared == 0)
         {
-            projection = intersection;
+            for (auto& v : vertices)
+            {
+                sf::Color color = generator_->get(.5);
+                color.a = v.color.a;
+                v.color = color;
+            }
         }
 
-        for (auto& v : vertices)
+        else
         {
-            sf::Vector2f Ap = v.position - intersection;
-            float t = (Ap.x*AB.x + Ap.y*AB.y) / AB_squared;
-            projection = intersection + t*AB;
+            for (auto& v : vertices)
+            {
+                sf::Vector2f Ap = v.position - intersection;
+                float t = (Ap.x*AB.x + Ap.y*AB.y) / AB_squared;
+                sf::Vector2f projection;
+                if (t < 0.)
+                {
+                    projection = intersection;
+                }
+                else if (t > 1.)
+                {
+                    projection = opposite_intersection;
+                }
+                else
+                {
+                    projection = intersection + t*AB;
+                }
 
-            float lerp = std::sqrt(std::pow(opposite_intersection.x-projection.x,2)+
-                                   std::pow(opposite_intersection.y-projection.y,2)) / distance;
+                float lerp = geometry::distance(projection, opposite_intersection) / distance;
 
-            sf::Color color = generator_->get(lerp);
-            color.a = v.color.a;
-            v.color = color;
+                sf::Color color = generator_->get(lerp);
+                color.a = v.color.a;
+                v.color = color;
+            }
         }
+
+        // // DEBUG
+        // vertices.push_back({vertices.back().position, {0,0,0,0}});
+        // vertices.push_back({{intersection.x - 5, intersection.y - 5}, {0,0,0,0}});
+        // vertices.push_back({{intersection.x - 5, intersection.y - 5}, sf::Color::Magenta});
+        // vertices.push_back({{intersection.x + 5, intersection.y - 5}, sf::Color::Magenta});
+        // vertices.push_back({{intersection.x + 5, intersection.y + 5}, sf::Color::Magenta});
+        // vertices.push_back({{intersection.x - 5, intersection.y + 5}, sf::Color::Magenta});
+        // vertices.push_back({{intersection.x - 5, intersection.y - 5}, sf::Color::Magenta});
+        // vertices.push_back({{intersection.x - 5, intersection.y - 5}, {0,0,0,0}});
+
+        // vertices.push_back({{opposite_intersection.x - 5, opposite_intersection.y - 5}, {0,0,0,0}});
+        // vertices.push_back({{opposite_intersection.x + 5, opposite_intersection.y - 5}, sf::Color::Cyan});
+        // vertices.push_back({{opposite_intersection.x + 5, opposite_intersection.y + 5}, sf::Color::Cyan});
+        // vertices.push_back({{opposite_intersection.x - 5, opposite_intersection.y + 5}, sf::Color::Cyan});
+        // vertices.push_back({{opposite_intersection.x - 5, opposite_intersection.y - 5}, sf::Color::Cyan});
+        // vertices.push_back({{opposite_intersection.x + 5, opposite_intersection.y - 5}, sf::Color::Cyan});
     }
 
     void VertexPainter::interact_with()
