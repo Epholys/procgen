@@ -2,6 +2,7 @@
 #
 #   make all       - makes everything.
 #   make release   - makes everything in release mode (optimized).
+#   make optimized - makes everything in optimized mode (not portable)
 #   make profiling - makes a executable easy to profile
 #   make main      - makes the main executable.
 #   make test      - makes tests.
@@ -18,8 +19,9 @@ LFLAGS     += -lsfml-system -lsfml-window -lsfml-graphics -lGL -lstdc++fs
 IFLAGS     += -I. -I$(INCLUDE_DIR)
 
 # Special optimization flags for release and profiling
-release : CXXFLAGS = -std=c++17 -O3 -Wall -Wextra -pthread
-profiling : CXXFLAGS = -g -std=c++17 -O3 -Wall -Wextra -pthread
+release : CXXFLAGS = -std=c++17 -O3 -ffast-math -Wall -Wextra -pthread
+profiling : CXXFLAGS = -g -std=c++17 -O3 -ffast-math -Wall -Wextra -pthread
+optimized : CXXFLAGS = -std=c++17 -O3 -ffast-math -march=native -Wall -Wextra -pthread
 
 ### Source files, Object Files, Directories, Targets, ...
 # Core object files to compile for every target.
@@ -80,11 +82,14 @@ main : $(ALL_OBJECTS)
 test : $(OBJECTS) $(TEST_OBJ) $(TEST_DIR)/gtest_main.a
 	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -o $(TEST_TARGET) $^ $(IFLAGS) $(LFLAGS) -lpthread
 
-# release: Same as main with the '-O3' option in CXXFLAGS (see above).
+# release: Same as main with optimization flags (see above).
 release : main
 
-# profiling: Same as main with the '-g -O3' option in CXXFLAGS (see above).
+# profiling: Same as main with optimization and debug flags (see above)
 profiling : main
+
+# optimized: Same as main with the even more optimization flags (see above)
+optimized : main
 
 
 # Each .o file is compiled with its associated *.cpp file.
