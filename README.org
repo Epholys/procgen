@@ -16,6 +16,11 @@
 
 ** Main Roadmap
    4. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
+      * Continuous and discrete color gradients
+      * Painting the vertices by height, order of recursion, ...
+      * Composite painting (e.g. i-th recursion brown, j-th recursion shade of greens)
+      * Growth as the turtle order, recursion order, ...
+      * Rectangle of different widths for recursion
    3. Add genetic algorithm or constraint-based algorithm for new LSystem generation
 
 ** Other ideas
@@ -33,9 +38,7 @@
    - Bugs
      - Correct zoom level and drag behaviour when resizing window (in Gnome)
      - *Maybe* using arbitrary floating point precision (even with doubles some geometric LSystems are not so geometric anymore)
-
-   - Cleanup
-     - Make 'DrawingParameters' an Observable
+     - Non-responsive interface sometimes
 
 ** Development framework
    - *Environment:* debian sid chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=
