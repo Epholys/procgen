@@ -365,7 +365,7 @@ namespace procgui
     }
     bool interact_with(colors::ConstantColor&)
     {
-        return false;
+        return false;  // TODO
     }
     bool interact_with(colors::LinearGradient& gen)
     {
@@ -411,17 +411,20 @@ namespace procgui
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 pos = ImGui::GetCursorScreenPos();
         ImVec2 size {300., 15.};
+        float x = pos.x;
+        float ratio = 0.f;
         for (unsigned i=0; i<k.size()-1; ++i)
         {
             const auto& col1 = k.at(i).first;
             const auto& col2 = k.at(i+1).first;
             const auto& f = k.at(i+1).second;
-            draw_list->AddRectFilledMultiColor(pos, ImVec2(size.x*f, pos.y+size.y),
+            draw_list->AddRectFilledMultiColor({x, pos.y}, ImVec2(x+size.x*(f-ratio), pos.y+size.y),
                                                IM_COL32(col1.r, col1.g, col1.b, col1.a),
                                                IM_COL32(col2.r, col2.g, col2.b, col2.a),
                                                IM_COL32(col2.r, col2.g, col2.b, col2.a),
                                                IM_COL32(col1.r, col1.g, col1.b, col1.a));
-            pos.x += size.x*f - pos.x;
+            ratio = f;
+            x = pos.x + size.x*f;
         }
         ImGui::Dummy(size);
         if (is_modified)
