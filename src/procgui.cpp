@@ -369,6 +369,7 @@ namespace procgui
     }
     bool interact_with(colors::LinearGradient& gen)
     {
+        // TODO Comment Document
         bool is_modified = false;
         
         auto keys = gen.get_keys();

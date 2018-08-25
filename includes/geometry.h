@@ -8,6 +8,14 @@
 
 namespace geometry
 {
+    // Define a Line as a point and a direction vector.
+    struct Line
+    {
+        sf::Vector2f point;
+        sf::Vector2f direction;
+    };
+
+    // TODO: remove 'compute'
     // Compute the bounding box of a set of vertices.
     // Complexity in time is in O(n), n being the number of vertices.
     sf::FloatRect compute_bounding_box(const std::vector<sf::Vertex>& vertices);
@@ -21,14 +29,19 @@ namespace geometry
     //
     // Note: The algorithm breaks for low count of vertices: it returns a
     // correct set of bounding boxes but 'max_boxes' is not respected. See the
-    // code for more informations.
+    // implementation code for more informations.
     std::vector<sf::FloatRect> compute_sub_boxes(const std::vector<sf::Vertex>& vertices,
                                                  int max_boxes);
 
+
+    sf::Vector2f intersection(const Line& l1, const Line& l2);
     
-    bool intersection (const sf::Vector2f& a, const sf::Vector2f& u, const sf::Vector2f& b, const sf::Vector2f v, sf::Vector2f& intersection);
-    
-    float distance (const sf::Vector2f& a, const sf::Vector2f& b);
+    float distance(const sf::Vector2f& a, const sf::Vector2f& b);
+    float angle_from_vector(const sf::Vector2f vec);
+
+    std::pair<sf::Vector2f, sf::Vector2f> intersection_with_bounding_box(const Line& line,
+                                                                         const sf::FloatRect& bounding_box);
+    sf::Vector2f projection(sf::Vector2f A, sf::Vector2f B, sf::Vector2f p);
 }
 
 

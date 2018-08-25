@@ -20,7 +20,6 @@ namespace colors
         void interact_with();
 
     private:
-
         std::shared_ptr<ColorGenerator> generator_;
     };
 }
