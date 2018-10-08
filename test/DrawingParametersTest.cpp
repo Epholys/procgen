@@ -19,8 +19,8 @@ TEST(DrawingParametersTest, serialization)
         iarchive(iparams);
     }
 
-    ASSERT_FLOAT_EQ(oparams.starting_angle, iparams.starting_angle);
-    ASSERT_FLOAT_EQ(oparams.delta_angle, iparams.delta_angle);
-    ASSERT_FLOAT_EQ(oparams.step, iparams.step);
+    ASSERT_NEAR(oparams.starting_angle, iparams.starting_angle, 1000);
+    ASSERT_NEAR(oparams.delta_angle, iparams.delta_angle, 1000);
+    ASSERT_NEAR(oparams.step, iparams.step, 1000);
     ASSERT_EQ(oparams.n_iter, iparams.n_iter);
 }

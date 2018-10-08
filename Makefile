@@ -27,7 +27,7 @@ optimized : CXXFLAGS = -std=c++17 -O3 -ffast-math -march=native -Wall -Wextra -p
 # Core object files to compile for every target.
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
 ALL_OBJECTS = $(SRCS:%.cpp=%.o)
-OBJECTS = $(filter-out main.o, $(ALL_OBJECTS))
+OBJECTS = $(filter-out $(SRC_DIR)/main.o, $(ALL_OBJECTS))
 
 # 'dear imgui,' and 'imgui-sfml' object files to compile for the main target.
 IMGUI_DIR = imgui

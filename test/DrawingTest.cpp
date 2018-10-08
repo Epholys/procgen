@@ -33,8 +33,8 @@ public:
                                         { '[', save_position },
                                         { ']', load_position } };
     // starting_position, starting_angle, delta_angle, step, n_iter
-    DrawingParameters parameters { { 100, 100 }, degree_to_rad(45.f), degree_to_rad(90.f), 10, 0 };
-    impl::Turtle turtle;
+    DrawingParameters parameters { { 100, 100 }, 0.f, degree_to_rad(90.f), 10, 0 };
+    impl::Turtle turtle {parameters};
 };
 
 // SFML does not provide an equality operator for sf::Vertex. It is
@@ -94,7 +94,6 @@ TEST_F(DrawingTest, stack_test)
 
     ASSERT_EQ(saved_state.position, turtle.state.position);
     ASSERT_EQ(saved_state.angle, turtle.state.angle);
-
 }
 
 // The L-system defined returns the string: "F+G" with 1 iteration.
