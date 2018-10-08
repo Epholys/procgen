@@ -99,6 +99,7 @@ namespace geometry
         return boxes;
     }
 
+    
     sf::Vector2f intersection(const Line& l1, const Line& l2)
     {
         sf::Vector2f a = l1.point, b = l2.point;
@@ -141,6 +142,11 @@ namespace geometry
     std::pair<sf::Vector2f, sf::Vector2f> intersection_with_bounding_box(const Line& line,
                                                                          const sf::FloatRect& bounding_box)
     {
+        Expects(line.point.y >= bounding_box.top);
+        Expects(line.point.y <= bounding_box.top + bounding_box.height);
+        Expects(line.point.x >= bounding_box.left);
+        Expects(line.point.x <= bounding_box.left + bounding_box.width);
+        
         // From the bounding box, define the four lines that make up the box. 
         enum bound { Upper=0, Rightmost, Bottom, Leftmost };
         std::vector<Line> bounds (4);

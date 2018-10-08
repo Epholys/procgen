@@ -34,6 +34,7 @@ namespace geometry
                                                  int max_boxes);
 
 
+    // Compute the intersection between the 
     sf::Vector2f intersection(const Line& l1, const Line& l2);
     
     float distance(const sf::Vector2f& a, const sf::Vector2f& b);
