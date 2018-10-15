@@ -6,6 +6,11 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 
+
+// This namespace contains all utilities related to geometric operations.
+// WARNING: all of this was created ad-hoc and as a consequence is not coherent.
+// TODO: if this file continues expending, do a big makeover to have a cohesive
+// system.
 namespace geometry
 {
     // Define a Line as a point and a direction vector.
@@ -14,6 +19,19 @@ namespace geometry
         sf::Vector2f point;
         sf::Vector2f direction;
     };
+
+    // Computes the euclidean distance between the points 'a' and 'b'.
+    float distance(const sf::Vector2f& a, const sf::Vector2f& b);
+
+    // Computes the intersection between the lines 'l1' and 'l2'.
+    sf::Vector2f intersection(const Line& l1, const Line& l2);
+
+    // Computes the angle between the x axis and the vector 'vec' (in radian).
+    float angle_from_vector(const sf::Vector2f vec);
+
+    // First projects the point A on the straight line (AB) then clamp it to A
+    // or B if the projected point is not in the segment [AB].
+    sf::Vector2f project_and_clamp(sf::Vector2f A, sf::Vector2f B, sf::Vector2f p);
 
     // TODO: remove 'compute'
     // Compute the bounding box of a set of vertices.
@@ -33,16 +51,14 @@ namespace geometry
     std::vector<sf::FloatRect> compute_sub_boxes(const std::vector<sf::Vertex>& vertices,
                                                  int max_boxes);
 
-
-    // Compute the intersection between the 
-    sf::Vector2f intersection(const Line& l1, const Line& l2);
-    
-    float distance(const sf::Vector2f& a, const sf::Vector2f& b);
-    float angle_from_vector(const sf::Vector2f vec);
-
+    // Computes the two intersections 'line' forms with 'bounding_box'. The
+    // first component of the pair is the intersection closest to the 'point'
+    // attribute of 'line'. The second component is farthest one.
+    //
+    // Exception:
+    //   - Precondition: the 'point' attribute of 'line' must be inside the 'bounding_box'.
     std::pair<sf::Vector2f, sf::Vector2f> intersection_with_bounding_box(const Line& line,
                                                                          const sf::FloatRect& bounding_box);
-    sf::Vector2f projection(sf::Vector2f A, sf::Vector2f B, sf::Vector2f p);
 }
 
 

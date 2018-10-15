@@ -5,16 +5,20 @@
 namespace colors
 {
     VertexPainter::VertexPainter()
-        : generator_{nullptr}
+        : generator_{
+        std::make_shared<LinearGradient>(
+            LinearGradient::keys({
+                    {sf::Color::Red, 0.},
+                    {sf::Color::Green, 0.75},
+                    {sf::Color::Blue, 1.}}))}
     {
-        generator_ = std::make_shared<LinearGradient>(LinearGradient::keys({{sf::Color::Red, 0.}, {sf::Color::Green, 0.75}, {sf::Color::Blue, 1.}}));
     }
-    VertexPainter::VertexPainter(std::shared_ptr<ColorGenerator> gen)
+    VertexPainter::VertexPainter(const std::shared_ptr<ColorGenerator> gen)
         : generator_{gen}
     {
     }
     
-    void VertexPainter::paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box)
+    void VertexPainter::paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box) const
     {
         if (!generator_)
         {
@@ -33,7 +37,7 @@ namespace colors
         
         for (auto& v : vertices)
         {
-            sf::Vector2f projection = geometry::projection(opposite_intersection, intersection, v.position);
+            sf::Vector2f projection = geometry::project_and_clamp(opposite_intersection, intersection, v.position);
             float lerp = geometry::distance(projection, opposite_intersection) / distance;
 
             sf::Color color = generator_->get(lerp);
@@ -59,7 +63,7 @@ namespace colors
         // vertices.push_back({{opposite_intersection.x + 5, opposite_intersection.y - 5}, sf::Color::Cyan});
     }
 
-    void VertexPainter::interact_with()
+    void VertexPainter::interact_with() const
     {
         if(procgui::interact_with(generator_, ""))
         {

@@ -9,18 +9,28 @@
 
 namespace colors
 {
+    // TODO: Stub class, rewrites comments.
+    // Paint the vertices according to a rule with a ColorGenerator.
+    // For example, paints according to radial gradient with a ColorGenerator of
+    // green hues.
+    // No invariants.
     class VertexPainter : public Observable
     {
     public:
-        VertexPainter();
-        VertexPainter(std::shared_ptr<ColorGenerator> gen);
-        
-        void paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box);
 
-        void interact_with();
+        VertexPainter(); // Create a default generator
+        VertexPainter(const std::shared_ptr<ColorGenerator> gen); // Copy the generator
+        
+        
+        // Paint 'vertices' with the informations of 'bounding_box' according to
+        // the rule with the colors from generator_
+        void paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box) const;
+
+        // Interact with the GUI
+        void interact_with() const;
 
     private:
-        std::shared_ptr<ColorGenerator> generator_;
+        const std::shared_ptr<ColorGenerator> generator_;
     };
 }
 

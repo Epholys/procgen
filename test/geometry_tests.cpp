@@ -63,13 +63,13 @@ TEST(geometry, intersection_with_bounding_box)
     ASSERT_FLOAT_EQ(intersections.second.y, 3);
 }
 
-TEST(geometry, projection)
+TEST(geometry, project_and_clamp)
 {
     sf::Vector2f A (0, 0);
     sf::Vector2f B (2, 2);
     sf::Vector2f P (0, 2);
 
-    auto proj = projection(A, B, P);
+    auto proj = project_and_clamp(A, B, P);
     ASSERT_FLOAT_EQ(proj.x, 1);
     ASSERT_FLOAT_EQ(proj.y, 1);
 }

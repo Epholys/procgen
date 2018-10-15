@@ -4,6 +4,72 @@
 
 namespace geometry
 {
+    float distance (const sf::Vector2f& a, const sf::Vector2f& b)
+    {
+        return std::sqrt(std::pow(b.x-a.x, 2)+std::pow(b.y-a.y, 2));
+    }
+    
+    sf::Vector2f intersection(const Line& l1, const Line& l2)
+    {
+        sf::Vector2f a = l1.point, b = l2.point;
+        sf::Vector2f u = l1.direction, v = l2.direction;
+        sf::Vector2f intersection = a;
+        
+        float dx = b.x - a.x;
+        float dy = b.y - a.y;
+        float det = v.x * u.y - v.y * u.x;
+        if (det != 0)
+        {
+            float t = (dy * v.x - dx * v.y) / det;
+            intersection = a + t * u;
+        }
+        return intersection;
+    }
+
+    float angle_from_vector(const sf::Vector2f vec)
+    {
+         // y axis is downward
+        if (vec.x == 0 && vec.y <= 0)
+        {
+            return math::pi / 2;
+        }
+        else if (vec.x == 0 && vec.y > 0)
+        {
+            return -math::pi / 2;
+        }
+        else
+        {
+            return std::atan(-vec.y / vec.x);
+        }
+    }
+
+    sf::Vector2f project_and_clamp(sf::Vector2f A, sf::Vector2f B, sf::Vector2f P)
+    {
+        sf::Vector2f AB = B - A;
+        float AB_squared = AB.x*AB.x + AB.y*AB.y;
+        if (AB_squared == 0)
+        {
+            return A;
+        }
+
+        sf::Vector2f AP = P - A;
+        float t = (AP.x*AB.x + AP.y*AB.y) / AB_squared;
+        sf::Vector2f projection;
+        if (t < 0.)
+        {
+            projection = A;
+        }
+        else if (t > 1.)
+        {
+            projection = B;
+        }
+        else
+        {
+            projection = A + t*AB;
+        }
+        return projection;
+    }
+
     sf::FloatRect compute_bounding_box(const std::vector<sf::Vertex>& vertices)
     {
         if (vertices.size() == 0)
@@ -98,50 +164,11 @@ namespace geometry
 
         return boxes;
     }
-
-    
-    sf::Vector2f intersection(const Line& l1, const Line& l2)
-    {
-        sf::Vector2f a = l1.point, b = l2.point;
-        sf::Vector2f u = l1.direction, v = l2.direction;
-        sf::Vector2f intersection = a;
-        
-        float dx = b.x - a.x;
-        float dy = b.y - a.y;
-        float det = v.x * u.y - v.y * u.x;
-        if (det != 0)
-        {
-            float t = (dy * v.x - dx * v.y) / det;
-            intersection = a + t * u;
-        }
-        return intersection;
-    }
-
-    float distance (const sf::Vector2f& a, const sf::Vector2f& b)
-    {
-        return std::sqrt(std::pow(b.x-a.x, 2)+std::pow(b.y-a.y, 2));
-    }
-
-    float angle_from_vector(const sf::Vector2f vec)
-    {
-         // y axis is downward
-        if (vec.x == 0 && vec.y <= 0)
-        {
-            return math::pi / 2;
-        }
-        else if (vec.x == 0 && vec.y > 0)
-        {
-            return -math::pi / 2;
-        }
-        else
-        {
-            return std::atan(-vec.y / vec.x);
-        }
-    }
     
     std::pair<sf::Vector2f, sf::Vector2f> intersection_with_bounding_box(const Line& line,
                                                                          const sf::FloatRect& bounding_box)
     {
+        // Asserts the preconditions.
         Expects(line.point.y >= bounding_box.top);
         Expects(line.point.y <= bounding_box.top + bounding_box.height);
         Expects(line.point.x >= bounding_box.left);
@@ -157,8 +184,11 @@ namespace geometry
 
         float angle = angle_from_vector(line.direction);
 
+        // Here, 'line' refers to the geometry::Line representing the sides
+        // forming the bounding box.
+        // The '.first' represent the first possible line, and '.second' the other one.
         std::pair<Line, Line> possible_intersection_line; // at the direction pointed by the angle
-        std::pair<Line, Line> possible_opposite_intersection_line; // at the direction pointed by the angle
+        std::pair<Line, Line> possible_opposite_intersection_line; // at the opposite direction 
         if (angle >= 0. && angle < 180.)
         {
             possible_intersection_line.first = bounds.at(Upper);
@@ -180,14 +210,17 @@ namespace geometry
             possible_opposite_intersection_line.second = bounds.at(Leftmost);
         }
 
+        // Computes the two intersections corresponding to the first two possible sides.
         std::pair<sf::Vector2f, sf::Vector2f> possible_intersection = {line.point, line.point};
         possible_intersection.first = intersection(line, possible_intersection_line.first);
         possible_intersection.second = intersection(line, possible_intersection_line.second);
 
+        // Computes the same thing at the opposite direction.
         std::pair<sf::Vector2f, sf::Vector2f> possible_opposite_intersection = {line.point, line.point};
         possible_opposite_intersection.first = intersection(line, possible_opposite_intersection_line.first);
         possible_opposite_intersection.second = intersection(line, possible_opposite_intersection_line.second);
 
+        // Select the closest intersection.
         sf::Vector2f intersection {line.point};
         if (distance(line.point, possible_intersection.first) <= distance(line.point, possible_intersection.second))
         {
@@ -198,6 +231,7 @@ namespace geometry
             intersection = possible_intersection.second;
         }
 
+        // Same at the opposite direction.
         sf::Vector2f opposite_intersection {line.point};
         if (distance(line.point, possible_opposite_intersection.first) <= distance(line.point, possible_opposite_intersection.second))
         {
@@ -210,32 +244,4 @@ namespace geometry
 
         return {intersection, opposite_intersection};
     }
-
-    sf::Vector2f projection(sf::Vector2f A, sf::Vector2f B, sf::Vector2f P)
-    {
-        sf::Vector2f AB = B - A;
-        float AB_squared = AB.x*AB.x + AB.y*AB.y;
-        if (AB_squared == 0)
-        {
-            return A;
-        }
-
-        sf::Vector2f AP = P - A;
-        float t = (AP.x*AB.x + AP.y*AB.y) / AB_squared;
-        sf::Vector2f projection;
-        if (t < 0.)
-        {
-            projection = A;
-        }
-        else if (t > 1.)
-        {
-            projection = B;
-        }
-        else
-        {
-            projection = A + t*AB;
-        }
-        return projection;
-    }
-
 }
