@@ -37,13 +37,13 @@ namespace procgui
         compute_vertices();
     }
 
-    LSystemView::LSystemView(const std::string& name,
-                             std::shared_ptr<LSystem> lsys,
-                             std::shared_ptr<drawing::InterpretationMap> map,
-                             drawing::DrawingParameters param)
-        : LSystemView(name, lsys, map, param, std::make_shared<VertexPainter>())
-    {
-    }
+    // LSystemView::LSystemView(const std::string& name,
+    //                          std::shared_ptr<LSystem> lsys,
+    //                          std::shared_ptr<drawing::InterpretationMap> map,
+    //                          drawing::DrawingParameters param)
+    //     : LSystemView(name, lsys, map, param, std::make_shared<VertexPainter>())
+    // {
+    // }
 
     
     LSystemView::LSystemView(const sf::Vector2f& position)
@@ -265,7 +265,7 @@ namespace procgui
         {
             compute_vertices();
         }
-        Observer<VertexPainter>::get_target()->interact_with();
+        Observer<VertexPainter>::get_target()->interact_with(); // TODO: do the same as LSystemBuffer, etc.
 
         // Early out if there are no vertices.
         if (vertices_.size() == 0)

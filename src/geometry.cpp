@@ -37,9 +37,13 @@ namespace geometry
         {
             return -math::pi / 2;
         }
-        else
+        else if (vec.x > 0)
         {
             return std::atan(-vec.y / vec.x);
+        }
+        else
+        {
+            return -std::atan(-vec.y / vec.x);
         }
     }
 
@@ -182,7 +186,8 @@ namespace geometry
         bounds.at(Bottom) = {{bounding_box.left, bounding_box.top+bounding_box.height}, {1,0}};
         bounds.at(Leftmost) = {{bounding_box.left, bounding_box.top}, {0,1}};
 
-        float angle = angle_from_vector(line.direction);
+        float angle = math::rad_to_degree(angle_from_vector(line.direction)); // TODO wrong
+        std::cout << angle << std::endl;
 
         // Here, 'line' refers to the geometry::Line representing the sides
         // forming the bounding box.

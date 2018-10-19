@@ -21,16 +21,20 @@ namespace colors
         VertexPainter(); // Create a default generator
         VertexPainter(const std::shared_ptr<ColorGenerator> gen); // Copy the generator
         
+        float get_angle() const;
+        void set_angle(float angle);
+        const std::shared_ptr<ColorGenerator> get_generator() const;
         
         // Paint 'vertices' with the informations of 'bounding_box' according to
         // the rule with the colors from generator_
         void paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box) const;
 
         // Interact with the GUI
-        void interact_with() const;
+        void interact_with();
 
     private:
         const std::shared_ptr<ColorGenerator> generator_;
+        float angle_ {60.};
     };
 }
 

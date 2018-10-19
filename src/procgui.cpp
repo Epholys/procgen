@@ -340,6 +340,31 @@ namespace procgui
         return is_modified;
     }
 
+    bool interact_with(colors::VertexPainter& painter, const std::string& name, bool main)
+    {
+        if (!set_up(name, main))
+        {
+            return false;
+        }
+
+        bool is_modified = false;
+
+        // --- Starting angle ---
+        float angle = painter.get_angle();
+        if ( ImGui::DragFloat("Gradient Angle", &angle,
+                              1.f, 0.f, 360.f, "%.lf") )
+        {
+            is_modified = true;
+            painter.set_angle(angle);
+        }
+        
+        is_modified |= interact_with(painter.get_generator(), "", false);
+
+        conclude(main);
+
+        return is_modified;
+    }
+    
     bool interact_with(std::shared_ptr<colors::ColorGenerator> gen, const std::string& name, bool main)
     {
         if (!set_up(name, main))
@@ -369,10 +394,11 @@ namespace procgui
     }
     bool interact_with(colors::LinearGradient& gen)
     {
-        // TODO Comment Document
         bool is_modified = false;
         
         auto keys = gen.get_keys();
+
+        // Modify 'gen''s keys: colors and position
         for (unsigned i=0; i<keys.size(); ++i)
         {
             ImGui::PushID(i);
@@ -392,6 +418,7 @@ namespace procgui
             ImGui::SameLine();
         }
 
+        // Button '+' to add a key.
         ImGui::PushStyleGreenButton();
         if (ImGui::Button("+"))
         {
@@ -400,6 +427,7 @@ namespace procgui
         }
         ImGui::PopStyleColor(3);
         ImGui::SameLine();
+        // Button '-' to remove a key
         ImGui::PushStyleRedButton();
         if (ImGui::Button("-") && keys.size() > 2)
         {
@@ -409,6 +437,7 @@ namespace procgui
         ImGui::PopStyleColor(3);
         
         auto k = colors::LinearGradient::sanitize_keys(keys);
+        // Preview the color gradient
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 pos = ImGui::GetCursorScreenPos();
         ImVec2 size {300., 15.};

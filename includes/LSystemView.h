@@ -42,11 +42,11 @@ namespace procgui
                     std::shared_ptr<LSystem> lsys,
                     std::shared_ptr<drawing::InterpretationMap> map,
                     drawing::DrawingParameters param,
-                    std::shared_ptr<colors::VertexPainter> painter);
-        LSystemView(const std::string& name,
-                    std::shared_ptr<LSystem> lsys,
-                    std::shared_ptr<drawing::InterpretationMap> map,
-                    drawing::DrawingParameters param);
+                    std::shared_ptr<colors::VertexPainter> painter = std::make_shared<colors::VertexPainter>());
+        // LSystemView(const std::string& name,
+        //             std::shared_ptr<LSystem> lsys,
+        //             std::shared_ptr<drawing::InterpretationMap> map,
+        //             drawing::DrawingParameters param);
         // Create a default LSystemView at 'position'.
         LSystemView(const sf::Vector2f& position);
         // The rule-of-five is necessary with the 'Observer<>' callbacks
