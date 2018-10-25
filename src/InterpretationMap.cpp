@@ -10,7 +10,7 @@ namespace drawing
     void go_forward_fn(Turtle& turtle)
     {
         float dx = turtle.parameters.step * std::cos(turtle.state.angle);
-        float dy = turtle.parameters.step * std::sin(turtle.state.angle);
+        float dy = turtle.parameters.step * -std::sin(turtle.state.angle); // y axis point downward
         turtle.state.position += {dx, dy};
         turtle.vertices.push_back(sf::Vector2f(turtle.state.position));
     }
@@ -53,6 +53,6 @@ namespace drawing
     }
     InterpretationMap::InterpretationMap(std::initializer_list<typename rule_map::value_type> init)
         : RuleMap<Order>(init)
-    {
+    {        
     }
 }

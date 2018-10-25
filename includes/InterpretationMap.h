@@ -143,8 +143,8 @@ namespace drawing
     // The default interpretation map used when creating new LSystems.
     const InterpretationMap default_interpretation_map 
     { { 'F', go_forward },
-      { '+', turn_left  },
-      { '-', turn_right },
+      { '-', turn_left  },
+      { '+', turn_right },
       { '[', save_position },
       { ']', load_position } };
 }

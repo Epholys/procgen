@@ -31,13 +31,7 @@ int main()
 
     auto serpinski = std::make_shared<LSystem>(LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
     auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } } });
-    auto map = std::make_shared<InterpretationMap>(InterpretationMap
-                                                     { { 'F', go_forward },
-                                                     { 'G', go_forward },
-                                                     { '+', turn_left  },
-                                                     { '-', turn_right },
-                                                     { '[', save_position },
-                                                     { ']', load_position } });
+    auto map = std::make_shared<InterpretationMap>(default_interpretation_map);
     DrawingParameters serpinski_param;
     serpinski_param.starting_position = { 1000, 600 };
     serpinski_param.starting_angle = 0.f;
@@ -47,7 +41,7 @@ int main()
 
     DrawingParameters plant_param;
     plant_param.starting_position = { 400, 800 };
-    plant_param.starting_angle = degree_to_rad(-80.f);
+    plant_param.starting_angle = degree_to_rad(80.f);
     plant_param.delta_angle = degree_to_rad(25.f);
     plant_param.step = 5;
     plant_param.n_iter = 6;

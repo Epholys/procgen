@@ -43,7 +43,7 @@ namespace colors
             return;
         }
 
-        sf::Vector2f direction = {std::cos(math::degree_to_rad(angle_)), std::sin(math::degree_to_rad(angle_))};
+        sf::Vector2f direction = {std::cos(math::degree_to_rad(angle_)), -std::sin(math::degree_to_rad(angle_))};
         sf::Vector2f middle = {bounding_box.left + bounding_box.width/2, bounding_box.top + bounding_box.height/2};
         const auto intersections = geometry::intersection_with_bounding_box({middle, direction}, bounding_box);
         
