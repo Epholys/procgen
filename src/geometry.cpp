@@ -35,15 +35,23 @@ namespace geometry
         }
         else if (vec.x == 0 && vec.y > 0)
         {
-            return -math::pi / 2;
+            return 3 * math::pi / 2;
         }
-        else if (vec.x > 0)
+        else if (vec.x > 0 && vec.y >= 0)
         {
-            return std::atan(-vec.y / vec.x);
+            return std::atan(vec.y / vec.x);
+        }
+        else if (vec.x < 0 && vec.y >=0)
+        {
+            return std::atan(-vec.x / vec.y) + math::pi/2;
+        }
+        else if (vec.x < 0 && vec.y < 0)
+        {
+            return std::atan(vec.y / vec.x) + math::pi;
         }
         else
         {
-            return -std::atan(-vec.y / vec.x);
+            return std::atan(-vec.x / vec.y) + 3 * math::pi / 2;
         }
     }
 
@@ -186,7 +194,7 @@ namespace geometry
         bounds.at(Bottom) = {{bounding_box.left, bounding_box.top+bounding_box.height}, {1,0}};
         bounds.at(Leftmost) = {{bounding_box.left, bounding_box.top}, {0,1}};
 
-        float angle = math::rad_to_degree(angle_from_vector(line.direction)); // TODO wrong
+        float angle = math::rad_to_degree(angle_from_vector(line.direction));
         std::cout << angle << std::endl;
 
         // Here, 'line' refers to the geometry::Line representing the sides
@@ -196,13 +204,13 @@ namespace geometry
         std::pair<Line, Line> possible_opposite_intersection_line; // at the opposite direction 
         if (angle >= 0. && angle < 180.)
         {
-            possible_intersection_line.first = bounds.at(Upper);
-            possible_opposite_intersection_line.first = bounds.at(Bottom);
+            possible_intersection_line.first = bounds.at(Bottom);
+            possible_opposite_intersection_line.first = bounds.at(Upper);
         }
         else
         {
-            possible_intersection_line.first = bounds.at(Bottom);
-            possible_opposite_intersection_line.first = bounds.at(Upper);
+            possible_intersection_line.first = bounds.at(Upper);
+            possible_opposite_intersection_line.first = bounds.at(Bottom);
         }
         if (angle >= 90. && angle < 270.)
         {
