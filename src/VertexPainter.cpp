@@ -51,6 +51,12 @@ namespace colors
         sf::Vector2f opposite_intersection = intersections.second;
         
         float distance = geometry::distance(opposite_intersection, intersection);
+        if(distance < std::numeric_limits<float>::epsilon())
+        {
+            // The vertices are on the same line, the lerp will always be 0, set
+            // distance to 1. to avoid division by 0.;
+            distance = 1.f;
+        }
         
         for (auto& v : vertices)
         {
@@ -62,29 +68,29 @@ namespace colors
             v.color = color;
         }
 
-        // DEBUG
-        vertices.push_back({vertices.back().position, {0,0,0,0}});
-        vertices.push_back({{intersection.x - 5, intersection.y - 5}, {0,0,0,0}});
-        vertices.push_back({{intersection.x - 5, intersection.y - 5}, sf::Color::Magenta});
-        vertices.push_back({{intersection.x + 5, intersection.y - 5}, sf::Color::Magenta});
-        vertices.push_back({{intersection.x + 5, intersection.y + 5}, sf::Color::Magenta});
-        vertices.push_back({{intersection.x - 5, intersection.y + 5}, sf::Color::Magenta});
-        vertices.push_back({{intersection.x - 5, intersection.y - 5}, sf::Color::Magenta});
-        vertices.push_back({{intersection.x - 5, intersection.y - 5}, {0,0,0,0}});
+        // // DEBUG
+        // vertices.push_back({vertices.back().position, {0,0,0,0}});
+        // vertices.push_back({{intersection.x - 5, intersection.y - 5}, {0,0,0,0}});
+        // vertices.push_back({{intersection.x - 5, intersection.y - 5}, sf::Color::Magenta});
+        // vertices.push_back({{intersection.x + 5, intersection.y - 5}, sf::Color::Magenta});
+        // vertices.push_back({{intersection.x + 5, intersection.y + 5}, sf::Color::Magenta});
+        // vertices.push_back({{intersection.x - 5, intersection.y + 5}, sf::Color::Magenta});
+        // vertices.push_back({{intersection.x - 5, intersection.y - 5}, sf::Color::Magenta});
+        // vertices.push_back({{intersection.x - 5, intersection.y - 5}, {0,0,0,0}});
 
-        vertices.push_back({{opposite_intersection.x - 5, opposite_intersection.y - 5}, {0,0,0,0}});
-        vertices.push_back({{opposite_intersection.x + 5, opposite_intersection.y - 5}, sf::Color::Cyan});
-        vertices.push_back({{opposite_intersection.x + 5, opposite_intersection.y + 5}, sf::Color::Cyan});
-        vertices.push_back({{opposite_intersection.x - 5, opposite_intersection.y + 5}, sf::Color::Cyan});
-        vertices.push_back({{opposite_intersection.x - 5, opposite_intersection.y - 5}, sf::Color::Cyan});
-        vertices.push_back({{opposite_intersection.x + 5, opposite_intersection.y - 5}, sf::Color::Cyan});
+        // vertices.push_back({{opposite_intersection.x - 5, opposite_intersection.y - 5}, {0,0,0,0}});
+        // vertices.push_back({{opposite_intersection.x + 5, opposite_intersection.y - 5}, sf::Color::Cyan});
+        // vertices.push_back({{opposite_intersection.x + 5, opposite_intersection.y + 5}, sf::Color::Cyan});
+        // vertices.push_back({{opposite_intersection.x - 5, opposite_intersection.y + 5}, sf::Color::Cyan});
+        // vertices.push_back({{opposite_intersection.x - 5, opposite_intersection.y - 5}, sf::Color::Cyan});
+        // vertices.push_back({{opposite_intersection.x + 5, opposite_intersection.y - 5}, sf::Color::Cyan});
     }
 
     void VertexPainter::interact_with()
     {
         if(procgui::interact_with(*this, ""))
         {
-            notify();
+            notify(); // TODO: two notify when changing angle: add ColorGenerator to Observer
         }
     }
 }

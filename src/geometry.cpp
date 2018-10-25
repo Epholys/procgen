@@ -22,8 +22,12 @@ namespace geometry
         {
             float t = (dy * v.x - dx * v.y) / det;
             intersection = a + t * u;
+            return intersection;
         }
-        return intersection;
+        else
+        {
+            return {std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
+        }
     }
 
     float angle_from_vector(const sf::Vector2f vec)

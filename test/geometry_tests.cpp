@@ -48,8 +48,8 @@ TEST(geometry, distance)
 TEST(geometry, angle_from_vector)
 {
     ASSERT_FLOAT_EQ(math::pi / 2, angle_from_vector(sf::Vector2f(0,-1))); 
-    ASSERT_FLOAT_EQ(-math::pi / 2, angle_from_vector(sf::Vector2f(0,1))); 
-    ASSERT_NEAR(math::degree_to_rad(45.f), angle_from_vector(sf::Vector2f(1,-1)), 0.0001); 
+    ASSERT_FLOAT_EQ(3 * math::pi / 2, angle_from_vector(sf::Vector2f(0,1))); 
+    ASSERT_NEAR(math::degree_to_rad(45.f), angle_from_vector(sf::Vector2f(1,1)), 0.0001); 
 }
 
 TEST(geometry, intersection_with_bounding_box)
