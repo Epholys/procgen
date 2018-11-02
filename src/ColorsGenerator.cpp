@@ -20,8 +20,19 @@ namespace colors
         return color_;
     }
 
+    const sf::Color ConstantColor::get_color() const
+    {
+        return color_;
+    }
+    
+    void ConstantColor::set_color(const sf::Color& color)
+    {
+        color_ = color;
+    }
+
+    
     LinearGradient::LinearGradient()
-        : LinearGradient({{sf::Color::Red, 0.},{sf::Color::Blue, 1.}})
+        : LinearGradient({{sf::Color::White, 0.},{sf::Color::White, 1.}})
     {
     }
     
@@ -70,7 +81,7 @@ namespace colors
         // Clamp 'f'.
         f = f < 0. ? 0. : f;
         f = f > 1. ? 1. : f;
-        auto keys = sanitize_keys(key_colors_);
+        auto keys = sanitize_keys(key_colors_); // TODO unoptimal
 
         // Find the upper-bound key...
         auto superior_it = std::find_if(begin(keys), end(keys),
@@ -97,5 +108,86 @@ namespace colors
         color.g = inferior.first.g * (1-factor) + superior.first.g * factor;
         color.b = inferior.first.b * (1-factor) + superior.first.b * factor;
         return color;
+    }
+
+
+    DiscreteGradient::DiscreteGradient()
+        : DiscreteGradient({{sf::Color::White, 0}})
+    {
+    }
+
+    DiscreteGradient::DiscreteGradient(const keys& keys)
+        : ColorGenerator()
+        , keys_{keys}
+        , colors_{generate_colors(keys_)}
+    {
+    }
+
+    sf::Color DiscreteGradient::get(float f)
+    {
+        f = f < 0. ? 0. : f;
+        f = f >= 1. ? 1.-std::numeric_limits<float>::epsilon() : f; // just before one to round to the inferior
+        
+        return colors_.at(static_cast<size_t>(f * colors_.size()));
+    }
+
+    const DiscreteGradient::keys& DiscreteGradient::get_keys() const
+    {
+        return keys_;
+    }
+
+    void DiscreteGradient::set_keys(keys keys)
+    {
+        Expects(keys.size() > 0);
+        keys_ = keys;
+        colors_ = generate_colors(keys_);
+    }
+
+    std::vector<sf::Color> DiscreteGradient::generate_colors(const keys& dirty_keys)
+    {
+        std::vector<sf::Color> colors;
+        
+        Expects(dirty_keys.size() > 0);
+        if(dirty_keys.size() == 1)
+        {
+            colors = {dirty_keys.at(0).first};
+            return colors;
+        }
+        
+        keys keys = sanitize_keys(dirty_keys);
+        
+        auto inferior = keys.begin();
+        auto superior = ++keys.begin();
+        size_t i = 0;
+        while(i <= keys.back().second)
+        {
+            float factor = ((float)i - inferior->second) / (superior->second - inferior->second);
+            sf::Color color;
+            color.r = inferior->first.r * (1-factor) + superior->first.r * factor;
+            color.g = inferior->first.g * (1-factor) + superior->first.g * factor;
+            color.b = inferior->first.b * (1-factor) + superior->first.b * factor;
+            colors.push_back(color);
+
+            ++i;
+            if (i > superior->second)
+            {
+                ++inferior;
+                ++superior;
+            }
+        }
+
+        return colors;
+    }
+
+    DiscreteGradient::keys DiscreteGradient::sanitize_keys(const keys& dirty_keys)
+    {
+        keys keys = dirty_keys;
+        std::sort(keys.begin(), keys.end(), [](const auto& a, const auto& b){return a.second < b.second;});
+        size_t min_position = keys.at(0).second;
+        for (auto it = keys.begin(); it != keys.end(); ++it)
+        {
+            it->second -= min_position;
+        }
+        return keys;
     }
 }

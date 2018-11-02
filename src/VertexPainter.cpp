@@ -35,7 +35,12 @@ namespace colors
     {
         return generator_;
     }
-    
+
+    std::shared_ptr<ColorGenerator>& VertexPainter::ref_generator()
+    {
+        return generator_;
+    }
+
     void VertexPainter::paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box) const
     {
         if (!generator_)

@@ -342,6 +342,7 @@ namespace procgui
 
     bool interact_with(colors::VertexPainter& painter, const std::string& name, bool main)
     {
+        ImGui::SetNextWindowSize({500,150}, ImGuiSetCond_Appearing);
         if (!set_up(name, main))
         {
             return false;
@@ -358,14 +359,14 @@ namespace procgui
             painter.set_angle(angle);
         }
         
-        is_modified |= interact_with(painter.get_generator(), "", false);
+        is_modified |= interact_with(painter.ref_generator(), "", false);
 
         conclude(main);
 
         return is_modified;
     }
     
-    bool interact_with(std::shared_ptr<colors::ColorGenerator> gen, const std::string& name, bool main)
+    bool interact_with(std::shared_ptr<colors::ColorGenerator>& gen, const std::string& name, bool main)
     {
         if (!set_up(name, main))
         {
@@ -373,24 +374,80 @@ namespace procgui
         }
 
         bool is_modified = false;    
+
+        int index = 0;
         auto constant = std::dynamic_pointer_cast<colors::ConstantColor>(gen);
         auto gradient = std::dynamic_pointer_cast<colors::LinearGradient>(gen);
+        auto discrete = std::dynamic_pointer_cast<colors::DiscreteGradient>(gen);
         if (constant)
         {
-            is_modified = interact_with(*constant);
+            index = 0;
         }
         else if (gradient)
         {
-            is_modified = interact_with(*gradient);
+            index = 1;
+        }
+        else
+        {
+            index = 2;
+        }
+
+        const char* generators[3] = {"Constant", "Linear Gradient", "Discrete Gradient"};
+        if (ImGui::ListBox("", &index, generators, 3))
+        {
+            is_modified = true;
+            if (index == 0)
+            {
+                gen = std::make_shared<colors::ConstantColor>();
+            }
+            else if (index == 1)
+            {
+                gen = std::make_shared<colors::LinearGradient>();
+            }
+            else
+            {
+                gen = std::make_shared<colors::DiscreteGradient>();
+
+            }
+        }
+
+        if (constant)
+        {
+            is_modified |= interact_with(*constant);
+        }
+        else if (gradient)
+        {
+            is_modified |= interact_with(*gradient);
+        }
+        else
+        {
+            is_modified |= interact_with(*discrete);
         }
 
         conclude(main);
         
         return is_modified;
     }
-    bool interact_with(colors::ConstantColor&)
+    bool interact_with(colors::ConstantColor& constant)
     {
-        return false;  // TODO
+        bool is_modified = false;
+
+        ImVec4 imcolor = constant.get_color();
+        is_modified |= ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf);
+
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        ImVec2 pos = ImGui::GetCursorScreenPos();
+        ImVec2 size {500., 30.};
+        draw_list->AddRectFilled(ImVec2(pos.x, pos.y), ImVec2(pos.x+size.x, pos.y+size.y),
+                                 ImGui::ColorConvertFloat4ToU32(imcolor));
+        ImGui::Dummy(size);
+
+        if (is_modified)
+        {
+            constant.set_color(imcolor);
+        }
+
+        return is_modified;
     }
     bool interact_with(colors::LinearGradient& gen)
     {
@@ -426,10 +483,9 @@ namespace procgui
             keys.push_back({sf::Color::White, 1.f});
         }
         ImGui::PopStyleColor(3);
-        ImGui::SameLine();
         // Button '-' to remove a key
         ImGui::PushStyleRedButton();
-        if (ImGui::Button("-") && keys.size() > 2)
+        if (keys.size() > 2 && (ImGui::SameLine(), ImGui::Button("-")))
         {
             is_modified = true;
             keys.pop_back();
@@ -440,7 +496,7 @@ namespace procgui
         // Preview the color gradient
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 pos = ImGui::GetCursorScreenPos();
-        ImVec2 size {300., 15.};
+        ImVec2 size {500., 30.};
         float x = pos.x;
         float ratio = 0.f;
         for (unsigned i=0; i<k.size()-1; ++i)
@@ -463,6 +519,97 @@ namespace procgui
         }
         return is_modified;
     }
+    bool interact_with(colors::DiscreteGradient& gen)
+    {
+        bool is_modified = false;
+        
+        auto keys = gen.get_keys();
+
+        int modifier = 0;
+        // Modify 'gen''s keys: colors and position
+        for (unsigned i=0; i<keys.size()-1; ++i)
+        {
+            ImGui::PushID(i);
+
+            auto& sfcolor = keys.at(i).first;
+            ImVec4 imcolor = sfcolor;
+            is_modified |= ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf);
+            sfcolor = imcolor;
+
+            ImGui::SameLine();
+            ImGui::BeginGroup();
+
+            int diff = keys.at(i+1).second - keys.at(i).second - 1;
+            ImGui::Text(std::to_string(diff).c_str());
+
+            ImGui::PushStyleGreenButton();
+            if (ImGui::Button("+"))
+            {
+                is_modified = true;
+                ++modifier;
+            }
+            ImGui::PopStyleColor(3);
+            ImGui::SameLine();
+            ImGui::PushStyleRedButton();
+            if (diff > 0 && ImGui::Button("-"))
+            {
+                is_modified = true;
+                --modifier;
+            }
+            ImGui::PopStyleColor(3);
+
+            keys.at(i+1).second += modifier;
+
+            ImGui::EndGroup();
+            ImGui::PopID();
+            ImGui::SameLine();
+        }
+
+        ImGui::PushID(keys.size());
+        auto& sfcolor = keys.back().first;
+        ImVec4 imcolor = sfcolor;
+        is_modified |= ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf);
+        sfcolor = imcolor;
+        ImGui::PopID();
+
+        ImGui::SameLine();
+        // Button '+' to add a key.
+        ImGui::PushStyleGreenButton();
+        if (ImGui::Button("+"))
+        {
+            is_modified = true;
+            keys.push_back({sf::Color::White, keys.back().second+1});
+        }
+        ImGui::PopStyleColor(3);
+        // Button '-' to remove a key
+        ImGui::PushStyleRedButton();
+        if (keys.size() > 1 && (ImGui::SameLine(), ImGui::Button("-")))
+        {
+            is_modified = true;
+            keys.pop_back();
+        }
+        ImGui::PopStyleColor(3);
+        
+        // Preview the color gradient
+        std::vector<sf::Color> colors = colors::DiscreteGradient::generate_colors(keys);
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        ImVec2 pos = ImGui::GetCursorScreenPos();
+        ImVec2 size {500., 30.};
+        float x = pos.x;
+        float width = size.x / colors.size();
+        for (const auto& color : colors)
+        {
+            draw_list->AddRectFilled({x, pos.y}, ImVec2(x+width, pos.y+size.y), IM_COL32(color.r, color.g, color.b, color.a));
+            x += width;
+        }
+        ImGui::Dummy(size);
+        if (is_modified)
+        {
+            gen.set_keys(keys);
+        }
+        return is_modified;
+    }
+
 
     bool interact_with(LSystemView& lsys_view, const std::string& name, bool main, bool* open)
     {

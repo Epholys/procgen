@@ -199,7 +199,6 @@ namespace geometry
         bounds.at(Leftmost) = {{bounding_box.left, bounding_box.top}, {0,1}};
 
         float angle = math::rad_to_degree(angle_from_vector(line.direction));
-        std::cout << angle << std::endl;
 
         // Here, 'line' refers to the geometry::Line representing the sides
         // forming the bounding box.

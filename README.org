@@ -15,13 +15,18 @@
    - Saving and loading LSystems to and from files
 
 ** Main Roadmap
-   4. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
+   1. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
       * Continuous and discrete color gradients
       * Painting the vertices by height, order of recursion, ...
       * Composite painting (e.g. i-th recursion brown, j-th recursion shade of greens)
       * Growth as the turtle order, recursion order, ...
       * Rectangle of different widths for recursion
-   3. Add genetic algorithm or constraint-based algorithm for new LSystem generation
+   2. Add genetic algorithm or constraint-based algorithm for new LSystem generation
+   3. Extend the L-System and turtle interpretation
+      * Parametric L-System
+      * Context-sensitive L-System
+      * Stochastic L-System
+      * Parameters for each interpretation order (step for go_forward, delta_angle for turn_*)
 
 ** Other ideas
 

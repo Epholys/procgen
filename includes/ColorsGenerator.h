@@ -28,6 +28,9 @@ namespace colors
 
         sf::Color get(float f) override;
 
+        const sf::Color get_color() const;
+        void set_color(const sf::Color& color);
+        
     private:
         sf::Color color_;
     };
@@ -68,6 +71,28 @@ namespace colors
 
     private:
         keys key_colors_;
+    };
+
+
+    class DiscreteGradient : public ColorGenerator
+    {
+    public:
+        using keys = std::vector<std::pair<sf::Color, size_t>>;
+
+        DiscreteGradient();
+        DiscreteGradient(const keys& keys);
+
+        sf::Color get(float f) override;
+
+        const keys& get_keys() const;
+        void set_keys(keys keys);
+        static std::vector<sf::Color> generate_colors(const keys& dirty_keys);
+        
+    private:
+        static keys sanitize_keys(const keys& dirty_keys);
+        
+        keys keys_;
+        std::vector<sf::Color> colors_;
     };
 }
 

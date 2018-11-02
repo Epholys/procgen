@@ -75,11 +75,13 @@ namespace procgui {
     bool interact_with(colors::VertexPainter& painter, const std::string& name, bool main = true);
 
     // Pointer for polymorphism
-    bool interact_with(std::shared_ptr<colors::ColorGenerator> gen, const std::string& name, bool main = true);
+    bool interact_with(std::shared_ptr<colors::ColorGenerator>& gen, const std::string& name, bool main = true);
 
     bool interact_with(colors::ConstantColor& gen);
 
     bool interact_with(colors::LinearGradient& gen);
+
+    bool interact_with(colors::DiscreteGradient& gen);
     
     #include "procgui.tpp"
 

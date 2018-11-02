@@ -24,6 +24,7 @@ namespace colors
         float get_angle() const;
         void set_angle(float angle);
         const std::shared_ptr<ColorGenerator> get_generator() const;
+        std::shared_ptr<ColorGenerator>& ref_generator();
         
         // Paint 'vertices' with the informations of 'bounding_box' according to
         // the rule with the colors from generator_
@@ -33,7 +34,7 @@ namespace colors
         void interact_with();
 
     private:
-        const std::shared_ptr<ColorGenerator> generator_;
+        std::shared_ptr<ColorGenerator> generator_;
         float angle_ {60.};
     };
 }
