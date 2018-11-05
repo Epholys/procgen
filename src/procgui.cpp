@@ -11,6 +11,21 @@ using namespace math;
 
 namespace
 {
+    int embeddedLevel = 0;
+
+    void pushEmbedded()
+    {
+        ++embeddedLevel;
+    }
+
+    void popEmbedded()
+    {
+        if (embeddedLevel > 0)
+        {
+            --embeddedLevel;
+        }
+    }
+    
     // The two next function are shared by all the 'display()' and
     // 'interact_with()' functions. They manage window creation and integration.
 
@@ -19,19 +34,15 @@ namespace
     // An 'id' can be specified to separate instances *inside* a window.
     // Returns 'false' if the window is collapsed, to early-out.
     bool set_up(const std::string& name,
-                bool main = true,
-                const std::string& id = "",
                 bool* open = nullptr)
     {
         // If we're the main class, open window 'name'.
-        if (main)
+        if (embeddedLevel == 0)
         {
             bool is_active = ImGui::Begin(name.c_str(), open, ImGuiWindowFlags_NoSavedSettings);
-            ImGui::PushID(id.c_str());
             if(!is_active)
             {
                 // Window is collapsed, call End();
-                ImGui::PopID();
                 ImGui::End();
             }
             return is_active;
@@ -39,25 +50,18 @@ namespace
         // Otherwise, set up a CollapsingHeader
         else
         {
-            ImGui::PushID(id.c_str());
             bool is_active = ImGui::CollapsingHeader(name.c_str());
-            if(!is_active)
-            {
-                ImGui::PopID();
-            }
             return is_active;
         }
     }
     
     // Finish appending to the current window if 'main' is true.
     // Otherwise, close the current TreeNode.
-    void conclude(bool main)
+    void conclude()
     {
-        ImGui::PopID();
-
-        // If we're the main class, stop appending to the current
+         // If we're the main class, stop appending to the current
         // window.
-        if (main)
+        if (embeddedLevel == 0)
         {
             ImGui::Separator();
             ImGui::End();
@@ -101,9 +105,9 @@ namespace ImGui
 
 namespace procgui
 {
-    void display(const LSystem& lsys, const std::string& name, bool main)
+    void display(const LSystem& lsys, const std::string& name)
     {
-        if( !set_up(name, main) )
+        if( !set_up(name) )
         {
             // Early out if the display zone is collapsed.
             return;
@@ -132,13 +136,13 @@ namespace procgui
         }
         ImGui::Unindent(); 
 
-        conclude(main);
+        conclude();
     }
 
     
-    void display(const drawing::DrawingParameters& parameters, const std::string& name, bool main)
+    void display(const drawing::DrawingParameters& parameters, const std::string& name)
     {
-        if( !set_up(name, main) )
+        if( !set_up(name) )
         {
             // Early out if the display zone is collapsed.
             return;
@@ -166,12 +170,12 @@ namespace procgui
         ImGui::Text("Step:"); ImGui::SameLine(align);
         ImGui::Text("%.1lf", parameters.step);
 
-        conclude(main);
+        conclude();
     }
 
-    void display(const drawing::InterpretationMap& map, const std::string& name, bool main)
+    void display(const drawing::InterpretationMap& map, const std::string& name)
     {
-        if( !set_up(name, main) )
+        if( !set_up(name) )
         {
             // Early out if the display zone is collapsed.
             return;
@@ -184,14 +188,14 @@ namespace procgui
 
         }
         
-        conclude(main);
+        conclude();
     }
 
     
 
-    bool interact_with(drawing::DrawingParameters& parameters, const std::string& name, bool main)
+    bool interact_with(drawing::DrawingParameters& parameters, const std::string& name)
     {
-        if( !set_up(name, main) )
+        if( !set_up(name) )
         {
             // Early out if the display zone is collapsed.
             return false;
@@ -240,14 +244,14 @@ namespace procgui
         is_modified |= ImGui::SliderInt("Iterations", &parameters.n_iter, 0, n_iter_max);
         ImGui::SameLine(); ImGui::ShowHelpMarker("CTRL+click to directly input values. Higher values will use all of your memory and CPU");
 
-        conclude(main);
+        conclude();
 
         return is_modified;
     }
 
-    bool interact_with(LSystemBuffer& buffer, const std::string& name, bool main)
+    bool interact_with(LSystemBuffer& buffer, const std::string& name)
     {
-        if( !set_up(name, main) )
+        if( !set_up(name) )
         {
             // Early out if the display zone is collapsed.
             return false;
@@ -286,14 +290,14 @@ namespace procgui
                 return false;
             });
 
-        conclude(main);
+        conclude();
 
         return is_modified;
     }
 
-    bool interact_with(InterpretationMapBuffer& buffer, const std::string& name, bool main)
+    bool interact_with(InterpretationMapBuffer& buffer, const std::string& name)
     {
-        if( !set_up(name, main) )
+        if( !set_up(name) )
         {
             // Early out
             return false;
@@ -326,15 +330,14 @@ namespace procgui
                 return false;
             });
 
-        conclude(main);
+        conclude();
 
         return is_modified;
     }
 
-    bool interact_with(colors::VertexPainter& painter, const std::string& name, bool main)
+    bool interact_with(colors::VertexPainter& painter, const std::string& name)
     {
-        ImGui::SetNextWindowSize({500,150}, ImGuiSetCond_Appearing);
-        if (!set_up(name, main))
+        if (!set_up(name))
         {
             return false;
         }
@@ -350,16 +353,18 @@ namespace procgui
             painter.set_angle(angle);
         }
         
-        is_modified |= interact_with(painter.ref_generator(), "Colors", false);
-
-        conclude(main);
+        pushEmbedded();
+        is_modified |= interact_with(painter.ref_generator(), "Colors");
+        popEmbedded();
+        
+        conclude();
 
         return is_modified;
     }
     
-    bool interact_with(std::shared_ptr<colors::ColorGenerator>& gen, const std::string& name, bool main)
+    bool interact_with(std::shared_ptr<colors::ColorGenerator>& gen, const std::string& name)
     {
-        if (!set_up(name, main))
+        if (!set_up(name))
         {
             return false;
         }
@@ -415,7 +420,7 @@ namespace procgui
             is_modified |= interact_with(*discrete);
         }
 
-        conclude(main);
+        conclude();
         
         return is_modified;
     }
@@ -602,7 +607,7 @@ namespace procgui
     }
 
 
-    bool interact_with(LSystemView& lsys_view, const std::string& name, bool main, bool* open)
+    bool interact_with(LSystemView& lsys_view, const std::string& name, bool* open)
     {
         // To avoid collision with other window of the same name, create a
         // unique ID for the created window. We override the mecanism of
@@ -615,14 +620,14 @@ namespace procgui
         }
         std::stringstream ss;
         ss << "##" << lsys_view.get_id(); // Each window of LSystemView
-                                                  // is conserved by its id.
-        if (main)
+                                          // is conserved by its id.
+        if (embeddedLevel == 0)
         {
             // Make the window appear at the mouse double-click position with a
             // correct size.
             // Warning: lots of arbitrary values.
             sf::Vector2f pos = sf::Vector2f(controller::WindowController::get_mouse_position());
-            pos -= {250,50}; // Shift the window position to make its center
+            pos -= {250,150}; // Shift the window position to make its center
                              // appear a the mouse position.
 
             // Shift the window position to always appear on-screen in its entirety.
@@ -631,9 +636,9 @@ namespace procgui
             pos.x = pos.x < 0 ? 0 : pos.x;
             pos.x = pos.x + 500 > windowX ? windowX-500 : pos.x;
             pos.y = pos.y < 0 ? 0 : pos.y;
-            pos.y = pos.y + 150 > windowY ? windowY-150 : pos.y;
+            pos.y = pos.y + 450 > windowY ? windowY-450 : pos.y;
             ImGui::SetNextWindowPos({pos.x,pos.y}, ImGuiSetCond_Appearing);
-            ImGui::SetNextWindowSize({500,150}, ImGuiSetCond_Appearing);
+            ImGui::SetNextWindowSize({500,450}, ImGuiSetCond_Appearing);
 
             // The window's title background is set to the unique color
             // associated with the 'lsys_view_'.
@@ -642,10 +647,14 @@ namespace procgui
                                   static_cast<ImVec4>(ImColor(color.r, color.g, color.b)));
             ImGui::PushStyleColor(ImGuiCol_TitleBgActive,
                                   static_cast<ImVec4>(ImColor(color.r, color.g, color.b)));
+
         }
-        if (!set_up(name+ss.str(), main, open))
+        if (!set_up(name+ss.str(), open))
         {
-            ImGui::PopStyleColor(2);
+            if (embeddedLevel == 0)
+            {
+                ImGui::PopStyleColor(2);
+            }
             // Early out if the display zone is collapsed.
             return false;
         }
@@ -653,13 +662,16 @@ namespace procgui
         // 'is_modified' is true if the DrawingParameter is modified. It does
         // not check the LSystem or the InterpretationMap because the
         // LSystemView is already an Observer of these classes.
-        bool is_modified = interact_with(lsys_view.ref_parameters(), "Drawing Parameters"+ss.str(), false);
-        interact_with(lsys_view.ref_lsystem_buffer(), "LSystem"+ss.str(), false);
-        interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map"+ss.str(), false);
+        pushEmbedded();
+        bool is_modified = interact_with(lsys_view.ref_parameters(), "Drawing Parameters"+ss.str());
+        interact_with(lsys_view.ref_lsystem_buffer(), "LSystem"+ss.str());
+        interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map"+ss.str());
         interact_with(lsys_view.ref_vertex_painter(), "Painter");
+        popEmbedded();
 
-        conclude(main);
-        if (main)
+        conclude();
+
+        if (embeddedLevel == 0)
         {
             ImGui::PopStyleColor(2);
         }

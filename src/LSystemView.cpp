@@ -261,7 +261,7 @@ namespace procgui
     {
         // Interact with the models and re-compute the vertices if there is a
         // modification. 
-        if (interact_with(*this, name_, true, &is_selected_))
+        if (interact_with(*this, name_, &is_selected_))
         {
             compute_vertices();
         }

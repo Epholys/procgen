@@ -41,33 +41,31 @@
 namespace procgui {
     
     void display(const drawing::DrawingParameters& turtle,
-                 const std::string& name,
-                 bool main = true);
+                 const std::string& name);
     
-    void display(const LSystem& lsys, const std::string& name, bool main = true);
+    void display(const LSystem& lsys, const std::string& name);
     
-    void display(const drawing::InterpretationMap& map, const std::string& name, bool main = true);
+    void display(const drawing::InterpretationMap& map, const std::string& name);
 
     
     bool interact_with(drawing::DrawingParameters& turtle,
-                       const std::string& name,
-                       bool main = true);
+                       const std::string& name);
 
     // Special case for the RuleMapBuffers
     template<typename Buffer>
     bool interact_with_buffer(Buffer& buffer,
                               std::function<bool(typename Buffer::const_iterator)> successor_fn);
     
-    bool interact_with(LSystemBuffer& buffer, const std::string& name, bool main = true);
+    bool interact_with(LSystemBuffer& buffer, const std::string& name);
 
-    bool interact_with(InterpretationMapBuffer& buffer, const std::string& name, bool main = true);
+    bool interact_with(InterpretationMapBuffer& buffer, const std::string& name);
 
-    bool interact_with(LSystemView& lsys_view, const std::string& name, bool main = true, bool* open = nullptr);
+    bool interact_with(LSystemView& lsys_view, const std::string& name, bool* open = nullptr);
 
-    bool interact_with(colors::VertexPainter& painter, const std::string& name, bool main = true);
+    bool interact_with(colors::VertexPainter& painter, const std::string& name);
 
     // Pointer for polymorphism
-    bool interact_with(std::shared_ptr<colors::ColorGenerator>& gen, const std::string& name, bool main = true);
+    bool interact_with(std::shared_ptr<colors::ColorGenerator>& gen, const std::string& name);
 
     bool interact_with(colors::ConstantColor& gen);
 
