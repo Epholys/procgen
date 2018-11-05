@@ -265,7 +265,6 @@ namespace procgui
         {
             compute_vertices();
         }
-        Observer<VertexPainter>::get_target()->interact_with(); // TODO: do the same as LSystemBuffer, etc.
 
         // Early out if there are no vertices.
         if (vertices_.size() == 0)

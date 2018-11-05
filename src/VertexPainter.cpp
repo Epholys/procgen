@@ -90,12 +90,4 @@ namespace colors
         // vertices.push_back({{opposite_intersection.x - 5, opposite_intersection.y - 5}, sf::Color::Cyan});
         // vertices.push_back({{opposite_intersection.x + 5, opposite_intersection.y - 5}, sf::Color::Cyan});
     }
-
-    void VertexPainter::interact_with()
-    {
-        if(procgui::interact_with(*this, ""))
-        {
-            notify(); // TODO: two notify when changing angle: add ColorGenerator to Observer
-        }
-    }
 }

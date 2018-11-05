@@ -68,7 +68,7 @@ int main()
             ImGui::SFML::ProcessEvent(event);
         }
         
-        procgui::new_frame();
+        // procgui::new_frame();
         ImGui::SFML::Update(window, delta_clock.restart());
         
         WindowController::handle_input(events, window, views);

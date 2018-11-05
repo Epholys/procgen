@@ -9,52 +9,43 @@
 
 using namespace math;
 
-namespace procgui
-{
-    static int call_id = 0;
-    void new_frame()
-    {
-        call_id = 0;
-    }
-}
-
 namespace
 {
     // The two next function are shared by all the 'display()' and
     // 'interact_with()' functions. They manage window creation and integration.
 
     // Open a window named 'name' if 'main' is true.  Otherwise, set up a
-    // TreeNode named 'name', to inline the GUI in a existing window.
+    // CollapsingHeader named 'name', to inline the GUI in a existing window.
+    // An 'id' can be specified to separate instances *inside* a window.
     // Returns 'false' if the window is collapsed, to early-out.
-    bool set_up(const std::string& name, bool main, bool* open = nullptr)
+    bool set_up(const std::string& name,
+                bool main = true,
+                const std::string& id = "",
+                bool* open = nullptr)
     {
-        auto& id = procgui::call_id;
-        ++id;
-        
         // If we're the main class, open window 'name'.
         if (main)
         {
             bool is_active = ImGui::Begin(name.c_str(), open, ImGuiWindowFlags_NoSavedSettings);
+            ImGui::PushID(id.c_str());
             if(!is_active)
             {
                 // Window is collapsed, call End();
+                ImGui::PopID();
                 ImGui::End();
-            }
-            else
-            {
-                ImGui::PushID(id);
             }
             return is_active;
         }
-        // Otherwise, set up a TreeNode.
+        // Otherwise, set up a CollapsingHeader
         else
         {
-            if(ImGui::CollapsingHeader(name.c_str()))
+            ImGui::PushID(id.c_str());
+            bool is_active = ImGui::CollapsingHeader(name.c_str());
+            if(!is_active)
             {
-                ImGui::PushID(id);
-                return true;
+                ImGui::PopID();
             }
-            return false;
+            return is_active;
         }
     }
     
@@ -359,7 +350,7 @@ namespace procgui
             painter.set_angle(angle);
         }
         
-        is_modified |= interact_with(painter.ref_generator(), "", false);
+        is_modified |= interact_with(painter.ref_generator(), "Colors", false);
 
         conclude(main);
 
@@ -393,7 +384,7 @@ namespace procgui
         }
 
         const char* generators[3] = {"Constant", "Linear Gradient", "Discrete Gradient"};
-        if (ImGui::ListBox("", &index, generators, 3))
+        if (ImGui::ListBox("Color Generator", &index, generators, 3))
         {
             is_modified = true;
             if (index == 0)
@@ -623,7 +614,7 @@ namespace procgui
             return false;
         }
         std::stringstream ss;
-        ss << name << "##" << lsys_view.get_id(); // Each window of LSystemView
+        ss << "##" << lsys_view.get_id(); // Each window of LSystemView
                                                   // is conserved by its id.
         if (main)
         {
@@ -652,8 +643,9 @@ namespace procgui
             ImGui::PushStyleColor(ImGuiCol_TitleBgActive,
                                   static_cast<ImVec4>(ImColor(color.r, color.g, color.b)));
         }
-        if (!set_up(ss.str(), main, open))
+        if (!set_up(name+ss.str(), main, open))
         {
+            ImGui::PopStyleColor(2);
             // Early out if the display zone is collapsed.
             return false;
         }
@@ -661,9 +653,10 @@ namespace procgui
         // 'is_modified' is true if the DrawingParameter is modified. It does
         // not check the LSystem or the InterpretationMap because the
         // LSystemView is already an Observer of these classes.
-        bool is_modified = interact_with(lsys_view.ref_parameters(), "Drawing Parameters", false);
-        interact_with(lsys_view.ref_lsystem_buffer(), "LSystem", false);
-        interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map", false);
+        bool is_modified = interact_with(lsys_view.ref_parameters(), "Drawing Parameters"+ss.str(), false);
+        interact_with(lsys_view.ref_lsystem_buffer(), "LSystem"+ss.str(), false);
+        interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map"+ss.str(), false);
+        interact_with(lsys_view.ref_vertex_painter(), "Painter");
 
         conclude(main);
         if (main)

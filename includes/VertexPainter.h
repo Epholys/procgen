@@ -30,9 +30,6 @@ namespace colors
         // the rule with the colors from generator_
         void paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box) const;
 
-        // Interact with the GUI
-        void interact_with();
-
     private:
         std::shared_ptr<ColorGenerator> generator_;
         float angle_ {60.};

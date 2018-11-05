@@ -39,15 +39,7 @@
 // the GUI, 'false' otherwise.
 
 namespace procgui {
-    // Each widget in ImGui has an identifier persistent between two frames.
-    // If two widget has the same identifier or if a widget does not have the
-    // same identifier between two frames, chaos follow. In this architecture,
-    // if two 'interact_buffer()' are called with the same object, it
-    // misbehave. To correct this, we add a 'call_id' in procgui.cpp which keep
-    // tracks of which call to a interact_with we are doing. We must reset it
-    // each frame however, so new_frame is here.
-    void new_frame();
-
+    
     void display(const drawing::DrawingParameters& turtle,
                  const std::string& name,
                  bool main = true);

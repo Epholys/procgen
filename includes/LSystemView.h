@@ -109,6 +109,7 @@ namespace procgui
         // The window's name.
         std::string name_;
 
+        // TODO: comment with inheritance in mind
         // The LSystem's buffer and by extension the LSystem (with shared
         // ownership). 
         LSystemBuffer lsys_buff_;
