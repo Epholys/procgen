@@ -6,7 +6,7 @@ namespace drawing
 
     Turtle::Turtle(const DrawingParameters& params)
         : parameters { params }
-        , state {{0,0},params.starting_angle}
+        , state {{0,0},params.get_starting_angle()}
         , vertices      { { sf::Vector2f(state.position) } }
     {
     }
@@ -17,7 +17,7 @@ namespace drawing
     {
         Turtle turtle (parameters);
         
-        const auto res = lsys.produce(parameters.n_iter);
+        const auto res = lsys.produce(parameters.get_n_iter());
 
         for (auto c : res)
         {

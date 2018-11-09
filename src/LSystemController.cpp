@@ -126,7 +126,8 @@ namespace controller
         if (under_mouse_)
         {
             auto& parameters = under_mouse_->ref_parameters();
-            parameters.starting_position -= delta;
+            auto starting_position = parameters.get_starting_position() - delta;
+            parameters.silently_set_starting_position(starting_position);
         }
     }
 

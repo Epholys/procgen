@@ -19,8 +19,8 @@ TEST(DrawingParametersTest, serialization)
         iarchive(iparams);
     }
 
-    ASSERT_NEAR(oparams.starting_angle, iparams.starting_angle, 0.0001);
-    ASSERT_NEAR(oparams.delta_angle, iparams.delta_angle, 0.0001);
-    ASSERT_NEAR(oparams.step, iparams.step, 0.0001);
-    ASSERT_EQ(oparams.n_iter, iparams.n_iter);
+    ASSERT_NEAR(oparams.get_starting_angle(), iparams.get_starting_angle(), 0.0001);
+    ASSERT_NEAR(oparams.get_delta_angle(), iparams.get_delta_angle(), 0.0001);
+    ASSERT_NEAR(oparams.get_step(), iparams.get_step(), 0.0001);
+    ASSERT_EQ(oparams.get_n_iter(), iparams.get_n_iter());
 }

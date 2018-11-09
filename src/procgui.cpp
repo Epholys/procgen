@@ -153,22 +153,22 @@ namespace procgui
 
         // --- Starting Position ---
         ImGui::Text("Starting Position:"); ImGui::SameLine(align);
-        ImGui::Text("x: %.f", parameters.starting_position.x); ImGui::SameLine();
-        ImGui::Text("y: %.f", parameters.starting_position.y);
+        ImGui::Text("x: %.f", parameters.get_starting_position().x); ImGui::SameLine();
+        ImGui::Text("y: %.f", parameters.get_starting_position().y);
 
         // --- Starting Angle ---
         ImGui::Text("Starting Angle:"); ImGui::SameLine(align);
-        ImGui::Text("%.lf", math::rad_to_degree(parameters.starting_angle)); ImGui::SameLine();
+        ImGui::Text("%.lf", math::rad_to_degree(parameters.get_starting_angle())); ImGui::SameLine();
         ImGui::Text("degree");
             
         // --- Angle Delta ---
         ImGui::Text("Angle Delta:"); ImGui::SameLine(align);
-        ImGui::Text("%.lf", math::rad_to_degree(parameters.delta_angle)); ImGui::SameLine();
+        ImGui::Text("%.lf", math::rad_to_degree(parameters.get_delta_angle())); ImGui::SameLine();
         ImGui::Text("degree");
 
         // --- Step ---
         ImGui::Text("Step:"); ImGui::SameLine(align);
-        ImGui::Text("%.1lf", parameters.step);
+        ImGui::Text("%.1lf", parameters.get_step());
 
         conclude();
     }
@@ -205,43 +205,53 @@ namespace procgui
         bool is_modified = false;
 
         // --- Starting position ---
-        float pos[2] = { parameters.starting_position.x,
-                         parameters.starting_position.y };
+        float pos[2] = { parameters.get_starting_position().x,
+                         parameters.get_starting_position().y };
         if ( ImGui::DragFloat2("Starting position", pos,
                                1.f, 0.f, 0.f, "%.lf") )
         {
             // is_modified_ is not set: the render state take care of translating the view.
-            parameters.starting_position.x = pos[0];
-            parameters.starting_position.y = pos[1];
+            sf::Vector2f starting_position {pos[0], pos[1]};
+            parameters.silently_set_starting_position(starting_position);
         }
 
         // --- Starting angle ---
-        float starting_angle_deg = math::rad_to_degree(parameters.starting_angle);
+        float starting_angle_deg = math::rad_to_degree(parameters.get_starting_angle());
         if ( ImGui::DragFloat("Starting Angle", &starting_angle_deg,
                               1.f, 0.f, 360.f, "%.lf") )
         {
             is_modified = true;
-            parameters.starting_angle = math::degree_to_rad(starting_angle_deg);
+            parameters.set_starting_angle(math::degree_to_rad(starting_angle_deg));
         }
 
         // --- Angle Delta ---
-        float delta_angle_deg = math::rad_to_degree(parameters.delta_angle);
+        float delta_angle_deg = math::rad_to_degree(parameters.get_delta_angle());
         if ( ImGui::DragFloat("Angle Delta", &delta_angle_deg,
                               1.f, 0.f, 360.f, "%.lf") )
         {
             is_modified = true;
-            parameters.delta_angle = math::degree_to_rad(delta_angle_deg);
+            parameters.set_delta_angle(math::degree_to_rad(delta_angle_deg));
         }
 
         // --- Step ---
-        is_modified |= ImGui::DragFloat("Step", &parameters.step, 0.2f, 0.f, 0.f, "%#.1lf");
+        float step = parameters.get_step();
+        if(ImGui::DragFloat("Step", &step, 0.2f, 0.f, 0.f, "%#.1lf"))
+        {
+            is_modified = true;
+            parameters.set_step(step);
+        }
 
         // --- Iterations ---
         // Arbitrary value to avoid resource depletion happening with higher
         // number of iterations (several GiB of memory usage and huge CPU
         // load).
         const int n_iter_max = 10;
-        is_modified |= ImGui::SliderInt("Iterations", &parameters.n_iter, 0, n_iter_max);
+        int n_iter = parameters.get_n_iter();
+        if(ImGui::SliderInt("Iterations", &n_iter, 0, n_iter_max))
+        {
+            is_modified = true;
+            parameters.set_n_iter(n_iter);
+        }
         ImGui::SameLine(); ImGui::ShowHelpMarker("CTRL+click to directly input values. Higher values will use all of your memory and CPU");
 
         conclude();
@@ -344,7 +354,7 @@ namespace procgui
 
         bool is_modified = false;
 
-        // --- Starting angle ---
+        // --- Gradient angle ---
         float angle = painter.get_angle();
         if ( ImGui::DragFloat("Gradient Angle", &angle,
                               1.f, 0.f, 360.f, "%.lf") )
@@ -354,7 +364,10 @@ namespace procgui
         }
         
         pushEmbedded();
-        is_modified |= interact_with(painter.ref_generator(), "Colors");
+        if(interact_with(painter.ref_generator(), "Colors"))
+        {
+            is_modified = true;
+        }
         popEmbedded();
         
         conclude();

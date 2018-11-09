@@ -58,8 +58,8 @@ namespace controller
         auto pasted_view = *view;
         auto box = pasted_view.get_bounding_box();
         sf::Vector2f middle = {box.left + box.width/2, box.top + box.height/2};
-        middle = pasted_view.get_parameters().starting_position - middle;
-        pasted_view.ref_parameters().starting_position = position + middle;
+        middle = pasted_view.get_parameters().get_starting_position() - middle;
+        pasted_view.ref_parameters().get_starting_position() = position + middle;
         lsys_views.emplace_front(pasted_view);
     }
     

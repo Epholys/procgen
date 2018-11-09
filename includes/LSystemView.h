@@ -35,13 +35,14 @@ namespace procgui
     //    copy of LSystemView will share the same LSystem and Map.
     class LSystemView : public Observer<LSystem>,
                         public Observer<drawing::InterpretationMap>,
+                        public Observer<drawing::DrawingParameters>,
                         public Observer<colors::VertexPainter>
     {
     public:
         LSystemView(const std::string& name,
                     std::shared_ptr<LSystem> lsys,
                     std::shared_ptr<drawing::InterpretationMap> map,
-                    drawing::DrawingParameters param,
+                    std::shared_ptr<drawing::DrawingParameters> params,
                     std::shared_ptr<colors::VertexPainter> painter = std::make_shared<colors::VertexPainter>());
         // LSystemView(const std::string& name,
         //             std::shared_ptr<LSystem> lsys,
@@ -119,7 +120,7 @@ namespace procgui
         InterpretationMapBuffer interpretation_buff_;
 
         // The DrawingParameters (single Ownership)
-        drawing::DrawingParameters params_;
+        // drawing::DrawingParameters params_;
 
         // The vertices of the View. Computer at each modification.
         std::vector<sf::Vertex> vertices_;
@@ -144,7 +145,7 @@ namespace procgui
             {
                 ar(cereal::make_nvp("name", name_),
                    cereal::make_nvp("LSystem", *Observer<LSystem>::get_target()),
-                   cereal::make_nvp("DrawingParameters", params_),
+                   cereal::make_nvp("DrawingParameters", *Observer<drawing::DrawingParameters>::get_target()),
                    cereal::make_nvp("Interpretation Map", *Observer<drawing::InterpretationMap>::get_target()));
             }
 
@@ -156,13 +157,13 @@ namespace procgui
                 drawing::DrawingParameters params;
                 drawing::InterpretationMap map;
                 ar(name,
-                    cereal::make_nvp("LSystem", lsys),
-                    cereal::make_nvp("DrawingParameters", params),
-                    cereal::make_nvp("Interpretation Map", map));
+                   cereal::make_nvp("LSystem", lsys),
+                   cereal::make_nvp("DrawingParameters", params),
+                   cereal::make_nvp("Interpretation Map", map));
                 *this = LSystemView(name,
-                          std::make_shared<LSystem>(lsys),
-                          std::make_shared<drawing::InterpretationMap>(map),
-                          params);
+                                    std::make_shared<LSystem>(lsys),
+                                    std::make_shared<drawing::InterpretationMap>(map),
+                                    std::make_shared<drawing::DrawingParameters>(params));
             }
     };
 }

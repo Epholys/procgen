@@ -10,6 +10,7 @@
 #include "cereal/cereal.hpp"
 
 #include "helper_math.h"
+#include "Observable.h"
 
 // Main explanation of drawing in Turtle.h
 namespace drawing
@@ -19,24 +20,49 @@ namespace drawing
     // can be freely initialized and modified, there are no invariant.
     // During an interpretation, this structure will not be
     // modified.
-    struct DrawingParameters
+    class DrawingParameters : public Observable
     {
+    public:
+        DrawingParameters() = default;
+        DrawingParameters(const sf::Vector2f& starting_position);
+        DrawingParameters(const sf::Vector2f& starting_position,
+                          float starting_angle,
+                          double delta_angle,
+                          float step,
+                          int n_iter);
+        DrawingParameters(const DrawingParameters& params) = default;
+
+        sf::Vector2f get_starting_position() const;
+        float get_starting_angle() const;
+        double get_delta_angle() const;
+        float get_step() const;
+        int get_n_iter() const;
+
+        void set_starting_position(const sf::Vector2f starting_position);
+        void set_starting_angle(float starting_angle);
+        void set_delta_angle(double delta_angle);
+        void set_step(float step);
+        void set_n_iter(int n_iter);
+
+        void silently_set_starting_position(const sf::Vector2f starting_position);
+        
+    private:
         // The starting position and angle of the Turtle.
-        sf::Vector2f starting_position { 0, 0 };
-        float starting_angle { 0 };
+        sf::Vector2f starting_position_ { 0, 0 };
+        float starting_angle_ { 0 };
 
         // When 'turn_left' or 'turn_right' orders are executed, the
         // Turtle pivot at a 'delta_angle' angle (in
         // radian). Initialized at an arbitrary value.
-        double delta_angle { math::pi / 2 };
+        double delta_angle_ { math::pi / 2 };
 
         // When 'move_forward' order is executed, the Turtle will move
         // forward 'step' pixels (at default zoom level). Initialized
         // at an arbitrary value. 
-        float step { 20 };
+        float step_ { 20 };
 
         // The number of iterations done by the L-system.
-        int n_iter { 0 };
+        int n_iter_ { 0 };
 
     private:
         // Serialization
@@ -45,18 +71,18 @@ namespace drawing
         template <class Archive>
         void save (Archive& ar, const std::uint32_t) const
             {
-                ar(cereal::make_nvp("starting_angle", std::round(math::rad_to_degree(starting_angle)*1000)/1000),
-                   cereal::make_nvp("delta_angle", std::round(math::rad_to_degree(delta_angle)*1000)/1000),
-                   CEREAL_NVP(step),
-                   CEREAL_NVP(n_iter));
+                ar(cereal::make_nvp("starting_angle", std::round(math::rad_to_degree(starting_angle_)*1000)/1000),
+                   cereal::make_nvp("delta_angle", std::round(math::rad_to_degree(delta_angle_)*1000)/1000),
+                   CEREAL_NVP(step_),
+                   CEREAL_NVP(n_iter_));
             }
         
         template <class Archive>
         void load (Archive& ar, const std::uint32_t)
             {
-                ar(starting_angle, delta_angle, step, n_iter);
-                starting_angle = math::degree_to_rad(starting_angle);
-                delta_angle = math::degree_to_rad(delta_angle);
+                ar(starting_angle_, delta_angle_, step_, n_iter_);
+                starting_angle_ = math::degree_to_rad(starting_angle_);
+                delta_angle_ = math::degree_to_rad(delta_angle_);
                 
             }
 

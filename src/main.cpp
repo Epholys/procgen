@@ -32,19 +32,19 @@ int main()
     auto serpinski = std::make_shared<LSystem>(LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
     auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } } });
     auto map = std::make_shared<InterpretationMap>(default_interpretation_map);
-    DrawingParameters serpinski_param;
-    serpinski_param.starting_position = { 1000, 600 };
-    serpinski_param.starting_angle = 0.f;
-    serpinski_param.delta_angle = degree_to_rad(60.f);
-    serpinski_param.step = 7;
-    serpinski_param.n_iter = 5;
+    auto serpinski_param = std::make_shared<DrawingParameters>();
+    serpinski_param->set_starting_position({ 1000, 600 });
+    serpinski_param->set_starting_angle(0.f);
+    serpinski_param->set_delta_angle(degree_to_rad(60.f));
+    serpinski_param->set_step(7);
+    serpinski_param->set_n_iter(5);
 
-    DrawingParameters plant_param;
-    plant_param.starting_position = { 400, 800 };
-    plant_param.starting_angle = degree_to_rad(80.f);
-    plant_param.delta_angle = degree_to_rad(25.f);
-    plant_param.step = 5;
-    plant_param.n_iter = 6;
+    auto plant_param = std::make_shared<DrawingParameters>();
+    plant_param->set_starting_position({ 400, 800 });
+    plant_param->set_starting_angle(degree_to_rad(80.f));
+    plant_param->set_delta_angle(degree_to_rad(25.f));
+    plant_param->set_step(5);
+    plant_param->set_n_iter(6);
 
     LSystemView plant_view ("Plant", plant, map, plant_param);
     LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
