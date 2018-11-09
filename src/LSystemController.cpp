@@ -14,6 +14,7 @@ namespace controller
 
     std::chrono::time_point<std::chrono::steady_clock> LSystemController::click_time_ {};
 
+    bool LSystemController::is_clone_ = false;
     
     bool LSystemController::has_priority()
     {
@@ -27,6 +28,10 @@ namespace controller
     const procgui::LSystemView* LSystemController::under_mouse()
     {
         return under_mouse_;
+    }
+    bool LSystemController::is_clone()
+    {
+        return is_clone_;
     }
 
     
@@ -108,11 +113,13 @@ namespace controller
         {
             if (event.key.code == sf::Keyboard::C)
             {
-                saved_view_ = under_mouse_->clone();
+                saved_view_ = *under_mouse_;
+                is_clone_ = true;
             }
             else if (event.key.code == sf::Keyboard::X)
             {
-                saved_view_ = under_mouse_->duplicate();
+                saved_view_ = *under_mouse_;
+                is_clone_ = false;
             }
             else if (event.key.code == sf::Keyboard::S)
             {
@@ -147,11 +154,13 @@ namespace controller
             // Cloning is deep-copying the LSystem.
             if (ImGui::MenuItem("Clone", "Ctrl+C") && under_mouse_)
             {
-                saved_view_ = under_mouse_->clone();
+                saved_view_ = *under_mouse_;
+                is_clone_ = true;
             }
             if (ImGui::MenuItem("Duplicate", "Ctrl+X") && under_mouse_)
             {
-                saved_view_ = under_mouse_->duplicate();
+                saved_view_ = *under_mouse_;
+                is_clone_ = false;
             }
             if (ImGui::MenuItem("Delete", "Del") && under_mouse_)
             {

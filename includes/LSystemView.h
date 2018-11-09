@@ -51,16 +51,16 @@ namespace procgui
         // Create a default LSystemView at 'position'.
         LSystemView(const sf::Vector2f& position);
         // The rule-of-five is necessary with the 'Observer<>' callbacks
-        // behaviour. Deep-copy.
+        // behaviour. Deep-copy. TODO: Deep?
         LSystemView(const LSystemView& other);
         LSystemView& operator=(LSystemView other);
         LSystemView(LSystemView&& other);
         ~LSystemView();
         
         // Clone the LSystemView into an independant other view.
-        LSystemView clone();
+        LSystemView clone() const;
 
-        LSystemView duplicate();
+        LSystemView duplicate() const;
         
         // Reference Getters
         drawing::DrawingParameters& ref_parameters();

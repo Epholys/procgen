@@ -12,8 +12,8 @@ namespace procgui
     
     LSystemView::LSystemView(const std::string& name,
                              std::shared_ptr<LSystem> lsys,
-                             std::shared_ptr<drawing::InterpretationMap> map,
-                             std::shared_ptr<drawing::DrawingParameters> params,
+                             std::shared_ptr<InterpretationMap> map,
+                             std::shared_ptr<DrawingParameters> params,
                              std::shared_ptr<VertexPainter> painter)
         : Observer<LSystem> {lsys}
         , Observer<InterpretationMap> {map}
@@ -53,8 +53,8 @@ namespace procgui
         : LSystemView(
             "",
             std::make_shared<LSystem>(LSystem("F+F+F+F", {})),
-            std::make_shared<drawing::InterpretationMap>(drawing::default_interpretation_map),
-            std::make_shared<drawing::DrawingParameters>(position))
+            std::make_shared<InterpretationMap>(default_interpretation_map),
+            std::make_shared<DrawingParameters>(position))
     {
         // Arbitrary default LSystem.
     }
@@ -77,8 +77,8 @@ namespace procgui
         // Manually managing Observer<> callbacks.
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
-        Observer<VertexPainter>::add_callback([this](){paint_vertices();});
         Observer<DrawingParameters>::add_callback([this](){compute_vertices();});
+        Observer<VertexPainter>::add_callback([this](){paint_vertices();});
     }
 
     LSystemView::LSystemView(LSystemView&& other)
@@ -131,25 +131,26 @@ namespace procgui
         auto tmp_lsys = Observer<LSystem>::get_target();
         Observer<LSystem>::set_target(other.Observer<LSystem>::get_target());
         other.Observer<LSystem>::set_target(tmp_lsys);
-    
         Observer<LSystem>::add_callback([this](){compute_vertices();});
         other.Observer<LSystem>::add_callback([&other](){other.compute_vertices();});
 
         auto tmp_map = Observer<InterpretationMap>::get_target();
         Observer<InterpretationMap>::set_target(other.Observer<InterpretationMap>::get_target());
         other.Observer<InterpretationMap>::set_target(tmp_map);
+        Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
+        other.Observer<InterpretationMap>::add_callback([&other](){other.compute_vertices();});
 
         auto tmp_params = Observer<DrawingParameters>::get_target();
         Observer<DrawingParameters>::set_target(other.Observer<DrawingParameters>::get_target());
         other.Observer<DrawingParameters>::set_target(tmp_params);
+        Observer<DrawingParameters>::add_callback([this](){compute_vertices();});
+        other.Observer<DrawingParameters>::add_callback([&other](){other.compute_vertices();});
 
         auto tmp_painter = Observer<VertexPainter>::get_target();
         Observer<VertexPainter>::set_target(other.Observer<VertexPainter>::get_target());
         other.Observer<VertexPainter>::set_target(tmp_painter);
-        
-        Observer<InterpretationMap>::add_callback([this](){compute_vertices();});
-        other.Observer<InterpretationMap>::add_callback([&other](){other.compute_vertices();});
-        other.Observer<VertexPainter>::add_callback([&other](){other.compute_vertices();});
+        Observer<VertexPainter>::add_callback([this](){paint_vertices();});
+        other.Observer<VertexPainter>::add_callback([&other](){other.paint_vertices();});
 
         swap(id_, other.id_);
         swap(color_id_, other.color_id_);
@@ -173,25 +174,25 @@ namespace procgui
     }
 
 
-    LSystemView LSystemView::clone()
+    LSystemView LSystemView::clone() const
     {        
         // Deep copy.
         return LSystemView(
             name_,
             std::make_shared<LSystem>(*lsys_buff_.get_target()),
-            std::make_shared<drawing::InterpretationMap>(*interpretation_buff_.get_target()),
-            std::make_shared<drawing::DrawingParameters>(*Observer<DrawingParameters>::get_target())
+            std::make_shared<InterpretationMap>(*interpretation_buff_.get_target()),
+            std::make_shared<DrawingParameters>(*Observer<DrawingParameters>::get_target())
 //            params_
             );
     }
 
-    LSystemView LSystemView::duplicate()
+    LSystemView LSystemView::duplicate() const
     {
         return LSystemView(
             name_,
             lsys_buff_.get_target(),
             interpretation_buff_.get_target(),
-            Observer<DrawingParameters>::get_target(),
+            std::make_shared<DrawingParameters>(*Observer<DrawingParameters>::get_target()),
 //            params_,
             Observer<VertexPainter>::get_target());
     }
@@ -252,7 +253,6 @@ namespace procgui
     
     void LSystemView::compute_vertices()
     {
-        std::cout << "computed" << std::endl;
         // Invariant respected: cohesion between the vertices and the bounding
         // boxes. 
         

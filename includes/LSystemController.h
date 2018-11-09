@@ -39,6 +39,7 @@ namespace controller
         // Getters
         static const std::optional<procgui::LSystemView>& saved_view();
         static const procgui::LSystemView* under_mouse();
+        static bool is_clone();
 
     private:
         // Delete the LSystemView with identifier 'id' in 'views'
@@ -58,6 +59,8 @@ namespace controller
         static const std::chrono::duration<unsigned long long, std::milli> double_click_time_;
         // Previous left-click timestamp.
         static std::chrono::time_point<std::chrono::steady_clock> click_time_;
+
+        static bool is_clone_;
     };
 }
 

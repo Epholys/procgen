@@ -55,12 +55,22 @@ namespace controller
 
         // Before adding the view to the vector<>, update
         // 'starting_position' to the new location.
-        auto pasted_view = *view;
+        const auto& pasted_view = *view;
         auto box = pasted_view.get_bounding_box();
         sf::Vector2f middle = {box.left + box.width/2, box.top + box.height/2};
         middle = pasted_view.get_parameters().get_starting_position() - middle;
-        pasted_view.ref_parameters().get_starting_position() = position + middle;
-        lsys_views.emplace_front(pasted_view);
+        if (LSystemController::is_clone())
+        {
+            auto cloned_view = pasted_view.clone();
+            cloned_view.ref_parameters().silently_set_starting_position(position + middle);
+            lsys_views.emplace_front(cloned_view);
+        }
+        else
+        {
+            auto duplicated_view = pasted_view.duplicate();
+            duplicated_view.ref_parameters().silently_set_starting_position(position + middle);
+            lsys_views.emplace_front(duplicated_view);
+        }
     }
     
     void WindowController::right_click_menu(sf::RenderWindow& window, std::list<procgui::LSystemView>& lsys_views)
