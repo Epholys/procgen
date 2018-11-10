@@ -4,11 +4,13 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 
+#include "Observable.h"
+
 namespace colors
 {
     // ColorGenerator is an simple interface.
     // From a single float between 0 and 1, returns a color.
-    class ColorGenerator
+    class ColorGenerator : public Observable
     {
     public:
         ColorGenerator() = default;
@@ -16,6 +18,11 @@ namespace colors
         
         // Returns a color from a float.
         virtual sf::Color get(float f) = 0;
+
+        std::shared_ptr<ColorGenerator> clone() const;
+
+    private:
+        virtual std::shared_ptr<ColorGenerator> clone_impl() const = 0;
     };
 
     
@@ -32,6 +39,8 @@ namespace colors
         void set_color(const sf::Color& color);
         
     private:
+        std::shared_ptr<ColorGenerator> clone_impl() const override;
+
         sf::Color color_;
     };
 
@@ -70,6 +79,8 @@ namespace colors
         static keys sanitize_keys(const keys& colors);
 
     private:
+        std::shared_ptr<ColorGenerator> clone_impl() const override;
+
         keys key_colors_;
     };
 
@@ -90,6 +101,7 @@ namespace colors
         
     private:
         static keys sanitize_keys(const keys& dirty_keys);
+        std::shared_ptr<ColorGenerator> clone_impl() const override;
         
         keys keys_;
         std::vector<sf::Color> colors_;

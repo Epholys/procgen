@@ -13,12 +13,12 @@ namespace
 {
     int embeddedLevel = 0;
 
-    void pushEmbedded()
+    void push_embedded()
     {
         ++embeddedLevel;
     }
 
-    void popEmbedded()
+    void pop_embedded()
     {
         if (embeddedLevel > 0)
         {
@@ -363,12 +363,12 @@ namespace procgui
             painter.set_angle(angle);
         }
         
-        pushEmbedded();
+        push_embedded();
         if(interact_with(painter.ref_generator(), "Colors"))
         {
             is_modified = true;
         }
-        popEmbedded();
+        pop_embedded();
         
         conclude();
 
@@ -675,12 +675,12 @@ namespace procgui
         // 'is_modified' is true if the DrawingParameter is modified. It does
         // not check the LSystem or the InterpretationMap because the
         // LSystemView is already an Observer of these classes.
-        pushEmbedded();
+        push_embedded();
         bool is_modified = interact_with(lsys_view.ref_parameters(), "Drawing Parameters"+ss.str());
         interact_with(lsys_view.ref_lsystem_buffer(), "LSystem"+ss.str());
         interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map"+ss.str());
         interact_with(lsys_view.ref_vertex_painter(), "Painter");
-        popEmbedded();
+        pop_embedded();
 
         conclude();
 

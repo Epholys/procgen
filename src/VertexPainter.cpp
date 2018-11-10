@@ -5,18 +5,57 @@
 namespace colors
 {
     VertexPainter::VertexPainter()
-        : generator_{
-        std::make_shared<LinearGradient>(
+        : Observer<ColorGenerator>{std::make_shared<LinearGradient>(
             LinearGradient::keys({
                     {sf::Color::Red, 0.},
-                    {sf::Color::Green, 0.75},
-                    {sf::Color::Blue, 1.}}))},
-          angle_{60.f}
+                    {sf::Color::Green, 0.5},
+                    {sf::Color::Blue, 1.}}))}
+        , generator_{get_target()}
+        , angle_{60.f}
     {
+        add_callback([this](){notify();});
     }
     VertexPainter::VertexPainter(const std::shared_ptr<ColorGenerator> gen)
-        : generator_{gen}
+        : Observer<ColorGenerator>(gen)
+        , generator_{gen}
     {
+        add_callback([this](){notify();});
+    }
+    VertexPainter::VertexPainter(const VertexPainter& other)
+        : Observable{}
+        , Observer<ColorGenerator>{other.get_target()->clone()}
+        , generator_{get_target()}
+        , angle_{other.angle_}
+    {
+        add_callback([this](){notify();});
+    }
+    VertexPainter::VertexPainter(VertexPainter&& other)
+        : Observer<ColorGenerator>{other.get_target()->clone()}
+        , generator_{get_target()}
+        , angle_{other.angle_}
+    {
+        add_callback([this](){notify();});
+        other.Observer<ColorGenerator>::set_target(nullptr);
+        other.generator_.reset();
+        other.angle_ = 0.;
+    }
+    VertexPainter& VertexPainter::operator=(VertexPainter other)
+    {
+        swap(other);
+        return *this;
+    }
+    void VertexPainter::swap(VertexPainter& other)
+    {
+        using std::swap;
+
+        auto tmp_gen = get_target();
+        set_target(other.get_target());
+        other.set_target(tmp_gen);
+        add_callback([this](){notify();});
+        other.add_callback([&other](){other.notify();});
+
+        swap(generator_, other.generator_);
+        swap(angle_, other.angle_);
     }
     
     float VertexPainter::get_angle() const
@@ -40,6 +79,15 @@ namespace colors
     {
         return generator_;
     }
+    
+    void VertexPainter::set_generator(std::shared_ptr<ColorGenerator> generator)
+    {
+        generator_ = generator;
+        set_target(generator_);
+        add_callback([this]{notify();});
+        notify();
+    }
+
 
     void VertexPainter::paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box) const
     {

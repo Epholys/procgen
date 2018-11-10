@@ -4,9 +4,17 @@
 
 namespace colors
 {
+    std::shared_ptr<ColorGenerator> ColorGenerator::clone() const
+    {
+        return clone_impl();
+    }
+
+    //------------------------------------------------------------
+    
     ConstantColor::ConstantColor()
         : ConstantColor(sf::Color::White)
     {
+        notify();
     }
 
     ConstantColor::ConstantColor(const sf::Color& color)
@@ -28,12 +36,20 @@ namespace colors
     void ConstantColor::set_color(const sf::Color& color)
     {
         color_ = color;
+        notify();
     }
 
+    std::shared_ptr<ColorGenerator> ConstantColor::clone_impl() const
+    {
+        return std::make_shared<ConstantColor>(*this);
+    }
+
+    //------------------------------------------------------------
     
     LinearGradient::LinearGradient()
         : LinearGradient({{sf::Color::White, 0.},{sf::Color::White, 1.}})
     {
+        notify();
     }
     
     LinearGradient::LinearGradient(const LinearGradient::keys& key_colors)
@@ -74,6 +90,7 @@ namespace colors
     {
         Expects(keys.size() >= 2);
         key_colors_ = keys;
+        notify();
     }
 
     sf::Color LinearGradient::get(float f)
@@ -110,10 +127,17 @@ namespace colors
         return color;
     }
 
+    std::shared_ptr<ColorGenerator> LinearGradient::clone_impl() const
+    {
+        return std::make_shared<LinearGradient>(*this);
+    }
+
+    //------------------------------------------------------------
 
     DiscreteGradient::DiscreteGradient()
         : DiscreteGradient({{sf::Color::White, 0}})
     {
+        notify();
     }
 
     DiscreteGradient::DiscreteGradient(const keys& keys)
@@ -141,6 +165,7 @@ namespace colors
         Expects(keys.size() > 0);
         keys_ = keys;
         colors_ = generate_colors(keys_);
+        notify();
     }
 
     std::vector<sf::Color> DiscreteGradient::generate_colors(const keys& dirty_keys)
@@ -190,4 +215,12 @@ namespace colors
         }
         return keys;
     }
+
+    std::shared_ptr<ColorGenerator> DiscreteGradient::clone_impl() const
+    {
+        return std::make_shared<DiscreteGradient>(*this);
+    }
+
+    //------------------------------------------------------------
+
 }
