@@ -5,56 +5,78 @@
 namespace colors
 {
     VertexPainter::VertexPainter()
-        : Observer<ColorGenerator>{std::make_shared<LinearGradient>(
+        : Observable{}
+        , Observer<ColorGenerator>{std::make_shared<LinearGradient>(
             LinearGradient::keys({
                     {sf::Color::Red, 0.},
                     {sf::Color::Green, 0.5},
                     {sf::Color::Blue, 1.}}))}
-        , generator_{get_target()}
-        , angle_{60.f}
+        , Observer<ColorGeneratorBuffer>{std::make_shared<ColorGeneratorBuffer>(Observer<ColorGenerator>::get_target())}
+        , generator_buffer_{Observer<ColorGeneratorBuffer>::get_target()}
     {
-        add_callback([this](){notify();});
+        Observer<ColorGenerator>::add_callback([this](){notify();});
+        Observer<ColorGeneratorBuffer>::add_callback([this](){update_generator();});
     }
+
     VertexPainter::VertexPainter(const std::shared_ptr<ColorGenerator> gen)
-        : Observer<ColorGenerator>(gen)
-        , generator_{gen}
+        : Observable{}
+        , Observer<ColorGenerator>(gen)
+        , Observer<ColorGeneratorBuffer>{std::make_shared<ColorGeneratorBuffer>(gen)}
+        , generator_buffer_{Observer<ColorGeneratorBuffer>::get_target()}
     {
-        add_callback([this](){notify();});
+        Observer<ColorGenerator>::add_callback([this](){notify();});
+        Observer<ColorGeneratorBuffer>::add_callback([this](){update_generator();});
     }
+
     VertexPainter::VertexPainter(const VertexPainter& other)
         : Observable{}
-        , Observer<ColorGenerator>{other.get_target()->clone()}
-        , generator_{get_target()}
+        , Observer<ColorGenerator>{other.Observer<ColorGenerator>::get_target()->clone()}
+        , Observer<ColorGeneratorBuffer>{std::make_shared<ColorGeneratorBuffer>(Observer<ColorGenerator>::get_target())}
+        , generator_buffer_{Observer<ColorGeneratorBuffer>::get_target()}
         , angle_{other.angle_}
     {
-        add_callback([this](){notify();});
+        Observer<ColorGenerator>::add_callback([this](){notify();});
+        Observer<ColorGeneratorBuffer>::add_callback([this](){update_generator();});
     }
+
     VertexPainter::VertexPainter(VertexPainter&& other)
-        : Observer<ColorGenerator>{other.get_target()->clone()}
-        , generator_{get_target()}
+        : Observable{}
+        , Observer<ColorGenerator>{other.Observer<ColorGenerator>::get_target()->clone()}
+        , Observer<ColorGeneratorBuffer>{std::make_shared<ColorGeneratorBuffer>(Observer<ColorGenerator>::get_target())}
+        , generator_buffer_{Observer<ColorGeneratorBuffer>::get_target()}
         , angle_{other.angle_}
     {
-        add_callback([this](){notify();});
+        Observer<ColorGenerator>::add_callback([this](){notify();});
+        Observer<ColorGeneratorBuffer>::add_callback([this](){update_generator();});
+
         other.Observer<ColorGenerator>::set_target(nullptr);
-        other.generator_.reset();
+        other.Observer<ColorGeneratorBuffer>::set_target(nullptr);
+        
         other.angle_ = 0.;
     }
+
     VertexPainter& VertexPainter::operator=(VertexPainter other)
     {
         swap(other);
         return *this;
     }
+
     void VertexPainter::swap(VertexPainter& other)
     {
         using std::swap;
 
-        auto tmp_gen = get_target();
-        set_target(other.get_target());
-        other.set_target(tmp_gen);
-        add_callback([this](){notify();});
-        other.add_callback([&other](){other.notify();});
+        auto tmp_gen = Observer<ColorGenerator>::get_target();
+        Observer<ColorGenerator>::set_target(other.Observer<ColorGenerator>::get_target());
+        other.Observer<ColorGenerator>::set_target(tmp_gen);
+        Observer<ColorGenerator>::add_callback([this](){notify();});
+        other.Observer<ColorGenerator>::add_callback([&other](){other.notify();});
 
-        swap(generator_, other.generator_);
+        auto tmp_buff = Observer<ColorGeneratorBuffer>::get_target();
+        Observer<ColorGeneratorBuffer>::set_target(other.Observer<ColorGeneratorBuffer>::get_target());
+        other.Observer<ColorGeneratorBuffer>::set_target(tmp_buff);
+        Observer<ColorGeneratorBuffer>::add_callback([this](){update_generator();});
+        other.Observer<ColorGeneratorBuffer>::add_callback([&other](){other.update_generator();});
+
         swap(angle_, other.angle_);
     }
     
@@ -70,28 +92,36 @@ namespace colors
     }
 
 
-    const std::shared_ptr<ColorGenerator> VertexPainter::get_generator() const
-    {
-        return generator_;
-    }
+    // const std::shared_ptr<ColorGenerator> VertexPainter::get_generator() const
+    // {
+    //     return generator_;
+    // }
 
-    std::shared_ptr<ColorGenerator>& VertexPainter::ref_generator()
+    std::shared_ptr<ColorGeneratorBuffer> VertexPainter::get_generator_buffer() const
     {
-        return generator_;
+        return generator_buffer_;
     }
     
-    void VertexPainter::set_generator(std::shared_ptr<ColorGenerator> generator)
+    // void VertexPainter::set_generator(std::shared_ptr<ColorGenerator> generator)
+    // {
+    //     generator_ = generator;
+    //     set_target(generator_);
+    //     add_callback([this]{notify();});
+    //     notify();
+    // }
+
+    void VertexPainter::update_generator()
     {
-        generator_ = generator;
-        set_target(generator_);
-        add_callback([this]{notify();});
+        auto gen = generator_buffer_->get_generator();
+        Observer<ColorGenerator>::set_target(gen);
+        Observer<ColorGenerator>::add_callback([this](){notify();});
         notify();
     }
 
-
     void VertexPainter::paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box) const
     {
-        if (!generator_)
+        auto generator = Observer<ColorGenerator>::get_target();
+        if (!generator)
         {
             return;
         }
@@ -116,7 +146,7 @@ namespace colors
             sf::Vector2f projection = geometry::project_and_clamp(opposite_intersection, intersection, v.position);
             float lerp = geometry::distance(projection, opposite_intersection) / distance;
 
-            sf::Color color = generator_->get(lerp);
+            sf::Color color = generator->get(lerp);
             color.a = v.color.a;
             v.color = color;
         }

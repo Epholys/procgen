@@ -14,7 +14,7 @@
 #include "Turtle.h"
 #include "helper_string.h"
 #include "ColorsGenerator.h"
-
+#include "ColorsGeneratorBuffer.h"
 
 // Define 'display()' and 'interact_with()' for the structs and classes to
 // display.
@@ -67,6 +67,8 @@ namespace procgui {
     // Pointer for polymorphism
     bool interact_with(std::shared_ptr<colors::ColorGenerator>& gen, const std::string& name);
 
+    bool interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string& name);
+    
     bool interact_with(colors::ConstantColor& gen);
 
     bool interact_with(colors::LinearGradient& gen);

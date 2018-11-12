@@ -7,6 +7,7 @@
 #include "Observable.h"
 #include "Observer.h"
 #include "ColorsGenerator.h"
+#include "ColorsGeneratorBuffer.h"
 
 namespace colors
 {
@@ -17,6 +18,7 @@ namespace colors
     // No invariants.
     class VertexPainter : public Observable
                         , public Observer<ColorGenerator>
+                        , public Observer<ColorGeneratorBuffer>
     {
     public:
 
@@ -28,9 +30,9 @@ namespace colors
         
         float get_angle() const;
         void set_angle(float angle);
-        const std::shared_ptr<ColorGenerator> get_generator() const;
-        std::shared_ptr<ColorGenerator>& ref_generator();
-        void set_generator(std::shared_ptr<ColorGenerator> generator);
+        std::shared_ptr<ColorGeneratorBuffer> get_generator_buffer() const;
+        // void set_generator(std::shared_ptr<ColorGenerator> generator);
+        void update_generator();
         
         // Paint 'vertices' with the informations of 'bounding_box' according to
         // the rule with the colors from generator_
@@ -39,7 +41,7 @@ namespace colors
     private:
         void swap(VertexPainter& other);
         
-        std::shared_ptr<ColorGenerator> generator_;
+        const std::shared_ptr<ColorGeneratorBuffer>& generator_buffer_;
         float angle_ {60.};
     };
 }

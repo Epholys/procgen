@@ -50,6 +50,7 @@ namespace
         // Otherwise, set up a CollapsingHeader
         else
         {
+            // TODO ID
             bool is_active = ImGui::CollapsingHeader(name.c_str());
             return is_active;
         }
@@ -364,7 +365,7 @@ namespace procgui
         }
         
         push_embedded();
-        if(interact_with(painter.ref_generator(), "Colors"))
+        if(interact_with(*painter.get_generator_buffer(), "Colors"))
         {
             is_modified = true;
         }
@@ -437,6 +438,74 @@ namespace procgui
         
         return is_modified;
     }
+
+    bool interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string& name)
+    {
+        if (!set_up(name))
+        {
+            return false;
+        }
+
+        bool is_modified = false;    
+
+        auto gen = color_buffer.get_generator();
+        
+        int index = 0;
+        auto constant = std::dynamic_pointer_cast<colors::ConstantColor>(gen);
+        auto gradient = std::dynamic_pointer_cast<colors::LinearGradient>(gen);
+        auto discrete = std::dynamic_pointer_cast<colors::DiscreteGradient>(gen);
+        if (constant)
+        {
+            index = 0;
+        }
+        else if (gradient)
+        {
+            index = 1;
+        }
+        else
+        {
+            index = 2;
+        }
+
+        const char* generators[3] = {"Constant", "Linear Gradient", "Discrete Gradient"};
+        if (ImGui::ListBox("Color Generator", &index, generators, 3))
+        {
+            is_modified = true;
+            if (index == 0)
+            {
+                gen = std::make_shared<colors::ConstantColor>();
+            }
+            else if (index == 1)
+            {
+                gen = std::make_shared<colors::LinearGradient>();
+            }
+            else
+            {
+                gen = std::make_shared<colors::DiscreteGradient>();
+
+            }
+            color_buffer.set_generator(gen);
+        }
+
+        if (constant)
+        {
+            is_modified |= interact_with(*constant);
+        }
+        else if (gradient)
+        {
+            is_modified |= interact_with(*gradient);
+        }
+        else
+        {
+            is_modified |= interact_with(*discrete);
+        }
+
+        conclude();
+                
+
+        return false;
+    }
+    
     bool interact_with(colors::ConstantColor& constant)
     {
         bool is_modified = false;
@@ -458,6 +527,7 @@ namespace procgui
 
         return is_modified;
     }
+
     bool interact_with(colors::LinearGradient& gen)
     {
         bool is_modified = false;
