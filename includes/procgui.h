@@ -48,32 +48,32 @@ namespace procgui {
     void display(const drawing::InterpretationMap& map, const std::string& name);
 
     
-    bool interact_with(drawing::DrawingParameters& turtle,
+    void interact_with(drawing::DrawingParameters& turtle,
                        const std::string& name);
 
     // Special case for the RuleMapBuffers
     template<typename Buffer>
-    bool interact_with_buffer(Buffer& buffer,
+    void interact_with_buffer(Buffer& buffer,
                               std::function<bool(typename Buffer::const_iterator)> successor_fn);
     
-    bool interact_with(LSystemBuffer& buffer, const std::string& name);
+    void interact_with(LSystemBuffer& buffer, const std::string& name);
 
-    bool interact_with(InterpretationMapBuffer& buffer, const std::string& name);
+    void interact_with(InterpretationMapBuffer& buffer, const std::string& name);
 
-    bool interact_with(LSystemView& lsys_view, const std::string& name, bool* open = nullptr);
+    void interact_with(LSystemView& lsys_view, const std::string& name, bool* open = nullptr);
 
-    bool interact_with(colors::VertexPainter& painter, const std::string& name);
+    void interact_with(colors::VertexPainter& painter, const std::string& name);
 
     // Pointer for polymorphism
-    bool interact_with(std::shared_ptr<colors::ColorGenerator>& gen, const std::string& name);
+    void interact_with(std::shared_ptr<colors::ColorGenerator>& gen, const std::string& name);
 
-    bool interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string& name);
+    void interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string& name);
     
-    bool interact_with(colors::ConstantColor& gen);
+    void interact_with(colors::ConstantColor& gen);
 
-    bool interact_with(colors::LinearGradient& gen);
+    void interact_with(colors::LinearGradient& gen);
 
-    bool interact_with(colors::DiscreteGradient& gen);
+    void interact_with(colors::DiscreteGradient& gen);
     
     #include "procgui.tpp"
 

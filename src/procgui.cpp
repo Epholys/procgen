@@ -194,17 +194,13 @@ namespace procgui
 
     
 
-    bool interact_with(drawing::DrawingParameters& parameters, const std::string& name)
+    void interact_with(drawing::DrawingParameters& parameters, const std::string& name)
     {
         if( !set_up(name) )
         {
-            // Early out if the display zone is collapsed.
-            return false;
+            return;
         }
     
-        // Returned value informing if the object was modified
-        bool is_modified = false;
-
         // --- Starting position ---
         float pos[2] = { parameters.get_starting_position().x,
                          parameters.get_starting_position().y };
@@ -221,7 +217,6 @@ namespace procgui
         if ( ImGui::DragFloat("Starting Angle", &starting_angle_deg,
                               1.f, 0.f, 360.f, "%.lf") )
         {
-            is_modified = true;
             parameters.set_starting_angle(math::degree_to_rad(starting_angle_deg));
         }
 
@@ -230,7 +225,6 @@ namespace procgui
         if ( ImGui::DragFloat("Angle Delta", &delta_angle_deg,
                               1.f, 0.f, 360.f, "%.lf") )
         {
-            is_modified = true;
             parameters.set_delta_angle(math::degree_to_rad(delta_angle_deg));
         }
 
@@ -238,7 +232,6 @@ namespace procgui
         float step = parameters.get_step();
         if(ImGui::DragFloat("Step", &step, 0.2f, 0.f, 0.f, "%#.1lf"))
         {
-            is_modified = true;
             parameters.set_step(step);
         }
 
@@ -250,26 +243,20 @@ namespace procgui
         int n_iter = parameters.get_n_iter();
         if(ImGui::SliderInt("Iterations", &n_iter, 0, n_iter_max))
         {
-            is_modified = true;
             parameters.set_n_iter(n_iter);
         }
         ImGui::SameLine(); ImGui::ShowHelpMarker("CTRL+click to directly input values. Higher values will use all of your memory and CPU");
 
         conclude();
 
-        return is_modified;
     }
 
-    bool interact_with(LSystemBuffer& buffer, const std::string& name)
+    void interact_with(LSystemBuffer& buffer, const std::string& name)
     {
         if( !set_up(name) )
         {
-            // Early out if the display zone is collapsed.
-            return false;
+            return;
         }
-
-        // Returned value informing if the object was modified
-        bool is_modified = false;
 
         // The LSystem itelf
         LSystem& lsys = *buffer.get_target();
@@ -279,7 +266,6 @@ namespace procgui
                         
         if (ImGui::InputText("Axiom", buf.data(), lsys_successor_size))
         {
-            is_modified = true;
             lsys.set_axiom(array_to_string(buf));
         }
 
@@ -287,8 +273,8 @@ namespace procgui
         // [ predecessor ] -> [ successor ] [-] (remove rule) | [+] (add rule)
 
         ImGui::Text("Production rules:");
-        is_modified |= interact_with_buffer(buffer,
-            [&buffer](auto it)
+        interact_with_buffer(buffer,
+           [&buffer](auto it)
             {
                 // Interact with the successor. Except for the input size, does not
                 // have any constraints.
@@ -302,21 +288,19 @@ namespace procgui
             });
 
         conclude();
-
-        return is_modified;
     }
 
-    bool interact_with(InterpretationMapBuffer& buffer, const std::string& name)
+    void interact_with(InterpretationMapBuffer& buffer, const std::string& name)
     {
         if( !set_up(name) )
         {
             // Early out
-            return false;
+            return;
         }
 
         using namespace drawing;
         
-        bool is_modified = interact_with_buffer(buffer,
+        interact_with_buffer(buffer,
             [&buffer](auto it)
             {
                 // ImGui::ListBox needs:
@@ -342,48 +326,36 @@ namespace procgui
             });
 
         conclude();
-
-        return is_modified;
     }
 
-    bool interact_with(colors::VertexPainter& painter, const std::string& name)
+    void interact_with(colors::VertexPainter& painter, const std::string& name)
     {
         if (!set_up(name))
         {
-            return false;
+            return;
         }
-
-        bool is_modified = false;
 
         // --- Gradient angle ---
         float angle = painter.get_angle();
         if ( ImGui::DragFloat("Gradient Angle", &angle,
                               1.f, 0.f, 360.f, "%.lf") )
         {
-            is_modified = true;
             painter.set_angle(angle);
         }
         
         push_embedded();
-        if(interact_with(*painter.get_generator_buffer(), "Colors"))
-        {
-            is_modified = true;
-        }
+        interact_with(*painter.get_generator_buffer(), "Colors");
         pop_embedded();
         
         conclude();
-
-        return is_modified;
     }
     
-    bool interact_with(std::shared_ptr<colors::ColorGenerator>& gen, const std::string& name)
+    void interact_with(std::shared_ptr<colors::ColorGenerator>& gen, const std::string& name)
     {
         if (!set_up(name))
         {
-            return false;
+            return;
         }
-
-        bool is_modified = false;    
 
         int index = 0;
         auto constant = std::dynamic_pointer_cast<colors::ConstantColor>(gen);
@@ -405,7 +377,6 @@ namespace procgui
         const char* generators[3] = {"Constant", "Linear Gradient", "Discrete Gradient"};
         if (ImGui::ListBox("Color Generator", &index, generators, 3))
         {
-            is_modified = true;
             if (index == 0)
             {
                 gen = std::make_shared<colors::ConstantColor>();
@@ -423,30 +394,26 @@ namespace procgui
 
         if (constant)
         {
-            is_modified |= interact_with(*constant);
+            interact_with(*constant);
         }
         else if (gradient)
         {
-            is_modified |= interact_with(*gradient);
+            interact_with(*gradient);
         }
         else
         {
-            is_modified |= interact_with(*discrete);
+            interact_with(*discrete);
         }
 
         conclude();
-        
-        return is_modified;
     }
 
-    bool interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string& name)
+    void interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string& name)
     {
         if (!set_up(name))
         {
-            return false;
+            return;
         }
-
-        bool is_modified = false;    
 
         auto gen = color_buffer.get_generator();
         
@@ -470,7 +437,6 @@ namespace procgui
         const char* generators[3] = {"Constant", "Linear Gradient", "Discrete Gradient"};
         if (ImGui::ListBox("Color Generator", &index, generators, 3))
         {
-            is_modified = true;
             if (index == 0)
             {
                 gen = std::make_shared<colors::ConstantColor>();
@@ -489,29 +455,27 @@ namespace procgui
 
         if (constant)
         {
-            is_modified |= interact_with(*constant);
+            interact_with(*constant);
         }
         else if (gradient)
         {
-            is_modified |= interact_with(*gradient);
+            interact_with(*gradient);
         }
         else
         {
-            is_modified |= interact_with(*discrete);
+            interact_with(*discrete);
         }
 
         conclude();
-                
-
-        return false;
     }
     
-    bool interact_with(colors::ConstantColor& constant)
+    void interact_with(colors::ConstantColor& constant)
     {
-        bool is_modified = false;
-
         ImVec4 imcolor = constant.get_color();
-        is_modified |= ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf);
+        if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+        {
+            constant.set_color(imcolor);
+        }
 
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 pos = ImGui::GetCursorScreenPos();
@@ -519,16 +483,9 @@ namespace procgui
         draw_list->AddRectFilled(ImVec2(pos.x, pos.y), ImVec2(pos.x+size.x, pos.y+size.y),
                                  ImGui::ColorConvertFloat4ToU32(imcolor));
         ImGui::Dummy(size);
-
-        if (is_modified)
-        {
-            constant.set_color(imcolor);
-        }
-
-        return is_modified;
     }
 
-    bool interact_with(colors::LinearGradient& gen)
+    void interact_with(colors::LinearGradient& gen)
     {
         bool is_modified = false;
         
@@ -542,11 +499,17 @@ namespace procgui
 
             auto& sfcolor = keys.at(i).first;
             ImVec4 imcolor = sfcolor;
-            is_modified |= ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf);
+            if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+            {
+                is_modified = true;
+            }
             sfcolor = imcolor;
             
             ImGui::PushItemWidth(50);
-            is_modified |= ImGui::DragFloat("", &keys.at(i).second, 0.01, 0., 1., "%.2f");
+            if(ImGui::DragFloat("", &keys.at(i).second, 0.01, 0., 1., "%.2f"))
+            {
+                is_modified = true;
+            }
             ImGui::PopItemWidth();
 
             ImGui::EndGroup();
@@ -562,6 +525,7 @@ namespace procgui
             keys.push_back({sf::Color::White, 1.f});
         }
         ImGui::PopStyleColor(3);
+
         // Button '-' to remove a key
         ImGui::PushStyleRedButton();
         if (keys.size() > 2 && (ImGui::SameLine(), ImGui::Button("-")))
@@ -591,14 +555,15 @@ namespace procgui
             ratio = f;
             x = pos.x + size.x*f;
         }
+
         ImGui::Dummy(size);
         if (is_modified)
         {
             gen.set_keys(keys);
         }
-        return is_modified;
     }
-    bool interact_with(colors::DiscreteGradient& gen)
+
+    void interact_with(colors::DiscreteGradient& gen)
     {
         bool is_modified = false;
         
@@ -612,7 +577,10 @@ namespace procgui
 
             auto& sfcolor = keys.at(i).first;
             ImVec4 imcolor = sfcolor;
-            is_modified |= ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf);
+            if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+            {
+                is_modified = true;
+            }
             sfcolor = imcolor;
 
             ImGui::SameLine();
@@ -647,7 +615,10 @@ namespace procgui
         ImGui::PushID(keys.size());
         auto& sfcolor = keys.back().first;
         ImVec4 imcolor = sfcolor;
-        is_modified |= ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf);
+        if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+        {
+            is_modified = true;
+        }
         sfcolor = imcolor;
         ImGui::PopID();
 
@@ -660,6 +631,7 @@ namespace procgui
             keys.push_back({sf::Color::White, keys.back().second+1});
         }
         ImGui::PopStyleColor(3);
+
         // Button '-' to remove a key
         ImGui::PushStyleRedButton();
         if (keys.size() > 1 && (ImGui::SameLine(), ImGui::Button("-")))
@@ -682,25 +654,25 @@ namespace procgui
             x += width;
         }
         ImGui::Dummy(size);
+
         if (is_modified)
         {
             gen.set_keys(keys);
         }
-        return is_modified;
     }
 
 
-    bool interact_with(LSystemView& lsys_view, const std::string& name, bool* open)
+    void interact_with(LSystemView& lsys_view, const std::string& name, bool* open)
     {
+        if (open && !(*open))
+        {
+            return;
+        }
+
         // To avoid collision with other window of the same name, create a
         // unique ID for the created window. We override the mecanism of
         // same name ==> same window for the LSystemView which is a unique
         // window for a system.
-        
-        if (open && !(*open))
-        {
-            return false;
-        }
         std::stringstream ss;
         ss << "##" << lsys_view.get_id(); // Each window of LSystemView
                                           // is conserved by its id.
@@ -739,14 +711,14 @@ namespace procgui
                 ImGui::PopStyleColor(2);
             }
             // Early out if the display zone is collapsed.
-            return false;
+            return;
         }
 
         // 'is_modified' is true if the DrawingParameter is modified. It does
         // not check the LSystem or the InterpretationMap because the
         // LSystemView is already an Observer of these classes.
         push_embedded();
-        bool is_modified = interact_with(lsys_view.ref_parameters(), "Drawing Parameters"+ss.str());
+        interact_with(lsys_view.ref_parameters(), "Drawing Parameters"+ss.str());
         interact_with(lsys_view.ref_lsystem_buffer(), "LSystem"+ss.str());
         interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map"+ss.str());
         interact_with(lsys_view.ref_vertex_painter(), "Painter");
@@ -758,7 +730,5 @@ namespace procgui
         {
             ImGui::PopStyleColor(2);
         }
-        
-        return is_modified;
     }
 }

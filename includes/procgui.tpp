@@ -1,12 +1,9 @@
 template<typename Buffer>
-bool interact_with_buffer(Buffer& buffer,
+void interact_with_buffer(Buffer& buffer,
                           std::function<bool(typename Buffer::const_iterator)>  successor_fn)
 {
     //  --- Rules ---
     // [ predecessor ] -> [ successor ] [-] (remove rule) | [+] (add rule)
-
-    // Returned value informing if the object was modified
-    bool is_modified = false;
 
     ImGui::Indent(); 
 
@@ -26,7 +23,6 @@ bool interact_with_buffer(Buffer& buffer,
         // Display the predecessor as an InputText
         if (ImGui::InputText("##pred", predec, 2))
         {
-            is_modified = true;
             buffer.delayed_change_predecessor(it, predec[0]);
         }
 
@@ -34,8 +30,7 @@ bool interact_with_buffer(Buffer& buffer,
 
         ImGui::PushItemWidth(200);
 
-        // Successor function
-        is_modified |= successor_fn(it);
+        successor_fn(it);
         
         // The [-] button. If clicked, the current iterator is saved as the
         // one to delete. We reasonably assume a user can not click on two
@@ -47,7 +42,6 @@ bool interact_with_buffer(Buffer& buffer,
         ImGui::SameLine();
         if (ImGui::Button("-"))
         {
-            is_modified = true;
             to_delete = it;
         }
         ImGui::PopStyleColor(3);
@@ -67,7 +61,6 @@ bool interact_with_buffer(Buffer& buffer,
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(2/7.0f, 0.8f, 0.8f)));
     if (ImGui::Button("+"))
     {
-        is_modified = true;
         buffer.delayed_add_rule();
     }
     ImGui::PopStyleColor(3);
@@ -82,6 +75,4 @@ bool interact_with_buffer(Buffer& buffer,
     buffer.apply();
             
     ImGui::Unindent();
-
-    return is_modified;
 }

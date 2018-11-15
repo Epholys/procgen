@@ -38,14 +38,15 @@ int main()
     serpinski_param->set_delta_angle(degree_to_rad(60.f));
     serpinski_param->set_step(7);
     serpinski_param->set_n_iter(5);
-
+    
     auto plant_param = std::make_shared<DrawingParameters>();
     plant_param->set_starting_position({ 400, 800 });
     plant_param->set_starting_angle(degree_to_rad(80.f));
     plant_param->set_delta_angle(degree_to_rad(25.f));
     plant_param->set_step(5);
     plant_param->set_n_iter(6);
-
+    plant_param->set_step(4);
+    
     LSystemView plant_view ("Plant", plant, map, plant_param);
     LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
     
