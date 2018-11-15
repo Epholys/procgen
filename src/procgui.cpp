@@ -50,8 +50,12 @@ namespace
         // Otherwise, set up a CollapsingHeader
         else
         {
-            // TODO ID
             bool is_active = ImGui::CollapsingHeader(name.c_str());
+            if(is_active)
+            {
+                ImGui::PushID(name.c_str());
+                ImGui::Indent();
+            }
             return is_active;
         }
     }
@@ -66,6 +70,11 @@ namespace
         {
             ImGui::Separator();
             ImGui::End();
+        }
+        else
+        {
+            ImGui::Unindent();
+            ImGui::PopID();
         }
     }
 }
