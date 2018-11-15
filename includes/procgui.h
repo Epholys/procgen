@@ -64,9 +64,6 @@ namespace procgui {
 
     void interact_with(colors::VertexPainter& painter, const std::string& name);
 
-    // Pointer for polymorphism
-    void interact_with(std::shared_ptr<colors::ColorGenerator>& gen, const std::string& name);
-
     void interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string& name);
     
     void interact_with(colors::ConstantColor& gen);

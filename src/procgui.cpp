@@ -359,64 +359,6 @@ namespace procgui
         conclude();
     }
     
-    void interact_with(std::shared_ptr<colors::ColorGenerator>& gen, const std::string& name)
-    {
-        if (!set_up(name))
-        {
-            return;
-        }
-
-        int index = 0;
-        auto constant = std::dynamic_pointer_cast<colors::ConstantColor>(gen);
-        auto gradient = std::dynamic_pointer_cast<colors::LinearGradient>(gen);
-        auto discrete = std::dynamic_pointer_cast<colors::DiscreteGradient>(gen);
-        if (constant)
-        {
-            index = 0;
-        }
-        else if (gradient)
-        {
-            index = 1;
-        }
-        else
-        {
-            index = 2;
-        }
-
-        const char* generators[3] = {"Constant", "Linear Gradient", "Discrete Gradient"};
-        if (ImGui::ListBox("Color Generator", &index, generators, 3))
-        {
-            if (index == 0)
-            {
-                gen = std::make_shared<colors::ConstantColor>();
-            }
-            else if (index == 1)
-            {
-                gen = std::make_shared<colors::LinearGradient>();
-            }
-            else
-            {
-                gen = std::make_shared<colors::DiscreteGradient>();
-
-            }
-        }
-
-        if (constant)
-        {
-            interact_with(*constant);
-        }
-        else if (gradient)
-        {
-            interact_with(*gradient);
-        }
-        else
-        {
-            interact_with(*discrete);
-        }
-
-        conclude();
-    }
-
     void interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string& name)
     {
         if (!set_up(name))
@@ -427,20 +369,23 @@ namespace procgui
         auto gen = color_buffer.get_generator();
         
         int index = 0;
-        auto constant = std::dynamic_pointer_cast<colors::ConstantColor>(gen);
-        auto gradient = std::dynamic_pointer_cast<colors::LinearGradient>(gen);
-        auto discrete = std::dynamic_pointer_cast<colors::DiscreteGradient>(gen);
-        if (constant)
+
+        const auto& info = typeid(*gen).hash_code();
+        if (info == typeid(colors::ConstantColor).hash_code())
         {
             index = 0;
         }
-        else if (gradient)
+        else if (info == typeid(colors::LinearGradient).hash_code())
         {
             index = 1;
         }
-        else
+        else if (info == typeid(colors::DiscreteGradient).hash_code())
         {
             index = 2;
+        }
+        else
+        {
+            Expects(false);
         }
 
         const char* generators[3] = {"Constant", "Linear Gradient", "Discrete Gradient"};
@@ -462,16 +407,19 @@ namespace procgui
             color_buffer.set_generator(gen);
         }
 
-        if (constant)
+        if (index == 0)
         {
+            auto constant = std::dynamic_pointer_cast<colors::ConstantColor>(gen);
             interact_with(*constant);
         }
-        else if (gradient)
+        else if (index == 1)
         {
+            auto gradient = std::dynamic_pointer_cast<colors::LinearGradient>(gen);
             interact_with(*gradient);
         }
         else
         {
+            auto discrete = std::dynamic_pointer_cast<colors::DiscreteGradient>(gen);
             interact_with(*discrete);
         }
 
