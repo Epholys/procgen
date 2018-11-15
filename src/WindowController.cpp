@@ -38,6 +38,17 @@ namespace controller
         return position;
     }
 
+    sf::Vector2i WindowController::absolute_mouse_position(sf::Vector2f mouse_click)
+    {
+        auto size = view_.getSize();
+        auto center = view_.getCenter();
+        sf::Vector2f upright {center.x - size.x/2, center.y - size.y/2};
+        sf::Vector2i position((mouse_click.x - upright.x) / zoom_level_,
+                              (mouse_click.y - upright.y) * zoom_level_);
+        return position;
+    }
+
+    
     sf::Vector2i WindowController::get_mouse_position()
     {
         return mouse_position_;

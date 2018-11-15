@@ -638,18 +638,28 @@ namespace procgui
             // Make the window appear at the mouse double-click position with a
             // correct size.
             // Warning: lots of arbitrary values.
-            sf::Vector2f pos = sf::Vector2f(controller::WindowController::get_mouse_position());
-            pos -= {250,150}; // Shift the window position to make its center
-                             // appear a the mouse position.
-
             // Shift the window position to always appear on-screen in its entirety.
             int windowX = window::window_size.x;
             int windowY = window::window_size.y;
+            sf::Vector2i pos = controller::WindowController::get_mouse_position();
+            auto bounding_box = lsys_view.get_bounding_box();
+            if (bounding_box.contains(controller::WindowController::real_mouse_position(pos)))
+            {
+                auto absolute_right_side = controller::WindowController::absolute_mouse_position({bounding_box.left + bounding_box.width,0});
+                pos.x = absolute_right_side.x;
+            }
+            if (pos.x + 500 > windowX)
+            {
+                auto absolute_left_side = controller::WindowController::absolute_mouse_position({bounding_box.left,0});
+                pos.x = absolute_left_side.x - 500;                
+            }
+            pos.y -= 150;
+            
             pos.x = pos.x < 0 ? 0 : pos.x;
             pos.x = pos.x + 500 > windowX ? windowX-500 : pos.x;
             pos.y = pos.y < 0 ? 0 : pos.y;
             pos.y = pos.y + 450 > windowY ? windowY-450 : pos.y;
-            ImGui::SetNextWindowPos({pos.x,pos.y}, ImGuiSetCond_Appearing);
+            ImGui::SetNextWindowPos(sf::Vector2i{pos.x,pos.y}, ImGuiSetCond_Appearing);
             ImGui::SetNextWindowSize({500,450}, ImGuiSetCond_Appearing);
 
             // The window's title background is set to the unique color
