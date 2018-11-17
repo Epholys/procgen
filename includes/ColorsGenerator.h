@@ -65,8 +65,9 @@ namespace colors
 
         sf::Color get(float f) override;
 
-        // Getter
-        const keys& get_keys() const;
+        // Getters
+        const keys& get_raw_keys() const;
+        const keys& get_sanitized_keys() const;
 
         // Setter (keys are always modified externally)
         // Precondition: 'key_colors' must have at least two keys.
@@ -81,7 +82,8 @@ namespace colors
     private:
         std::shared_ptr<ColorGenerator> clone_impl() const override;
 
-        keys key_colors_;
+        keys raw_keys_;
+        keys sanitized_keys_;
     };
 
 

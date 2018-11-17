@@ -52,11 +52,12 @@ namespace colors
         notify();
     }
     
-    LinearGradient::LinearGradient(const LinearGradient::keys& key_colors)
+    LinearGradient::LinearGradient(const LinearGradient::keys& keys)
         : ColorGenerator()
-        , key_colors_(key_colors)
+        , raw_keys_(keys)
+        , sanitized_keys_(keys)
     {
-        Expects(key_colors_.size() >= 2);
+        Expects(keys.size() >= 2);
     }
 
     LinearGradient::keys LinearGradient::sanitize_keys(const keys& colors)
@@ -81,15 +82,21 @@ namespace colors
         return keys;
     }
 
-    const LinearGradient::keys& LinearGradient::get_keys() const
+    const LinearGradient::keys& LinearGradient::get_raw_keys() const
     {
-        return key_colors_;
+        return raw_keys_;
+    }
+ 
+    const LinearGradient::keys& LinearGradient::get_sanitized_keys() const
+    {
+        return sanitized_keys_;
     }
 
     void LinearGradient::set_keys(const keys& keys)
     {
         Expects(keys.size() >= 2);
-        key_colors_ = keys;
+        raw_keys_ = keys;
+        sanitized_keys_ = sanitize_keys(keys);
         notify();
     }
 
@@ -98,16 +105,15 @@ namespace colors
         // Clamp 'f'.
         f = f < 0. ? 0. : f;
         f = f > 1. ? 1. : f;
-        auto keys = sanitize_keys(key_colors_); // TODO unoptimal
 
         // Find the upper-bound key...
-        auto superior_it = std::find_if(begin(keys), end(keys),
+        auto superior_it = std::find_if(begin(sanitized_keys_), end(sanitized_keys_),
                                 [f](const auto& p){return f <= p.second;});
-        Expects(superior_it != end(keys)); // should never happen
-        auto superior_idx = std::distance(begin(keys), superior_it);
+        Expects(superior_it != end(sanitized_keys_)); // should never happen
+        auto superior_idx = std::distance(begin(sanitized_keys_), superior_it);
         auto inferior_idx = superior_idx == 0 ? 0 : superior_idx-1; // ...and the lower-bound one.
-        const auto& superior = keys.at(superior_idx);
-        const auto& inferior = keys.at(inferior_idx);
+        const auto& superior = sanitized_keys_.at(superior_idx);
+        const auto& inferior = sanitized_keys_.at(inferior_idx);
 
         float factor = 0.f;
         if (superior == inferior)

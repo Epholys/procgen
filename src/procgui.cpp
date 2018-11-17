@@ -446,7 +446,7 @@ namespace procgui
     {
         bool is_modified = false;
         
-        auto keys = gen.get_keys();
+        auto keys = gen.get_raw_keys();
 
         // Modify 'gen''s keys: colors and position
         for (unsigned i=0; i<keys.size(); ++i)
@@ -492,7 +492,12 @@ namespace procgui
         }
         ImGui::PopStyleColor(3);
         
-        auto k = colors::LinearGradient::sanitize_keys(keys);
+        if (is_modified)
+        {
+            gen.set_keys(keys);
+        }
+
+        auto k = gen.get_sanitized_keys();
         // Preview the color gradient
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 pos = ImGui::GetCursorScreenPos();
@@ -514,10 +519,6 @@ namespace procgui
         }
 
         ImGui::Dummy(size);
-        if (is_modified)
-        {
-            gen.set_keys(keys);
-        }
     }
 
     void interact_with(colors::DiscreteGradient& gen)
