@@ -3,9 +3,9 @@
 namespace drawing
 {
     DrawingParameters::DrawingParameters(const sf::Vector2f& starting_position,
-                      float starting_angle,
+                      double starting_angle,
                       double delta_angle,
-                      float step,
+                      double step,
                       int n_iter)
         : starting_position_ {starting_position}
         , starting_angle_ {starting_angle}
@@ -35,7 +35,7 @@ namespace drawing
     {
         return starting_position_;
     }
-    float DrawingParameters::get_starting_angle() const
+    double DrawingParameters::get_starting_angle() const
     {
         return starting_angle_;
     }
@@ -43,7 +43,7 @@ namespace drawing
     {
         return delta_angle_;
     }
-    float DrawingParameters::get_step() const
+    double DrawingParameters::get_step() const
     {
         return step_;
     }
@@ -57,7 +57,7 @@ namespace drawing
         starting_position_ = starting_position;
         notify();
     }
-    void DrawingParameters::set_starting_angle(float starting_angle)
+    void DrawingParameters::set_starting_angle(double starting_angle)
     {
         starting_angle_ = starting_angle;
         notify();
@@ -67,7 +67,7 @@ namespace drawing
         delta_angle_ = delta_angle;
         notify();
     }
-    void DrawingParameters::set_step(float step)
+    void DrawingParameters::set_step(double step)
     {
         step_ = step;
         notify();

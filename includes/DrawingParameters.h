@@ -26,22 +26,22 @@ namespace drawing
         DrawingParameters() = default;
         DrawingParameters(const sf::Vector2f& starting_position);
         DrawingParameters(const sf::Vector2f& starting_position,
-                          float starting_angle,
+                          double starting_angle,
                           double delta_angle,
-                          float step,
+                          double step,
                           int n_iter);
         DrawingParameters(const DrawingParameters& params) = default;
 
         sf::Vector2f get_starting_position() const;
-        float get_starting_angle() const;
+        double get_starting_angle() const;
         double get_delta_angle() const;
-        float get_step() const;
+        double get_step() const;
         int get_n_iter() const;
 
         void set_starting_position(const sf::Vector2f starting_position);
-        void set_starting_angle(float starting_angle);
+        void set_starting_angle(double starting_angle);
         void set_delta_angle(double delta_angle);
-        void set_step(float step);
+        void set_step(double step);
         void set_n_iter(int n_iter);
 
         void silently_set_starting_position(const sf::Vector2f starting_position);
@@ -49,7 +49,7 @@ namespace drawing
     private:
         // The starting position and angle of the Turtle.
         sf::Vector2f starting_position_ { 0, 0 };
-        float starting_angle_ { 0 };
+        double starting_angle_ { 0 };
 
         // When 'turn_left' or 'turn_right' orders are executed, the
         // Turtle pivot at a 'delta_angle' angle (in
@@ -59,7 +59,7 @@ namespace drawing
         // When 'move_forward' order is executed, the Turtle will move
         // forward 'step' pixels (at default zoom level). Initialized
         // at an arbitrary value. 
-        float step_ { 20 };
+        double step_ { 20 };
 
         // The number of iterations done by the L-system.
         int n_iter_ { 0 };

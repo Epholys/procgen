@@ -9,8 +9,8 @@ namespace drawing
     
     void go_forward_fn(Turtle& turtle)
     {
-        float dx = turtle.parameters.get_step() * std::cos(turtle.state.angle);
-        float dy = turtle.parameters.get_step() * -std::sin(turtle.state.angle); // y axis point downward
+        double dx = turtle.parameters.get_step() * std::cos(turtle.state.angle);
+        double dy = turtle.parameters.get_step() * -std::sin(turtle.state.angle); // y axis point downward
         turtle.state.position += {dx, dy};
         turtle.vertices.push_back(sf::Vector2f(turtle.state.position));
     }
