@@ -646,12 +646,12 @@ namespace procgui
             if (bounding_box.contains(controller::WindowController::real_mouse_position(pos)))
             {
                 auto absolute_right_side = controller::WindowController::absolute_mouse_position({bounding_box.left + bounding_box.width,0});
-                pos.x = absolute_right_side.x;
+                pos.x = absolute_right_side.x + 50;
             }
             if (pos.x + 500 > windowX)
             {
                 auto absolute_left_side = controller::WindowController::absolute_mouse_position({bounding_box.left,0});
-                pos.x = absolute_left_side.x - 500;                
+                pos.x = absolute_left_side.x - 550;                
             }
             pos.y -= 150;
             
