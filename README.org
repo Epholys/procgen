@@ -13,14 +13,15 @@
    - Dynamic GUIs to interact with the parameters
    - Basic and necessary user interactions (mouse dragging, adding, removing, copy-pasting)
    - Saving and loading LSystems to and from files
+   - Stub of colors
 
 ** Main Roadmap
    1. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
-      * Continuous and discrete color gradients
       * Painting the vertices by height, order of recursion, ...
       * Composite painting (e.g. i-th recursion brown, j-th recursion shade of greens)
       * Growth as the turtle order, recursion order, ...
       * Rectangle of different widths for recursion
+      * Shaders ?
    2. Add genetic algorithm or constraint-based algorithm for new LSystem generation
    3. Extend the L-System and turtle interpretation
       * Parametric L-System
@@ -28,28 +29,16 @@
       * Stochastic L-System
       * Parameters for each interpretation order (step for go_forward, delta_angle for turn_*)
 
-** Other ideas
-
-** Next Bugs
-
-** Optimization, non-urgent bugs and cleanup
-   - Optimization
-     With the current algorithm, execution time and memory consumption are exponential. Memory consumption is the biggest factor, as several GB can be allocated easily (from 16 iterations).
-     - Cache multi-iteration production rules (*very good* for execution time (from O(x^n) to O(n)) but bad for memory consumption). Useful when calculating L-System productions but not for vertices computation, which is the biggest time hog.
-     - Compute the vertices from the position (0,0) and use sf::RenderStates to define real position and angle: *huge* gain for the most common operation: moving around the vertices.
-    - Use raw OpenGL vertices instead of SFML's sf::Vertex to reduce their size (no texcoord for example)
-     - Use `sqrt` instead of `cos` and `sin` for angles to calculate vertex's position
-
-   - Bugs
-     - Correct zoom level and drag behaviour when resizing window (in Gnome)
-     - *Maybe* using arbitrary floating point precision (even with doubles some geometric LSystems are not so geometric anymore)
-     - Non-responsive interface sometimes
+** Known Bugs
+   - double precision is not enough when dealing with big geometric L-systems
+   - the GUI sometimes become irresponsive
+   - Correct zoom level and drag behaviour when resizing window (in Gnome)
 
 ** Development framework
    - *Environment:* debian sid chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=
    - *Dependencies:*
-     - SFML / 2.4.1 / [[https://www.sfml-dev.org/][Website]] / installed from packages / 
-     - googletest / 1.7.0 / [[https://github.com/google/googletest][Github Repository]] / installed from packages
+     - SFML / 2.5 / [[https://www.sfml-dev.org/][Website]] / installed from packages / 
+     - googletest / 1.8.0-10.1 / [[https://github.com/google/googletest][Github Repository]] / installed from packages
      - dear imgui, / 2018-05-21 / [[https://github.com/ocornut/imgui][Github Repository]] / cloned from the repository / included in the repo
      - imgui-sfml / 2018-05-21 / [[https://github.com/eliasdaler/imgui-sfml][Github Repository]] / installed via the instructions from the README.org of the repository / included in the repo
      - GSL (Guidelines Support Library) / 2017-06-27 / [[https://github.com/Microsoft/GSL][Github Repository]] / cloned from the repository / included in the repo
@@ -60,7 +49,11 @@
    - *Compilation:* =make= and C++17 needed
    - *Testing suite:* [[https://github.com/google/googletest/][googletest]]
 
-Warnings:
+*** Releases
+    The dev branch is where the main line of work is conducted, a commit in this branch may not compile, the application may not behave properly, the tests may not pass, and the code may not be tested, or documented.
+    The master branch is assured to compile, the application works as intended (except for known bugs), all the test passes, and the code is documented. However, the features may not be complete.
+
+*** Warnings
    - The save format is not yet stable, the save files may not be compatible between two commits. It is however possible to manually edit them to support the new features. the 'saves' directory will always be populated with valid examples.
    - The API is not stable (and will probably never be, as this is a software and not a library)
 
@@ -72,7 +65,7 @@ Warnings:
 
 ** Thoughts dump
   - Huge literature on the subject and extremely developed existing software. What does this project bring?
-*** Memory allocation with Valgrind (2017-09-17 Epholys)
+*** Memory allocation with Valgrind (2017-09-17)
     =valgrind --tool\=massif --time-unit\=B --peak-inaccuracy=0.1=
 
     Memory usage is directly linked to the size of the L-Systems calculated. These sizes grow exponentialy, so does the memory. As an example, with a simple L-System and 16 iterations, the resulting string is composed of tens of million of symbols. Saving these symbols and the 20-bytes-long vertices associated takes at least hundreds of MB in memory.
@@ -81,6 +74,12 @@ Warnings:
     I don't see an *obvious* way to reduce memory consumption. Symbols and vertices are already very small. We could reduce the size of the aforementioned vector by reserving just enough bytes for the vertices. But that means we would have to approximate a small upper-bound of the result of the L-System and also how much of its symbols will produce a new vertex. A whole mathematical problem.
 
     For now, I'll do nothing: I see no reasonable case to computes and display so much iterations of a L-System. I'll concentrate on optimizing execution time (with memory consumption in mind).
+
+*** Optimization ideas
+    - Use raw OpenGL vertices instead of SFML's sf::Vertex to reduce their size (no texcoord for example)
+    - Use `sqrt` instead of `cos` and `sin` for angles to calculate vertex's position
+
+
 
 ** (Res)sources
 [[http://blog.rabidgremlin.com/2014/12/09/procedural-content-generation-l-systems/][Procedural content generation: L-Systems (by Rabidgremlin)]]
