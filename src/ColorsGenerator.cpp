@@ -4,6 +4,7 @@
 
 namespace colors
 {
+    // Returns a cloned copy of this. Managed by the children.
     std::shared_ptr<ColorGenerator> ColorGenerator::clone() const
     {
         return clone_impl();
@@ -14,7 +15,6 @@ namespace colors
     ConstantColor::ConstantColor()
         : ConstantColor(sf::Color::White)
     {
-        notify();
     }
 
     ConstantColor::ConstantColor(const sf::Color& color)
@@ -28,7 +28,7 @@ namespace colors
         return color_;
     }
 
-    const sf::Color ConstantColor::get_color() const
+    const sf::Color& ConstantColor::get_color() const
     {
         return color_;
     }
@@ -39,6 +39,7 @@ namespace colors
         notify();
     }
 
+    // Return a copy of this as a shared_ptr for polymorphic purpose.
     std::shared_ptr<ColorGenerator> ConstantColor::clone_impl() const
     {
         return std::make_shared<ConstantColor>(*this);
@@ -49,7 +50,6 @@ namespace colors
     LinearGradient::LinearGradient()
         : LinearGradient({{sf::Color::White, 0.},{sf::Color::White, 1.}})
     {
-        notify();
     }
     
     LinearGradient::LinearGradient(const LinearGradient::keys& keys)
@@ -58,28 +58,27 @@ namespace colors
         , sanitized_keys_(keys)
     {
         Expects(keys.size() >= 2);
+        sanitize_keys();
     }
 
-    LinearGradient::keys LinearGradient::sanitize_keys(const keys& colors)
+    void LinearGradient::sanitize_keys()
     {
-        auto keys = colors;
-
+        sanitized_keys_ = raw_keys_;
+        
         // Clamp every keys between 0 and 1.
-        for (auto& p : keys)
+        for (auto& p : sanitized_keys_)
         {
             p.second = p.second < 0. ? 0. : p.second;
             p.second = p.second > 1. ? 1. : p.second;
         }
 
-        // Sort the elements
-        std::sort(begin(keys), end(keys),
+        // Sort the elements.
+        std::sort(begin(sanitized_keys_), end(sanitized_keys_),
                   [](const auto& p1, const auto& p2){return p1.second < p2.second;});
 
-        // The highest key is at 0 and the lowest at 0.
-        keys.front().second = 0.f;
-        keys.back().second = 1.f;
-
-        return keys;
+        // The highest key is at 1 and the lowest at 0.
+        sanitized_keys_.front().second = 0.f;
+        sanitized_keys_.back().second = 1.f;
     }
 
     const LinearGradient::keys& LinearGradient::get_raw_keys() const
@@ -96,7 +95,7 @@ namespace colors
     {
         Expects(keys.size() >= 2);
         raw_keys_ = keys;
-        sanitized_keys_ = sanitize_keys(keys);
+        sanitize_keys();
         notify();
     }
 
@@ -109,11 +108,11 @@ namespace colors
         // Find the upper-bound key...
         auto superior_it = std::find_if(begin(sanitized_keys_), end(sanitized_keys_),
                                 [f](const auto& p){return f <= p.second;});
-        Expects(superior_it != end(sanitized_keys_)); // should never happen
-        auto superior_idx = std::distance(begin(sanitized_keys_), superior_it);
-        auto inferior_idx = superior_idx == 0 ? 0 : superior_idx-1; // ...and the lower-bound one.
-        const auto& superior = sanitized_keys_.at(superior_idx);
-        const auto& inferior = sanitized_keys_.at(inferior_idx);
+        Expects(superior_it != end(sanitized_keys_)); // (should never happen if correctly sanitized)
+        auto superior_index = std::distance(begin(sanitized_keys_), superior_it);
+        auto inferior_index = superior_index == 0 ? 0 : superior_index-1; // ...and the lower-bound one.
+        const auto& superior = sanitized_keys_.at(superior_index);
+        const auto& inferior = sanitized_keys_.at(inferior_index);
 
         float factor = 0.f;
         if (superior == inferior)
@@ -125,7 +124,7 @@ namespace colors
             factor = (f - inferior.second) / (superior.second - inferior.second);
         }
 
-        // Interpolate
+        // Interpolate.
         sf::Color color;
         color.r = inferior.first.r * (1-factor) + superior.first.r * factor;
         color.g = inferior.first.g * (1-factor) + superior.first.g * factor;
@@ -133,6 +132,7 @@ namespace colors
         return color;
     }
 
+    // Return a copy of this as a shared_ptr for polymorphic purpose.
     std::shared_ptr<ColorGenerator> LinearGradient::clone_impl() const
     {
         return std::make_shared<LinearGradient>(*this);
@@ -143,20 +143,28 @@ namespace colors
     DiscreteGradient::DiscreteGradient()
         : DiscreteGradient({{sf::Color::White, 0}})
     {
-        notify();
     }
 
     DiscreteGradient::DiscreteGradient(const keys& keys)
         : ColorGenerator()
         , keys_{keys}
-        , colors_{generate_colors(keys_)}
+        , colors_{}
     {
+        // Verify the invariant.
+        Expects(keys.size() > 0);
+        Expects(keys.at(0).second == 0);
+        Expects(std::is_sorted(begin(keys), end(keys),
+                               [](const auto& a, const auto& b)
+                               {return a.second < b.second;}));
+        generate_colors();
     }
 
     sf::Color DiscreteGradient::get(float f)
     {
         f = f < 0. ? 0. : f;
-        f = f >= 1. ? 1.-std::numeric_limits<float>::epsilon() : f; // just before one to round to the inferior
+        // We do not clamp to 1 as it would be a out-of-bound call. So we clamp
+        // it to just before 1.
+        f = f >= 1. ? 1.-std::numeric_limits<float>::epsilon() : f;
         
         return colors_.at(static_cast<size_t>(f * colors_.size()));
     }
@@ -166,67 +174,57 @@ namespace colors
         return keys_;
     }
 
+    const std::vector<sf::Color>& DiscreteGradient::get_colors() const
+    {
+        return colors_;
+    }
+
+
     void DiscreteGradient::set_keys(keys keys)
     {
+        // Verify the invariant
         Expects(keys.size() > 0);
+        Expects(keys.at(0).second == 0);
+        Expects(std::is_sorted(begin(keys), end(keys),
+                               [](const auto& a, const auto& b)
+                               {return a.second < b.second;}));
         keys_ = keys;
-        colors_ = generate_colors(keys_);
+        generate_colors();
         notify();
     }
 
-    std::vector<sf::Color> DiscreteGradient::generate_colors(const keys& dirty_keys)
+    void DiscreteGradient::generate_colors()
     {
-        std::vector<sf::Color> colors;
-        
-        Expects(dirty_keys.size() > 0);
-        if(dirty_keys.size() == 1)
-        {
-            colors = {dirty_keys.at(0).first};
-            return colors;
-        }
-        
-        keys keys = sanitize_keys(dirty_keys);
-        
-        auto inferior = keys.begin();
-        auto superior = ++keys.begin();
+        colors_.clear();
+
+        auto inferior = keys_.begin();
+        auto superior = ++keys_.begin(); // could be 'end(keys)' but the loop
+                                         // condition stop the method before
+                                         // dereferencing it.
         size_t i = 0;
-        while(i <= keys.back().second)
+        while(i <= keys_.back().second)
         {
-            float factor = ((float)i - inferior->second) / (superior->second - inferior->second);
+            // Interpolate
+            float factor = (static_cast<float>(i) - inferior->second) / (superior->second - inferior->second);
             sf::Color color;
             color.r = inferior->first.r * (1-factor) + superior->first.r * factor;
             color.g = inferior->first.g * (1-factor) + superior->first.g * factor;
             color.b = inferior->first.b * (1-factor) + superior->first.b * factor;
-            colors.push_back(color);
+            colors_.push_back(color);
 
             ++i;
             if (i > superior->second)
             {
+                // Change the surrounding keys.
                 ++inferior;
                 ++superior;
             }
         }
-
-        return colors;
     }
 
-    DiscreteGradient::keys DiscreteGradient::sanitize_keys(const keys& dirty_keys)
-    {
-        keys keys = dirty_keys;
-        std::sort(keys.begin(), keys.end(), [](const auto& a, const auto& b){return a.second < b.second;});
-        size_t min_position = keys.at(0).second;
-        for (auto it = keys.begin(); it != keys.end(); ++it)
-        {
-            it->second -= min_position;
-        }
-        return keys;
-    }
-
+    // Return a copy of this as a shared_ptr for polymorphic purpose.
     std::shared_ptr<ColorGenerator> DiscreteGradient::clone_impl() const
     {
         return std::make_shared<DiscreteGradient>(*this);
     }
-
-    //------------------------------------------------------------
-
 }

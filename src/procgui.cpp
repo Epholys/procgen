@@ -600,7 +600,7 @@ namespace procgui
         ImGui::PopStyleColor(3);
         
         // Preview the color gradient
-        std::vector<sf::Color> colors = colors::DiscreteGradient::generate_colors(keys);
+        std::vector<sf::Color> colors = gen.get_colors();
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 pos = ImGui::GetCursorScreenPos();
         ImVec2 size {500., 30.};
