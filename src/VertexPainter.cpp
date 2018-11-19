@@ -6,51 +6,47 @@ namespace colors
 {
     VertexPainter::VertexPainter()
         : Observable{}
-        , Observer<ColorGenerator>{std::make_shared<LinearGradient>(
-            LinearGradient::keys({
-                    {sf::Color::Red, 0.},
-                    {sf::Color::Green, 0.5},
-                    {sf::Color::Blue, 1.}}))}
-        , Observer<ColorGeneratorBuffer>{std::make_shared<ColorGeneratorBuffer>(Observer<ColorGenerator>::get_target())}
-        , generator_buffer_{Observer<ColorGeneratorBuffer>::get_target()}
+        , OGen{std::make_shared<ConstantColor>()}
+        , OBuff{std::make_shared<ColorGeneratorBuffer>(OGen::get_target())}
+        , generator_buffer_{OBuff::get_target()}
     {
-        Observer<ColorGenerator>::add_callback([this](){notify();});
-        Observer<ColorGeneratorBuffer>::add_callback([this](){update_generator();});
+        OGen::add_callback([this](){notify();});
+        OBuff::add_callback([this](){update_generator();});
     }
 
     VertexPainter::VertexPainter(const std::shared_ptr<ColorGenerator> gen)
         : Observable{}
-        , Observer<ColorGenerator>(gen)
-        , Observer<ColorGeneratorBuffer>{std::make_shared<ColorGeneratorBuffer>(gen)}
-        , generator_buffer_{Observer<ColorGeneratorBuffer>::get_target()}
+        , OGen(gen)
+        , OBuff{std::make_shared<ColorGeneratorBuffer>(gen)}
+        , generator_buffer_{OBuff::get_target()}
     {
-        Observer<ColorGenerator>::add_callback([this](){notify();});
-        Observer<ColorGeneratorBuffer>::add_callback([this](){update_generator();});
+        OGen::add_callback([this](){notify();});
+        OBuff::add_callback([this](){update_generator();});
     }
 
     VertexPainter::VertexPainter(const VertexPainter& other)
         : Observable{}
-        , Observer<ColorGenerator>{other.Observer<ColorGenerator>::get_target()->clone()}
-        , Observer<ColorGeneratorBuffer>{std::make_shared<ColorGeneratorBuffer>(Observer<ColorGenerator>::get_target())}
-        , generator_buffer_{Observer<ColorGeneratorBuffer>::get_target()}
+        , OGen{other.OGen::get_target()->clone()}
+        , OBuff{std::make_shared<ColorGeneratorBuffer>(OGen::get_target())}
+        , generator_buffer_{OBuff::get_target()}
         , angle_{other.angle_}
     {
-        Observer<ColorGenerator>::add_callback([this](){notify();});
-        Observer<ColorGeneratorBuffer>::add_callback([this](){update_generator();});
+        OGen::add_callback([this](){notify();});
+        OBuff::add_callback([this](){update_generator();});
     }
 
     VertexPainter::VertexPainter(VertexPainter&& other)
         : Observable{}
-        , Observer<ColorGenerator>{other.Observer<ColorGenerator>::get_target()->clone()}
-        , Observer<ColorGeneratorBuffer>{std::make_shared<ColorGeneratorBuffer>(Observer<ColorGenerator>::get_target())}
-        , generator_buffer_{Observer<ColorGeneratorBuffer>::get_target()}
+        , OGen{other.OGen::get_target()->clone()}
+        , OBuff{std::make_shared<ColorGeneratorBuffer>(OGen::get_target())}
+        , generator_buffer_{OBuff::get_target()}
         , angle_{other.angle_}
     {
-        Observer<ColorGenerator>::add_callback([this](){notify();});
-        Observer<ColorGeneratorBuffer>::add_callback([this](){update_generator();});
+        OGen::add_callback([this](){notify();});
+        OBuff::add_callback([this](){update_generator();});
 
-        other.Observer<ColorGenerator>::set_target(nullptr);
-        other.Observer<ColorGeneratorBuffer>::set_target(nullptr);
+        other.OGen::set_target(nullptr);
+        other.OBuff::set_target(nullptr);
         
         other.angle_ = 0.;
     }
@@ -65,17 +61,17 @@ namespace colors
     {
         using std::swap;
 
-        auto tmp_gen = Observer<ColorGenerator>::get_target();
-        Observer<ColorGenerator>::set_target(other.Observer<ColorGenerator>::get_target());
-        other.Observer<ColorGenerator>::set_target(tmp_gen);
-        Observer<ColorGenerator>::add_callback([this](){notify();});
-        other.Observer<ColorGenerator>::add_callback([&other](){other.notify();});
+        auto tmp_gen = OGen::get_target();
+        OGen::set_target(other.OGen::get_target());
+        other.OGen::set_target(tmp_gen);
+        OGen::add_callback([this](){notify();});
+        other.OGen::add_callback([&other](){other.notify();});
 
-        auto tmp_buff = Observer<ColorGeneratorBuffer>::get_target();
-        Observer<ColorGeneratorBuffer>::set_target(other.Observer<ColorGeneratorBuffer>::get_target());
-        other.Observer<ColorGeneratorBuffer>::set_target(tmp_buff);
-        Observer<ColorGeneratorBuffer>::add_callback([this](){update_generator();});
-        other.Observer<ColorGeneratorBuffer>::add_callback([&other](){other.update_generator();});
+        auto tmp_buff = OBuff::get_target();
+        OBuff::set_target(other.OBuff::get_target());
+        other.OBuff::set_target(tmp_buff);
+        OBuff::add_callback([this](){update_generator();});
+        other.OBuff::add_callback([&other](){other.update_generator();});
 
         swap(angle_, other.angle_);
     }
@@ -91,36 +87,24 @@ namespace colors
         notify();
     }
 
-
-    // const std::shared_ptr<ColorGenerator> VertexPainter::get_generator() const
-    // {
-    //     return generator_;
-    // }
-
     std::shared_ptr<ColorGeneratorBuffer> VertexPainter::get_generator_buffer() const
     {
         return generator_buffer_;
     }
     
-    // void VertexPainter::set_generator(std::shared_ptr<ColorGenerator> generator)
-    // {
-    //     generator_ = generator;
-    //     set_target(generator_);
-    //     add_callback([this]{notify();});
-    //     notify();
-    // }
-
     void VertexPainter::update_generator()
     {
+        // Reconcile OGen::ColorGenerator with
+        // generator_buffer_::ColorGenerator. 
         auto gen = generator_buffer_->get_generator();
-        Observer<ColorGenerator>::set_target(gen);
-        Observer<ColorGenerator>::add_callback([this](){notify();});
+        OGen::set_target(gen);
+        OGen::add_callback([this](){notify();});
         notify();
     }
 
     void VertexPainter::paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box) const
     {
-        auto generator = Observer<ColorGenerator>::get_target();
+        auto generator = OGen::get_target();
         if (!generator)
         {
             return;
