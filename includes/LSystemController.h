@@ -60,6 +60,8 @@ namespace controller
         // Previous left-click timestamp.
         static std::chrono::time_point<std::chrono::steady_clock> click_time_;
 
+        // True if saved 'save_view_' is to be cloned. False if it is to be
+        // duplicated.
         static bool is_clone_;
     };
 }

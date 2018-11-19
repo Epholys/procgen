@@ -134,7 +134,7 @@ namespace controller
         {
             auto& parameters = under_mouse_->ref_parameters();
             auto starting_position = parameters.get_starting_position() - delta;
-            parameters.silently_set_starting_position(starting_position);
+            parameters.set_starting_position(starting_position);
         }
     }
 

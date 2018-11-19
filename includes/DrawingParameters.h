@@ -15,9 +15,9 @@
 // Main explanation of drawing in Turtle.h
 namespace drawing
 {
-    // This data structure contains all constant informations
-    // necessary to interpret the result of a L-system. Each attribute
-    // can be freely initialized and modified, there are no invariant.
+    // This data structure contains all constant informations necessary to
+    // interpret the result of a L-system. Each attribute can be freely
+    // initialized and modified via getters and setters, there are no invariant.
     // During an interpretation, this structure will not be
     // modified.
     class DrawingParameters : public Observable
@@ -32,19 +32,21 @@ namespace drawing
                           int n_iter);
         DrawingParameters(const DrawingParameters& params) = default;
 
+        // Getters
         sf::Vector2f get_starting_position() const;
         double get_starting_angle() const;
         double get_delta_angle() const;
         double get_step() const;
         int get_n_iter() const;
 
-        void set_starting_position(const sf::Vector2f starting_position);
+        // Setters
+        // The starting position is only used when rendering the LSystem, so it
+        // does not 'notify()' to avoid re-calculating for nothing.
+        void set_starting_position(const sf::Vector2f starting_position); 
         void set_starting_angle(double starting_angle);
         void set_delta_angle(double delta_angle);
         void set_step(double step);
         void set_n_iter(int n_iter);
-
-        void silently_set_starting_position(const sf::Vector2f starting_position);
         
     private:
         // The starting position and angle of the Turtle.

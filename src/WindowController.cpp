@@ -73,13 +73,13 @@ namespace controller
         if (LSystemController::is_clone())
         {
             auto cloned_view = pasted_view.clone();
-            cloned_view.ref_parameters().silently_set_starting_position(position + middle);
+            cloned_view.ref_parameters().set_starting_position(position + middle);
             lsys_views.emplace_front(cloned_view);
         }
         else
         {
             auto duplicated_view = pasted_view.duplicate();
-            duplicated_view.ref_parameters().silently_set_starting_position(position + middle);
+            duplicated_view.ref_parameters().set_starting_position(position + middle);
             lsys_views.emplace_front(duplicated_view);
         }
     }

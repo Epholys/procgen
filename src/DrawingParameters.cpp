@@ -20,17 +20,6 @@ namespace drawing
     {
     }
 
-    
-    // DrawingParameters::DrawingParameters(const DrawingParameters& params)
-    //     : starting_position_ {params.starting_position_}
-    //     , starting_angle_ {params.starting_angle_}
-    //     , delta_angle_ {params.delta_angle_}
-    //     , step_ {params.step_}
-    //     , n_iter_ {params.n_iter_}
-    // {
-    // }
-
-
     sf::Vector2f DrawingParameters::get_starting_position() const
     {
         return starting_position_;
@@ -55,7 +44,8 @@ namespace drawing
     void DrawingParameters::set_starting_position(const sf::Vector2f starting_position)
     {
         starting_position_ = starting_position;
-        notify();
+        // The starting position is only used when rendering the LSystem, so it
+        // does not 'notify()' to avoid re-calculating for nothing.
     }
     void DrawingParameters::set_starting_angle(double starting_angle)
     {
@@ -76,11 +66,6 @@ namespace drawing
     {
         n_iter_ = n_iter;
         notify();
-    }
-
-    void DrawingParameters::silently_set_starting_position(const sf::Vector2f starting_position)
-    {
-        starting_position_ = starting_position;
     }
 
 }

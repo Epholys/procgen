@@ -218,7 +218,7 @@ namespace procgui
         {
             // is_modified_ is not set: the render state take care of translating the view.
             sf::Vector2f starting_position {pos[0], pos[1]};
-            parameters.silently_set_starting_position(starting_position);
+            parameters.set_starting_position(starting_position);
         }
 
         // --- Starting angle ---
