@@ -24,8 +24,9 @@ namespace procgui
     //     boxes.
     //
     // Invariant:
-    //     - The 'vertices_' must correspond to the 'lsys_buff_',
-    //     'interpretation_buff_', and 'params_'.
+    //     - The 'vertices_' must correspond to the LSystem,
+    //     - The 'vertices_' are at any time painted with VertexPainter
+    //     InterpretationMap, and DrawingParameters.
     //     - The 'bounding_box_' and 'sub_boxes_' must correspond with the
     //     'vertices_'.
     //
@@ -39,27 +40,29 @@ namespace procgui
                         public Observer<colors::VertexPainter>
     {
     public:
+        using OLSys = Observer<LSystem>;
+        using OMap = Observer<drawing::InterpretationMap>;
+        using OParams = Observer<drawing::DrawingParameters>;
+        using OPainter = Observer<colors::VertexPainter>;
+
         LSystemView(const std::string& name,
                     std::shared_ptr<LSystem> lsys,
                     std::shared_ptr<drawing::InterpretationMap> map,
                     std::shared_ptr<drawing::DrawingParameters> params,
                     std::shared_ptr<colors::VertexPainter> painter = std::make_shared<colors::VertexPainter>());
-        // LSystemView(const std::string& name,
-        //             std::shared_ptr<LSystem> lsys,
-        //             std::shared_ptr<drawing::InterpretationMap> map,
-        //             drawing::DrawingParameters param);
-        // Create a default LSystemView at 'position'.
         LSystemView(const sf::Vector2f& position);
-        // The rule-of-five is necessary with the 'Observer<>' callbacks
-        // behaviour. Deep-copy. TODO: Deep?
+        // The TODO rule-of-five is necessary with the 'Observer<>' callbacks
+        // behaviour. Shallow copy: LSystem, DrawingParameters and VertexPainter
+        // are shared from 'other'. Use 'clone()' for a deep copy.
         LSystemView(const LSystemView& other);
         LSystemView& operator=(LSystemView other);
         LSystemView(LSystemView&& other);
         ~LSystemView();
         
-        // Clone the LSystemView into an independant other view.
+        // Clone the LSystemView into an independant other view: deep copy.
         LSystemView clone() const;
 
+        // Shallow-copy 'this'.
         LSystemView duplicate() const;
         
         // Reference Getters
@@ -68,6 +71,7 @@ namespace procgui
         InterpretationMapBuffer& ref_interpretation_buffer();
         colors::VertexPainter& ref_vertex_painter();
         // Getters
+        // Correctly translated to screen-space bounding_box.
         sf::FloatRect get_bounding_box() const;
         const drawing::DrawingParameters& get_parameters() const;
         const LSystemBuffer& get_lsystem_buffer() const;
@@ -75,6 +79,8 @@ namespace procgui
         const colors::VertexPainter& get_vertex_painter();
         int get_id() const;
         sf::Color get_color() const;
+        // Translation transform to correct screen-space position of the
+        // LSystem. 
         sf::Transform get_transform() const;
         
         // Compute the vertices of the turtle interpretation of the LSystem.
@@ -87,7 +93,8 @@ namespace procgui
         // Getter to is_selected_.
         bool is_selected() const;
 
-        // Check if 'click' is inside one of the 'bounding_box_'
+        // Check if 'click' is inside one of the correctly translated
+        // 'bounding_box_'. 
         bool is_inside(const sf::Vector2f& click) const;
 
         // Select the view.
@@ -110,22 +117,20 @@ namespace procgui
         // The window's name.
         std::string name_;
 
-        // TODO: comment with inheritance in mind
-        // The LSystem's buffer and by extension the LSystem (with shared
-        // ownership). 
+        // The LSystem's buffer. It has shared ownership of a
+        // shared_ptr<LSystem> with the associated Observable.
         LSystemBuffer lsys_buff_;
 
-        // The InterpretationMap's buffer and by extension the
-        // InterpretationMap (with shared ownership).
+        // The InterpretationMap's buffer. It has shared ownership of a
+        // shared_ptr<InterpretationMap> with the associated Observable.
         InterpretationMapBuffer interpretation_buff_;
-
-        // The DrawingParameters (single Ownership)
-        // drawing::DrawingParameters params_;
 
         // The vertices of the View. Computer at each modification.
         std::vector<sf::Vertex> vertices_;
 
-        // The global bounding box of the drawing.
+        // The global bounding box of the drawing. It is a "raw" bounding box:
+        // its position is fixed. The rendering at the correct position as well
+        // as getters are correctly translated with 'get_transform()'.
         sf::FloatRect bounding_box_;
 
         // The sub-bounding boxes of the drawing: a more precise way to decide
@@ -135,7 +140,6 @@ namespace procgui
 
         // True if the window is selected.
         bool is_selected_;
-
 
         // Serialization
         friend class cereal::access;
