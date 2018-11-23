@@ -35,6 +35,9 @@ namespace controller
         // coordinates relative to the drawing of the application.
         static sf::Vector2f real_mouse_position(sf::Vector2i mouse_click);
 
+        // Inverse operation of 'real_mouse_position()' : from a relative mouse
+        // position in the application coordinates, returns the absolution
+        // position in the window coordinate.
         static sf::Vector2i absolute_mouse_position(sf::Vector2f mouse_click);
         
         // Get the absolute mouse position

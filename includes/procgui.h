@@ -30,13 +30,6 @@
 // with the same name for two different objects, even with different types, they
 // will be in the same window. Exception: the LSystemView which is a coherent
 // and unique window.
-//
-// The 'main' parameter defines if the GUI will be simply displayed in the
-// window (main=true) or if it will be displayed in a CollapsingHeader. Used
-// mainly internally.
-//
-// The 'interact_with()' functions return 'true' if the object was modified by
-// the GUI, 'false' otherwise.
 
 namespace procgui {
     
@@ -60,18 +53,15 @@ namespace procgui {
 
     void interact_with(InterpretationMapBuffer& buffer, const std::string& name);
 
+    // 'open' manages the selection of the LSystemView: if it is true, the
+    // window is keeped open. Otherwise, when clicking at the close widget, the
+    // view is un-selected and the window closed.
     void interact_with(LSystemView& lsys_view, const std::string& name, bool* open = nullptr);
 
     void interact_with(colors::VertexPainter& painter, const std::string& name);
 
     void interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string& name);
-    
-    void interact_with(colors::ConstantColor& gen);
-
-    void interact_with(colors::LinearGradient& gen);
-
-    void interact_with(colors::DiscreteGradient& gen);
-    
+        
     #include "procgui.tpp"
 
 }

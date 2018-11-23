@@ -11,33 +11,41 @@ using namespace math;
 
 namespace
 {
-    int embeddedLevel = 0;
+    // At value 0, 'set_up()' will open a new window. Otherwise, it creates a
+    // CollapsingHeader. 'push/pop_embedded()' is called before and after
+    // calling 'interact_with()' to create a tree of embedded content.
+    int embedded_level = 0;
 
     void push_embedded()
     {
-        ++embeddedLevel;
+        ++embedded_level;
     }
 
     void pop_embedded()
     {
-        if (embeddedLevel > 0)
+        if (embedded_level > 0)
         {
-            --embeddedLevel;
+            --embedded_level;
         }
     }
     
-    // The two next function are shared by all the 'display()' and
+    // The two next function are shared with the 'display()' and
     // 'interact_with()' functions. They manage window creation and integration.
 
-    // Open a window named 'name' if 'main' is true.  Otherwise, set up a
-    // CollapsingHeader named 'name', to inline the GUI in a existing window.
-    // An 'id' can be specified to separate instances *inside* a window.
-    // Returns 'false' if the window is collapsed, to early-out.
+    // Open a window or create a CollapsingHeader according to the value of
+    // 'embedded_level' with the name 'name'. This name is important: if two
+    // windows has the same name, the data will be displayed inside the same
+    // window. If two CollapsingHeaders have the same name, some collision
+    // between the widgets will create some innapropriate behaviour.
+    // If 'open' is set, the window will show a close widget which when clicking
+    // will set the boolean to false.
+    // Returns 'false' if the window or the CollapsingHeader is collapsed, to
+    // early-out.
     bool set_up(const std::string& name,
                 bool* open = nullptr)
     {
-        // If we're the main class, open window 'name'.
-        if (embeddedLevel == 0)
+        // If the data is not embedded, creates a new window.
+        if (embedded_level == 0)
         {
             bool is_active = ImGui::Begin(name.c_str(), open, ImGuiWindowFlags_NoSavedSettings);
             if(!is_active)
@@ -53,6 +61,7 @@ namespace
             bool is_active = ImGui::CollapsingHeader(name.c_str());
             if(is_active)
             {
+                // Avoid name collision between two widgets (like '+' button).
                 ImGui::PushID(name.c_str());
                 ImGui::Indent();
             }
@@ -60,13 +69,11 @@ namespace
         }
     }
     
-    // Finish appending to the current window if 'main' is true.
-    // Otherwise, close the current TreeNode.
+    // Concludes the window or CollapsingHeader
     void conclude()
     {
-         // If we're the main class, stop appending to the current
-        // window.
-        if (embeddedLevel == 0)
+         // If this function is called at the window level, close the window.
+        if (embedded_level == 0)
         {
             ImGui::Separator();
             ImGui::End();
@@ -341,6 +348,7 @@ namespace procgui
     {
         if (!set_up(name))
         {
+            // Early out if the display zone is collapsed.
             return;
         }
 
@@ -359,81 +367,22 @@ namespace procgui
         conclude();
     }
     
-    void interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string& name)
-    {
-        if (!set_up(name))
-        {
-            return;
-        }
-
-        auto gen = color_buffer.get_generator();
-        
-        int index = 0;
-
-        const auto& info = typeid(*gen).hash_code();
-        if (info == typeid(colors::ConstantColor).hash_code())
-        {
-            index = 0;
-        }
-        else if (info == typeid(colors::LinearGradient).hash_code())
-        {
-            index = 1;
-        }
-        else if (info == typeid(colors::DiscreteGradient).hash_code())
-        {
-            index = 2;
-        }
-        else
-        {
-            Expects(false);
-        }
-
-        const char* generators[3] = {"Constant", "Linear Gradient", "Discrete Gradient"};
-        if (ImGui::ListBox("Color Generator", &index, generators, 3))
-        {
-            if (index == 0)
-            {
-                gen = std::make_shared<colors::ConstantColor>();
-            }
-            else if (index == 1)
-            {
-                gen = std::make_shared<colors::LinearGradient>();
-            }
-            else
-            {
-                gen = std::make_shared<colors::DiscreteGradient>();
-
-            }
-            color_buffer.set_generator(gen);
-        }
-
-        if (index == 0)
-        {
-            auto constant = std::dynamic_pointer_cast<colors::ConstantColor>(gen);
-            interact_with(*constant);
-        }
-        else if (index == 1)
-        {
-            auto gradient = std::dynamic_pointer_cast<colors::LinearGradient>(gen);
-            interact_with(*gradient);
-        }
-        else
-        {
-            auto discrete = std::dynamic_pointer_cast<colors::DiscreteGradient>(gen);
-            interact_with(*discrete);
-        }
-
-        conclude();
-    }
-    
+}
+namespace
+{
     void interact_with(colors::ConstantColor& constant)
     {
+        // Do not setup a window, this function is always called from
+        // 'interact_with(ColorGeneratorBuffer)'
+
+        // Color selection widget.
         ImVec4 imcolor = constant.get_color();
         if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
         {
             constant.set_color(imcolor);
         }
 
+        // Display the ConstantColor preview.
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 pos = ImGui::GetCursorScreenPos();
         ImVec2 size {500., 30.};
@@ -444,6 +393,9 @@ namespace procgui
 
     void interact_with(colors::LinearGradient& gen)
     {
+        // Do not setup a window, this function is always called from
+        // 'interact_with(ColorGeneratorBuffer)'
+
         bool is_modified = false;
         
         auto keys = gen.get_raw_keys();
@@ -454,6 +406,7 @@ namespace procgui
             ImGui::PushID(i);
             ImGui::BeginGroup();
 
+            // Color
             auto& sfcolor = keys.at(i).first;
             ImVec4 imcolor = sfcolor;
             if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
@@ -461,7 +414,8 @@ namespace procgui
                 is_modified = true;
             }
             sfcolor = imcolor;
-            
+
+            // Position
             ImGui::PushItemWidth(50);
             if(ImGui::DragFloat("", &keys.at(i).second, 0.01, 0., 1., "%.2f"))
             {
@@ -497,8 +451,8 @@ namespace procgui
             gen.set_keys(keys);
         }
 
-        auto k = gen.get_sanitized_keys();
         // Preview the color gradient
+        auto k = gen.get_sanitized_keys();
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 pos = ImGui::GetCursorScreenPos();
         ImVec2 size {500., 30.};
@@ -523,16 +477,26 @@ namespace procgui
 
     void interact_with(colors::DiscreteGradient& gen)
     {
+        // Do not setup a window, this function is always called from
+        // 'interact_with(ColorGeneratorBuffer)'
+
         bool is_modified = false;
         
         auto keys = gen.get_keys();
 
+        // Modify 'gen''s keys: key's color and transitional colors between
+        // these keys.
+
+        // If the user add or remove a transitional color, it have to offset all
+        // next keys' position. 'modifier' conserve the offset's value.
+        // The last color is managed at the end, to not add the transitional
+        // colors part.
         int modifier = 0;
-        // Modify 'gen''s keys: colors and position
         for (unsigned i=0; i<keys.size()-1; ++i)
         {
             ImGui::PushID(i);
 
+            // Key Color
             auto& sfcolor = keys.at(i).first;
             ImVec4 imcolor = sfcolor;
             if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
@@ -544,9 +508,11 @@ namespace procgui
             ImGui::SameLine();
             ImGui::BeginGroup();
 
+            // Number of transitional colors.
             int diff = keys.at(i+1).second - keys.at(i).second - 1;
             ImGui::Text(std::to_string(diff).c_str());
 
+            // '+' button to add a transitional color.
             ImGui::PushStyleGreenButton();
             if (ImGui::Button("+"))
             {
@@ -555,6 +521,7 @@ namespace procgui
             }
             ImGui::PopStyleColor(3);
             ImGui::SameLine();
+            // '-' button to remove a transitional color
             ImGui::PushStyleRedButton();
             if (diff > 0 && ImGui::Button("-"))
             {
@@ -563,6 +530,7 @@ namespace procgui
             }
             ImGui::PopStyleColor(3);
 
+            // Offset the current key.
             keys.at(i+1).second += modifier;
 
             ImGui::EndGroup();
@@ -570,6 +538,7 @@ namespace procgui
             ImGui::SameLine();
         }
 
+        // Last color widget.
         ImGui::PushID(keys.size());
         auto& sfcolor = keys.back().first;
         ImVec4 imcolor = sfcolor;
@@ -618,7 +587,82 @@ namespace procgui
             gen.set_keys(keys);
         }
     }
+} // namespace 
+namespace procgui
+{
+    void interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string& name)
+    {
+        if (!set_up(name))
+        {
+            // Early out if the display zone is collapsed.
+            return;
+        }
 
+        auto gen = color_buffer.get_generator();
+        
+        // Represents the index of the next ListBox. Set by inspecting the
+        // polyphormism. 
+        int index = 0;
+        const auto& info = typeid(*gen).hash_code();
+        if (info == typeid(colors::ConstantColor).hash_code())
+        {
+            index = 0;
+        }
+        else if (info == typeid(colors::LinearGradient).hash_code())
+        {
+            index = 1;
+        }
+        else if (info == typeid(colors::DiscreteGradient).hash_code())
+        {
+            index = 2;
+        }
+        else
+        {
+            Expects(false);
+        }
+
+        const char* generators[3] = {"Constant", "Linear Gradient", "Discrete Gradient"};
+        // Create a new ColorGenerator
+        if (ImGui::ListBox("Color Generator", &index, generators, 3))
+        {
+            if (index == 0)
+            {
+                gen = std::make_shared<colors::ConstantColor>();
+            }
+            else if (index == 1)
+            {
+                gen = std::make_shared<colors::LinearGradient>();
+            }
+            else
+            {
+                gen = std::make_shared<colors::DiscreteGradient>();
+
+            }
+            // Updates ColorGeneratorBuffer and VertexPainter and a 'notify()'
+            // waterfall. 
+            color_buffer.set_generator(gen);
+        }
+
+        // Does not use embedded_level, the generator will be displayed just
+        // after the generator selection.
+        if (index == 0)
+        {
+            auto constant = std::dynamic_pointer_cast<colors::ConstantColor>(gen);
+            ::interact_with(*constant);
+        }
+        else if (index == 1)
+        {
+            auto gradient = std::dynamic_pointer_cast<colors::LinearGradient>(gen);
+            ::interact_with(*gradient);
+        }
+        else
+        {
+            auto discrete = std::dynamic_pointer_cast<colors::DiscreteGradient>(gen);
+            ::interact_with(*discrete);
+        }
+
+        conclude();
+    }
 
     void interact_with(LSystemView& lsys_view, const std::string& name, bool* open)
     {
@@ -634,30 +678,31 @@ namespace procgui
         std::stringstream ss;
         ss << "##" << lsys_view.get_id(); // Each window of LSystemView
                                           // is conserved by its id.
-        if (embeddedLevel == 0)
+        if (embedded_level == 0)
         {
             // Make the window appear at the mouse double-click position with a
             // correct size.
             // Warning: lots of arbitrary values.
-            // Shift the window position to always appear on-screen in its entirety.
+            // Shift the window next to the LSystemView and shift it again for
+            // the window position always appearing on-screen in its entirety. 
             int windowX = window::window_size.x;
             int windowY = window::window_size.y;
             sf::Vector2i pos = controller::WindowController::get_mouse_position();
             auto bounding_box = lsys_view.get_bounding_box();
-            if (bounding_box.contains(controller::WindowController::real_mouse_position(pos)))
-            {
-                auto absolute_right_side = controller::WindowController::absolute_mouse_position({bounding_box.left + bounding_box.width,0});
-                pos.x = absolute_right_side.x + 50;
-            }
+
+            // Shift the window to the right.
+            auto absolute_right_side = controller::WindowController::absolute_mouse_position({bounding_box.left + bounding_box.width,0});
+            pos.x = absolute_right_side.x + 50;
+
+            // If the window would be out of the current screen, shift it to the left.
             if (pos.x + 500 > windowX)
             {
                 auto absolute_left_side = controller::WindowController::absolute_mouse_position({bounding_box.left,0});
                 pos.x = absolute_left_side.x - 550;                
             }
             pos.y -= 150;
-            
-            pos.x = pos.x < 0 ? 0 : pos.x;
-            pos.x = pos.x + 500 > windowX ? windowX-500 : pos.x;
+
+            // If the window is too far up or down, shift it down or up.
             pos.y = pos.y < 0 ? 0 : pos.y;
             pos.y = pos.y + 450 > windowY ? windowY-450 : pos.y;
             ImGui::SetNextWindowPos(sf::Vector2i{pos.x,pos.y}, ImGuiSetCond_Appearing);
@@ -674,7 +719,7 @@ namespace procgui
         }
         if (!set_up(name+ss.str(), open))
         {
-            if (embeddedLevel == 0)
+            if (embedded_level == 0)
             {
                 ImGui::PopStyleColor(2);
             }
@@ -682,9 +727,6 @@ namespace procgui
             return;
         }
 
-        // 'is_modified' is true if the DrawingParameter is modified. It does
-        // not check the LSystem or the InterpretationMap because the
-        // LSystemView is already an Observer of these classes.
         push_embedded();
         interact_with(lsys_view.ref_parameters(), "Drawing Parameters"+ss.str());
         interact_with(lsys_view.ref_lsystem_buffer(), "LSystem"+ss.str());
@@ -694,7 +736,7 @@ namespace procgui
 
         conclude();
 
-        if (embeddedLevel == 0)
+        if (embedded_level == 0)
         {
             ImGui::PopStyleColor(2);
         }
