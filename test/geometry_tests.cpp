@@ -20,7 +20,7 @@ std::vector<sf::Vertex> gen_circle()
 TEST(geometry, bounding_box)
 {
     auto circle = gen_circle();
-    auto box = compute_bounding_box(circle);
+    auto box = bounding_box(circle);
     ASSERT_EQ(sf::FloatRect(-1, -1, 2, 2), box);
 }
 

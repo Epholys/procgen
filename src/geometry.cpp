@@ -86,7 +86,7 @@ namespace geometry
         return projection;
     }
 
-    sf::FloatRect compute_bounding_box(const std::vector<sf::Vertex>& vertices)
+    sf::FloatRect bounding_box(const std::vector<sf::Vertex>& vertices)
     {
         if (vertices.size() == 0)
         {
@@ -121,7 +121,7 @@ namespace geometry
         return {left, top, right - left, down - top};
     }
     
-    std::vector<sf::FloatRect> compute_sub_boxes(const std::vector<sf::Vertex>& vertices,
+    std::vector<sf::FloatRect> sub_boxes(const std::vector<sf::Vertex>& vertices,
                                                  int max_boxes)
     {
         Expects(max_boxes > 0);
@@ -162,7 +162,7 @@ namespace geometry
                 n = 0;
                 i -= 2; // Go back to count several time the number of vertices
                         // to make overlapping boxes
-                boxes.push_back(compute_bounding_box(box_vertices));
+                boxes.push_back(bounding_box(box_vertices));
                 box_vertices.clear();
             }
 
@@ -174,7 +174,7 @@ namespace geometry
             // 'vertices_per_box', so manually set it.
             if (i == vertices.size()-1)
             {
-                boxes.push_back(compute_bounding_box(box_vertices));
+                boxes.push_back(bounding_box(box_vertices));
             }
         }
 
