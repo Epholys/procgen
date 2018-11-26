@@ -3,11 +3,11 @@
 namespace drawing
 {
     using namespace impl;
-
+    
     Turtle::Turtle(const DrawingParameters& params)
         : parameters { params }
-        , state {{0,0},params.get_starting_angle()}
-        , vertices      { { sf::Vector2f(state.position) } }
+          // The other members are set in header as they all derives from
+          // 'parameters'.
     {
     }
 

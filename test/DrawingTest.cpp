@@ -33,7 +33,7 @@ public:
                                         { '[', save_position },
                                         { ']', load_position } };
     // starting_position, starting_angle, delta_angle, step, n_iter
-    DrawingParameters parameters { { 100, 100 }, 0.f, degree_to_rad(90.f), 10, 0 };
+    DrawingParameters parameters { { 100, 100 }, 0, degree_to_rad(90.), 10, 0 };
     impl::Turtle turtle {parameters};
 };
 
@@ -54,8 +54,8 @@ namespace sf
 TEST_F(DrawingTest, go_forward)
 {
     sf::Vertex begin ( {0.f, 0.f} );
-    float newx = parameters.get_step() * std::cos(turtle.state.angle);
-    float newy = parameters.get_step() * std::sin(turtle.state.angle);
+    float newx = parameters.get_step() * std::cos(parameters.get_starting_angle());
+    float newy = parameters.get_step() * std::sin(parameters.get_starting_angle());
     sf::Vector2f end_pos = begin.position + sf::Vector2f (newx, newy);
     sf::Vertex end { end_pos } ;
 
@@ -69,8 +69,10 @@ TEST_F(DrawingTest, go_forward)
 TEST_F(DrawingTest, turn_right)
 {
     turn_right_fn(turtle);
-    
-    ASSERT_FLOAT_EQ(turtle.state.angle, parameters.get_delta_angle());
+
+    ext::sf::Vector2d direction { 0, 1 };
+    ASSERT_NEAR(turtle.state.direction.x, direction.x, 1e-10);
+    ASSERT_NEAR(turtle.state.direction.y, direction.y, 1e-10);
 }
 
 // Test the turn_left order.
@@ -78,7 +80,9 @@ TEST_F(DrawingTest, turn_left)
 {
     turn_left_fn(turtle);
     
-    ASSERT_FLOAT_EQ(turtle.state.angle, -parameters.get_delta_angle());
+    ext::sf::Vector2d direction { 0, -1 };
+    ASSERT_NEAR(turtle.state.direction.x, direction.x, 1e-10);
+    ASSERT_NEAR(turtle.state.direction.y, direction.y, 1e-10);
 }
 
 // Test the save_position and load_position order.
@@ -87,13 +91,13 @@ TEST_F(DrawingTest, stack_test)
     save_position_fn(turtle);
     const auto& saved_state = turtle.stack.top();
     ASSERT_EQ(saved_state.position, turtle.state.position);
-    ASSERT_EQ(saved_state.angle, turtle.state.angle);
+    ASSERT_EQ(saved_state.direction, turtle.state.direction);
 
     go_forward_fn(turtle);
     load_position_fn(turtle);
 
     ASSERT_EQ(saved_state.position, turtle.state.position);
-    ASSERT_EQ(saved_state.angle, turtle.state.angle);
+    ASSERT_EQ(saved_state.direction, turtle.state.direction);
 }
 
 // The L-system defined returns the string: "F+G" with 1 iteration.

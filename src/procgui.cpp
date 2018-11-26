@@ -86,19 +86,19 @@ namespace
     }
 }
 
-namespace ImGui
+namespace ext::ImGui
 {
     // Taken from 'imgui_demo.cpp', helper function to display a help tooltip.
     void ShowHelpMarker(const char* desc)
     {
-        ImGui::TextDisabled("(?)");
-        if (ImGui::IsItemHovered())
+        ::ImGui::TextDisabled("(?)");
+        if (::ImGui::IsItemHovered())
         {
-            ImGui::BeginTooltip();
-            ImGui::PushTextWrapPos(450.0f);
-            ImGui::TextUnformatted(desc);
-            ImGui::PopTextWrapPos();
-            ImGui::EndTooltip();
+            ::ImGui::BeginTooltip();
+            ::ImGui::PushTextWrapPos(450.0f);
+            ::ImGui::TextUnformatted(desc);
+            ::ImGui::PopTextWrapPos();
+            ::ImGui::EndTooltip();
         }
     }
 
@@ -107,9 +107,9 @@ namespace ImGui
     // WARNING: Use these with 'ImGui::PopStyleColor(3)'.
     template<int hue> void PushStyleColoredButton()
     {
-        ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue/7.0f, 0.6f, 0.6f)));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue/7.0f, 0.7f, 0.7f)));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue/7.0f, 0.8f, 0.8f)));
+        ::ImGui::PushStyleColor(::ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue/7.0f, 0.6f, 0.6f)));
+        ::ImGui::PushStyleColor(::ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue/7.0f, 0.7f, 0.7f)));
+        ::ImGui::PushStyleColor(::ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue/7.0f, 0.8f, 0.8f)));
     }
     auto PushStyleRedButton = PushStyleColoredButton<0>;
     auto PushStyleYellowButton = PushStyleColoredButton<1>;
@@ -118,6 +118,19 @@ namespace ImGui
     auto PushStyleBlueButton = PushStyleColoredButton<4>;
     auto PushStylePurpleButton = PushStyleColoredButton<5>;
     auto PushStylePinkButton = PushStyleColoredButton<6>;
+
+    bool DragDouble(const char* label, double* v, double v_speed = 1.0f, double v_min = 0.0f, double v_max = 0.0f, const char* format = "%.3f", double power = 1.0f)
+    {
+        double* min = &v_min;
+        double* max = &v_max;
+        return ::ImGui::DragScalarN(label, ::ImGuiDataType_Double, v, 1, v_speed, min, max, format, power);
+    }
+    bool DragDouble2(const char* label, double v[2], double v_speed = 1.0f, double v_min = 0.0f, double v_max = 0.0f, const char* format = "%.3f", double power = 1.0f)
+    {
+        double* min = &v_min;
+        double* max = &v_max;
+        return ::ImGui::DragScalarN(label, ::ImGuiDataType_Double, v, 2, v_speed, min, max, format, power);
+    }
 }
 
 namespace procgui
@@ -218,35 +231,35 @@ namespace procgui
         }
     
         // --- Starting position ---
-        float pos[2] = { parameters.get_starting_position().x,
+        double pos[2] = { parameters.get_starting_position().x,
                          parameters.get_starting_position().y };
-        if ( ImGui::DragFloat2("Starting position", pos,
+        if (ext::ImGui::DragDouble2("Starting position", pos,
                                1.f, 0.f, 0.f, "%.lf") )
         {
             // is_modified_ is not set: the render state take care of translating the view.
-            sf::Vector2f starting_position {pos[0], pos[1]};
+            ext::sf::Vector2d starting_position {pos[0], pos[1]};
             parameters.set_starting_position(starting_position);
         }
 
         // --- Starting angle ---
-        float starting_angle_deg = math::rad_to_degree(parameters.get_starting_angle());
-        if ( ImGui::DragFloat("Starting Angle", &starting_angle_deg,
+        double starting_angle_deg = math::rad_to_degree(parameters.get_starting_angle());
+        if (ext::ImGui::DragDouble("Starting Angle", &starting_angle_deg,
                               1.f, 0.f, 360.f, "%.lf") )
         {
             parameters.set_starting_angle(math::degree_to_rad(starting_angle_deg));
         }
 
         // --- Angle Delta ---
-        float delta_angle_deg = math::rad_to_degree(parameters.get_delta_angle());
-        if ( ImGui::DragFloat("Angle Delta", &delta_angle_deg,
+        double delta_angle_deg = math::rad_to_degree(parameters.get_delta_angle());
+        if (ext::ImGui::DragDouble("Angle Delta", &delta_angle_deg,
                               1.f, 0.f, 360.f, "%.lf") )
         {
             parameters.set_delta_angle(math::degree_to_rad(delta_angle_deg));
         }
 
         // --- Step ---
-        float step = parameters.get_step();
-        if(ImGui::DragFloat("Step", &step, 0.2f, 0.f, 0.f, "%#.1lf"))
+        double step = parameters.get_step();
+        if(ext::ImGui::DragDouble("Step", &step, 0.2f, 0.f, 0.f, "%#.1lf"))
         {
             parameters.set_step(step);
         }
@@ -261,7 +274,7 @@ namespace procgui
         {
             parameters.set_n_iter(n_iter);
         }
-        ImGui::SameLine(); ImGui::ShowHelpMarker("CTRL+click to directly input values. Higher values will use all of your memory and CPU");
+        ImGui::SameLine(); ext::ImGui::ShowHelpMarker("CTRL+click and click to directly input values. Higher values will use all of your memory and CPU");
 
         conclude();
 
@@ -353,8 +366,8 @@ namespace procgui
         }
 
         // --- Gradient angle ---
-        float angle = painter.get_angle();
-        if ( ImGui::DragFloat("Gradient Angle", &angle,
+        double angle = painter.get_angle();
+        if (ext::ImGui::DragDouble("Gradient Angle", &angle,
                               1.f, 0.f, 360.f, "%.lf") )
         {
             painter.set_angle(angle);
@@ -429,7 +442,7 @@ namespace
         }
 
         // Button '+' to add a key.
-        ImGui::PushStyleGreenButton();
+        ext::ImGui::PushStyleGreenButton();
         if (ImGui::Button("+"))
         {
             is_modified = true;
@@ -438,7 +451,7 @@ namespace
         ImGui::PopStyleColor(3);
 
         // Button '-' to remove a key
-        ImGui::PushStyleRedButton();
+        ext::ImGui::PushStyleRedButton();
         if (keys.size() > 2 && (ImGui::SameLine(), ImGui::Button("-")))
         {
             is_modified = true;
@@ -457,7 +470,7 @@ namespace
         ImVec2 pos = ImGui::GetCursorScreenPos();
         ImVec2 size {500., 30.};
         float x = pos.x;
-        float ratio = 0.f;
+        double ratio = 0.f;
         for (unsigned i=0; i<k.size()-1; ++i)
         {
             const auto& col1 = k.at(i).first;
@@ -513,7 +526,7 @@ namespace
             ImGui::Text(std::to_string(diff).c_str());
 
             // '+' button to add a transitional color.
-            ImGui::PushStyleGreenButton();
+            ext::ImGui::PushStyleGreenButton();
             if (ImGui::Button("+"))
             {
                 is_modified = true;
@@ -522,7 +535,7 @@ namespace
             ImGui::PopStyleColor(3);
             ImGui::SameLine();
             // '-' button to remove a transitional color
-            ImGui::PushStyleRedButton();
+            ext::ImGui::PushStyleRedButton();
             if (diff > 0 && ImGui::Button("-"))
             {
                 is_modified = true;
@@ -551,7 +564,7 @@ namespace
 
         ImGui::SameLine();
         // Button '+' to add a key.
-        ImGui::PushStyleGreenButton();
+        ext::ImGui::PushStyleGreenButton();
         if (ImGui::Button("+"))
         {
             is_modified = true;
@@ -560,7 +573,7 @@ namespace
         ImGui::PopStyleColor(3);
 
         // Button '-' to remove a key
-        ImGui::PushStyleRedButton();
+        ext::ImGui::PushStyleRedButton();
         if (keys.size() > 1 && (ImGui::SameLine(), ImGui::Button("-")))
         {
             is_modified = true;
@@ -574,7 +587,7 @@ namespace
         ImVec2 pos = ImGui::GetCursorScreenPos();
         ImVec2 size {500., 30.};
         float x = pos.x;
-        float width = size.x / colors.size();
+        double width = size.x / colors.size();
         for (const auto& color : colors)
         {
             draw_list->AddRectFilled({x, pos.y}, ImVec2(x+width, pos.y+size.y), IM_COL32(color.r, color.g, color.b, color.a));

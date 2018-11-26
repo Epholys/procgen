@@ -133,7 +133,7 @@ namespace controller
         if (under_mouse_)
         {
             auto& parameters = under_mouse_->ref_parameters();
-            auto starting_position = parameters.get_starting_position() - delta;
+            auto starting_position = parameters.get_starting_position() - ext::sf::Vector2d(delta);
             parameters.set_starting_position(starting_position);
         }
     }

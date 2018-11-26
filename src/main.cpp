@@ -29,30 +29,41 @@ int main()
     window.setVerticalSyncEnabled(true);
     ImGui::SFML::Init(window);
 
-    auto serpinski = std::make_shared<LSystem>(LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
+    // auto serpinski = std::make_shared<LSystem>(LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
     auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } } });
+    // auto fract = std::make_shared<LSystem>(LSystem { "F", { { 'F', "FF+F" } } });
     auto map = std::make_shared<InterpretationMap>(default_interpretation_map);
-    auto serpinski_param = std::make_shared<DrawingParameters>();
-    serpinski_param->set_starting_position({ 1000, 600 });
-    serpinski_param->set_starting_angle(0.f);
-    serpinski_param->set_delta_angle(degree_to_rad(60.f));
-    serpinski_param->set_step(7);
-    serpinski_param->set_n_iter(5);
+
+    // auto serpinski_param = std::make_shared<DrawingParameters>();
+    // serpinski_param->set_starting_position({ 1000, 600 });
+    // serpinski_param->set_starting_angle(0.f);
+    // serpinski_param->set_delta_angle(degree_to_rad(60.f));
+    // serpinski_param->set_step(7);
+    // serpinski_param->set_n_iter(5);
     
     auto plant_param = std::make_shared<DrawingParameters>();
     plant_param->set_starting_position({ 400, 800 });
     plant_param->set_starting_angle(degree_to_rad(80.f));
     plant_param->set_delta_angle(degree_to_rad(25.f));
-    plant_param->set_step(5);
     plant_param->set_n_iter(6);
     plant_param->set_step(4);
+
+    // auto fract_param = std::make_shared<DrawingParameters>();
+    // fract_param->set_starting_position({ 400., 800. });
+    // fract_param->set_starting_angle(degree_to_rad(0.));
+    // fract_param->set_delta_angle(degree_to_rad(120.));
+    // fract_param->set_step(20.);
+    // fract_param->set_n_iter(10);
+
     
     LSystemView plant_view ("Plant", plant, map, plant_param);
-    LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
+    // LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
+    // LSystemView fract_view ("Fract", fract, map, fract_param);
     
     std::list<LSystemView> views;
-    views.push_back(std::move(plant_view));
     // views.push_back(std::move(serpinski_view));
+    views.push_back(std::move(plant_view));
+    // views.push_back(std::move(fract_view));
 
     sf::Clock delta_clock;
     while (window.isOpen())

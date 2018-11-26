@@ -24,8 +24,8 @@ namespace drawing
     {
     public:
         DrawingParameters() = default;
-        DrawingParameters(const sf::Vector2f& starting_position);
-        DrawingParameters(const sf::Vector2f& starting_position,
+        DrawingParameters(const ext::sf::Vector2d& starting_position);
+        DrawingParameters(const ext::sf::Vector2d& starting_position,
                           double starting_angle,
                           double delta_angle,
                           double step,
@@ -33,7 +33,7 @@ namespace drawing
         DrawingParameters(const DrawingParameters& params) = default;
 
         // Getters
-        sf::Vector2f get_starting_position() const;
+        ext::sf::Vector2d get_starting_position() const;
         double get_starting_angle() const;
         double get_delta_angle() const;
         double get_step() const;
@@ -42,7 +42,7 @@ namespace drawing
         // Setters
         // The starting position is only used when rendering the LSystem, so it
         // does not 'notify()' to avoid re-calculating for nothing.
-        void set_starting_position(const sf::Vector2f starting_position); 
+        void set_starting_position(const ext::sf::Vector2d starting_position); 
         void set_starting_angle(double starting_angle);
         void set_delta_angle(double delta_angle);
         void set_step(double step);
@@ -50,13 +50,13 @@ namespace drawing
         
     private:
         // The starting position and angle of the Turtle.
-        sf::Vector2f starting_position_ { 0, 0 };
+        ext::sf::Vector2d starting_position_ { 0, 0 };
         double starting_angle_ { 0 };
 
         // When 'turn_left' or 'turn_right' orders are executed, the
         // Turtle pivot at a 'delta_angle' angle (in
         // radian). Initialized at an arbitrary value.
-        double delta_angle_ { math::pi / 2 };
+        double delta_angle_ {math::pi / 2 };
 
         // When 'move_forward' order is executed, the Turtle will move
         // forward 'step' pixels (at default zoom level). Initialized

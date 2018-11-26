@@ -68,18 +68,19 @@ namespace controller
         // 'starting_position' to the new location.
         const auto& pasted_view = *view;
         auto box = pasted_view.get_bounding_box();
-        sf::Vector2f middle = {box.left + box.width/2, box.top + box.height/2};
+        ext::sf::Vector2d pos {position};
+        ext::sf::Vector2d middle = {box.left + box.width/2, box.top + box.height/2};
         middle = pasted_view.get_parameters().get_starting_position() - middle;
         if (LSystemController::is_clone())
         {
             auto cloned_view = pasted_view.clone();
-            cloned_view.ref_parameters().set_starting_position(position + middle);
+            cloned_view.ref_parameters().set_starting_position(pos + middle);
             lsys_views.emplace_front(cloned_view);
         }
         else
         {
             auto duplicated_view = pasted_view.duplicate();
-            duplicated_view.ref_parameters().set_starting_position(position + middle);
+            duplicated_view.ref_parameters().set_starting_position(pos + middle);
             lsys_views.emplace_front(duplicated_view);
         }
     }
@@ -90,7 +91,7 @@ namespace controller
         {
             if (ImGui::MenuItem("New LSystem", "Ctrl+N"))
             {
-                lsys_views.emplace_front(real_mouse_position(sf::Mouse::getPosition(window)));
+                lsys_views.emplace_front(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))));
             }
             if (ImGui::MenuItem("Load LSystem", "Ctrl+O"))
             {
@@ -368,7 +369,7 @@ namespace controller
                 }
                 else if (event.key.code == sf::Keyboard::N)
                 {
-                    lsys_views.emplace_front(real_mouse_position(sf::Mouse::getPosition(window)));
+                    lsys_views.emplace_front(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))));
                 }
                 else if (event.key.code == sf::Keyboard::O)
                 {

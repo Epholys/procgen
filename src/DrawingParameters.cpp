@@ -2,7 +2,7 @@
 
 namespace drawing
 {
-    DrawingParameters::DrawingParameters(const sf::Vector2f& starting_position,
+    DrawingParameters::DrawingParameters(const ext::sf::Vector2d& starting_position,
                       double starting_angle,
                       double delta_angle,
                       double step,
@@ -15,12 +15,12 @@ namespace drawing
     {
     }
 
-    DrawingParameters::DrawingParameters(const sf::Vector2f& starting_position)
+    DrawingParameters::DrawingParameters(const ext::sf::Vector2d& starting_position)
         : starting_position_ {starting_position}
     {
     }
 
-    sf::Vector2f DrawingParameters::get_starting_position() const
+    ext::sf::Vector2d DrawingParameters::get_starting_position() const
     {
         return starting_position_;
     }
@@ -41,7 +41,7 @@ namespace drawing
         return n_iter_;
     }
 
-    void DrawingParameters::set_starting_position(const sf::Vector2f starting_position)
+    void DrawingParameters::set_starting_position(const ext::sf::Vector2d starting_position)
     {
         starting_position_ = starting_position;
         // The starting position is only used when rendering the LSystem, so it

@@ -9,20 +9,29 @@ namespace drawing
     
     void go_forward_fn(Turtle& turtle)
     {
-        double dx = turtle.parameters.get_step() * std::cos(turtle.state.angle);
-        double dy = turtle.parameters.get_step() * -std::sin(turtle.state.angle); // y axis point downward
+        // Go forward following the direction vector.
+        double dx = turtle.parameters.get_step() * turtle.state.direction.x;
+        double dy = turtle.parameters.get_step() * -turtle.state.direction.y;
         turtle.state.position += {dx, dy};
         turtle.vertices.push_back(sf::Vector2f(turtle.state.position));
     }
 
     void turn_right_fn(Turtle& turtle)
     {
-        turtle.state.angle += turtle.parameters.get_delta_angle();
+        // Updates the direction vector.
+        ext::sf::Vector2d v
+        {turtle.state.direction.x * turtle.cos - turtle.state.direction.y * turtle.sin,
+         turtle.state.direction.x * turtle.sin + turtle.state.direction.y * turtle.cos};
+        turtle.state.direction = v;
     }
 
     void turn_left_fn(Turtle& turtle)
     {
-        turtle.state.angle -= turtle.parameters.get_delta_angle();
+        // Updates the direction vector.
+        ext::sf::Vector2d v
+        {turtle.state.direction.x * turtle.cos - turtle.state.direction.y * (-turtle.sin),
+         turtle.state.direction.x * (-turtle.sin) + turtle.state.direction.y * turtle.cos};
+        turtle.state.direction = v;
     }
 
     void save_position_fn(Turtle& turtle)
@@ -39,8 +48,7 @@ namespace drawing
         else
         {
             turtle.vertices.push_back( {turtle.vertices.back().position, sf::Color::Transparent} );
-            turtle.state.position = turtle.stack.top().position;
-            turtle.state.angle = turtle.stack.top().angle;
+            turtle.state = turtle.stack.top();
             turtle.vertices.push_back( {sf::Vector2f(turtle.stack.top().position), sf::Color::Transparent} );
             turtle.vertices.push_back( {sf::Vector2f(turtle.stack.top().position)} );
             turtle.stack.pop();

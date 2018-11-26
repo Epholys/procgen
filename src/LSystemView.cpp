@@ -39,7 +39,7 @@ namespace procgui
         compute_vertices();
     }
 
-    LSystemView::LSystemView(const sf::Vector2f& position)
+    LSystemView::LSystemView(const ext::sf::Vector2d& position)
         : LSystemView(
             "",
             std::make_shared<LSystem>(LSystem("F+F+F+F", {})),
@@ -232,7 +232,7 @@ namespace procgui
     sf::Transform LSystemView::get_transform() const
     {
         sf::Transform transform;
-        transform.translate(OParams::get_target()->get_starting_position());
+        transform.translate(sf::Vector2f(OParams::get_target()->get_starting_position()));
         return transform;
     }
     

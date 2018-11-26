@@ -43,12 +43,21 @@ namespace drawing
             // care.
             const DrawingParameters& parameters;
 
-            // The current position and angle of the turtle.
+            // Cosine and sine of the 'delta_angle'. Computed once to speed up
+            // calculations.
+            const double cos = std::cos(parameters.get_delta_angle());
+            const double sin = std::sin(parameters.get_delta_angle());
+
+
+            // The current position and direction of the Turtle.
             struct State {
-                sf::Vector2<double> position { 0, 0 };
-                double angle { 0 };
+                sf::Vector2<double> position;
+                sf::Vector2<double> direction;
             };
-            State state { };
+            State state { {0, 0}, // The position on-screen is set in
+                                  // LSystemView with transforms.
+                          {std::cos(parameters.get_starting_angle()),
+                           std::sin(parameters.get_starting_angle())}};
 
             // The state of a turtle can be saved and loaded in a stack.
             std::stack<State> stack { };
@@ -56,7 +65,7 @@ namespace drawing
             // Each time the Turtle changes its position, the new one is saved
             // in a vertex. However, we can jump from position to position, so
             // it there is additional transparent vertices between jumps.
-            std::vector<sf::Vertex> vertices { };
+            std::vector<sf::Vertex> vertices { sf::Vector2f{state.position} };
         };
     }
 
