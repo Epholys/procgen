@@ -356,15 +356,11 @@ namespace procgui
 
         conclude();
     }
-
-    void interact_with(colors::VertexPainter& painter, const std::string& name)
+}
+namespace
+{
+    void interact_with(colors::VertexPainter& painter)
     {
-        if (!set_up(name))
-        {
-            // Early out if the display zone is collapsed.
-            return;
-        }
-
         // --- Gradient angle ---
         double angle = painter.get_angle();
         if (ext::ImGui::DragDouble("Gradient Angle", &angle,
@@ -374,12 +370,85 @@ namespace procgui
         }
         
         push_embedded();
-        interact_with(*painter.get_generator_buffer(), "Colors");
+        ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
         pop_embedded();
-        
-        conclude();
     }
-    
+}
+namespace procgui
+{
+    void interact_with(colors::VertexPainterBuffer& painter_buffer, const std::string& name)
+    {
+        if (!set_up(name))
+        {
+            // Early out if the display zone is collapsed.
+            return;
+        }
+
+        auto painter = painter_buffer.get_painter();
+        
+        // Represents the index of the next ListBox. Set by inspecting the
+        // polyphormism. 
+        int index = 0;
+        const auto& info = typeid(*painter).hash_code();
+        if (info == typeid(colors::VertexPainter).hash_code())
+        {
+            index = 0;
+        }
+        // else if (info == typeid(colors::LinearGradient).hash_code())
+        // {
+        //     index = 1;
+        // }
+        // else if (info == typeid(colors::DiscreteGradient).hash_code())
+        // {
+        //     index = 2;
+        // }
+        // else
+        // {
+        //     Expects(false);
+        // }
+
+        const char* generators[1] = {"VertexPainter"};
+        // Create a new ColorGenerator
+        if (ImGui::ListBox("Vertex Painter", &index, generators, 1))
+        {
+            if (index == 0)
+            {
+                painter = std::make_shared<colors::VertexPainter>();
+            }
+            // else if (index == 1)
+            // {
+            //     gen = std::make_shared<colors::LinearGradient>();
+            // }
+            // else
+            // {
+            //     gen = std::make_shared<colors::DiscreteGradient>();
+            // }
+            // Updates ColorGeneratorBuffer and VertexPainter and a 'notify()'
+            // waterfall. 
+            painter_buffer.set_painter(painter);
+        }
+
+        // Does not use embedded_level, the generator will be displayed just
+        // after the generator selection.
+        if (index == 0)
+        {
+            // auto constant = std::dynamic_pointer_cast<colors::ConstantColor>(gen);
+            ::interact_with(*painter);
+        }
+        // else if (index == 1)
+        // {
+        //     auto gradient = std::dynamic_pointer_cast<colors::LinearGradient>(gen);
+        //     ::interact_with(*gradient);
+        // }
+        // else
+        // {
+        //     auto discrete = std::dynamic_pointer_cast<colors::DiscreteGradient>(gen);
+        //     ::interact_with(*discrete);
+        // }
+
+        conclude();
+
+    }
 }
 namespace
 {
@@ -744,7 +813,7 @@ namespace procgui
         interact_with(lsys_view.ref_parameters(), "Drawing Parameters"+ss.str());
         interact_with(lsys_view.ref_lsystem_buffer(), "LSystem"+ss.str());
         interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map"+ss.str());
-        interact_with(lsys_view.ref_vertex_painter(), "Painter");
+        interact_with(lsys_view.ref_vertex_painter_buffer(), "Painter");
         pop_embedded();
 
         conclude();

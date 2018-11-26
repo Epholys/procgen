@@ -15,6 +15,7 @@
 #include "helper_string.h"
 #include "ColorsGenerator.h"
 #include "ColorsGeneratorBuffer.h"
+#include "VertexPainterBuffer.h"
 
 // Define 'display()' and 'interact_with()' for the structs and classes to
 // display.
@@ -58,10 +59,10 @@ namespace procgui {
     // view is un-selected and the window closed.
     void interact_with(LSystemView& lsys_view, const std::string& name, bool* open = nullptr);
 
-    void interact_with(colors::VertexPainter& painter, const std::string& name);
+    void interact_with(colors::VertexPainterBuffer& painter_buffer, const std::string& name);
 
     void interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string& name);
-        
+
     #include "procgui.tpp"
 
 }

@@ -14,15 +14,15 @@ namespace procgui
     {
         OLSys::add_callback([this](){compute_vertices();});
         OMap::add_callback([this](){compute_vertices();});
-        OPainter::add_callback([this](){paint_vertices();});
         OParams::add_callback([this](){compute_vertices();});
+        OPainter::add_callback([this](){paint_vertices();});
     }
 
     LSystemView::LSystemView(const std::string& name,
                              std::shared_ptr<LSystem> lsys,
                              std::shared_ptr<InterpretationMap> map,
                              std::shared_ptr<DrawingParameters> params,
-                             std::shared_ptr<VertexPainter> painter)
+                             std::shared_ptr<VertexPainterBuffer> painter)
         : OLSys {lsys}
         , OMap {map}
         , OParams {params}
@@ -211,7 +211,7 @@ namespace procgui
     {
         return interpretation_buff_;
     }
-    colors::VertexPainter& LSystemView::ref_vertex_painter()
+    colors::VertexPainterBuffer& LSystemView::ref_vertex_painter_buffer()
     {
         return *OPainter::get_target();
     }
@@ -231,7 +231,7 @@ namespace procgui
     {
         return interpretation_buff_;
     }
-    const colors::VertexPainter& LSystemView::get_vertex_painter()
+    const colors::VertexPainterBuffer& LSystemView::get_vertex_painter_buffer() const
     {
         return *OPainter::get_target();
     }
@@ -267,7 +267,7 @@ namespace procgui
     void LSystemView::paint_vertices()
     {
         // un-transformed vertices and bounding box
-        OPainter::get_target()->paint_vertices(vertices_, bounding_box_);
+        OPainter::get_target()->get_target()->paint_vertices(vertices_, bounding_box_);
     }
 
     

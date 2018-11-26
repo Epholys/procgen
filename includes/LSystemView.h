@@ -10,7 +10,7 @@
 #include "LSystemBuffer.h"
 #include "InterpretationMapBuffer.h"
 #include "UniqueColor.h"
-#include "VertexPainter.h"
+#include "VertexPainterBuffer.h"
 
 namespace procgui
 {
@@ -37,22 +37,21 @@ namespace procgui
     class LSystemView : public Observer<LSystem>,
                         public Observer<drawing::InterpretationMap>,
                         public Observer<drawing::DrawingParameters>,
-                        public Observer<colors::VertexPainter>
+                        public Observer<colors::VertexPainterBuffer>
     {
     public:
         using OLSys = Observer<LSystem>;
         using OMap = Observer<drawing::InterpretationMap>;
         using OParams = Observer<drawing::DrawingParameters>;
-        using OPainter = Observer<colors::VertexPainter>;
+        using OPainter = Observer<colors::VertexPainterBuffer>;
 
         LSystemView(const std::string& name,
                     std::shared_ptr<LSystem> lsys,
                     std::shared_ptr<drawing::InterpretationMap> map,
                     std::shared_ptr<drawing::DrawingParameters> params,
-                    std::shared_ptr<colors::VertexPainter> painter = std::make_shared<colors::VertexPainter>());
+                    std::shared_ptr<colors::VertexPainterBuffer> painter = std::make_shared<colors::VertexPainterBuffer>());
         explicit LSystemView(const ext::sf::Vector2d& position);
-        // The TODO rule-of-five is necessary with the 'Observer<>' callbacks
-        // behaviour. Shallow copy: LSystem, DrawingParameters and VertexPainter
+        // Shallow copy: LSystem, DrawingParameters and VertexPainterBuffer
         // are shared from 'other'. Use 'clone()' for a deep copy.
         LSystemView(const LSystemView& other);
         LSystemView(LSystemView&& other);
@@ -70,14 +69,14 @@ namespace procgui
         drawing::DrawingParameters& ref_parameters();
         LSystemBuffer& ref_lsystem_buffer();
         InterpretationMapBuffer& ref_interpretation_buffer();
-        colors::VertexPainter& ref_vertex_painter();
+        colors::VertexPainterBuffer& ref_vertex_painter_buffer();
         // Getters
         // Correctly translated to screen-space bounding_box.
         sf::FloatRect get_bounding_box() const;
         const drawing::DrawingParameters& get_parameters() const;
         const LSystemBuffer& get_lsystem_buffer() const;
         const InterpretationMapBuffer& get_interpretation_buffer() const;
-        const colors::VertexPainter& get_vertex_painter();
+        const colors::VertexPainterBuffer& get_vertex_painter_buffer() const;
         int get_id() const;
         sf::Color get_color() const;
         // Translation transform to correct screen-space position of the
