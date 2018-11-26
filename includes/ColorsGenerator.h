@@ -44,7 +44,7 @@ namespace colors
     public:
         // Construct a pure white ConstantColor.
         ConstantColor();
-        ConstantColor(const sf::Color& color);
+        explicit ConstantColor(const sf::Color& color);
 
         // For every float 'f', returns 'color_'
         sf::Color get(float f) override;
@@ -84,7 +84,7 @@ namespace colors
         // Create a LinearGradient with 'raw_keys_' as 'key_colors' and
         // 'sanitized_keys' as the sanitized 'key_colors'.
         // Precondition: 'key_colors' must have at least two keys.
-        LinearGradient(const keys& key_colors);
+        explicit LinearGradient(const keys& key_colors);
 
         // Returns the RGB interpolation between the two adjacent keys of 'f'.
         // 'f' is automatically clamped.
@@ -134,7 +134,7 @@ namespace colors
         DiscreteGradient();
 
         // Construct a DiscreteGradient respecting the invariants.
-        DiscreteGradient(const keys& keys);
+        explicit DiscreteGradient(const keys& keys);
 
         // Returns a colors corresponding to a RGB interpolation between the two
         // adjacent keys of 'f'. The number of colors between the two adjacent

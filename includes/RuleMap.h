@@ -24,7 +24,7 @@ public:
     using rule_map = std::unordered_map<char, Successor>;
     
     RuleMap() = default;
-    RuleMap(const rule_map& rules);
+    explicit RuleMap(const rule_map& rules);
     RuleMap(std::initializer_list<typename rule_map::value_type> init);
     virtual ~RuleMap() {}
 

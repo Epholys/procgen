@@ -16,7 +16,7 @@ namespace colors
         ColorGeneratorBuffer();
 
         // Construct initializing 'generator_' with 'gen'
-        ColorGeneratorBuffer(std::shared_ptr<ColorGenerator> gen);
+        explicit ColorGeneratorBuffer(std::shared_ptr<ColorGenerator> gen);
 
         // Getter
         std::shared_ptr<ColorGenerator> get_generator() const;

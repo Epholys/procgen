@@ -50,7 +50,7 @@ namespace procgui
                     std::shared_ptr<drawing::InterpretationMap> map,
                     std::shared_ptr<drawing::DrawingParameters> params,
                     std::shared_ptr<colors::VertexPainter> painter = std::make_shared<colors::VertexPainter>());
-        LSystemView(const ext::sf::Vector2d& position);
+        explicit LSystemView(const ext::sf::Vector2d& position);
         // The TODO rule-of-five is necessary with the 'Observer<>' callbacks
         // behaviour. Shallow copy: LSystem, DrawingParameters and VertexPainter
         // are shared from 'other'. Use 'clone()' for a deep copy.

@@ -81,7 +81,7 @@ namespace procgui
         using const_iterator = typename buffer::const_iterator;
 
         // Constructor
-        RuleMapBuffer(const std::shared_ptr<Target>& target_);
+        explicit RuleMapBuffer(const std::shared_ptr<Target>& target_);
 
         // The copy constructor and the assignment operator are needed because
         // we need to register a callback for the new object to

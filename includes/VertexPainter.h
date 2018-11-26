@@ -32,8 +32,8 @@ namespace colors
         using OBuff = Observer<ColorGeneratorBuffer>;
 
         VertexPainter(); // Create a default generator
-        // TODO Rule-of-five deep copy.
-        VertexPainter(const std::shared_ptr<ColorGenerator> gen);
+        explicit VertexPainter(const std::shared_ptr<ColorGenerator> gen);
+
         VertexPainter(const VertexPainter& other);
         VertexPainter(VertexPainter&& other);
         VertexPainter& operator=(const VertexPainter& other);
