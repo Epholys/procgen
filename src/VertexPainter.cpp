@@ -4,14 +4,19 @@
 
 namespace colors
 {
+    void VertexPainter::update_callbacks()
+    {
+        OGen::add_callback([this](){notify();});
+        OBuff::add_callback([this](){update_generator();});
+    }
+
     VertexPainter::VertexPainter()
         : Observable{}
         , OGen{std::make_shared<ConstantColor>()}
         , OBuff{std::make_shared<ColorGeneratorBuffer>(OGen::get_target())}
         , generator_buffer_{OBuff::get_target()}
     {
-        OGen::add_callback([this](){notify();});
-        OBuff::add_callback([this](){update_generator();});
+        update_callbacks();
     }
 
     VertexPainter::VertexPainter(const std::shared_ptr<ColorGenerator> gen)
@@ -20,8 +25,7 @@ namespace colors
         , OBuff{std::make_shared<ColorGeneratorBuffer>(gen)}
         , generator_buffer_{OBuff::get_target()}
     {
-        OGen::add_callback([this](){notify();});
-        OBuff::add_callback([this](){update_generator();});
+        update_callbacks();
     }
 
     VertexPainter::VertexPainter(const VertexPainter& other)
@@ -31,50 +35,58 @@ namespace colors
         , generator_buffer_{OBuff::get_target()}
         , angle_{other.angle_}
     {
-        OGen::add_callback([this](){notify();});
-        OBuff::add_callback([this](){update_generator();});
+        update_callbacks();
     }
 
     VertexPainter::VertexPainter(VertexPainter&& other)
         : Observable{}
-        , OGen{other.OGen::get_target()->clone()}
+        , OGen{std::move(other.OGen::get_target())}
         , OBuff{std::make_shared<ColorGeneratorBuffer>(OGen::get_target())}
         , generator_buffer_{OBuff::get_target()}
         , angle_{other.angle_}
     {
-        OGen::add_callback([this](){notify();});
-        OBuff::add_callback([this](){update_generator();});
-
+        update_callbacks();
+        
         other.OGen::set_target(nullptr);
         other.OBuff::set_target(nullptr);
-        
-        other.angle_ = 0.;
+
+        generator_buffer_.reset();
     }
 
-    VertexPainter& VertexPainter::operator=(VertexPainter other)
+    VertexPainter& VertexPainter::operator=(const VertexPainter& other)
     {
-        swap(other);
+        if (this != &other)
+        {
+            OGen {other.OGen::get_target()->clone()};
+            OBuff {std::make_shared<ColorGeneratorBuffer>(OGen::get_target())};
+            generator_buffer_ = OBuff::get_target();
+            angle_ = {other.angle_};
+
+            update_callbacks();
+        }
         return *this;
     }
 
-    void VertexPainter::swap(VertexPainter& other)
+    VertexPainter& VertexPainter::operator=(VertexPainter&& other)
     {
-        using std::swap;
+        if (this != &other)
+        {
+            
+            OGen {std::move(other.OGen::get_target()->clone())};
+            OBuff {std::make_shared<ColorGeneratorBuffer>(OGen::get_target())};
+            generator_buffer_ = OBuff::get_target();
+            angle_ = other.angle_;
 
-        auto tmp_gen = OGen::get_target();
-        OGen::set_target(other.OGen::get_target());
-        other.OGen::set_target(tmp_gen);
-        OGen::add_callback([this](){notify();});
-        other.OGen::add_callback([&other](){other.notify();});
+            update_callbacks();
+            
+            other.OGen::set_target(nullptr);
+            other.OBuff::set_target(nullptr);
 
-        auto tmp_buff = OBuff::get_target();
-        OBuff::set_target(other.OBuff::get_target());
-        other.OBuff::set_target(tmp_buff);
-        OBuff::add_callback([this](){update_generator();});
-        other.OBuff::add_callback([&other](){other.update_generator();});
-
-        swap(angle_, other.angle_);
+            generator_buffer_.reset();
+        }
+        return *this;
     }
+
     
     float VertexPainter::get_angle() const
     {

@@ -26,7 +26,7 @@ RuleMapBuffer<Target>::RuleMapBuffer(const RuleMapBuffer& other)
 
 template<typename Target>
 RuleMapBuffer<Target>::RuleMapBuffer(RuleMapBuffer&& other)
-    : Observer<Target>(other.Observer<Target>::get_target())
+    : Observer<Target>(std::move(other.Observer<Target>::get_target()))
     , buffer_ {std::move(other.buffer_)}
     , instruction_ {nullptr}
 {
@@ -37,31 +37,37 @@ RuleMapBuffer<Target>::RuleMapBuffer(RuleMapBuffer&& other)
     other.instruction_ = nullptr;
 }
 
-
 template<typename Target>
-RuleMapBuffer<Target>& RuleMapBuffer<Target>::operator=(RuleMapBuffer other)
+RuleMapBuffer<Target>& RuleMapBuffer<Target>::operator=(const RuleMapBuffer& other)
 {
-    swap(other);
+    if (this != &other)
+    {
+        Observer<Target> {other.Observer<Target>::get_target()};
+        buffer_ = other.buffer_;
+        instruction_ = nullptr;
+
+        Observer<Target>::add_callback([this](){sync();});
+    }
     return *this;
 }
 
 template<typename Target>
-void RuleMapBuffer<Target>::swap(RuleMapBuffer& other)
+RuleMapBuffer<Target>& RuleMapBuffer<Target>::operator=(RuleMapBuffer&& other)
 {
-    using std::swap;
+    if (this != &other)
+    {
+        Observer<Target> {other.Observer<Target>::get_target()};
+        buffer_ = other.buffer_;
+        instruction_ = nullptr;
 
-    // Not a pure swap but Observer<T> must be manually swapped.
-    auto tmp = Observer<Target>::get_target();
-    this->set_target(other.Observer<Target>::get_target());
-    other.Observer<Target>::set_target(tmp);
-    
-    this->add_callback([this](){sync();});
-    other.Observer<Target>::add_callback([&other](){other.sync();});
+        Observer<Target>::add_callback([this](){sync();});
 
-    swap(buffer_, other.buffer_);
-    instruction_ = nullptr;
+        other.set_target(nullptr);
+        other.buffer_ = {};
+        other.instruction_ = nullptr;
+    }
+    return *this;
 }
-
 
 template<typename Target>
 Target& RuleMapBuffer<Target>::observer_target() const

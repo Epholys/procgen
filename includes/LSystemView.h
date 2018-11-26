@@ -55,8 +55,9 @@ namespace procgui
         // behaviour. Shallow copy: LSystem, DrawingParameters and VertexPainter
         // are shared from 'other'. Use 'clone()' for a deep copy.
         LSystemView(const LSystemView& other);
-        LSystemView& operator=(LSystemView other);
         LSystemView(LSystemView&& other);
+        LSystemView& operator=(const LSystemView& other);
+        LSystemView& operator=(LSystemView&& other);
         ~LSystemView();
         
         // Clone the LSystemView into an independant other view: deep copy.
@@ -102,9 +103,8 @@ namespace procgui
 
                 
     private:
-        // Used in assignment and move operator.
-        void swap(LSystemView& other);
-
+        void update_callbacks();
+        
         // Unique identifier for each instance (with a growing id_count_).
         // Used in the GUI.
         static int id_count_;

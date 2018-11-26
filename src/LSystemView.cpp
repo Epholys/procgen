@@ -9,7 +9,15 @@ namespace procgui
 
     int LSystemView::id_count_ = 0;
     UniqueColor LSystemView::color_gen_ {};
-    
+
+    void LSystemView::update_callbacks()
+    {
+        OLSys::add_callback([this](){compute_vertices();});
+        OMap::add_callback([this](){compute_vertices();});
+        OPainter::add_callback([this](){paint_vertices();});
+        OParams::add_callback([this](){compute_vertices();});
+    }
+
     LSystemView::LSystemView(const std::string& name,
                              std::shared_ptr<LSystem> lsys,
                              std::shared_ptr<InterpretationMap> map,
@@ -30,13 +38,11 @@ namespace procgui
         , is_selected_ {false}
     {
         // Invariant respected: cohesion between the LSystem/InterpretationMap
-        // and the vertices. 
-        OLSys::add_callback([this](){compute_vertices();});
-        OMap::add_callback([this](){compute_vertices();});
-        OPainter::add_callback([this](){paint_vertices();});
-        OParams::add_callback([this](){compute_vertices();});
-            
+        // and the vertices.             
+        update_callbacks();
+        
         compute_vertices();
+        paint_vertices();
     }
 
     LSystemView::LSystemView(const ext::sf::Vector2d& position)
@@ -65,17 +71,14 @@ namespace procgui
         , is_selected_ {other.is_selected_}
     {
         // Manually managing Observer<> callbacks.
-        OLSys::add_callback([this](){compute_vertices();});
-        OMap::add_callback([this](){compute_vertices();});
-        OParams::add_callback([this](){compute_vertices();});
-        OPainter::add_callback([this](){paint_vertices();});
+        update_callbacks();
     }
 
     LSystemView::LSystemView(LSystemView&& other)
-        : OLSys {other.OLSys::get_target()}
-        , OMap {other.OMap::get_target()}
-        , OParams {other.OParams::get_target()}
-        , OPainter {other.OPainter::get_target()}
+        : OLSys {std::move(other.OLSys::get_target())}
+        , OMap {std::move(other.OMap::get_target())}
+        , OParams {std::move(other.OParams::get_target())}
+        , OPainter {std::move(other.OPainter::get_target())}
         , id_ {other.id_}
         , color_id_{std::move(other.color_id_)}
         , name_ {std::move(other.name_)}
@@ -87,10 +90,7 @@ namespace procgui
         , is_selected_ {other.is_selected_}
     {
         // Manually managing Observer<> callbacks.
-        OLSys::add_callback([this](){compute_vertices();});
-        OMap::add_callback([this](){compute_vertices();});
-        OParams::add_callback([this](){compute_vertices();});
-        OPainter::add_callback([this](){paint_vertices();});
+        update_callbacks();
 
         // Remove callbacks of the moved 'other'.
         other.OLSys::set_target(nullptr);
@@ -105,53 +105,67 @@ namespace procgui
         other.is_selected_ = false;
     }
 
-    LSystemView& LSystemView::operator=(LSystemView other)
+    LSystemView& LSystemView::operator=(const LSystemView& other)
     {
-        swap(other);
+        if (this != &other)
+        {
+            OLSys {other.OLSys::get_target()};
+            OMap {other.OMap::get_target()};
+            OParams {other.OParams::get_target()};
+            OPainter {other.OPainter::get_target()};
+            id_ = {id_count_++};
+            color_id_= {color_gen_.register_id(id_)};
+            name_ = {other.name_};
+            lsys_buff_ = {other.lsys_buff_};
+            interpretation_buff_ = {other.interpretation_buff_};
+            vertices_ = {other.vertices_};
+            bounding_box_ = {other.bounding_box_};
+            sub_boxes_ = {other.sub_boxes_};
+            is_selected_ = {other.is_selected_};
+
+            update_callbacks();
+        }
+
         return *this;
     }
 
-    void LSystemView::swap(LSystemView& other)
+    LSystemView& LSystemView::operator=(LSystemView&& other)
     {
-        using std::swap;
+        if (this != &other)
+        {
+            OLSys {std::move(other.OLSys::get_target())};
+            OMap {std::move(other.OMap::get_target())};
+            OParams {std::move(other.OParams::get_target())};
+            OPainter {std::move(other.OPainter::get_target())};
+            id_ = {other.id_};
+            color_id_= {std::move(other.color_id_)};
+            name_ = {std::move(other.name_)};
+            lsys_buff_ = {std::move(other.lsys_buff_)};
+            interpretation_buff_ = {std::move(other.interpretation_buff_)};
+            vertices_ = {std::move(other.vertices_)};
+            bounding_box_ = {std::move(other.bounding_box_)};
+            sub_boxes_ = {std::move(other.sub_boxes_)};
+            is_selected_ = {other.is_selected_};
 
-        // Not a pure swap but Observer<> must be manually swaped:
-        //  - swap the targets.
-        //  - add correct callback.
-        auto tmp_lsys = OLSys::get_target();
-        OLSys::set_target(other.OLSys::get_target());
-        other.OLSys::set_target(tmp_lsys);
-        OLSys::add_callback([this](){compute_vertices();});
-        other.OLSys::add_callback([&other](){other.compute_vertices();});
+            // Manually managing Observer<> callbacks.
+            update_callbacks();
 
-        auto tmp_map = OMap::get_target();
-        OMap::set_target(other.OMap::get_target());
-        other.OMap::set_target(tmp_map);
-        OMap::add_callback([this](){compute_vertices();});
-        other.OMap::add_callback([&other](){other.compute_vertices();});
+            // Remove callbacks of the moved 'other'.
+            other.OLSys::set_target(nullptr);
+            other.OMap::set_target(nullptr);
+            other.OParams::set_target(nullptr);
+            other.OPainter::set_target(nullptr);
 
-        auto tmp_params = OParams::get_target();
-        OParams::set_target(other.OParams::get_target());
-        other.OParams::set_target(tmp_params);
-        OParams::add_callback([this](){compute_vertices();});
-        other.OParams::add_callback([&other](){other.compute_vertices();});
+            // the 'other' object must not matter in the 'color_gen_' anymore.
+            other.id_ = -1;
+            other.color_id_ = sf::Color::Black;
+            other.bounding_box_ = {};
+            other.is_selected_ = false;
+        }
 
-        auto tmp_painter = OPainter::get_target();
-        OPainter::set_target(other.OPainter::get_target());
-        other.OPainter::set_target(tmp_painter);
-        OPainter::add_callback([this](){paint_vertices();});
-        other.OPainter::add_callback([&other](){other.paint_vertices();});
-
-        swap(id_, other.id_);
-        swap(color_id_, other.color_id_);
-        swap(name_, other.name_);
-        swap(lsys_buff_, other.lsys_buff_);
-        swap(interpretation_buff_, other.interpretation_buff_);
-        swap(vertices_, other.vertices_);
-        swap(bounding_box_, other.bounding_box_);
-        swap(sub_boxes_, other.sub_boxes_);
-        swap(is_selected_, other.is_selected_);
+        return *this;
     }
+
 
     LSystemView::~LSystemView()
     {

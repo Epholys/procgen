@@ -36,7 +36,8 @@ namespace colors
         VertexPainter(const std::shared_ptr<ColorGenerator> gen);
         VertexPainter(const VertexPainter& other);
         VertexPainter(VertexPainter&& other);
-        VertexPainter& operator=(VertexPainter other);
+        VertexPainter& operator=(const VertexPainter& other);
+        VertexPainter& operator=(VertexPainter&& other);
         
         // Getters
         float get_angle() const;
@@ -53,9 +54,9 @@ namespace colors
         void paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box) const;
 
     private:
-        void swap(VertexPainter& other);
+        void update_callbacks();
         
-        const std::shared_ptr<ColorGeneratorBuffer>& generator_buffer_;
+        std::shared_ptr<ColorGeneratorBuffer> generator_buffer_;
         float angle_ {0};
     };
 }

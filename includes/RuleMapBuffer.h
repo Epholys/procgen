@@ -87,8 +87,9 @@ namespace procgui
         // we need to register a callback for the new object to
         // 'Observer<Target>'
         RuleMapBuffer(const RuleMapBuffer& other);
-        RuleMapBuffer& operator=(RuleMapBuffer other);
         RuleMapBuffer(RuleMapBuffer&& other);
+        RuleMapBuffer& operator=(const RuleMapBuffer& other);
+        RuleMapBuffer& operator=(RuleMapBuffer&& other);
         
         // Access the underlying buffer without allowing modifications. Every
         // modification should be done with the associated functions.
@@ -151,8 +152,6 @@ namespace procgui
         
     private:
         Target& observer_target() const;
-
-        void swap(RuleMapBuffer& other);
 
         // Remove a rule from the buffer.
         // Take care of updating the Target according to the existence of
