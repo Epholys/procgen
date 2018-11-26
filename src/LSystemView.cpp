@@ -184,8 +184,9 @@ namespace procgui
             name_,
             std::make_shared<LSystem>(*OLSys::get_target()),
             std::make_shared<InterpretationMap>(*OMap::get_target()),
-            std::make_shared<DrawingParameters>(*OParams::get_target())
-            );
+            std::make_shared<DrawingParameters>(*OParams::get_target()),
+            std::make_shared<VertexPainterBuffer>(OPainter::get_target()->clone())
+                );
     }
 
     LSystemView LSystemView::duplicate() const

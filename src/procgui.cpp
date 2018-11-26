@@ -359,7 +359,7 @@ namespace procgui
 }
 namespace
 {
-    void interact_with(colors::VertexPainter& painter)
+    void interact_with(colors::VertexPainterLinear& painter)
     {
         // --- Gradient angle ---
         double angle = painter.get_angle();
@@ -390,7 +390,7 @@ namespace procgui
         // polyphormism. 
         int index = 0;
         const auto& info = typeid(*painter).hash_code();
-        if (info == typeid(colors::VertexPainter).hash_code())
+        if (info == typeid(colors::VertexPainterLinear).hash_code())
         {
             index = 0;
         }
@@ -407,13 +407,13 @@ namespace procgui
         //     Expects(false);
         // }
 
-        const char* generators[1] = {"VertexPainter"};
+        const char* generators[1] = {"Linear"};
         // Create a new ColorGenerator
         if (ImGui::ListBox("Vertex Painter", &index, generators, 1))
         {
             if (index == 0)
             {
-                painter = std::make_shared<colors::VertexPainter>();
+                painter = std::make_shared<colors::VertexPainterLinear>();
             }
             // else if (index == 1)
             // {
@@ -432,8 +432,8 @@ namespace procgui
         // after the generator selection.
         if (index == 0)
         {
-            // auto constant = std::dynamic_pointer_cast<colors::ConstantColor>(gen);
-            ::interact_with(*painter);
+            auto linear = std::dynamic_pointer_cast<colors::VertexPainterLinear>(painter);
+            ::interact_with(*linear);
         }
         // else if (index == 1)
         // {

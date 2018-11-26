@@ -3,24 +3,28 @@
 namespace colors
 {
     ColorGeneratorBuffer::ColorGeneratorBuffer()
-        : OGen{std::make_shared<ConstantColor>()}
+        : Observable{}
+        , OGen{std::make_shared<ConstantColor>()}
     {
         add_callback([this](){notify();});
     }
                                          
     ColorGeneratorBuffer::ColorGeneratorBuffer(std::shared_ptr<ColorGenerator> gen)
-        : OGen{gen}
+        : Observable{}
+        , OGen{gen}
     {
         add_callback([this](){notify();});
     }
 
     ColorGeneratorBuffer::ColorGeneratorBuffer(const ColorGeneratorBuffer& other)
-        : OGen{other.get_target()}
+        : Observable{}
+        , OGen{other.get_target()}
     {
         add_callback([this](){notify();});
     }
     ColorGeneratorBuffer::ColorGeneratorBuffer(ColorGeneratorBuffer&& other)
-        : OGen{std::move(other.get_target())}
+        : Observable{}
+        , OGen{std::move(other.get_target())}
     {
         add_callback([this](){notify();});
         other.set_target(nullptr);
@@ -45,7 +49,6 @@ namespace colors
         return *this;
     }
 
-    
     std::shared_ptr<ColorGenerator> ColorGeneratorBuffer::get_generator() const
     {
         return get_target();
@@ -54,6 +57,7 @@ namespace colors
     void ColorGeneratorBuffer::set_generator(std::shared_ptr<ColorGenerator> gen)
     {
         set_target(gen);
+        add_callback([this](){notify();});
         notify();
     }
 }

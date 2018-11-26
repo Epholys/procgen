@@ -4,21 +4,27 @@ namespace colors
 {
     VertexPainterBuffer::VertexPainterBuffer()
         : Observable{}
-        , Observer<VertexPainter>{std::make_shared<VertexPainter>()}
+        , OPainter{std::make_shared<VertexPainterLinear>()}
+    {
+        add_callback([this](){notify();});
+    }
+
+    VertexPainterBuffer::VertexPainterBuffer(std::shared_ptr<VertexPainter> painter)
+        : OPainter{painter}
     {
         add_callback([this](){notify();});
     }
     
     VertexPainterBuffer::VertexPainterBuffer(const VertexPainterBuffer& other)
         : Observable{}
-        , Observer<VertexPainter>{other.get_target()}
+        , OPainter{other.get_target()}
     {
         add_callback([this](){notify();});
     }
     
     VertexPainterBuffer::VertexPainterBuffer(VertexPainterBuffer&& other)
         : Observable{}
-        , Observer<VertexPainter>{std::move(other.get_target())}
+        , OPainter{std::move(other.get_target())}
     {
         add_callback([this](){notify();});
         other.set_target(nullptr);
@@ -28,7 +34,7 @@ namespace colors
     {
         if (this != &other)
         {
-            Observer<VertexPainter> {other.get_target()};
+            OPainter {other.get_target()};
             add_callback([this](){notify();});
         }
         return *this;
@@ -38,13 +44,18 @@ namespace colors
     {
         if (this != &other)
         {
-            Observer<VertexPainter> {std::move(other.get_target())};
+            OPainter {std::move(other.get_target())};
             add_callback([this](){notify();});
             other.set_target(nullptr);
         }
         return *this;
     }
 
+    VertexPainterBuffer VertexPainterBuffer::clone() const
+    {
+        return VertexPainterBuffer(get_target()->clone());
+    }
+    
     std::shared_ptr<VertexPainter> VertexPainterBuffer::get_painter() const
     {
         return get_target();

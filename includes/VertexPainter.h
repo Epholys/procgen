@@ -11,7 +11,6 @@
 
 namespace colors
 {
-    // TODO: Class will be modified, rewrites comments.
     // Paint the vertices according to a rule with a ColorGenerator.
     // For example, paints according to radial gradient with a ColorGenerator of
     // green hues.
@@ -28,20 +27,19 @@ namespace colors
         VertexPainter(VertexPainter&& other);
         VertexPainter& operator=(const VertexPainter& other);
         VertexPainter& operator=(VertexPainter&& other);
+
+        std::shared_ptr<VertexPainter> clone() const;
         
         // Getters
-        float get_angle() const;
         std::shared_ptr<ColorGeneratorBuffer> get_generator_buffer() const;
 
-        // Setter
-        void set_angle(float angle);
-        
         // Paint 'vertices' with the informations of 'bounding_box' according to
         // the rule with the colors from 'generator_'
-        void paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box) const;
+        virtual void paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box) const = 0;
 
     private:
-        float angle_ {0};
+        virtual std::shared_ptr<VertexPainter> clone_impl() const = 0;
+        
     };
 }
 

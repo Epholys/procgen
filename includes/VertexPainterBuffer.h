@@ -3,6 +3,7 @@
 
 
 #include "VertexPainter.h"
+#include "VertexPainterLinear.h"
 
 namespace colors
 {
@@ -14,6 +15,8 @@ namespace colors
                               , public Observer<VertexPainter>
     {
     public:
+        using OPainter = Observer<VertexPainter>;
+        
         // Default constructor, construct an empy VertexPainter.
         VertexPainterBuffer();
         explicit VertexPainterBuffer(std::shared_ptr<VertexPainter> painter);
@@ -22,6 +25,8 @@ namespace colors
         VertexPainterBuffer(VertexPainterBuffer&& other);
         VertexPainterBuffer& operator=(const VertexPainterBuffer& other);
         VertexPainterBuffer& operator=(VertexPainterBuffer&& other);
+
+        VertexPainterBuffer clone() const;
 
         // Getter
         std::shared_ptr<VertexPainter> get_painter() const;
