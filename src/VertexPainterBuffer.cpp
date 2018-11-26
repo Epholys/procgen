@@ -3,25 +3,22 @@
 namespace colors
 {
     VertexPainterBuffer::VertexPainterBuffer()
-        : Observer<VertexPainter>{std::make_shared<VertexPainter>()}
+        : Observable{}
+        , Observer<VertexPainter>{std::make_shared<VertexPainter>()}
     {
         add_callback([this](){notify();});
     }
     
-    VertexPainterBuffer::VertexPainterBuffer(std::shared_ptr<VertexPainter> painter)
-        : Observer<VertexPainter>{painter}
-    {
-        add_callback([this](){notify();});
-    }
-        
     VertexPainterBuffer::VertexPainterBuffer(const VertexPainterBuffer& other)
-        : Observer<VertexPainter>{other.get_target()}
+        : Observable{}
+        , Observer<VertexPainter>{other.get_target()}
     {
         add_callback([this](){notify();});
     }
     
     VertexPainterBuffer::VertexPainterBuffer(VertexPainterBuffer&& other)
-        : Observer<VertexPainter>{std::move(other.get_target())}
+        : Observable{}
+        , Observer<VertexPainter>{std::move(other.get_target())}
     {
         add_callback([this](){notify();});
         other.set_target(nullptr);

@@ -16,7 +16,6 @@ namespace colors
     public:
         // Default constructor, construct an empy VertexPainter.
         VertexPainterBuffer();
-        // Shallow copy a VertexPainter.
         explicit VertexPainterBuffer(std::shared_ptr<VertexPainter> painter);
         // Rule-of-five shallow copy.
         VertexPainterBuffer(const VertexPainterBuffer& other);

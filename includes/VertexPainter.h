@@ -15,25 +15,15 @@ namespace colors
     // Paint the vertices according to a rule with a ColorGenerator.
     // For example, paints according to radial gradient with a ColorGenerator of
     // green hues.
-    // Invariant: the ColorGenerator pointer of Observer must point to the same
-    // ColorGenerator than the ColorGeneratorBuffer. However, it can not be
-    // implemented in this class, so ColorGeneratorBuffer takes care of it.
     class VertexPainter : public Observable
-                         // The generator itself, forward the notify() to
-                         // LSystemView to paint again.
-                        , public Observer<ColorGenerator>
-                         // The GeneratorBuffer, to update the
-                         // Observer<ColorGenerator> when a new one is
-                         // constructed.
                         , public Observer<ColorGeneratorBuffer>
     {
     public:
-        using OGen = Observer<ColorGenerator>;
-        using OBuff = Observer<ColorGeneratorBuffer>;
+        using OGenBuff = Observer<ColorGeneratorBuffer>;
 
         VertexPainter(); // Create a default generator
         explicit VertexPainter(const std::shared_ptr<ColorGenerator> gen);
-
+        // Rule-of-five shallow copy
         VertexPainter(const VertexPainter& other);
         VertexPainter(VertexPainter&& other);
         VertexPainter& operator=(const VertexPainter& other);
@@ -45,18 +35,12 @@ namespace colors
 
         // Setter
         void set_angle(float angle);
-
-        // Reconcile the pointers of OGen and OBuff::ColorGenerator.
-        void update_generator();
         
         // Paint 'vertices' with the informations of 'bounding_box' according to
         // the rule with the colors from 'generator_'
         void paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box) const;
 
     private:
-        void update_callbacks();
-        
-        std::shared_ptr<ColorGeneratorBuffer> generator_buffer_;
         float angle_ {0};
     };
 }
