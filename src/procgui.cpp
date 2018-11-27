@@ -7,6 +7,7 @@
 #include "WindowController.h"
 #include "RenderWindow.h"
 #include "VertexPainterRadial.h"
+#include "VertexPainterRandom.h"
 
 using namespace math;
 
@@ -389,6 +390,20 @@ namespace
         ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
         pop_embedded();
     }
+
+    void interact_with(colors::VertexPainterRandom& painter)
+    {
+        ext::ImGui::PushStyleGreenButton();
+        if (ImGui::Button("Randomize"))
+        {
+            painter.randomize();
+        }
+        ImGui::PopStyleColor(3);
+            
+        push_embedded();
+        ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
+        pop_embedded();
+    }
 }
 namespace procgui
 {
@@ -414,18 +429,18 @@ namespace procgui
         {
             index = 1;
         }
-        // else if (info == typeid(colors::DiscreteGradient).hash_code())
-        // {
-        //     index = 2;
-        // }
+        else if (info == typeid(colors::VertexPainterRandom).hash_code())
+        {
+            index = 2;
+        }
         else
         {
             Expects(false);
         }
 
-        const char* generators[2] = {"Linear", "Radial"};
+        const char* generators[3] = {"Linear", "Radial", "Random"};
         // Create a new VertexPainter
-        if (ImGui::ListBox("Vertex Painter", &index, generators, 2))
+        if (ImGui::ListBox("Vertex Painter", &index, generators, 3))
         {
             if (index == 0)
             {
@@ -435,10 +450,10 @@ namespace procgui
             {
                 painter = std::make_shared<colors::VertexPainterRadial>();
             }
-            // else if (index == 2)
-            // {
-            //     gen = std::make_shared<colors::DiscreteGradient>();
-            // }
+            else if (index == 2)
+            {
+                painter = std::make_shared<colors::VertexPainterRandom>();
+            }
             else
             {
                 Ensures(false);
@@ -460,11 +475,11 @@ namespace procgui
             auto radial = std::dynamic_pointer_cast<colors::VertexPainterRadial>(painter);
             ::interact_with(*radial);
         }
-        // else if (index == 2)
-        // {
-        //     auto discrete = std::dynamic_pointer_cast<colors::DiscreteGradient>(gen);
-        //     ::interact_with(*discrete);
-        // }
+        else if (index == 2)
+        {
+            auto random = std::dynamic_pointer_cast<colors::VertexPainterRandom>(painter);
+            ::interact_with(*random);
+        }
         else
         {
             Ensures(false);
