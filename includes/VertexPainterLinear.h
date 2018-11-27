@@ -25,9 +25,9 @@ namespace colors
         // Setter
         void set_angle(float angle);
         
-        // Paint 'vertices' in a center-oriented linear gradient with the
-        // informations of 'bounding_box' according to the rule with the colors
-        // from the ColorGenerator.
+        // Paint 'vertices' following a line passing through the center at a
+        // certain 'angle_' according to the informations of 'bounding_box'
+        // according to the rule with the colors from the ColorGenerator.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box) const override;
 
     private:

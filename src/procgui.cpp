@@ -6,6 +6,7 @@
 #include "helper_string.h"
 #include "WindowController.h"
 #include "RenderWindow.h"
+#include "VertexPainterRadial.h"
 
 using namespace math;
 
@@ -373,6 +374,21 @@ namespace
         ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
         pop_embedded();
     }
+
+    void interact_with(colors::VertexPainterRadial& painter)
+    {
+        // --- Center ---
+        float center[2] = {painter.get_center().x, painter.get_center().y};
+        if (ImGui::DragFloat2("", center,
+                              0.01f, 0.f, 1.f, "%.2f") )
+        {
+            painter.set_center(sf::Vector2f(center[0], center[1]));
+        }
+        
+        push_embedded();
+        ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
+        pop_embedded();
+    }
 }
 namespace procgui
 {
@@ -394,35 +410,39 @@ namespace procgui
         {
             index = 0;
         }
-        // else if (info == typeid(colors::LinearGradient).hash_code())
-        // {
-        //     index = 1;
-        // }
+        else if (info == typeid(colors::VertexPainterRadial).hash_code())
+        {
+            index = 1;
+        }
         // else if (info == typeid(colors::DiscreteGradient).hash_code())
         // {
         //     index = 2;
         // }
-        // else
-        // {
-        //     Expects(false);
-        // }
+        else
+        {
+            Expects(false);
+        }
 
-        const char* generators[1] = {"Linear"};
-        // Create a new ColorGenerator
-        if (ImGui::ListBox("Vertex Painter", &index, generators, 1))
+        const char* generators[2] = {"Linear", "Radial"};
+        // Create a new VertexPainter
+        if (ImGui::ListBox("Vertex Painter", &index, generators, 2))
         {
             if (index == 0)
             {
                 painter = std::make_shared<colors::VertexPainterLinear>();
             }
-            // else if (index == 1)
-            // {
-            //     gen = std::make_shared<colors::LinearGradient>();
-            // }
-            // else
+            else if (index == 1)
+            {
+                painter = std::make_shared<colors::VertexPainterRadial>();
+            }
+            // else if (index == 2)
             // {
             //     gen = std::make_shared<colors::DiscreteGradient>();
             // }
+            else
+            {
+                Ensures(false);
+            }
             // Updates ColorGeneratorBuffer and VertexPainter and a 'notify()'
             // waterfall. 
             painter_buffer.set_painter(painter);
@@ -435,16 +455,20 @@ namespace procgui
             auto linear = std::dynamic_pointer_cast<colors::VertexPainterLinear>(painter);
             ::interact_with(*linear);
         }
-        // else if (index == 1)
-        // {
-        //     auto gradient = std::dynamic_pointer_cast<colors::LinearGradient>(gen);
-        //     ::interact_with(*gradient);
-        // }
-        // else
+        else if (index == 1)
+        {
+            auto radial = std::dynamic_pointer_cast<colors::VertexPainterRadial>(painter);
+            ::interact_with(*radial);
+        }
+        // else if (index == 2)
         // {
         //     auto discrete = std::dynamic_pointer_cast<colors::DiscreteGradient>(gen);
         //     ::interact_with(*discrete);
         // }
+        else
+        {
+            Ensures(false);
+        }
 
         conclude();
 
@@ -715,10 +739,14 @@ namespace procgui
             {
                 gen = std::make_shared<colors::LinearGradient>();
             }
-            else
+            else if (index == 2)
             {
                 gen = std::make_shared<colors::DiscreteGradient>();
 
+            }
+            else
+            {
+                Ensures(false);
             }
             // Updates ColorGeneratorBuffer and VertexPainter and a 'notify()'
             // waterfall. 
@@ -737,10 +765,14 @@ namespace procgui
             auto gradient = std::dynamic_pointer_cast<colors::LinearGradient>(gen);
             ::interact_with(*gradient);
         }
-        else
+        else if (index == 2)
         {
             auto discrete = std::dynamic_pointer_cast<colors::DiscreteGradient>(gen);
             ::interact_with(*discrete);
+        }
+        else
+        {
+            Ensures(false);
         }
 
         conclude();
