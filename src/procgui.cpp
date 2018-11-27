@@ -444,15 +444,15 @@ namespace procgui
         {
             if (index == 0)
             {
-                painter = std::make_shared<colors::VertexPainterLinear>();
+                painter = std::make_shared<colors::VertexPainterLinear>(painter->get_generator_buffer()->get_generator()->clone());
             }
             else if (index == 1)
             {
-                painter = std::make_shared<colors::VertexPainterRadial>();
+                painter = std::make_shared<colors::VertexPainterRadial>(painter->get_generator_buffer()->get_generator()->clone());
             }
             else if (index == 2)
             {
-                painter = std::make_shared<colors::VertexPainterRandom>();
+                painter = std::make_shared<colors::VertexPainterRandom>(painter->get_generator_buffer()->get_generator()->clone());
             }
             else
             {
