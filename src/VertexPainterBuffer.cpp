@@ -34,7 +34,7 @@ namespace colors
     {
         if (this != &other)
         {
-            OPainter {other.get_target()};
+            set_target(other.get_target());
             add_callback([this](){notify();});
         }
         return *this;
@@ -44,7 +44,7 @@ namespace colors
     {
         if (this != &other)
         {
-            OPainter {std::move(other.get_target())};
+            set_target(std::move(other.get_target()));
             add_callback([this](){notify();});
             other.set_target(nullptr);
         }

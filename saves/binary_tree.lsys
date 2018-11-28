@@ -6,24 +6,24 @@
             "cereal_class_version": 0,
             "axiom": "X",
             "production_rules": {
-                "X": "F[-X]+X",
-                "F": "FF"
+                "F": "FF",
+                "X": "F[-X]+X"
             }
         },
         "DrawingParameters": {
             "cereal_class_version": 0,
-            "starting_angle": 280.0,
+            "starting_angle": 80.0,
             "delta_angle": 30.0,
-            "step": 20.0,
-            "n_iter": 5
+            "step_": 20.0,
+            "n_iter_": 5
         },
         "Interpretation Map": {
             "cereal_class_version": 0,
-            "]": "Load position",
-            "-": "Turn right",
-            "+": "Turn left",
+            "F": "Go forward",
             "[": "Save Position",
-            "F": "Go forward"
+            "+": "Turn left",
+            "]": "Load position",
+            "-": "Turn right"
         }
     }
 }

@@ -38,7 +38,7 @@ namespace colors
     {
         if (this != &other)
         {
-            OGenBuff{other.get_target()};
+            set_target(other.get_target());
 
             add_callback([this](){notify();});
         }
@@ -49,7 +49,7 @@ namespace colors
     {
         if (this != &other)
         {
-            OGenBuff {std::move(other.get_target())};
+            set_target(std::move(other.get_target()));
 
             add_callback([this](){notify();});
             

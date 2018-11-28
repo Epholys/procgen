@@ -12,17 +12,16 @@
         },
         "DrawingParameters": {
             "cereal_class_version": 0,
-            "starting_angle": 279.9999694824219,
-            "delta_angle": 25.0000007525357,
-            "step": 5.0,
-            "n_iter": 6
+            "starting_angle": 80.0,
+            "delta_angle": 25.0,
+            "step_": 4.0,
+            "n_iter_": 6
         },
         "Interpretation Map": {
             "cereal_class_version": 0,
             "]": "Load position",
-            "-": "Turn right",
-            "+": "Turn left",
-            "G": "Go forward",
+            "+": "Turn right",
+            "-": "Turn left",
             "[": "Save Position",
             "F": "Go forward"
         }

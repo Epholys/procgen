@@ -57,7 +57,8 @@ namespace controller
 
     void WindowController::paste_view(std::list<procgui::LSystemView>& lsys_views,
                                       const std::optional<procgui::LSystemView>& view,
-                                      const sf::Vector2f& position)
+                                      const sf::Vector2f& position,
+                                      bool is_loaded_from_disk)
     {
         if (!view)
         {
@@ -71,7 +72,7 @@ namespace controller
         ext::sf::Vector2d pos {position};
         ext::sf::Vector2d middle = {box.left + box.width/2, box.top + box.height/2};
         middle = pasted_view.get_parameters().get_starting_position() - middle;
-        if (LSystemController::is_clone())
+        if (!is_loaded_from_disk && LSystemController::is_clone())
         {
             auto cloned_view = pasted_view.clone();
             cloned_view.ref_parameters().set_starting_position(pos + middle);
@@ -309,7 +310,7 @@ namespace controller
                     {
                         // Paste the new LSystemView at the correct position.
                         auto tmp = std::make_optional(loaded_view);
-                        paste_view(lsys_views, tmp, mouse_position_to_load_);
+                        paste_view(lsys_views, tmp, mouse_position_to_load_, true);
                         load_menu_open_ = false;
                     }
                 }

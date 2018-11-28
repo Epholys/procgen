@@ -54,7 +54,8 @@ namespace controller
         // 'lsys_views'. 
         static void paste_view(std::list<procgui::LSystemView>& lsys_views,
                                const std::optional<procgui::LSystemView>& view,
-                               const sf::Vector2f& position);
+                               const sf::Vector2f& position,
+                               bool is_loaded_from_disk = false);
 
         // The right-click menu managing everything between
         // creation/copy-pasting of LSystemViews, saving and loading.

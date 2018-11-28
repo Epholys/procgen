@@ -42,7 +42,7 @@ RuleMapBuffer<Target>& RuleMapBuffer<Target>::operator=(const RuleMapBuffer& oth
 {
     if (this != &other)
     {
-        Observer<Target> {other.Observer<Target>::get_target()};
+        Observer<Target>::set_target(other.Observer<Target>::get_target());
         buffer_ = other.buffer_;
         instruction_ = nullptr;
 
@@ -56,8 +56,8 @@ RuleMapBuffer<Target>& RuleMapBuffer<Target>::operator=(RuleMapBuffer&& other)
 {
     if (this != &other)
     {
-        Observer<Target> {other.Observer<Target>::get_target()};
-        buffer_ = other.buffer_;
+        Observer<Target>::set_target(std::move(other.Observer<Target>::get_target()));
+        buffer_ = std::move(other.buffer_);
         instruction_ = nullptr;
 
         Observer<Target>::add_callback([this](){sync();});

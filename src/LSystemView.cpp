@@ -109,10 +109,10 @@ namespace procgui
     {
         if (this != &other)
         {
-            OLSys {other.OLSys::get_target()};
-            OMap {other.OMap::get_target()};
-            OParams {other.OParams::get_target()};
-            OPainter {other.OPainter::get_target()};
+            OLSys::set_target(other.OLSys::get_target());
+            OMap::set_target(other.OMap::get_target());
+            OParams::set_target(other.OParams::get_target());
+            OPainter::set_target(other.OPainter::get_target());
             id_ = {id_count_++};
             color_id_= {color_gen_.register_id(id_)};
             name_ = {other.name_};
@@ -133,10 +133,10 @@ namespace procgui
     {
         if (this != &other)
         {
-            OLSys {std::move(other.OLSys::get_target())};
-            OMap {std::move(other.OMap::get_target())};
-            OParams {std::move(other.OParams::get_target())};
-            OPainter {std::move(other.OPainter::get_target())};
+            OLSys::set_target(std::move(other.OLSys::get_target()));
+            OMap::set_target(std::move(other.OMap::get_target()));
+            OParams::set_target(std::move(other.OParams::get_target()));
+            OPainter::set_target(std::move(other.OPainter::get_target()));
             id_ = {other.id_};
             color_id_= {std::move(other.color_id_)};
             name_ = {std::move(other.name_)};
