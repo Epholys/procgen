@@ -8,6 +8,7 @@
 #include "RenderWindow.h"
 #include "VertexPainterRadial.h"
 #include "VertexPainterRandom.h"
+#include "VertexPainterSequential.h"
 
 using namespace math;
 
@@ -380,7 +381,7 @@ namespace
     {
         // --- Center ---
         float center[2] = {painter.get_center().x, painter.get_center().y};
-        if (ImGui::DragFloat2("", center,
+        if (ImGui::DragFloat2("Circle Center", center,
                               0.01f, 0.f, 1.f, "%.2f") )
         {
             painter.set_center(sf::Vector2f(center[0], center[1]));
@@ -399,6 +400,20 @@ namespace
             painter.randomize();
         }
         ImGui::PopStyleColor(3);
+            
+        push_embedded();
+        ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
+        pop_embedded();
+    }
+
+    void interact_with(colors::VertexPainterSequential& painter)
+    {
+        float angle = painter.get_factor();
+        if (ImGui::DragFloat("Repetition factor", &angle,
+                             0.01f, 0.f, std::numeric_limits<float>::max(), "%.2f") )
+        {
+            painter.set_factor(angle);
+        }
             
         push_embedded();
         ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
@@ -433,14 +448,18 @@ namespace procgui
         {
             index = 2;
         }
+        else if (info == typeid(colors::VertexPainterSequential).hash_code())
+        {
+            index = 3;
+        }
         else
         {
             Expects(false);
         }
 
-        const char* generators[3] = {"Linear", "Radial", "Random"};
+        const char* generators[4] = {"Linear", "Radial", "Random", "Sequential"};
         // Create a new VertexPainter
-        if (ImGui::ListBox("Vertex Painter", &index, generators, 3))
+        if (ImGui::ListBox("Vertex Painter", &index, generators, 4))
         {
             if (index == 0)
             {
@@ -453,6 +472,10 @@ namespace procgui
             else if (index == 2)
             {
                 painter = std::make_shared<colors::VertexPainterRandom>(painter->get_generator_buffer()->get_generator()->clone());
+            }
+            else if (index == 3)
+            {
+                painter = std::make_shared<colors::VertexPainterSequential>(painter->get_generator_buffer()->get_generator()->clone());
             }
             else
             {
@@ -479,6 +502,11 @@ namespace procgui
         {
             auto random = std::dynamic_pointer_cast<colors::VertexPainterRandom>(painter);
             ::interact_with(*random);
+        }
+        else if (index == 3)
+        {
+            auto sequential = std::dynamic_pointer_cast<colors::VertexPainterSequential>(painter);
+            ::interact_with(*sequential);
         }
         else
         {
