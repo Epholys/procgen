@@ -70,14 +70,13 @@ public:
         
     // Constructors
     LSystem() = default;
-    LSystem(const std::string& axiom, const production_rules& prod);
+    LSystem(const std::string& axiom, const production_rules& prod, const std::string& preds);
 
     // --- Getters and setters ---
-    // Get the axiom.
     std::string get_axiom() const;
-
-    // Get the cache
-    const std::unordered_map<int, std::string>& get_cache() const;
+    const std::unordered_map<int, std::string>& get_production_cache() const;
+    std::string get_recursion_predecessors() const;
+    const std::unordered_map<int, std::vector<int>>& get_recursion_cache() const;
 
     // Set the axiom to 'axiom'
     void set_axiom(const std::string& axiom);
@@ -95,6 +94,8 @@ public:
     // Clear the rules
     void clear_rules() override;
 
+    void set_recursion_predecessors(const std::string& predecessors);
+
     // Returns the result of the 'n'-th iteration of the L-System and cache
     // it as well as the transitional iterations.
     //
@@ -102,7 +103,7 @@ public:
     //   - Precondition: n positive.
     //   - Throw in case of allocation problem.
     //   - Throw at '.at()' if code is badly refactored.
-    std::string produce(int n);
+    std::pair<std::string, std::vector<int>> produce(int n);
        
 private:
 
@@ -111,17 +112,21 @@ private:
     template <class Archive>
     void serialize (Archive& ar, const std::uint32_t)
         {
-            ar(cereal::make_nvp("axiom", cache_[0]),
+            ar(cereal::make_nvp("axiom", production_cache_[0]),
                cereal::make_nvp("production_rules", rules_));
         }
     
+    std::string recursion_predecessors_ = {};
+
     // The cache of all calculated iterations and the axiom.
     // It contains all the iterations up to the highest iteration
     // calculated. It is clearly not optimized for memory
     // usage. However, this project emphasizes interactivity so
     // quickly swapping between different iterations of the same
     // L-System.
-    std::unordered_map<int, std::string> cache_ = {};
+    std::unordered_map<int, std::string> production_cache_ = {};
+    std::unordered_map<int, std::vector<int>> recursion_cache_ = {};
+
 };
 
 #endif

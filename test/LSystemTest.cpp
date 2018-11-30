@@ -9,35 +9,40 @@ TEST(LSystemTest, default_ctor)
     LSystem lsys;
     
     LSystem::production_rules empty_rules;
-    std::string empty_vec;
-    std::unordered_map<int, std::string> empty_cache;
+    std::string empty_str;
+    std::unordered_map<int, std::string> empty_prod_cache;
+    std::unordered_map<int, std::vector<int>> empty_rec_cache;
     
-    ASSERT_EQ(lsys.get_axiom(), empty_vec);
+    ASSERT_EQ(lsys.get_axiom(), empty_str);
     ASSERT_EQ(lsys.get_rules(), empty_rules);
-    ASSERT_EQ(lsys.get_cache(), empty_cache);
+    ASSERT_EQ(lsys.get_production_cache(), empty_prod_cache);
+    ASSERT_EQ(lsys.get_recursion_predecessor(), empty_str);
+    ASSERT_EQ(lsys.get_recursion_cache(), empty_rec_cache);
 }
 
 TEST(LSystemTest, complete_ctor)
 {
-    LSystem lsys { "F", { { 'F', "F+F" } } };
-
+    LSystem lsys { "F", { { 'F', "F+F" } }, "F" };
     LSystem::production_rules expected_rules = { { 'F', "F+F" } };
+    std::vector<int> expected_recursion_cache = { 0 };
 
-    ASSERT_EQ(lsys.get_axiom(),       "F");
-    ASSERT_EQ(lsys.get_rules(),       expected_rules);
-    ASSERT_EQ(lsys.get_cache().at(0), "F");
+    ASSERT_EQ(lsys.get_axiom(), "F");
+    ASSERT_EQ(lsys.get_production_rules(), expected_rules);
+    ASSERT_EQ(lsys.get_production_cache().at(0), "F");
+    ASSERT_EQ(lsys.get_recursion_predecessors(), "F");
+    ASSERT_EQ(lsys.get_recursion_cache(), expected_recursion_cache);
 }
 
 TEST(LSystemTest, get_axiom)
 {
-    LSystem lsys { "F", { { 'F', "F+F" } } };
+    LSystem lsys { "F", { { 'F', "F+F" } }, "F"  };
 
     ASSERT_EQ(lsys.get_axiom(), "F");
 }
 
 TEST(LSystemTest, set_axiom)
 {
-    LSystem lsys { "F", { { 'F', "F+F" } } };
+    LSystem lsys { "F", { { 'F', "F+F" } }, "F"  };
 
     lsys.set_axiom("FF");
 
@@ -47,7 +52,7 @@ TEST(LSystemTest, set_axiom)
 
 TEST(LSystemTest, add_rule)
 {
-    LSystem lsys { "F", { } };
+    LSystem lsys { "F", { }, "F"  };
     LSystem::production_rules expected_rules = { { 'F', "F+F" } };
     std::unordered_map<int, std::string> base_cache { { 0, "F" } };
     
@@ -59,7 +64,7 @@ TEST(LSystemTest, add_rule)
 
 TEST(LSystemTest, remove_rule)
 {
-    LSystem lsys { "F", { { 'F', "F+F" } } };
+    LSystem lsys { "F", { { 'F', "F+F" } }, "F"  };
     LSystem::production_rules empty_rules;
     std::unordered_map<int, std::string> base_cache { { 0, "F" } };
 
@@ -73,7 +78,7 @@ TEST(LSystemTest, remove_rule)
 
 TEST(LSystemTest, clear_rules)
 {
-    LSystem lsys { "F", { { 'F', "F+F" }, { 'G', "GG" } } };
+    LSystem lsys { "F", { { 'F', "F+F" }, { 'G', "GG" } }, "F"  };
     LSystem::production_rules empty_rules;
     std::unordered_map<int, std::string> base_cache { { 0, "F" } };
 
@@ -83,17 +88,32 @@ TEST(LSystemTest, clear_rules)
     ASSERT_EQ(lsys.get_cache(), base_cache);
 }
 
+TEST(LSystemTest, set_recursion_predecessors)
+{
+    LSystem lsys { "F", { { 'F', "F+F" }, { 'G', "GG" } }, "F" };
+    std::string expected_predecessors = "";
+    std::unordered_map<int, std::vector<int>> empty_cache_;
+
+    lsys.set_recursion_predecessors();
+    ASSERT_EQ(lsys.get_recursion_predecessors(), expected_predecessors);
+    ASSERT_EQ(lsys.get_recursion_cache, empty_cache);
+}
 
 // Test some iterations.
 TEST(LSystemTest, derivation)
 {
-    LSystem lsys { "F", { { 'F', "F+G" }, { 'G', "G-F" } } };
+    LSystem lsys { "F", { { 'F', "F+G" }, { 'G', "G-F" } }, "F" };
 
-    std::string iter_1 = "F+G";
-    std::string iter_3 = "F+G+G-F+G-F-F+G";
+    std::string prod_iter_1 = "F+G";
+//    std::string prod_iter_2 = "F+G + G-F";
+    std::string prod_iter_3 = "F+G + G-F  +  G-F - F+G";
+    
+    std::vector<int> rec_iter_1 = {1, 1, 1};
+//    std::vector<int> rec_iter_2 = {2,2,2, 1, 1,1,1};
+    std::vector<int> rec_iter_3 = {3,3,3, 2, 2,2,2,  1,  1,1,1, 1, 2,2,2};
 
-    ASSERT_EQ(lsys.produce(1), iter_1);
-    ASSERT_EQ(lsys.produce(3), iter_3);
+    ASSERT_EQ(lsys.produce(1), {prod_iter_1, rec_iter_1});
+    ASSERT_EQ(lsys.produce(3), {prod_iter_3, rec_iter_3});
 }
 
 // Test some iterations in a non-standard order.
