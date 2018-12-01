@@ -64,7 +64,10 @@ namespace colors
         notify();
     }
 
-    void VertexPainterSequential::paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect) const
+    void VertexPainterSequential::paint_vertices(std::vector<sf::Vertex>& vertices,
+                                                 const std::vector<int>&,
+                                                 sf::FloatRect) const
+
     {
         auto generator = get_target()->get_generator();
         if (!generator)

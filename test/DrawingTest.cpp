@@ -18,7 +18,6 @@ class DrawingTest :  public ::testing::Test
 {
 public:
     DrawingTest()
-        : turtle(parameters)
         {
             // Turtle is normally initialized inside
             // drawing::compute_vertices. Manually initialized here to
@@ -34,7 +33,7 @@ public:
                                         { ']', load_position } };
     // starting_position, starting_angle, delta_angle, step, n_iter
     DrawingParameters parameters { { 100, 100 }, 0, degree_to_rad(90.), 10, 0 };
-    impl::Turtle turtle {parameters};
+    impl::Turtle turtle {parameters, {1, 1, 1}};
 };
 
 // SFML does not provide an equality operator for sf::Vertex. It is
@@ -57,12 +56,15 @@ TEST_F(DrawingTest, go_forward)
     float newx = parameters.get_step() * std::cos(parameters.get_starting_angle());
     float newy = parameters.get_step() * std::sin(parameters.get_starting_angle());
     sf::Vector2f end_pos = begin.position + sf::Vector2f (newx, newy);
-    sf::Vertex end { end_pos } ;
+    sf::Vertex end { end_pos };
+    std::vector<int> expected_rec {1,1};
 
     go_forward_fn(turtle);
     
     ASSERT_EQ(turtle.vertices.at(0), begin);
     ASSERT_EQ(turtle.vertices.at(1), end);
+    ASSERT_EQ(turtle.recursion_index, 1);
+    ASSERT_EQ(turtle.vertices_recursion, expected_rec);
 }
 
 // Test the turn_right order.
@@ -73,6 +75,10 @@ TEST_F(DrawingTest, turn_right)
     ext::sf::Vector2d direction { 0, 1 };
     ASSERT_NEAR(turtle.state.direction.x, direction.x, 1e-10);
     ASSERT_NEAR(turtle.state.direction.y, direction.y, 1e-10);
+
+    std::vector<int> expected_rec {1};
+    ASSERT_EQ(turtle.recursion_index, 1);
+    ASSERT_EQ(turtle.vertices_recursion, expected_rec);
 }
 
 // Test the turn_left order.
@@ -83,6 +89,10 @@ TEST_F(DrawingTest, turn_left)
     ext::sf::Vector2d direction { 0, -1 };
     ASSERT_NEAR(turtle.state.direction.x, direction.x, 1e-10);
     ASSERT_NEAR(turtle.state.direction.y, direction.y, 1e-10);
+
+    std::vector<int> expected_rec {1};
+    ASSERT_EQ(turtle.recursion_index, 1);
+    ASSERT_EQ(turtle.vertices_recursion, expected_rec);
 }
 
 // Test the save_position and load_position order.
@@ -98,6 +108,10 @@ TEST_F(DrawingTest, stack_test)
 
     ASSERT_EQ(saved_state.position, turtle.state.position);
     ASSERT_EQ(saved_state.direction, turtle.state.direction);
+
+    std::vector<int> expected_rec {1,1,1,1,1};
+    ASSERT_EQ(turtle.recursion_index, 3);
+    ASSERT_EQ(turtle.vertices_recursion, expected_rec);
 }
 
 // The L-system defined returns the string: "F+G" with 1 iteration.
@@ -117,9 +131,15 @@ TEST_F(DrawingTest, compute_paths)
     
 
     parameters.set_n_iter(1);
-    auto res = compute_vertices(lsys, interpretation, parameters);
+    auto [str, rec] = compute_vertices(lsys, interpretation, parameters);
 
-    ASSERT_EQ(res, norm);
+    ASSERT_EQ(str, norm);
+
+    
+    std::vector<int> expected_rec {1,1,1};
+    ASSERT_EQ(turtle.recursion_index, 3);
+    ASSERT_EQ(rec, expected_rec);
+
 }
 
 TEST_F(DrawingTest, serialization)

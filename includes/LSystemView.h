@@ -24,9 +24,9 @@ namespace procgui
     //     boxes.
     //
     // Invariant:
-    //     - The 'vertices_' must correspond to the LSystem,
+    //     - The 'vertices_' and 'vertices_recursion_' must correspond to the
+    //     LSystem, InterpretationMap, and DrawingParameters.
     //     - The 'vertices_' are at any time painted with VertexPainter
-    //     InterpretationMap, and DrawingParameters.
     //     - The 'bounding_box_' and 'sub_boxes_' must correspond with the
     //     'vertices_'.
     //
@@ -124,9 +124,11 @@ namespace procgui
         // shared_ptr<InterpretationMap> with the associated Observable.
         InterpretationMapBuffer interpretation_buff_;
 
-        // The vertices of the View. Computer at each modification.
+        // The vertices of the View and their recursion order. Computed at each
+        // modification.
         std::vector<sf::Vertex> vertices_;
-
+        std::vector<int> vertices_recursion_;
+        
         // The global bounding box of the drawing. It is a "raw" bounding box:
         // its position is fixed. The rendering at the correct position as well
         // as getters are correctly translated with 'get_transform()'.

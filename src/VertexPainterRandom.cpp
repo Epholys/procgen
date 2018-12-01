@@ -52,7 +52,10 @@ namespace colors
         notify();
     }
     
-    void VertexPainterRandom::paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect) const
+    void VertexPainterRandom::paint_vertices(std::vector<sf::Vertex>& vertices,
+                                const std::vector<int>&,
+                                sf::FloatRect) const
+
     {
         auto generator = get_target()->get_generator();
         if (!generator)

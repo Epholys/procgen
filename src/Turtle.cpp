@@ -4,22 +4,30 @@ namespace drawing
 {
     using namespace impl;
     
-    Turtle::Turtle(const DrawingParameters& params)
+    Turtle::Turtle(const DrawingParameters& params,
+                   const std::vector<int>& recursions)
         : parameters { params }
+        , str_recursion {recursions}
+        , vertices_recursion {}
           // The other members are set in header as they all derives from
-          // 'parameters'.
+          // 'parameters' or 'str_recursion'.
     {
+        if (str_recursion.size())
+        {
+            vertices_recursion.push_back(str_recursion.at(0));
+        }
     }
 
-    std::vector<sf::Vertex> compute_vertices(LSystem& lsys,
-                                             InterpretationMap& interpretation,
-                                             const DrawingParameters& parameters)
-    {
-        Turtle turtle (parameters);
-        
-        const auto res = lsys.produce(parameters.get_n_iter());
+    std::pair<std::vector<sf::Vertex>, std::vector<int>>
+        compute_vertices(LSystem& lsys,
+                         InterpretationMap& interpretation,
+                         const DrawingParameters& parameters)
 
-        for (auto c : res.first)
+    {
+        const auto [str, rec] = lsys.produce(parameters.get_n_iter());
+        Turtle turtle (parameters, rec);
+        
+        for (auto c : str)
         {
             if (interpretation.has_predecessor(c))
             {
@@ -34,6 +42,7 @@ namespace drawing
             }
         }
 
-        return turtle.vertices;
+        Ensures(turtle.vertices.size() == turtle.vertices_recursion.size());
+        return {turtle.vertices, turtle.vertices_recursion};
     }
 }

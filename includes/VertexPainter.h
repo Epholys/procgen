@@ -39,9 +39,12 @@ namespace colors
         // Getters
         std::shared_ptr<ColorGeneratorBuffer> get_generator_buffer() const;
 
-        // Paint 'vertices' with the informations of 'bounding_box' according to
-        // a rule with the colors from 'ColorGeneratorBuffer::ColorGenerator'.
-        virtual void paint_vertices(std::vector<sf::Vertex>& vertices, sf::FloatRect bounding_box) const = 0;
+        // Paint 'vertices' with the informations of 'bounding_box' and
+        // 'vertices_recursion' according to a rule with the colors from
+        // 'ColorGeneratorBuffer::ColorGenerator'.
+        virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
+                                    const std::vector<int>& vertices_recursion,
+                                    sf::FloatRect bounding_box) const = 0;
 
     private:
         // Clone implementation.

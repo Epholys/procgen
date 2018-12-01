@@ -33,7 +33,8 @@ namespace drawing
     {
         struct Turtle
         {
-            explicit Turtle(const DrawingParameters& parameters);
+            explicit Turtle(const DrawingParameters& parameters,
+                            const std::vector<int>& str_recursion);
             
             // All the parameters necessary to compute the vertices.
             // Note: This is a non-owning reference. As Turtle is only
@@ -66,16 +67,31 @@ namespace drawing
             // in a vertex. However, we can jump from position to position, so
             // it there is additional transparent vertices between jumps.
             std::vector<sf::Vertex> vertices { sf::Vector2f{state.position} };
+
+
+            // All the recursion count produced by the LSystem. For each new
+            // vertices, its recursion count will be copies to 'vertices_recursion'.
+            const std::vector<int> str_recursion;
+            
+            // Index indicating the position in str_recursion.
+            std::size_t recursion_index {0};
+
+            // For each new vertex created, its recursion count is saved. The
+            // recursion count is produced by the LSystem and saved in
+            // 'str_recursion', the operation is simply to copy it in this
+            // vector corresponding to the vertices.
+            std::vector<int> vertices_recursion;
         };
     }
 
-    // Compute all vertices of a turtle interpretation of a L-system.
-    // First, this function iterates 'parameters.n_iter' times the LSystem
-    // 'lsys', using and modifying its cache. Then, it interprates the result
-    // with 'interpretation' and 'parameters'.
-    std::vector<sf::Vertex> compute_vertices(LSystem& lsys,
-                                             InterpretationMap& interpretation,
-                                             const DrawingParameters& parameters);
+    // Compute all vertices and their recursion count of a turtle interpretation
+    // of a L-system.  First, this function iterates 'parameters.n_iter' times
+    // the LSystem 'lsys', using and modifying its cache. Then, it interprates
+    // the result with 'interpretation' and 'parameters'.
+    std::pair<std::vector<sf::Vertex>, std::vector<int>>
+        compute_vertices(LSystem& lsys,
+                         InterpretationMap& interpretation,
+                         const DrawingParameters& parameters);
 }
 
 
