@@ -66,7 +66,7 @@ namespace drawing
             // Each time the Turtle changes its position, the new one is saved
             // in a vertex. However, we can jump from position to position, so
             // it there is additional transparent vertices between jumps.
-            std::vector<sf::Vertex> vertices { sf::Vector2f{state.position} };
+            std::vector<sf::Vertex> vertices { };
 
 
             // All the recursion count produced by the LSystem. For each new
@@ -87,8 +87,9 @@ namespace drawing
     // Compute all vertices and their recursion count of a turtle interpretation
     // of a L-system.  First, this function iterates 'parameters.n_iter' times
     // the LSystem 'lsys', using and modifying its cache. Then, it interprates
-    // the result with 'interpretation' and 'parameters'.
-    std::pair<std::vector<sf::Vertex>, std::vector<int>>
+    // the result with 'interpretation' and 'parameters'. The third returned
+    // value is the maximum number of recursion count.
+    std::tuple<std::vector<sf::Vertex>, std::vector<int>, int>
         compute_vertices(LSystem& lsys,
                          InterpretationMap& interpretation,
                          const DrawingParameters& parameters);

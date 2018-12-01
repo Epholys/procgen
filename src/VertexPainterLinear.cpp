@@ -66,6 +66,7 @@ namespace colors
 
     void VertexPainterLinear::paint_vertices(std::vector<sf::Vertex>& vertices,
                                              const std::vector<int>&,
+                                             int,
                                              sf::FloatRect bounding_box) const
     {
         auto generator = get_target()->get_generator();

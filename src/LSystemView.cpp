@@ -34,6 +34,7 @@ namespace procgui
         , interpretation_buff_ {map}
         , vertices_ {}
         , vertices_recursion_ {}
+        , max_recursion_ {0}
         , bounding_box_ {}
         , sub_boxes_ {}
         , is_selected_ {false}
@@ -68,6 +69,7 @@ namespace procgui
         , interpretation_buff_ {other.interpretation_buff_}
         , vertices_ {other.vertices_}
         , vertices_recursion_ {other.vertices_recursion_}
+        , max_recursion_ {other.max_recursion_}
         , bounding_box_ {other.bounding_box_}
         , sub_boxes_ {other.sub_boxes_}
         , is_selected_ {other.is_selected_}
@@ -88,6 +90,7 @@ namespace procgui
         , interpretation_buff_ {std::move(other.interpretation_buff_)}
         , vertices_ {std::move(other.vertices_)}
         , vertices_recursion_ {std::move(other.vertices_recursion_)}
+        , max_recursion_ {other.max_recursion_}
         , bounding_box_ {std::move(other.bounding_box_)}
         , sub_boxes_ {std::move(other.sub_boxes_)}
         , is_selected_ {other.is_selected_}
@@ -123,6 +126,7 @@ namespace procgui
             interpretation_buff_ = {other.interpretation_buff_};
             vertices_ = {other.vertices_};
             vertices_recursion_ = {other.vertices_recursion_};
+            max_recursion_ = {other.max_recursion_};
             bounding_box_ = {other.bounding_box_};
             sub_boxes_ = {other.sub_boxes_};
             is_selected_ = {other.is_selected_};
@@ -148,6 +152,7 @@ namespace procgui
             interpretation_buff_ = {std::move(other.interpretation_buff_)};
             vertices_ = {std::move(other.vertices_)};
             vertices_recursion_ = {std::move(other.vertices_recursion_)};
+            max_recursion_ = {other.max_recursion_};
             bounding_box_ = {std::move(other.bounding_box_)};
             sub_boxes_ = {std::move(other.sub_boxes_)};
             is_selected_ = {other.is_selected_};
@@ -261,10 +266,10 @@ namespace procgui
         // Invariant respected: cohesion between the vertices and the bounding
         // boxes. 
         
-        std::tie(vertices_, vertices_recursion_) = drawing::compute_vertices(*OLSys::get_target(),
-                                                                             *OMap::get_target(),
-                                                                             *OParams::get_target());
-        //params_);
+        std::tie(vertices_, vertices_recursion_, max_recursion_) =
+            drawing::compute_vertices(*OLSys::get_target(),
+                                      *OMap::get_target(),
+                                      *OParams::get_target());
         bounding_box_ = geometry::bounding_box(vertices_);
         sub_boxes_ = geometry::sub_boxes(vertices_, MAX_SUB_BOXES);
         paint_vertices();
@@ -275,6 +280,7 @@ namespace procgui
         // un-transformed vertices and bounding box
         OPainter::get_target()->get_target()->paint_vertices(vertices_,
                                                              vertices_recursion_,
+                                                             max_recursion_,
                                                              bounding_box_);
     }
 

@@ -11,7 +11,7 @@ TEST(LSystemTest, default_ctor)
     LSystem::production_rules empty_rules;
     std::string empty_str;
     std::unordered_map<int, std::string> empty_prod_cache;
-    std::unordered_map<int, std::vector<int>> empty_rec_cache;
+    std::unordered_map<int, std::pair<std::vector<int>, int>> empty_rec_cache;
     
     ASSERT_EQ(lsys.get_axiom(), empty_str);
     ASSERT_EQ(lsys.get_rules(), empty_rules);
@@ -24,7 +24,8 @@ TEST(LSystemTest, complete_ctor)
 {
     LSystem lsys { "F", { { 'F', "F+F" } }, "F" };
     LSystem::production_rules expected_rules = { { 'F', "F+F" } };
-    std::unordered_map<int, std::vector<int>> expected_recursion_cache = { {0, {0}} };
+    std::unordered_map<int, std::pair<std::vector<int>, int>> expected_recursion_cache =
+        { {0, {{0}, 0}} };
 
     ASSERT_EQ(lsys.get_axiom(), "F");
     ASSERT_EQ(lsys.get_rules(), expected_rules);
@@ -92,7 +93,8 @@ TEST(LSystemTest, set_recursion_predecessors)
 {
     LSystem lsys { "F", { { 'F', "F+F" }, { 'G', "GG" } }, "F" };
     std::string expected_predecessors = "";
-    std::unordered_map<int, std::vector<int>> expected_cache = { {0, {0}} };
+    std::unordered_map<int, std::pair<std::vector<int>, int>> expected_cache = { {0, {{0}, 0}} };
+
 
     lsys.set_recursion_predecessors("");
     ASSERT_EQ(lsys.get_recursion_predecessors(), expected_predecessors);
@@ -112,13 +114,15 @@ TEST(LSystemTest, derivation)
 //    std::vector<int> rec_iter_2 = {2,2,2, 1, 1,1,1};
     std::vector<int> rec_iter_3 = {3,3,3, 2, 2,2,2,  1,  1,1,1, 1, 2,2,2};
 
-    auto [prod1, rec1] = lsys.produce(1);
-    auto [prod3, rec3] = lsys.produce(3);
+    auto [prod1, rec1, max1] = lsys.produce(1);
+    auto [prod3, rec3, max3] = lsys.produce(3);
     
     ASSERT_EQ(prod1, prod_iter_1);
     ASSERT_EQ(rec1, rec_iter_1);
+    ASSERT_EQ(max1, 1);
     ASSERT_EQ(prod3, prod_iter_3);
     ASSERT_EQ(rec3, rec_iter_3);
+    ASSERT_EQ(max3, 3);
 }
 
 // Test some iterations in a non-standard order.
@@ -134,16 +138,19 @@ TEST(LSystemTest, wild_derivation)
     std::vector<int> rec_iter_3 {3, 3, 2, 1};
     std::vector<int> rec_iter_5 {5, 5, 4, 3, 2, 1};
 
-    auto [prod1, rec1] = lsys.produce(1);
-    auto [prod3, rec3] = lsys.produce(3);
-    auto [prod5, rec5] = lsys.produce(5);
+    auto [prod1, rec1, max1] = lsys.produce(1);
+    auto [prod3, rec3, max3] = lsys.produce(3);
+    auto [prod5, rec5, max5] = lsys.produce(5);
     
     ASSERT_EQ(prod1, prod_iter_1);
     ASSERT_EQ(rec1, rec_iter_1);
+    ASSERT_EQ(max1, 1);
     ASSERT_EQ(prod3, prod_iter_3);
     ASSERT_EQ(rec3, rec_iter_3);
+    ASSERT_EQ(max3, 3);
     ASSERT_EQ(prod5, prod_iter_5);
     ASSERT_EQ(rec5, rec_iter_5);
+    ASSERT_EQ(max5, 5);
 }
 
 TEST(LSystemTest, disjoint_derivation)
@@ -155,7 +162,8 @@ TEST(LSystemTest, disjoint_derivation)
     lsys.produce(1);
 
     std::unordered_map<int, std::string> production_cache { {0, "F"}, {1, "F+G"}, {2, "F+G+G-F"} };
-    std::unordered_map<int, std::vector<int>> recursion_cache { {0, {0}}, {1, {0,0,0}} };
+    std::unordered_map<int, std::pair<std::vector<int>, int>> recursion_cache
+                    { {0, {{0}, 0}}, {1, {{0,0,0}, 0}} };
 
     ASSERT_EQ(lsys.get_production_cache(), production_cache);
     ASSERT_EQ(lsys.get_recursion_cache(), recursion_cache);

@@ -63,7 +63,6 @@ TEST_F(DrawingTest, go_forward)
     
     ASSERT_EQ(turtle.vertices.at(0), begin);
     ASSERT_EQ(turtle.vertices.at(1), end);
-    ASSERT_EQ(turtle.recursion_index, 1);
     ASSERT_EQ(turtle.vertices_recursion, expected_rec);
 }
 
@@ -75,10 +74,6 @@ TEST_F(DrawingTest, turn_right)
     ext::sf::Vector2d direction { 0, 1 };
     ASSERT_NEAR(turtle.state.direction.x, direction.x, 1e-10);
     ASSERT_NEAR(turtle.state.direction.y, direction.y, 1e-10);
-
-    std::vector<int> expected_rec {1};
-    ASSERT_EQ(turtle.recursion_index, 1);
-    ASSERT_EQ(turtle.vertices_recursion, expected_rec);
 }
 
 // Test the turn_left order.
@@ -89,10 +84,6 @@ TEST_F(DrawingTest, turn_left)
     ext::sf::Vector2d direction { 0, -1 };
     ASSERT_NEAR(turtle.state.direction.x, direction.x, 1e-10);
     ASSERT_NEAR(turtle.state.direction.y, direction.y, 1e-10);
-
-    std::vector<int> expected_rec {1};
-    ASSERT_EQ(turtle.recursion_index, 1);
-    ASSERT_EQ(turtle.vertices_recursion, expected_rec);
 }
 
 // Test the save_position and load_position order.
@@ -109,8 +100,7 @@ TEST_F(DrawingTest, stack_test)
     ASSERT_EQ(saved_state.position, turtle.state.position);
     ASSERT_EQ(saved_state.direction, turtle.state.direction);
 
-    std::vector<int> expected_rec {1,1,1,1,1};
-    ASSERT_EQ(turtle.recursion_index, 3);
+    std::vector<int> expected_rec {1,1,1,1};
     ASSERT_EQ(turtle.vertices_recursion, expected_rec);
 }
 
@@ -127,19 +117,17 @@ TEST_F(DrawingTest, compute_paths)
 
     std::vector<sf::Vertex> norm { turtle.vertices.at(0),
                                    turtle.vertices.at(1),
-                                   turtle.vertices.at(2)  };
-    
+                                   turtle.vertices.at(2),
+                                   turtle.vertices.at(3) };
 
     parameters.set_n_iter(1);
-    auto [str, rec] = compute_vertices(lsys, interpretation, parameters);
+    auto [str, rec, _] = compute_vertices(lsys, interpretation, parameters);
 
     ASSERT_EQ(str, norm);
 
     
-    std::vector<int> expected_rec {1,1,1};
-    ASSERT_EQ(turtle.recursion_index, 3);
+    std::vector<int> expected_rec {1,1,1,1};
     ASSERT_EQ(rec, expected_rec);
-
 }
 
 TEST_F(DrawingTest, serialization)

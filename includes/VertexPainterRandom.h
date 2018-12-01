@@ -22,6 +22,7 @@ namespace colors
         // Paint 'vertices' according to a random real number.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<int>& vertices_recursion,
+                                    int max_recursion,
                                     sf::FloatRect bounding_box) const override;
 
     private:

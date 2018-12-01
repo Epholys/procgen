@@ -6,7 +6,7 @@ LSystem::LSystem(const std::string& axiom, const production_rules& prod, const s
     : RuleMap<std::string>(prod)
     , recursion_predecessors_ {preds}
     , production_cache_{ {0, axiom} }
-    , recursion_cache_ { {0, std::vector<int>(axiom.size(), 0)} }
+    , recursion_cache_ { {0, {std::vector<int>(axiom.size(), 0), 0} } }
     {
     }
 
@@ -34,7 +34,7 @@ std::string LSystem::get_recursion_predecessors() const
 }
 
 
-const std::unordered_map<int, std::vector<int>>& LSystem::get_recursion_cache() const
+const std::unordered_map<int, std::pair<std::vector<int>, int>>& LSystem::get_recursion_cache() const
 {
     return recursion_cache_;
 }
@@ -42,34 +42,34 @@ const std::unordered_map<int, std::vector<int>>& LSystem::get_recursion_cache() 
 void LSystem::set_axiom(const std::string& axiom)
 {
     production_cache_ = { {0, axiom} };
-    recursion_cache_ = { {0, std::vector<int>(axiom.size(), 0) } };
+    recursion_cache_ = { {0, {std::vector<int>(axiom.size(), 0), 0} } };
     notify();
 } 
 
 void LSystem::add_rule(char predecessor, const RuleMap::successor& successor)
 {
     production_cache_ = { {0, get_axiom()} };
-    recursion_cache_ = { {0, std::vector<int>(get_axiom().size(), 0) } };
+    recursion_cache_ = { {0, {std::vector<int>(get_axiom().size(), 0), 0} } };
     RuleMap::add_rule(predecessor, successor);    
 }
 
 void LSystem::remove_rule(char predecessor)
 {
     production_cache_ = { {0, get_axiom()} };
-    recursion_cache_ = { {0, std::vector<int>(get_axiom().size(), 0) } };
+    recursion_cache_ = { {0, {std::vector<int>(get_axiom().size(), 0), 0} } };
     RuleMap::remove_rule(predecessor);
 }
 
 void LSystem::clear_rules()
 {
     production_cache_ = { {0, get_axiom()} };
-    recursion_cache_ = { {0, std::vector<int>(get_axiom().size(), 0) } };
+    recursion_cache_ = { {0, {{std::vector<int>(get_axiom().size(), 0)}, 0}}};
     RuleMap::clear_rules();
 }                             
 
 void LSystem::set_recursion_predecessors(const std::string& predecessors)
 {
-    recursion_cache_ = { {0, std::vector<int>(get_axiom().size(), 0) } };
+    recursion_cache_ = { {0, {std::vector<int>(get_axiom().size(), 0), 0} } };
     recursion_predecessors_ = predecessors;
     notify();
 }
@@ -79,7 +79,7 @@ void LSystem::set_recursion_predecessors(const std::string& predecessors)
 //   - If 'production_cache_' is empty so does not contains the axiom, simply
 //   returns an empty string.
 //   - If the axiom is an empty string, early-out.
-std::pair<std::string, std::vector<int>> LSystem::produce(int n)
+std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
 {
     Expects(n >= 0);
 
@@ -87,13 +87,15 @@ std::pair<std::string, std::vector<int>> LSystem::produce(int n)
     {
         // We do not have any axiom so nothing to produce.
         Expects(production_cache_.count(0) == production_cache_.count(0));
-        return {"", {}};
+        return {"", {}, 0};
     }
         
     if (production_cache_.count(n) > 0 && recursion_cache_.count(n) > 0)
     {
         // A solution was already computed.
-        return {production_cache_.at(n), recursion_cache_.at(n)};
+        return {production_cache_.at(n),
+                recursion_cache_.at(n).first,
+                recursion_cache_.at(n).second};
     }
 
     // The caches saves all the iteration from the start. So we get
@@ -113,7 +115,8 @@ std::pair<std::string, std::vector<int>> LSystem::produce(int n)
     
     // We start iterating from the recursion's highest iteration.
     std::string base_production = production_cache_.at(highest_recursion->first);
-    std::vector<int> base_recursion = highest_recursion->second;
+    auto [base_recursion, max_recursion] = highest_recursion->second;
+    
     
     // We use temporary results: we can't iterate "in place".
     std::string tmp_production;
@@ -127,6 +130,11 @@ std::pair<std::string, std::vector<int>> LSystem::produce(int n)
         // If 'true', computes only the recursion vector and not the resulting
         // production string.
         bool only_recursion = highest_recursion->first + i + 1 < highest_production->first;
+
+        // If during the derivation a rule with a 'recursion_predecessors_' is used,
+        // new recursion is set to true
+        bool new_recursion = false;
+
 
         for (auto j=0u; j<base_recursion.size(); ++j)
         {
@@ -165,6 +173,7 @@ std::pair<std::string, std::vector<int>> LSystem::produce(int n)
             if (recursion_predecessors_.find(c) != std::string::npos)
             {
                 order += 1;
+                new_recursion = true;
             }
             tmp_recursion.insert(end(tmp_recursion), successor_count, order);
         }
@@ -180,7 +189,9 @@ std::pair<std::string, std::vector<int>> LSystem::produce(int n)
         }
 
         base_recursion = tmp_recursion;
-        recursion_cache_.emplace(highest_recursion->first + i + 1, tmp_recursion);
+        recursion_cache_[highest_recursion->first + i + 1] =
+                                 {tmp_recursion, new_recursion ? max_recursion+1 : max_recursion};
+        max_recursion = recursion_cache_.at(highest_recursion->first + i + 1).second;
     }
 
     // No 'notify()' call: this function is generally called each time there is
@@ -188,6 +199,6 @@ std::pair<std::string, std::vector<int>> LSystem::produce(int n)
     // computation time and may double the computation time of the hungrier
     // 'drawing::compute_vertices()' function.
     
-    return {production_cache_.at(n), recursion_cache_.at(n)};
+    return {production_cache_.at(n), recursion_cache_.at(n).first, recursion_cache_.at(n).second};
 }
 

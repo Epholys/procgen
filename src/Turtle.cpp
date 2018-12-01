@@ -12,19 +12,15 @@ namespace drawing
           // The other members are set in header as they all derives from
           // 'parameters' or 'str_recursion'.
     {
-        if (str_recursion.size())
-        {
-            vertices_recursion.push_back(str_recursion.at(0));
-        }
     }
 
-    std::pair<std::vector<sf::Vertex>, std::vector<int>>
+    std::tuple<std::vector<sf::Vertex>, std::vector<int>, int>
         compute_vertices(LSystem& lsys,
                          InterpretationMap& interpretation,
                          const DrawingParameters& parameters)
 
     {
-        const auto [str, rec] = lsys.produce(parameters.get_n_iter());
+        const auto [str, rec, max] = lsys.produce(parameters.get_n_iter());
         Turtle turtle (parameters, rec);
         
         for (auto c : str)
@@ -40,9 +36,12 @@ namespace drawing
                 // Do nothing: if 'c' does not have an associated
                 // order, it has no effects.
             }
+            // We must do it here as symbols without orders must also increment
+            // this index.
+            ++turtle.recursion_index;
         }
 
         Ensures(turtle.vertices.size() == turtle.vertices_recursion.size());
-        return {turtle.vertices, turtle.vertices_recursion};
+        return {turtle.vertices, turtle.vertices_recursion, max};
     }
 }

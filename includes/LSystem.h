@@ -101,7 +101,7 @@ public:
     std::string get_axiom() const;
     const std::unordered_map<int, std::string>& get_production_cache() const;
     std::string get_recursion_predecessors() const;
-    const std::unordered_map<int, std::vector<int>>& get_recursion_cache() const;
+    const std::unordered_map<int, std::pair<std::vector<int>, int>>& get_recursion_cache() const;
 
     // Set the axiom to 'axiom'
     void set_axiom(const std::string& axiom);
@@ -126,14 +126,15 @@ public:
     // Returns from the first part the result of the 'n'-th iteration of the
     // L-System and cache it as well as the transitional iterations. For the
     // second part, returns the array indicating the derivation number of rules
-    // having for predecessors any character from 'recursion_predecessors_'.
+    // having for predecessors any character from 'recursion_predecessors_'. For
+    // the third part, return the maximum number of recursion.
     //
     // Exceptions:
     //   - Precondition: n positive.
     //   - Ensures coherence of 'production_rules
     //   - Throw in case of allocation problem.
     //   - Throw at '.at()' if code is badly refactored.
-    std::pair<std::string, std::vector<int>> produce(int n);
+    std::tuple<std::string, std::vector<int>, int> produce(int n);
        
 private:
 
@@ -153,21 +154,23 @@ private:
             ar(cereal::make_nvp("axiom", production_cache_[0]),
                cereal::make_nvp("production_rules", rules_),
                cereal::make_nvp("recursion_predecessor", recursion_predecessors_));
-            recursion_cache_[0] = std::vector<int>(production_cache_.at(0).size(), 0);
+            recursion_cache_[0] = {std::vector<int>(production_cache_.at(0).size(), 0), 0};
         }
 
     // The predecessors indicating than, at their next derivation, the recursion
     // counter will be incremented by one.
     std::string recursion_predecessors_ = {};
 
-    // The cache of all calculated iterations and the axiom.
+    // The cache of all computed iterations and the axiom.
     // It contains all the iterations up to the highest iteration
     // calculated. It is clearly not optimized for memory
     // usage. However, this project emphasizes interactivity so
     // quickly swapping between different iterations of the same
     // L-System.
     std::unordered_map<int, std::string> production_cache_ = {};
-    std::unordered_map<int, std::vector<int>> recursion_cache_ = {};
+    // The cache of all computed recursion value. The second element in the pair
+    // is the maximum number of recursion for this iteration.
+    std::unordered_map<int, std::pair<std::vector<int>, int>> recursion_cache_ = {};
 };
 
 #endif

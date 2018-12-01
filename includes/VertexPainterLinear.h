@@ -30,6 +30,7 @@ namespace colors
         // according to the rule with the colors from the ColorGenerator.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<int>& vertices_recursion,
+                                    int max_recursion,
                                     sf::FloatRect bounding_box) const override;
 
     private:

@@ -128,6 +128,7 @@ namespace procgui
         // modification.
         std::vector<sf::Vertex> vertices_;
         std::vector<int> vertices_recursion_;
+        int max_recursion_;
         
         // The global bounding box of the drawing. It is a "raw" bounding box:
         // its position is fixed. The rendering at the correct position as well

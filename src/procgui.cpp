@@ -9,6 +9,7 @@
 #include "VertexPainterRadial.h"
 #include "VertexPainterRandom.h"
 #include "VertexPainterSequential.h"
+#include "VertexPainterRecursion.h"
 
 using namespace math;
 
@@ -389,9 +390,7 @@ namespace
             painter.set_angle(angle);
         }
         
-        push_embedded();
         ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
-        pop_embedded();
     }
 
     void interact_with(colors::VertexPainterRadial& painter)
@@ -404,9 +403,7 @@ namespace
             painter.set_center(sf::Vector2f(center[0], center[1]));
         }
         
-        push_embedded();
         ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
-        pop_embedded();
     }
 
     void interact_with(colors::VertexPainterRandom& painter)
@@ -418,9 +415,7 @@ namespace
         }
         ImGui::PopStyleColor(3);
             
-        push_embedded();
         ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
-        pop_embedded();
     }
 
     void interact_with(colors::VertexPainterSequential& painter)
@@ -432,10 +427,14 @@ namespace
             painter.set_factor(angle);
         }
             
-        push_embedded();
         ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
-        pop_embedded();
     }
+
+    void interact_with(colors::VertexPainterRecursion& painter)
+    {
+        ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
+    }
+
 }
 namespace procgui
 {
@@ -469,14 +468,18 @@ namespace procgui
         {
             index = 3;
         }
+        else if (info == typeid(colors::VertexPainterRecursion).hash_code())
+        {
+            index = 4;
+        }
         else
         {
             Expects(false);
         }
 
-        const char* generators[4] = {"Linear", "Radial", "Random", "Sequential"};
+        const char* generators[5] = {"Linear", "Radial", "Random", "Sequential", "Recursion"};
         // Create a new VertexPainter
-        if (ImGui::ListBox("Vertex Painter", &index, generators, 4))
+        if (ImGui::ListBox("Vertex Painter", &index, generators, 5))
         {
             if (index == 0)
             {
@@ -493,6 +496,10 @@ namespace procgui
             else if (index == 3)
             {
                 painter = std::make_shared<colors::VertexPainterSequential>(painter->get_generator_buffer()->get_generator()->clone());
+            }
+            else if (index == 4)
+            {
+                painter = std::make_shared<colors::VertexPainterRecursion>(painter->get_generator_buffer()->get_generator()->clone());
             }
             else
             {
@@ -525,6 +532,11 @@ namespace procgui
             auto sequential = std::dynamic_pointer_cast<colors::VertexPainterSequential>(painter);
             ::interact_with(*sequential);
         }
+        else if (index == 4)
+        {
+            auto recursion = std::dynamic_pointer_cast<colors::VertexPainterRecursion>(painter);
+            ::interact_with(*recursion);
+        }
         else
         {
             Ensures(false);
@@ -538,9 +550,6 @@ namespace
 {
     void interact_with(colors::ConstantColor& constant)
     {
-        // Do not setup a window, this function is always called from
-        // 'interact_with(ColorGeneratorBuffer)'
-
         // Color selection widget.
         ImVec4 imcolor = constant.get_color();
         if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
@@ -559,9 +568,6 @@ namespace
 
     void interact_with(colors::LinearGradient& gen)
     {
-        // Do not setup a window, this function is always called from
-        // 'interact_with(ColorGeneratorBuffer)'
-
         bool is_modified = false;
         
         auto keys = gen.get_raw_keys();
@@ -643,9 +649,6 @@ namespace
 
     void interact_with(colors::DiscreteGradient& gen)
     {
-        // Do not setup a window, this function is always called from
-        // 'interact_with(ColorGeneratorBuffer)'
-
         bool is_modified = false;
         
         auto keys = gen.get_keys();
@@ -756,13 +759,10 @@ namespace
 } // namespace 
 namespace procgui
 {
-    void interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string& name)
+    void interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string&)
     {
-        if (!set_up(name))
-        {
-            // Early out if the display zone is collapsed.
-            return;
-        }
+        // Always call this function in a predefined window.
+        Expects(embedded_level > 0);
 
         auto gen = color_buffer.get_generator();
         
@@ -834,8 +834,6 @@ namespace procgui
         {
             Ensures(false);
         }
-
-        conclude();
     }
 
     void interact_with(LSystemView& lsys_view, const std::string& name, bool* open)
