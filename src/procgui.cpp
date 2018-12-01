@@ -169,6 +169,16 @@ namespace procgui
         }
         ImGui::Unindent(); 
 
+        // --- Recursion Predecessors ---
+        ImGui::Text("Recursion predecessors:");
+
+        ImGui::Indent();
+
+        ImGui::Text(lsys.get_recursion_predecessors().c_str());
+
+        ImGui::Unindent(); 
+
+        
         conclude();
     }
 
@@ -319,6 +329,13 @@ namespace procgui
                 return false;
             });
 
+        // --- Recursion Predecessors ---
+        buf = string_to_array<lsys_successor_size>(lsys.get_recursion_predecessors());
+        if (ImGui::InputText("Recursion predecessors", buf.data(), lsys_successor_size))
+        {
+            lsys.set_recursion_predecessors(array_to_string(buf));
+        }
+        
         conclude();
     }
 

@@ -25,7 +25,7 @@ public:
             // test smaller the functions.
         }
     
-    LSystem lsys { "F", { { 'F', "F+G" } } };
+    LSystem lsys { "F", { { 'F', "F+G" } }, "F" };
     InterpretationMap interpretation { { 'F', go_forward },
                                         { 'G', go_forward },
                                         { '+', turn_left  },

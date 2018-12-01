@@ -63,6 +63,7 @@ void LSystem::remove_rule(char predecessor)
 void LSystem::clear_rules()
 {
     production_cache_ = { {0, get_axiom()} };
+    recursion_cache_ = { {0, std::vector<int>(get_axiom().size(), 0) } };
     RuleMap::clear_rules();
 }                             
 
@@ -82,9 +83,10 @@ std::pair<std::string, std::vector<int>> LSystem::produce(int n)
 {
     Expects(n >= 0);
 
-    if (production_cache_.count(0) == 0 || production_cache_.at(0) == "")
+    if (production_cache_.count(0) == 0 || production_cache_.count(0) == 0)
     {
         // We do not have any axiom so nothing to produce.
+        Expects(production_cache_.count(0) == production_cache_.count(0));
         return {"", {}};
     }
         
@@ -94,8 +96,8 @@ std::pair<std::string, std::vector<int>> LSystem::produce(int n)
         return {production_cache_.at(n), recursion_cache_.at(n)};
     }
 
-    // The cache saves all the iteration from the start. So we get
-    // the highest-iteration result.
+    // The caches saves all the iteration from the start. So we get
+    // the highest-iteration result for each cache.
     auto highest_production = std::max_element(production_cache_.begin(),
                                                production_cache_.end(),
                                                [](const auto& pair1, const auto& pair2)
@@ -105,13 +107,15 @@ std::pair<std::string, std::vector<int>> LSystem::produce(int n)
                                                    [](const auto& pair1, const auto& pair2)
                                                    { return pair1.first < pair2.first; });
 
+    // Invariant check: the production cache element count must be equal or
+    // greater than the recursion one.
     Expects(highest_production->first >= highest_recursion->first);
     
-    // We will start iterating from this result.
+    // We start iterating from the recursion's highest iteration.
     std::string base_production = production_cache_.at(highest_recursion->first);
     std::vector<int> base_recursion = highest_recursion->second;
     
-    // We use a temporary string: we can't iterate "in place".
+    // We use temporary results: we can't iterate "in place".
     std::string tmp_production;
     std::vector<int> tmp_recursion;    
 
@@ -120,39 +124,43 @@ std::pair<std::string, std::vector<int>> LSystem::produce(int n)
         tmp_production.clear();
         tmp_recursion.clear();
 
+        // If 'true', computes only the recursion vector and not the resulting
+        // production string.
         bool only_recursion = highest_recursion->first + i + 1 < highest_production->first;
-            
+
         for (auto j=0u; j<base_recursion.size(); ++j)
         {
             char c = base_production.at(j);
             int successor_count = 0;
-            if (only_recursion)
+
+            if (rules_.count(c) > 0)
             {
-                if (rules_.count(c) > 0)
-                {
-                    successor_count = rules_.size();
-                }
-                else
-                {
-                    successor_count = 1;
-                }
-            }
-            else
-            {
-                if (rules_.count(c) > 0)
+                // Add n element to the recursion vector, n corresponding to the
+                // successor size.
+                successor_count = rules_.at(c).size();
+
+                if (!only_recursion)
                 {
                     std::string derivation = rules_.at(c);
 
                     // Replace the symbol according to its rule.
                     tmp_production.insert(tmp_production.end(), derivation.begin(), derivation.end());
                 }
-                else
+            }
+            else // The identity rule
+            {
+                // Add only one element.
+                successor_count = 1;
+                    
+                if (!only_recursion)
                 {
                     // The symbol is a terminal: replace it by itself.
                     tmp_production.push_back(c);
                 }
             }
 
+            // If the current predecessor must be counter, add 1 to each element
+            // of the successor.
             char order = base_recursion.at(j);
             if (recursion_predecessors_.find(c) != std::string::npos)
             {

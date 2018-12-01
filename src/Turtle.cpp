@@ -19,7 +19,7 @@ namespace drawing
         
         const auto res = lsys.produce(parameters.get_n_iter());
 
-        for (auto c : res)
+        for (auto c : res.first)
         {
             if (interpretation.has_predecessor(c))
             {

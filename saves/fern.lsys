@@ -8,7 +8,8 @@
             "production_rules": {
                 "F": "FF",
                 "X": "F[-X][X]F[-X]+FX"
-            }
+            },
+            "recursion_predecessor": "X"
         },
         "DrawingParameters": {
             "cereal_class_version": 0,
