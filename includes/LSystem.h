@@ -52,36 +52,37 @@ namespace cereal
 // production rules, generate by iteration a result array of character by
 // replacing each character predecessor by its word successor. It also produces
 // an array containing for each character the derivation count corresponding to
-// the number of iteration of this character was derived from a defined
-// predecessor.
+// the number of iteration of this character was derived from a particular rule.
 //
 // For example:
 //   axiom: "F"
 //   production rules:
-//     "F" -> "F+G" (<- recursion predecessor)
+//     "F" -> "F+G" (<- predecessor to save iteration count)
 //     "G" -> "F-G"
 //   iteration 0:
 //     production_array: "F"
-//     recursion_array:  {0}
+//     iteration_array:  {0}
 //   iteration 1:
 //     production_array: "F + G" (without space)
-//     recursion_array:  {1,1,1}
+//     iteration_array:  {1,1,1}
 //   iteration 2:
 //     production_array: "F + G  +  F - G" (without space)
-//     recursion_array:  {2,2,2, 1, 1,1,1}
+//     iteration_array:  {2,2,2, 1, 1,1,1}
 //
 // This class is a simple variant of more general
 // L-systems: context-free (one generating symbol by rule) and
 // deterministic (at most one rule for each symbol).
 // Invariants:
-//   - If an axiom is defined at construction, 'production_cache_.at(0)' contains it at
-//   all time. And 'recursion_cache_.at(0)' is 0.
-//   - 'recursion_cache_' is coherent with 'recursion_predecessors_'
-//   - 'production_cache_' and 'recursion_cache_' are coherent with the 'rules_'.
-//   - As a consequence, 'recursion_cache_' and 'production_cache_' are coherent
-//   BUT 'recursion_cache_' may have less elements than 'production_cache_'. In
-//   any case, 'recursion_cache_' has always less or equal element then
-//   'production_cache_'. 
+//   - If an axiom is defined at construction, 'production_cache_.at(0)'
+//   contains it at all time. And 'iteration_count_cache_.at(0)' is 0.
+//   - 'iteration_count_cache_' is coherent with
+//  'iteraction_count_predecessors_' 
+//   - 'production_cache_' and 'iteration_count_cache_' are coherent with the
+//  'rules_'. 
+//   - As a consequence, 'iteration_count_cache_' and 'production_cache_' are
+//   coherent BUT 'iteration_count_cache_' may have less elements than
+//   'production_cache_'. In any case, 'iteration_count_cache_' has always less
+//   or equal element than'production_cache_'.
 class LSystem : public RuleMap<std::string>
 {
 public:
@@ -100,8 +101,8 @@ public:
     // Getters and setters
     std::string get_axiom() const;
     const std::unordered_map<int, std::string>& get_production_cache() const;
-    std::string get_recursion_predecessors() const;
-    const std::unordered_map<int, std::pair<std::vector<int>, int>>& get_recursion_cache() const;
+    std::string get_iteration_predecessors() const;
+    const std::unordered_map<int, std::pair<std::vector<int>, int>>& get_iteration_cache() const;
 
     // Set the axiom to 'axiom'
     void set_axiom(const std::string& axiom);
@@ -119,15 +120,15 @@ public:
     // Clear the rules
     void clear_rules() override;
 
-    // Set the symbols flagging the recursion count 'recursion_predecessors_' to
+    // Set the symbols flagging the iteration count 'iteration_predecessors_' to
     // 'predecessors'.
-    void set_recursion_predecessors(const std::string& predecessors);
+    void set_iteration_predecessors(const std::string& predecessors);
 
     // Returns from the first part the result of the 'n'-th iteration of the
     // L-System and cache it as well as the transitional iterations. For the
     // second part, returns the array indicating the derivation number of rules
-    // having for predecessors any character from 'recursion_predecessors_'. For
-    // the third part, return the maximum number of recursion.
+    // having for predecessors any character from 'iteration_predecessors_'. For
+    // the third part, return the maximum number of iteration.
     //
     // Exceptions:
     //   - Precondition: n positive.
@@ -145,7 +146,7 @@ private:
         {
             ar(cereal::make_nvp("axiom", production_cache_.at(0)),
                cereal::make_nvp("production_rules", rules_),
-               cereal::make_nvp("recursion_predecessor", recursion_predecessors_));
+               cereal::make_nvp("iteration_predecessor", iteration_predecessors_));
         }
     
     template <class Archive>
@@ -153,13 +154,13 @@ private:
         {
             ar(cereal::make_nvp("axiom", production_cache_[0]),
                cereal::make_nvp("production_rules", rules_),
-               cereal::make_nvp("recursion_predecessor", recursion_predecessors_));
-            recursion_cache_[0] = {std::vector<int>(production_cache_.at(0).size(), 0), 0};
+               cereal::make_nvp("iteration_predecessor", iteration_predecessors_));
+            iteration_count_cache_[0] = {std::vector<int>(production_cache_.at(0).size(), 0), 0};
         }
 
-    // The predecessors indicating than, at their next derivation, the recursion
+    // The predecessors indicating than, at their next derivation, the iteration
     // counter will be incremented by one.
-    std::string recursion_predecessors_ = {};
+    std::string iteration_predecessors_ = {};
 
     // The cache of all computed iterations and the axiom.
     // It contains all the iterations up to the highest iteration
@@ -168,9 +169,9 @@ private:
     // quickly swapping between different iterations of the same
     // L-System.
     std::unordered_map<int, std::string> production_cache_ = {};
-    // The cache of all computed recursion value. The second element in the pair
-    // is the maximum number of recursion for this iteration.
-    std::unordered_map<int, std::pair<std::vector<int>, int>> recursion_cache_ = {};
+    // The cache of all computed iteration values. The second element in the pair
+    // is the maximum number of iteration for this iteration.
+    std::unordered_map<int, std::pair<std::vector<int>, int>> iteration_count_cache_ = {};
 };
 
 #endif

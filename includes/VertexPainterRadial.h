@@ -26,8 +26,9 @@ namespace colors
         // Paint 'vertices' in a 'center_' centered distance-bases radial
         // fashion with the informations of 'bounding_box' according to the rule
         // with the colors from the ColorGenerator.
+        // 'iteration_of_vertices' and 'max_recursion' are not used.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<int>& vertices_recursion,
+                                    const std::vector<int>& iteration_of_vertices,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) const override;
 

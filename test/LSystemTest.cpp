@@ -16,8 +16,8 @@ TEST(LSystemTest, default_ctor)
     ASSERT_EQ(lsys.get_axiom(), empty_str);
     ASSERT_EQ(lsys.get_rules(), empty_rules);
     ASSERT_EQ(lsys.get_production_cache(), empty_prod_cache);
-    ASSERT_EQ(lsys.get_recursion_predecessors(), empty_str);
-    ASSERT_EQ(lsys.get_recursion_cache(), empty_rec_cache);
+    ASSERT_EQ(lsys.get_iteration_predecessors(), empty_str);
+    ASSERT_EQ(lsys.get_iteration_cache(), empty_rec_cache);
 }
 
 TEST(LSystemTest, complete_ctor)
@@ -30,8 +30,8 @@ TEST(LSystemTest, complete_ctor)
     ASSERT_EQ(lsys.get_axiom(), "F");
     ASSERT_EQ(lsys.get_rules(), expected_rules);
     ASSERT_EQ(lsys.get_production_cache().at(0), "F");
-    ASSERT_EQ(lsys.get_recursion_predecessors(), "F");
-    ASSERT_EQ(lsys.get_recursion_cache(), expected_recursion_cache);
+    ASSERT_EQ(lsys.get_iteration_predecessors(), "F");
+    ASSERT_EQ(lsys.get_iteration_cache(), expected_recursion_cache);
 }
 
 TEST(LSystemTest, get_axiom)
@@ -96,9 +96,9 @@ TEST(LSystemTest, set_recursion_predecessors)
     std::unordered_map<int, std::pair<std::vector<int>, int>> expected_cache = { {0, {{0}, 0}} };
 
 
-    lsys.set_recursion_predecessors("");
-    ASSERT_EQ(lsys.get_recursion_predecessors(), expected_predecessors);
-    ASSERT_EQ(lsys.get_recursion_cache(), expected_cache);
+    lsys.set_iteration_predecessors("");
+    ASSERT_EQ(lsys.get_iteration_predecessors(), expected_predecessors);
+    ASSERT_EQ(lsys.get_iteration_cache(), expected_cache);
 }
 
 // Test some iterations.
@@ -158,7 +158,7 @@ TEST(LSystemTest, disjoint_derivation)
     LSystem lsys { "F", { { 'F', "F+G" }, { 'G', "G-F" } }, "F" };
 
     lsys.produce(2);
-    lsys.set_recursion_predecessors("G");
+    lsys.set_iteration_predecessors("G");
     lsys.produce(1);
 
     std::unordered_map<int, std::string> production_cache { {0, "F"}, {1, "F+G"}, {2, "F+G+G-F"} };
@@ -166,7 +166,7 @@ TEST(LSystemTest, disjoint_derivation)
                     { {0, {{0}, 0}}, {1, {{0,0,0}, 0}} };
 
     ASSERT_EQ(lsys.get_production_cache(), production_cache);
-    ASSERT_EQ(lsys.get_recursion_cache(), recursion_cache);
+    ASSERT_EQ(lsys.get_iteration_cache(), recursion_cache);
 }
 
 TEST(LSystemTest, serialization)
@@ -186,5 +186,5 @@ TEST(LSystemTest, serialization)
 
     ASSERT_EQ(olsys.get_axiom(), ilsys.get_axiom());
     ASSERT_EQ(olsys.get_rules(), ilsys.get_rules());
-    ASSERT_EQ(olsys.get_recursion_predecessors(), ilsys.get_recursion_predecessors());
+    ASSERT_EQ(olsys.get_iteration_predecessors(), ilsys.get_iteration_predecessors());
 }

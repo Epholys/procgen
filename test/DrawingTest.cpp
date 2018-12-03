@@ -57,13 +57,13 @@ TEST_F(DrawingTest, go_forward)
     float newy = parameters.get_step() * std::sin(parameters.get_starting_angle());
     sf::Vector2f end_pos = begin.position + sf::Vector2f (newx, newy);
     sf::Vertex end { end_pos };
-    std::vector<int> expected_rec {1,1};
+    std::vector<int> expected_iter {1,1};
 
     go_forward_fn(turtle);
     
     ASSERT_EQ(turtle.vertices.at(0), begin);
     ASSERT_EQ(turtle.vertices.at(1), end);
-    ASSERT_EQ(turtle.vertices_recursion, expected_rec);
+    ASSERT_EQ(turtle.iteration_of_vertices, expected_iter);
 }
 
 // Test the turn_right order.
@@ -100,8 +100,8 @@ TEST_F(DrawingTest, stack_test)
     ASSERT_EQ(saved_state.position, turtle.state.position);
     ASSERT_EQ(saved_state.direction, turtle.state.direction);
 
-    std::vector<int> expected_rec {1,1,1,1};
-    ASSERT_EQ(turtle.vertices_recursion, expected_rec);
+    std::vector<int> expected_iter {1,1,1,1};
+    ASSERT_EQ(turtle.iteration_of_vertices, expected_iter);
 }
 
 // The L-system defined returns the string: "F+G" with 1 iteration.
@@ -121,13 +121,13 @@ TEST_F(DrawingTest, compute_paths)
                                    turtle.vertices.at(3) };
 
     parameters.set_n_iter(1);
-    auto [str, rec, _] = compute_vertices(lsys, interpretation, parameters);
+    auto [str, iter, _] = compute_vertices(lsys, interpretation, parameters);
 
     ASSERT_EQ(str, norm);
 
     
-    std::vector<int> expected_rec {1,1,1,1};
-    ASSERT_EQ(rec, expected_rec);
+    std::vector<int> expected_iter {1,1,1,1};
+    ASSERT_EQ(iter, expected_iter);
 }
 
 TEST_F(DrawingTest, serialization)

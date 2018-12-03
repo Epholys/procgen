@@ -11,12 +11,12 @@ namespace drawing
     {
         // Go forward following the direction vector.
         turtle.vertices.push_back(sf::Vector2f(turtle.state.position));
-        turtle.vertices_recursion.push_back(turtle.str_recursion.at(turtle.recursion_index));
+        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
         double dx = turtle.parameters.get_step() * turtle.state.direction.x;
         double dy = turtle.parameters.get_step() * -turtle.state.direction.y;
         turtle.state.position += {dx, dy};
         turtle.vertices.push_back(sf::Vector2f(turtle.state.position));
-        turtle.vertices_recursion.push_back(turtle.str_recursion.at(turtle.recursion_index));
+        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
     }
 
     void turn_right_fn(Turtle& turtle)
@@ -55,9 +55,9 @@ namespace drawing
             turtle.vertices.push_back( {sf::Vector2f(turtle.state.position), sf::Color::Transparent} );
             // turtle.vertices.push_back( {sf::Vector2f(turtle.state.position)} );
 
-            turtle.vertices_recursion.push_back(turtle.str_recursion.at(turtle.recursion_index));
-            turtle.vertices_recursion.push_back(turtle.str_recursion.at(turtle.recursion_index));
-            // turtle.vertices_recursion.push_back(turtle.str_recursion.at(turtle.recursion_index));
+            turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
+            turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
+            // turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
 
             turtle.stack.pop();
         }

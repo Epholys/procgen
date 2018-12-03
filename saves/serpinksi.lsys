@@ -9,12 +9,12 @@
                 "G": "F+G+F",
                 "F": "G-F-G"
             },
-            "recursion_predecessor": "FG"
+            "iteration_predecessor": "FG"
         },
         "DrawingParameters": {
             "cereal_class_version": 0,
             "starting_angle": 0.0,
-            "delta_angle": 59.99999770796872,
+            "delta_angle": 60,
             "step": 7.0,
             "n_iter": 5
         },

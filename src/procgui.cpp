@@ -9,7 +9,7 @@
 #include "VertexPainterRadial.h"
 #include "VertexPainterRandom.h"
 #include "VertexPainterSequential.h"
-#include "VertexPainterRecursion.h"
+#include "VertexPainterIteration.h"
 
 using namespace math;
 
@@ -175,7 +175,7 @@ namespace procgui
 
         ImGui::Indent();
 
-        ImGui::Text(lsys.get_recursion_predecessors().c_str());
+        ImGui::Text(lsys.get_iteration_predecessors().c_str());
 
         ImGui::Unindent(); 
 
@@ -331,10 +331,10 @@ namespace procgui
             });
 
         // --- Recursion Predecessors ---
-        buf = string_to_array<lsys_successor_size>(lsys.get_recursion_predecessors());
+        buf = string_to_array<lsys_successor_size>(lsys.get_iteration_predecessors());
         if (ImGui::InputText("Recursion predecessors", buf.data(), lsys_successor_size))
         {
-            lsys.set_recursion_predecessors(array_to_string(buf));
+            lsys.set_iteration_predecessors(array_to_string(buf));
         }
         
         conclude();

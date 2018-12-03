@@ -1,6 +1,6 @@
 #include "geometry.h"
 #include "helper_math.h"
-#include "VertexPainterRecursion.h"
+#include "VertexPainterIteration.h"
 
 namespace colors
 {

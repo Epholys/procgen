@@ -34,7 +34,7 @@ namespace drawing
         struct Turtle
         {
             explicit Turtle(const DrawingParameters& parameters,
-                            const std::vector<int>& str_recursion);
+                            const std::vector<int>& iteration_vec);
             
             // All the parameters necessary to compute the vertices.
             // Note: This is a non-owning reference. As Turtle is only
@@ -69,26 +69,26 @@ namespace drawing
             std::vector<sf::Vertex> vertices { };
 
 
-            // All the recursion count produced by the LSystem. For each new
-            // vertices, its recursion count will be copies to 'vertices_recursion'.
-            const std::vector<int> str_recursion;
+            // All the iteration count produced by the LSystem. For each new
+            // vertices, its iteration count will be copied to 'iteration_of_vertices'.
+            const std::vector<int> iteration_vec;
             
-            // Index indicating the position in str_recursion.
-            std::size_t recursion_index {0};
+            // Index indicating the position in 'iteration_vec'.
+            std::size_t iteration_index {0};
 
-            // For each new vertex created, its recursion count is saved. The
-            // recursion count is produced by the LSystem and saved in
-            // 'str_recursion', the operation is simply to copy it in this
+            // For each new vertex created, its iteration count is saved. The
+            // iteration count is produced by the LSystem and saved in
+            // 'iteration_vec', the operation is simply to copy it in this
             // vector corresponding to the vertices.
-            std::vector<int> vertices_recursion;
+            std::vector<int> iteration_of_vertices;
         };
     }
 
-    // Compute all vertices and their recursion count of a turtle interpretation
+    // Compute all vertices and their iteration count of a turtle interpretation
     // of a L-system.  First, this function iterates 'parameters.n_iter' times
     // the LSystem 'lsys', using and modifying its cache. Then, it interprates
     // the result with 'interpretation' and 'parameters'. The third returned
-    // value is the maximum number of recursion count.
+    // value is the maximum number of iteration count.
     std::tuple<std::vector<sf::Vertex>, std::vector<int>, int>
         compute_vertices(LSystem& lsys,
                          InterpretationMap& interpretation,

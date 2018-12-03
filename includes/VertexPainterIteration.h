@@ -17,8 +17,9 @@ namespace colors
         VertexPainterRecursion& operator=(const VertexPainterRecursion& other);
         VertexPainterRecursion& operator=(VertexPainterRecursion&& other);
         
-        // Paint 'vertices' according to its recursion value: simlpy divide the
+        // Paint 'vertices' according to its recursion value: simply divide the
         // current recursion by the max recursion.
+        // 'bounding_box' is not used.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<int>& vertices_recursion,
                                     int max_recursion,

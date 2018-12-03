@@ -5,12 +5,12 @@ namespace drawing
     using namespace impl;
     
     Turtle::Turtle(const DrawingParameters& params,
-                   const std::vector<int>& recursions)
+                   const std::vector<int>& iteration_vec)
         : parameters { params }
-        , str_recursion {recursions}
-        , vertices_recursion {}
+        , iteration_vec {iteration_vec}
+        , iteration_of_vertices {}
           // The other members are set in header as they all derives from
-          // 'parameters' or 'str_recursion'.
+          // 'parameters' or 'iteration_vec'.
     {
     }
 
@@ -36,12 +36,13 @@ namespace drawing
                 // Do nothing: if 'c' does not have an associated
                 // order, it has no effects.
             }
-            // We must do it here as symbols without orders must also increment
-            // this index.
-            ++turtle.recursion_index;
+            // Increment the iteration index: each character has an iteration
+            // count. Can not be in the orders, otherwise characters without
+            // orders will not increment this index.
+            ++turtle.iteration_index;
         }
 
-        Ensures(turtle.vertices.size() == turtle.vertices_recursion.size());
-        return {turtle.vertices, turtle.vertices_recursion, max};
+        Ensures(turtle.vertices.size() == turtle.iteration_of_vertices.size());
+        return {turtle.vertices, turtle.iteration_of_vertices, max};
     }
 }

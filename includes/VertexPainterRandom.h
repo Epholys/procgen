@@ -20,8 +20,9 @@ namespace colors
         void randomize() const;
         
         // Paint 'vertices' according to a random real number.
+        // 'bounding_box', 'iteration_of_vertices' and 'max_recursion' are not used.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<int>& vertices_recursion,
+                                    const std::vector<int>& iteration_of_vertices,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) const override;
 
