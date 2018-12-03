@@ -24,6 +24,16 @@ TEST(geometry, bounding_box)
     ASSERT_EQ(sf::FloatRect(-1, -1, 2, 2), box);
 }
 
+TEST(geometry, expand)
+{
+    std::vector<sf::FloatRect> boxes { {0, 0, 1, 1}, {10, 10, 10, 10 } };
+    std::vector<sf::FloatRect> expected_boxes { {-10, -10, 21, 21}, {0, 0, 30, 30} };
+
+    expand_boxes(boxes, 10.);
+
+    ASSERT_EQ(expected_boxes, boxes);
+}
+
 // compute_sub_boxes is not tested due to the bad behaviour with a low count of
 // vertices. 
 

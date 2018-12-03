@@ -272,6 +272,7 @@ namespace procgui
                                       *OParams::get_target());
         bounding_box_ = geometry::bounding_box(vertices_);
         sub_boxes_ = geometry::sub_boxes(vertices_, MAX_SUB_BOXES);
+        geometry::expand_boxes(sub_boxes_);
         paint_vertices();
     }
 
@@ -321,8 +322,8 @@ namespace procgui
         //            {{ box.left, box.top + box.height}, sf::Color(255,0,0,50)},
         //            {{ box.left + box.width, box.top + box.height}, sf::Color(255,0,0,50)},
         //            {{ box.left + box.width, box.top}, sf::Color(255,0,0,50)}}};
-        //     target.draw(rect.data(), rect.size(), sf::Quads);
-        // }
+        //     target.draw(rect.data(), rect.size(), sf::Quads, get_transform());
+        // } 
     }
 
     bool LSystemView::is_selected() const
