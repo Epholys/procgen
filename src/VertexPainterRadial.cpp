@@ -67,7 +67,7 @@ namespace colors
     void VertexPainterRadial::paint_vertices(std::vector<sf::Vertex>& vertices,
                                              const std::vector<int>&, 
                                              int,
-                                             sf::FloatRect bounding_box) const
+                                             sf::FloatRect bounding_box)
     {
         auto generator = get_target()->get_generator();
         if (!generator)

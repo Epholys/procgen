@@ -4,27 +4,27 @@
 
 namespace colors
 {
-    VertexPainterRecursion::VertexPainterRecursion()
+    VertexPainterIteration::VertexPainterIteration()
         : VertexPainter{}
     {
     }
 
-    VertexPainterRecursion::VertexPainterRecursion(const std::shared_ptr<ColorGenerator> gen)
+    VertexPainterIteration::VertexPainterIteration(const std::shared_ptr<ColorGenerator> gen)
         : VertexPainter{gen}
     {
     }
     
-    VertexPainterRecursion::VertexPainterRecursion(const VertexPainterRecursion& other)
+    VertexPainterIteration::VertexPainterIteration(const VertexPainterIteration& other)
         : VertexPainter{other}
     {
     }
 
-    VertexPainterRecursion::VertexPainterRecursion(VertexPainterRecursion&& other)
+    VertexPainterIteration::VertexPainterIteration(VertexPainterIteration&& other)
         : VertexPainter{std::move(other)}
     {
     }
 
-    VertexPainterRecursion& VertexPainterRecursion::operator=(const VertexPainterRecursion& other)
+    VertexPainterIteration& VertexPainterIteration::operator=(const VertexPainterIteration& other)
     {
         if (this != &other)
         {
@@ -33,7 +33,7 @@ namespace colors
         return *this;
     }
 
-    VertexPainterRecursion& VertexPainterRecursion::operator=(VertexPainterRecursion&& other)
+    VertexPainterIteration& VertexPainterIteration::operator=(VertexPainterIteration&& other)
     {
         if (this != &other)
         {
@@ -42,18 +42,18 @@ namespace colors
         return *this;
     }
 
-    std::shared_ptr<VertexPainter> VertexPainterRecursion::clone_impl() const
+    std::shared_ptr<VertexPainter> VertexPainterIteration::clone_impl() const
     {
-        return std::make_shared<VertexPainterRecursion>(get_target()->get_generator()->clone());
+        return std::make_shared<VertexPainterIteration>(get_target()->get_generator()->clone());
     }
     
-    void VertexPainterRecursion::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                                const std::vector<int>& vertices_recursion,
-                                                int max_recursion,
-                                                sf::FloatRect) const
+    void VertexPainterIteration::paint_vertices(std::vector<sf::Vertex>& vertices,
+                                                const std::vector<int>& vertices_iteration,
+                                                int max_iteration,
+                                                sf::FloatRect)
 
     {
-        Expects(vertices.size() == vertices_recursion.size());
+        Expects(vertices.size() == vertices_iteration.size());
         
         auto generator = get_target()->get_generator();
         if (!generator)
@@ -61,16 +61,16 @@ namespace colors
             return;
         }
 
-        if (max_recursion-1 <= 0)
+        if (max_iteration-1 <= 0)
         {
             // Avoid division by 0.
-            max_recursion = 2;
+            max_iteration = 2;
         }
 
 
-        for (auto i=0u; i<vertices_recursion.size(); ++i)
+        for (auto i=0u; i<vertices_iteration.size(); ++i)
         {
-            sf::Color color = generator->get((vertices_recursion.at(i)-1) / (float(max_recursion)-1));
+            sf::Color color = generator->get((vertices_iteration.at(i)-1) / (float(max_iteration)-1));
             sf::Vertex& v = vertices.at(i);
             color.a = v.color.a;
             v.color = color;

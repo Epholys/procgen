@@ -10,6 +10,7 @@
 #include "VertexPainterRandom.h"
 #include "VertexPainterSequential.h"
 #include "VertexPainterIteration.h"
+#include "VertexPainterComposite.h"
 
 using namespace math;
 
@@ -170,8 +171,8 @@ namespace procgui
         }
         ImGui::Unindent(); 
 
-        // --- Recursion Predecessors ---
-        ImGui::Text("Recursion predecessors:");
+        // --- Iteration Predecessors ---
+        ImGui::Text("Iteration predecessors:");
 
         ImGui::Indent();
 
@@ -330,9 +331,9 @@ namespace procgui
                 return false;
             });
 
-        // --- Recursion Predecessors ---
+        // --- Iteration Predecessors ---
         buf = string_to_array<lsys_successor_size>(lsys.get_iteration_predecessors());
-        if (ImGui::InputText("Recursion predecessors", buf.data(), lsys_successor_size))
+        if (ImGui::InputText("Iteration predecessors", buf.data(), lsys_successor_size))
         {
             lsys.set_iteration_predecessors(array_to_string(buf));
         }
@@ -430,7 +431,7 @@ namespace
         ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
     }
 
-    void interact_with(colors::VertexPainterRecursion& painter)
+    void interact_with(colors::VertexPainterIteration& painter)
     {
         ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
     }
@@ -468,18 +469,22 @@ namespace procgui
         {
             index = 3;
         }
-        else if (info == typeid(colors::VertexPainterRecursion).hash_code())
+        else if (info == typeid(colors::VertexPainterIteration).hash_code())
         {
             index = 4;
+        }
+        else if (info == typeid(colors::VertexPainterComposite).hash_code())
+        {
+            index = 5;
         }
         else
         {
             Expects(false);
         }
 
-        const char* generators[5] = {"Linear", "Radial", "Random", "Sequential", "Recursion"};
+        const char* generators[6] = {"Linear", "Radial", "Random", "Sequential", "Recursion", "Composite"};
         // Create a new VertexPainter
-        if (ImGui::ListBox("Vertex Painter", &index, generators, 5))
+        if (ImGui::ListBox("Vertex Painter", &index, generators, 6))
         {
             if (index == 0)
             {
@@ -499,7 +504,11 @@ namespace procgui
             }
             else if (index == 4)
             {
-                painter = std::make_shared<colors::VertexPainterRecursion>(painter->get_generator_buffer()->get_generator()->clone());
+                painter = std::make_shared<colors::VertexPainterIteration>(painter->get_generator_buffer()->get_generator()->clone());
+            }
+            else if (index == 5)
+            {
+                painter = std::make_shared<colors::VertexPainterComposite>(painter->get_generator_buffer()->get_generator()->clone());
             }
             else
             {
@@ -534,8 +543,13 @@ namespace procgui
         }
         else if (index == 4)
         {
-            auto recursion = std::dynamic_pointer_cast<colors::VertexPainterRecursion>(painter);
-            ::interact_with(*recursion);
+            auto iteration = std::dynamic_pointer_cast<colors::VertexPainterIteration>(painter);
+            ::interact_with(*iteration);
+        }
+        else if (index == 5)
+        {
+            // auto iteration = std::dynamic_pointer_cast<colors::VertexPainterIteration>(painter);
+            // ::interact_with(*iteration);
         }
         else
         {

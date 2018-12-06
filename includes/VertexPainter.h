@@ -24,6 +24,7 @@ namespace colors
         using OGenBuff = Observer<ColorGeneratorBuffer>;
 
         VertexPainter(); // Create a default generator
+        virtual ~VertexPainter() {};
         explicit VertexPainter(const std::shared_ptr<ColorGenerator> gen);
         // Rule-of-five shallow copy
         VertexPainter(const VertexPainter& other);
@@ -45,7 +46,7 @@ namespace colors
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<int>& iteration_of_vertices,
                                     int max_recursion,
-                                    sf::FloatRect bounding_box) const = 0;
+                                    sf::FloatRect bounding_box) = 0;
 
     private:
         // Clone implementation.
