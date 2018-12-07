@@ -53,6 +53,13 @@ namespace colors
         , vertices_index_groups_{}
         , child_painters_{}
     {
+        auto c1 = std::make_shared<LinearGradient>(LinearGradient({{sf::Color::Red, 0}, {sf::Color::Yellow, 1}}));
+        auto c2 = std::make_shared<LinearGradient>(LinearGradient({{sf::Color::Blue, 0}, {sf::Color::Magenta, 1}}));
+
+        auto b1 = std::make_shared<VertexPainterLinear>(c1);
+        auto b2 = std::make_shared<VertexPainterRadial>(c2);
+        child_painters_.push_back(std::make_shared<VertexPainterBuffer>(b1));
+        child_painters_.push_back(std::make_shared<VertexPainterBuffer>(b2));
     }
 
     VertexPainterComposite::VertexPainterComposite(const std::shared_ptr<ColorGenerator> gen)
@@ -143,6 +150,10 @@ namespace colors
         vertices_copy_ = vertices;
         color_distributor_->reset_index();
         vertices_index_groups_.clear();
+        for(auto i=0u; i<child_painters_.size(); ++i)
+        {
+            vertices_index_groups_.push_back({});
+        }
 
         main_painter_->get_painter()->paint_vertices(vertices_copy_,
                                                      iteration_of_vertices,
