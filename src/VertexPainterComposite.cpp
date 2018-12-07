@@ -40,26 +40,68 @@ namespace colors
         
         std::shared_ptr<ColorGenerator> ColorGeneratorComposite::clone_impl() const
         {
-            return std::make_shared<ColorGeneratorComposite>(*this);
+            return painter_.color_distributor_;
         }
+
+        //------------------------------------------------------------
+
+        VertexPainterBufferObserver::VertexPainterBufferObserver(std::shared_ptr<VertexPainterBuffer> painter_buffer,
+                                                                 VertexPainterComposite& painter_composite)
+            : OBuffer {painter_buffer}
+            , painter_ {painter_composite}
+        {
+            add_callback([this](){painter_.notify();});
+        }
+        // Shallow rule-of-five constructors.
+        VertexPainterBufferObserver::VertexPainterBufferObserver(const VertexPainterBufferObserver& other)
+            : OBuffer{other.get_target()}
+            , painter_{other.painter_}
+        {
+            add_callback([this](){painter_.notify();});
+        }
+        VertexPainterBufferObserver::VertexPainterBufferObserver(VertexPainterBufferObserver&& other)
+            : OBuffer{std::move(other.get_target())}
+            , painter_{other.painter_}
+        {
+            add_callback([this](){painter_.notify();});
+        }
+        VertexPainterBufferObserver& VertexPainterBufferObserver::operator=(const VertexPainterBufferObserver& other)
+        {
+            if (this != &other)
+            {
+                set_target(other.get_target());
+                add_callback([this](){painter_.notify();});
+            }
+            return *this;
+        }
+        VertexPainterBufferObserver& VertexPainterBufferObserver::operator=(VertexPainterBufferObserver&& other)
+        {
+            if (this != &other)
+            {
+                set_target(std::move(other.get_target()));
+                add_callback([this](){painter_.notify();});
+            }
+            return *this;
+        }
+
+        std::shared_ptr<VertexPainterBuffer> VertexPainterBufferObserver::get_painter_buffer() const
+        {
+            return get_target();
+        }
+
     }
+
+    //----------------------------------------------------------------------
     
     VertexPainterComposite::VertexPainterComposite()
         : VertexPainter{}
         , vertices_copy_ {}
         , color_distributor_{std::make_shared<impl::ColorGeneratorComposite>(*this)}
         , main_painter_{std::make_shared<VertexPainterBuffer>(
-                            std::make_shared<VertexPainterLinear>(color_distributor_))}
+            std::make_shared<VertexPainterLinear>(color_distributor_)), *this}
         , vertices_index_groups_{}
-        , child_painters_{}
+        , child_painters_{{impl::VertexPainterBufferObserver(std::make_shared<VertexPainterBuffer>(), *this)}}
     {
-        auto c1 = std::make_shared<LinearGradient>(LinearGradient({{sf::Color::Red, 0}, {sf::Color::Yellow, 1}}));
-        auto c2 = std::make_shared<LinearGradient>(LinearGradient({{sf::Color::Blue, 0}, {sf::Color::Magenta, 1}}));
-
-        auto b1 = std::make_shared<VertexPainterLinear>(c1);
-        auto b2 = std::make_shared<VertexPainterRadial>(c2);
-        child_painters_.push_back(std::make_shared<VertexPainterBuffer>(b1));
-        child_painters_.push_back(std::make_shared<VertexPainterBuffer>(b2));
     }
 
     VertexPainterComposite::VertexPainterComposite(const std::shared_ptr<ColorGenerator> gen)
@@ -67,17 +109,11 @@ namespace colors
         , vertices_copy_ {}
         , color_distributor_{std::make_shared<impl::ColorGeneratorComposite>(*this)}
         , main_painter_{std::make_shared<VertexPainterBuffer>(
-                            std::make_shared<VertexPainterLinear>(color_distributor_))}
+                            std::make_shared<VertexPainterLinear>(color_distributor_)), *this}
         , vertices_index_groups_{}
-        , child_painters_{}
-    {
-        auto c1 = std::make_shared<LinearGradient>(LinearGradient({{sf::Color::Red, 0}, {sf::Color::Yellow, 1}}));
-        auto c2 = std::make_shared<LinearGradient>(LinearGradient({{sf::Color::Blue, 0}, {sf::Color::Magenta, 1}}));
+        , child_painters_{{impl::VertexPainterBufferObserver(std::make_shared<VertexPainterBuffer>(), *this)}}
 
-        auto b1 = std::make_shared<VertexPainterLinear>(c1);
-        auto b2 = std::make_shared<VertexPainterRadial>(c2);
-        child_painters_.push_back(std::make_shared<VertexPainterBuffer>(b1));
-        child_painters_.push_back(std::make_shared<VertexPainterBuffer>(b2));
+    {
     }
     
     VertexPainterComposite::VertexPainterComposite(const VertexPainterComposite& other)
@@ -88,13 +124,6 @@ namespace colors
         , vertices_index_groups_{other.vertices_index_groups_}
         , child_painters_{other.child_painters_}
     {
-        auto c1 = std::make_shared<LinearGradient>(LinearGradient({{sf::Color::Red, 0}, {sf::Color::Yellow, 1}}));
-        auto c2 = std::make_shared<LinearGradient>(LinearGradient({{sf::Color::Blue, 0}, {sf::Color::Magenta, 1}}));
-
-        auto b1 = std::make_shared<VertexPainterLinear>(c1);
-        auto b2 = std::make_shared<VertexPainterRadial>(c2);
-        child_painters_.push_back(std::make_shared<VertexPainterBuffer>(b1));
-        child_painters_.push_back(std::make_shared<VertexPainterBuffer>(b2));
     }
 
     VertexPainterComposite::VertexPainterComposite(VertexPainterComposite&& other)
@@ -140,26 +169,29 @@ namespace colors
         return std::make_shared<VertexPainterComposite>(get_target()->get_generator()->clone());
     }
     
-    const std::list<std::shared_ptr<VertexPainterBuffer>>&
-    VertexPainterComposite::get_child_painters() const
+    std::list<std::shared_ptr<VertexPainterBuffer>> VertexPainterComposite::get_child_painters() const
     {
-        return child_painters_;
+        std::list<std::shared_ptr<VertexPainterBuffer>> list;
+        for (const auto& observer : child_painters_)
+        {
+            list.push_back(observer.get_target());
+        }
+        return list;
     }
 
     std::shared_ptr<VertexPainterBuffer> VertexPainterComposite::get_main_painter() const
     {
-        return main_painter_;
+        return main_painter_.get_painter_buffer();
     }
-                
+                 
     void VertexPainterComposite::set_child_painters(const std::list<std::shared_ptr<VertexPainterBuffer>> painters)
     {
-        child_painters_ = painters;
-        notify();
-    }
-
-    void VertexPainterComposite::update_main_painter()
-    {
-        main_painter_->get_painter()->set_target(std::make_shared<ColorGeneratorBuffer>(color_distributor_));
+        std::list<impl::VertexPainterBufferObserver> list;
+        for (const auto& painter : painters)
+        {
+            list.push_back(impl::VertexPainterBufferObserver(painter, *this));
+        }
+        child_painters_ = list;
         notify();
     }
 
@@ -177,10 +209,10 @@ namespace colors
             vertices_index_groups_.push_back({});
         }
 
-        main_painter_->get_painter()->paint_vertices(vertices_copy_,
-                                                     iteration_of_vertices,
-                                                     max_recursion,
-                                                     bounding_box);
+        main_painter_.get_painter_buffer()->get_painter()->paint_vertices(vertices_copy_,
+                                                                          iteration_of_vertices,
+                                                                          max_recursion,
+                                                                          bounding_box);
 
         std::vector<std::vector<sf::Vertex>> vertices_groups;
         for(const auto& v : vertices_index_groups_)
@@ -196,10 +228,10 @@ namespace colors
         auto idx = 0u;
         for(auto& painter_it : child_painters_)
         {
-            painter_it->get_painter()->paint_vertices(vertices_groups.at(idx),
-                                                      iteration_of_vertices,
-                                                      max_recursion,
-                                                      bounding_box);
+            painter_it.get_painter_buffer()->get_painter()->paint_vertices(vertices_groups.at(idx),
+                                                                           iteration_of_vertices,
+                                                                           max_recursion,
+                                                                           bounding_box);
             ++idx;
         }
 

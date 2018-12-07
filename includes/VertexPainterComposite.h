@@ -26,6 +26,24 @@ namespace colors
             VertexPainterComposite& painter_;
             std::size_t index_;
         };
+
+        class VertexPainterBufferObserver : public Observer<VertexPainterBuffer>
+        {
+        public:
+            using OBuffer = Observer<VertexPainterBuffer>;
+            
+            explicit VertexPainterBufferObserver(std::shared_ptr<VertexPainterBuffer> painter_buffer,
+                                                 VertexPainterComposite& painter_composite);
+            // Shallow rule-of-five constructors.
+            VertexPainterBufferObserver(const VertexPainterBufferObserver& other);
+            VertexPainterBufferObserver(VertexPainterBufferObserver&& other);
+            VertexPainterBufferObserver& operator=(const VertexPainterBufferObserver& other);
+            VertexPainterBufferObserver& operator=(VertexPainterBufferObserver&& other);
+
+            std::shared_ptr<VertexPainterBuffer> get_painter_buffer() const;
+        private:
+            VertexPainterComposite& painter_;
+        };
     }
     
     class VertexPainterComposite : public VertexPainter
@@ -39,12 +57,10 @@ namespace colors
         VertexPainterComposite& operator=(const VertexPainterComposite& other);
         VertexPainterComposite& operator=(VertexPainterComposite&& other);
 
-        const std::list<std::shared_ptr<VertexPainterBuffer>>&
-        get_child_painters() const;
+        std::list<std::shared_ptr<VertexPainterBuffer>> get_child_painters() const;
         std::shared_ptr<VertexPainterBuffer> get_main_painter() const;
                 
         void set_child_painters(const std::list<std::shared_ptr<VertexPainterBuffer>> painters);
-        void update_main_painter();
        
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<int>& iteration_of_vertices,
@@ -59,10 +75,11 @@ namespace colors
         
         friend impl::ColorGeneratorComposite;
         std::shared_ptr<impl::ColorGeneratorComposite> color_distributor_;        
-        std::shared_ptr<VertexPainterBuffer> main_painter_;
+        impl::VertexPainterBufferObserver main_painter_;
 
         std::list<std::vector<std::size_t>> vertices_index_groups_;
-        std::list<std::shared_ptr<VertexPainterBuffer>> child_painters_;
+        friend impl::VertexPainterBufferObserver;
+        std::list<impl::VertexPainterBufferObserver> child_painters_;
     };
 }
 
