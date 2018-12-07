@@ -381,7 +381,7 @@ namespace procgui
 }
 namespace
 {
-    void interact_with(colors::VertexPainterLinear& painter)
+    void interact_with(colors::VertexPainterLinear& painter, bool from_composite=false)
     {
         // --- Gradient angle ---
         double angle = painter.get_angle();
@@ -390,11 +390,14 @@ namespace
         {
             painter.set_angle(angle);
         }
-        
-        ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
+
+        if (!from_composite)
+        {
+            ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
+        }
     }
 
-    void interact_with(colors::VertexPainterRadial& painter)
+    void interact_with(colors::VertexPainterRadial& painter, bool from_composite=false)
     {
         // --- Center ---
         float center[2] = {painter.get_center().x, painter.get_center().y};
@@ -404,10 +407,13 @@ namespace
             painter.set_center(sf::Vector2f(center[0], center[1]));
         }
         
-        ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
+        if (!from_composite)
+        {
+            ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
+        }
     }
 
-    void interact_with(colors::VertexPainterRandom& painter)
+    void interact_with(colors::VertexPainterRandom& painter, bool from_composite=false)
     {
         ext::ImGui::PushStyleGreenButton();
         if (ImGui::Button("Randomize"))
@@ -415,11 +421,13 @@ namespace
             painter.randomize();
         }
         ImGui::PopStyleColor(3);
-            
-        ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
+        if (!from_composite)
+        {
+            ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
+        }
     }
 
-    void interact_with(colors::VertexPainterSequential& painter)
+    void interact_with(colors::VertexPainterSequential& painter, bool from_composite=false)
     {
         float angle = painter.get_factor();
         if (ImGui::DragFloat("Repetition factor", &angle,
@@ -428,18 +436,85 @@ namespace
             painter.set_factor(angle);
         }
             
-        ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
+        if (!from_composite)
+        {
+            ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
+        }
     }
 
-    void interact_with(colors::VertexPainterIteration& painter)
+    void interact_with(colors::VertexPainterIteration& painter, bool from_composite=false)
     {
-        ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
+        if (!from_composite)
+        {
+            ::procgui::interact_with(*painter.get_generator_buffer(), "Colors");
+        }
     }
 
+    void interact_with(colors::VertexPainterComposite& painter)
+    {
+        const auto& info_before = typeid(*painter.get_main_painter()->get_painter()).hash_code();
+        procgui::interact_with(*painter.get_main_painter(), "Slave Painter", true);
+        const auto& info_after = typeid(*painter.get_main_painter()->get_painter()).hash_code();
+        if (info_before != info_after)
+        {
+            painter.update_main_painter();
+        }
+
+        int index = 0;
+        auto child_painters = painter.get_child_painters();
+        auto to_remove = end(child_painters);
+        auto to_add = end(child_painters);
+
+        ::ext::ImGui::PushStyleGreenButton();
+        if (ImGui::Button("Add Painter here"))
+        {
+            to_add = next(it);
+        }
+        ImGui::PopStyleColor(3);
+        
+        for (auto it = begin(child_painters); it != end(child_painters); ++it)
+        {
+            ImGui::PushID(index);
+            
+            push_embedded();
+            ::procgui::interact_with(**it, "");
+            pop_embedded();
+
+            ::ext::ImGui::PushStyleRedButton();
+            if (it != prev(end(child_painters)) && ImGui::Button("Remove Previous Painter"))
+            {
+                to_remove = it;
+            }
+            ImGui::PopStyleColor(3);
+
+            ::ext::ImGui::PushStyleGreenButton();
+            if (ImGui::Button("Add Painter here"))
+            {
+                to_add = next(it);
+            }
+            ImGui::PopStyleColor(3);
+
+            ImGui::PopID();
+            index++;
+        }
+
+        if (to_remove != end(child_painters))
+        {
+            child_painters.erase(to_remove);
+            painter.set_child_painters(child_painters);
+        }
+        else if (to_add != end(child_painters))
+        {
+            child_painters.insert(to_add, std::make_shared<colors::VertexPainterBuffer>());
+            painter.set_child_painters(child_painters);
+        }
+    }
 }
 namespace procgui
 {
-    void interact_with(colors::VertexPainterBuffer& painter_buffer, const std::string& name)
+    void interact_with(colors::VertexPainterBuffer& painter_buffer,
+                       const std::string& name,
+                       bool from_composite)
     {
         if (!set_up(name))
         {
@@ -482,9 +557,22 @@ namespace procgui
             Expects(false);
         }
 
-        const char* generators[6] = {"Linear", "Radial", "Random", "Sequential", "Recursion", "Composite"};
+        bool new_generator = false;
+        if (!from_composite)
+        {
+            const char* generators[6] = {"Linear", "Radial", "Random", "Sequential", "Recursion", "Composite"};
+            new_generator =  ImGui::ListBox("Vertex Painter", &index, generators, 6);
+            
+        }
+        else
+        {
+            const char* generators[5] = {"Linear", "Radial", "Random", "Sequential", "Recursion"};
+            new_generator = ImGui::ListBox("Vertex Painter", &index, generators, 5);
+        }
+        
+        
         // Create a new VertexPainter
-        if (ImGui::ListBox("Vertex Painter", &index, generators, 6))
+        if (new_generator)
         {
             if (index == 0)
             {
@@ -524,32 +612,32 @@ namespace procgui
         if (index == 0)
         {
             auto linear = std::dynamic_pointer_cast<colors::VertexPainterLinear>(painter);
-            ::interact_with(*linear);
+            ::interact_with(*linear, from_composite);
         }
         else if (index == 1)
         {
             auto radial = std::dynamic_pointer_cast<colors::VertexPainterRadial>(painter);
-            ::interact_with(*radial);
+            ::interact_with(*radial, from_composite);
         }
         else if (index == 2)
         {
             auto random = std::dynamic_pointer_cast<colors::VertexPainterRandom>(painter);
-            ::interact_with(*random);
+            ::interact_with(*random, from_composite);
         }
         else if (index == 3)
         {
             auto sequential = std::dynamic_pointer_cast<colors::VertexPainterSequential>(painter);
-            ::interact_with(*sequential);
+            ::interact_with(*sequential, from_composite);
         }
         else if (index == 4)
         {
             auto iteration = std::dynamic_pointer_cast<colors::VertexPainterIteration>(painter);
-            ::interact_with(*iteration);
+            ::interact_with(*iteration, from_composite);
         }
         else if (index == 5)
         {
-            // auto iteration = std::dynamic_pointer_cast<colors::VertexPainterIteration>(painter);
-            // ::interact_with(*iteration);
+            auto composite = std::dynamic_pointer_cast<colors::VertexPainterComposite>(painter);
+            ::interact_with(*composite);
         }
         else
         {

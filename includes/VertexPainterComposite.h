@@ -39,6 +39,12 @@ namespace colors
         VertexPainterComposite& operator=(const VertexPainterComposite& other);
         VertexPainterComposite& operator=(VertexPainterComposite&& other);
 
+        const std::list<std::shared_ptr<VertexPainterBuffer>>&
+        get_child_painters() const;
+        std::shared_ptr<VertexPainterBuffer> get_main_painter() const;
+                
+        void set_child_painters(const std::list<std::shared_ptr<VertexPainterBuffer>> painters);
+        void update_main_painter();
        
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<int>& iteration_of_vertices,

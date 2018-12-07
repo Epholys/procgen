@@ -140,6 +140,28 @@ namespace colors
         return std::make_shared<VertexPainterComposite>(get_target()->get_generator()->clone());
     }
     
+    const std::list<std::shared_ptr<VertexPainterBuffer>>&
+    VertexPainterComposite::get_child_painters() const
+    {
+        return child_painters_;
+    }
+
+    std::shared_ptr<VertexPainterBuffer> VertexPainterComposite::get_main_painter() const
+    {
+        return main_painter_;
+    }
+                
+    void VertexPainterComposite::set_child_painters(const std::list<std::shared_ptr<VertexPainterBuffer>> painters)
+    {
+        child_painters_ = painters;
+        notify();
+    }
+
+    void VertexPainterComposite::update_main_painter()
+    {
+        main_painter_->get_painter()->set_target(std::make_shared<ColorGeneratorBuffer>(color_distributor_));
+        notify();
+    }
 
     void VertexPainterComposite::paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<int>& iteration_of_vertices,
