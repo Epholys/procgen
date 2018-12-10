@@ -8,6 +8,7 @@
 #include "RenderWindow.h"
 #include "VertexPainterRadial.h"
 #include "VertexPainterRandom.h"
+#include "VertexPainterBlockRandom.h"
 #include "VertexPainterSequential.h"
 #include "VertexPainterIteration.h"
 #include "VertexPainterComposite.h"
@@ -439,6 +440,21 @@ namespace
         }
     }
 
+    void interact_with(colors::VertexPainterBlockRandom& painter, bool from_composite=false)
+    {
+        int block_size = painter.get_block_size();
+        if (ImGui::DragInt("Block size", &block_size, 1, 1, std::numeric_limits<int>::max()))
+        {
+            painter.set_block_size(block_size);
+        }
+        
+        if (!from_composite)
+        {
+            ::procgui::interact_with(*painter.get_generator_buffer(), "Colors",
+                                     ::procgui::color_buffer_mode::GRADIENTS);
+        }
+    }
+    
     void interact_with(colors::VertexPainterSequential& painter, bool from_composite=false)
     {
         float angle = painter.get_factor();
@@ -555,17 +571,21 @@ namespace procgui
         {
             index = 3;
         }
-        else if (info == typeid(colors::VertexPainterSequential).hash_code())
+        else if (info == typeid(colors::VertexPainterBlockRandom).hash_code())
         {
             index = 4;
         }
-        else if (info == typeid(colors::VertexPainterIteration).hash_code())
+        else if (info == typeid(colors::VertexPainterSequential).hash_code())
         {
             index = 5;
         }
-        else if (info == typeid(colors::VertexPainterComposite).hash_code())
+        else if (info == typeid(colors::VertexPainterIteration).hash_code())
         {
             index = 6;
+        }
+        else if (info == typeid(colors::VertexPainterComposite).hash_code())
+        {
+            index = 7;
         }
         else
         {
@@ -575,14 +595,17 @@ namespace procgui
         bool new_generator = false;
         if (!is_slave_of_composite)
         {
-            const char* generators[7] = {"Constant", "Linear", "Radial", "Random", "Sequential", "Iterative", "Composite"};
-            new_generator =  ImGui::ListBox("Vertex Painter", &index, generators, 7);
+            const char* generators[8] = {"Constant", "Linear", "Radial",
+                                         "Random", "BlockRandom", "Sequential",
+                                         "Iterative", "Composite"};
+            new_generator =  ImGui::ListBox("Vertex Painter", &index, generators, 8);
             
         }
         else 
         {
-            const char* generators[6] = {"Constant", "Linear", "Radial", "Random", "Sequential", "Iterative"};
-            new_generator = ImGui::ListBox("Vertex Painter", &index, generators, 6);
+            const char* generators[7] = {"Constant", "Linear", "Radial",
+                                         "Random", "BlockRandom", "Sequential", "Iterative"};
+            new_generator = ImGui::ListBox("Vertex Painter", &index, generators, 7);
         }
         
         
@@ -607,13 +630,17 @@ namespace procgui
             }
             else if (index == 4)
             {
-                painter = std::make_shared<colors::VertexPainterSequential>(painter->get_generator_buffer()->get_generator()->clone());
+                painter = std::make_shared<colors::VertexPainterBlockRandom>(painter->get_generator_buffer()->get_generator()->clone());
             }
             else if (index == 5)
             {
-                painter = std::make_shared<colors::VertexPainterIteration>(painter->get_generator_buffer()->get_generator()->clone());
+                painter = std::make_shared<colors::VertexPainterSequential>(painter->get_generator_buffer()->get_generator()->clone());
             }
             else if (index == 6)
+            {
+                painter = std::make_shared<colors::VertexPainterIteration>(painter->get_generator_buffer()->get_generator()->clone());
+            }
+            else if (index == 7)
             {
                 painter = std::make_shared<colors::VertexPainterComposite>(painter->get_generator_buffer()->get_generator()->clone());
             }
@@ -650,15 +677,20 @@ namespace procgui
         }
         else if (index == 4)
         {
+            auto block_random = std::dynamic_pointer_cast<colors::VertexPainterBlockRandom>(painter);
+            ::interact_with(*block_random, is_slave_of_composite);
+        }
+        else if (index == 5)
+        {
             auto sequential = std::dynamic_pointer_cast<colors::VertexPainterSequential>(painter);
             ::interact_with(*sequential, is_slave_of_composite);
         }
-        else if (index == 5)
+        else if (index == 6)
         {
             auto iteration = std::dynamic_pointer_cast<colors::VertexPainterIteration>(painter);
             ::interact_with(*iteration, is_slave_of_composite);
         }
-        else if (index == 6)
+        else if (index == 7)
         {
             auto composite = std::dynamic_pointer_cast<colors::VertexPainterComposite>(painter);
             ::interact_with(*composite);

@@ -17,8 +17,6 @@ namespace colors
         VertexPainterConstant& operator=(const VertexPainterConstant& other);
         VertexPainterConstant& operator=(VertexPainterConstant&& other);
         
-        void constantize() const;
-        
         // Paint 'vertices' according to a constant real number.
         // 'bounding_box', 'iteration_of_vertices' and 'max_recursion' are not used.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,

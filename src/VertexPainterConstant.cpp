@@ -45,11 +45,6 @@ namespace colors
         return std::make_shared<VertexPainterConstant>(get_target()->get_generator()->clone());
     }
     
-    void VertexPainterConstant::constantize() const
-    {
-        notify();
-    }
-    
     void VertexPainterConstant::paint_vertices(std::vector<sf::Vertex>& vertices,
                                              const std::vector<int>&,
                                              int,
