@@ -71,8 +71,6 @@ namespace colors
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone_impl() const override;
 
-        std::vector<sf::Vertex> vertices_copy_;
-        
         friend impl::ColorGeneratorComposite;
         std::shared_ptr<impl::ColorGeneratorComposite> color_distributor_;        
         impl::VertexPainterBufferObserver main_painter_;

@@ -450,9 +450,9 @@ namespace
         }
     }
 
-    void interact_with(colors::VertexPainterComposite& painter, bool is_inside_composite)
+    void interact_with(colors::VertexPainterComposite& painter)
     {
-        procgui::interact_with(*painter.get_main_painter(), "Slave Painter", true, is_inside_composite);
+        procgui::interact_with(*painter.get_main_painter(), "Slave Painter", true);
 
         int index = 0;
         auto child_painters = painter.get_child_painters();
@@ -473,7 +473,7 @@ namespace
             ImGui::PushID(index);
             
             push_embedded();
-            ::procgui::interact_with(**it, "", false, true);
+            ::procgui::interact_with(**it, "", false /* is_slave_of_composite */);
             pop_embedded();
 
             ::ext::ImGui::PushStyleRedButton();
@@ -511,8 +511,7 @@ namespace procgui
 {
     void interact_with(colors::VertexPainterBuffer& painter_buffer,
                        const std::string& name,
-                       bool is_slave_of_composite,
-                       bool is_inside_composite)
+                       bool is_slave_of_composite)
     {
         if (!set_up(name))
         {
@@ -556,27 +555,16 @@ namespace procgui
         }
 
         bool new_generator = false;
-        if (!is_slave_of_composite && !is_inside_composite)
+        if (!is_slave_of_composite)
         {
             const char* generators[6] = {"Linear", "Radial", "Random", "Sequential", "Iterative", "Composite"};
             new_generator =  ImGui::ListBox("Vertex Painter", &index, generators, 6);
             
         }
-        else if (is_slave_of_composite && !is_inside_composite)
+        else 
         {
             const char* generators[5] = {"Linear", "Radial", "Random", "Sequential", "Iterative"};
             new_generator = ImGui::ListBox("Vertex Painter", &index, generators, 5);
-        }
-        else if (!is_slave_of_composite && is_inside_composite)
-        {
-            const char* generators[5] = {"Linear", "Radial", "Random", "Sequential", "Composite"};
-            new_generator = ImGui::ListBox("Vertex Painter", &index, generators, 5);
-            index = index == 4 ? 5 : index;
-        }
-        else // is_slave_of_composite && is_inside_composite
-        {
-            const char* generators[4] = {"Linear", "Radial", "Random", "Sequential"};
-            new_generator = ImGui::ListBox("Vertex Painter", &index, generators, 4);
         }
         
         
@@ -646,7 +634,7 @@ namespace procgui
         else if (index == 5)
         {
             auto composite = std::dynamic_pointer_cast<colors::VertexPainterComposite>(painter);
-            ::interact_with(*composite, is_inside_composite);
+            ::interact_with(*composite);
         }
         else
         {

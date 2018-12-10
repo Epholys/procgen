@@ -95,7 +95,6 @@ namespace colors
     
     VertexPainterComposite::VertexPainterComposite()
         : VertexPainter{}
-        , vertices_copy_ {}
         , color_distributor_{std::make_shared<impl::ColorGeneratorComposite>(*this)}
         , main_painter_{std::make_shared<VertexPainterBuffer>(
             std::make_shared<VertexPainterLinear>(color_distributor_)), *this}
@@ -106,7 +105,6 @@ namespace colors
 
     VertexPainterComposite::VertexPainterComposite(const std::shared_ptr<ColorGenerator> gen)
         : VertexPainter{gen}
-        , vertices_copy_ {}
         , color_distributor_{std::make_shared<impl::ColorGeneratorComposite>(*this)}
         , main_painter_{std::make_shared<VertexPainterBuffer>(
                             std::make_shared<VertexPainterLinear>(color_distributor_)), *this}
@@ -118,7 +116,6 @@ namespace colors
     
     VertexPainterComposite::VertexPainterComposite(const VertexPainterComposite& other)
         : VertexPainter{other}
-        , vertices_copy_{other.vertices_copy_}
         , color_distributor_{other.color_distributor_}
         , main_painter_{other.main_painter_}
         , vertices_index_groups_{other.vertices_index_groups_}
@@ -128,7 +125,6 @@ namespace colors
 
     VertexPainterComposite::VertexPainterComposite(VertexPainterComposite&& other)
         : VertexPainter{std::move(other)}
-        , vertices_copy_{std::move(other.vertices_copy_)}
         , color_distributor_{std::move(other.color_distributor_)}
         , main_painter_{std::move(other.main_painter_)}
         , vertices_index_groups_{std::move(other.vertices_index_groups_)}
@@ -141,7 +137,6 @@ namespace colors
         if (this != &other)
         {
             VertexPainter::operator=(other);
-            vertices_copy_ = other.vertices_copy_;
             color_distributor_ = other.color_distributor_;
             main_painter_ = other.main_painter_;
             child_painters_ = other.child_painters_;
@@ -155,7 +150,6 @@ namespace colors
         if (this != &other)
         {
             VertexPainter::operator=(other);
-            vertices_copy_ = std::move(other.vertices_copy_);
             color_distributor_ = std::move(other.color_distributor_);
             main_painter_ = std::move(other.main_painter_);
             child_painters_ = std::move(other.child_painters_);
@@ -201,7 +195,8 @@ namespace colors
                                     sf::FloatRect bounding_box)
 
     {
-        vertices_copy_ = vertices;
+        auto vertices_copy = vertices;
+        auto iteration_of_vertices_copy = iteration_of_vertices;
         color_distributor_->reset_index();
         vertices_index_groups_.clear();
         for(auto i=0u; i<child_painters_.size(); ++i)
@@ -209,27 +204,31 @@ namespace colors
             vertices_index_groups_.push_back({});
         }
 
-        main_painter_.get_painter_buffer()->get_painter()->paint_vertices(vertices_copy_,
+        main_painter_.get_painter_buffer()->get_painter()->paint_vertices(vertices_copy,
                                                                           iteration_of_vertices,
                                                                           max_recursion,
                                                                           bounding_box);
 
         std::vector<std::vector<sf::Vertex>> vertices_groups;
+        std::vector<std::vector<int>> iteration_of_vertices_groups;
         for(const auto& v : vertices_index_groups_)
         {
-            std::vector<sf::Vertex> part;
+            std::vector<sf::Vertex> vertices_part;
+            std::vector<int> iteration_of_vertices_part;
             for(auto idx : v)
             {
-                part.push_back(vertices_copy_.at(idx));
+                vertices_part.push_back(vertices_copy.at(idx));
+                iteration_of_vertices_part.push_back(iteration_of_vertices_copy.at(idx));
             }
-            vertices_groups.push_back(part);
+            vertices_groups.push_back(vertices_part);
+            iteration_of_vertices_groups.push_back(iteration_of_vertices_part);
         }
 
         auto idx = 0u;
         for(auto& painter_it : child_painters_)
         {
             painter_it.get_painter_buffer()->get_painter()->paint_vertices(vertices_groups.at(idx),
-                                                                           iteration_of_vertices,
+                                                                           iteration_of_vertices_groups.at(idx),
                                                                            max_recursion,
                                                                            bounding_box);
             ++idx;
@@ -252,10 +251,10 @@ namespace colors
         {
             for (auto idx : v)
             {
-                vertices_copy_.at(idx) = flattened_groups_.at(i++);
+                vertices_copy.at(idx) = flattened_groups_.at(i++);
             }
         }
 
-        vertices = vertices_copy_;
+        vertices = vertices_copy;
     }
 }
