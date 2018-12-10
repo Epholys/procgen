@@ -63,7 +63,15 @@ namespace procgui {
                        const std::string& name,
                        bool is_slave_of_composite=false);
 
-    void interact_with(colors::ColorGeneratorBuffer& color_buffer, const std::string& name);
+    enum class color_buffer_mode
+    {
+        CONSTANT = 1,
+        GRADIENTS = 1 << 1,
+        ALL = CONSTANT | GRADIENTS,
+    };
+    void interact_with(colors::ColorGeneratorBuffer& color_buffer,
+                       const std::string& name,
+                       color_buffer_mode mode = color_buffer_mode::ALL);
 
     #include "procgui.tpp"
 
