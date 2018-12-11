@@ -78,15 +78,16 @@ namespace colors
             return;
         }
 
+        // TODO: document non-opt.
         int block_index = 0;
-        sf::Color color {sf::Color::White};
+        float rand = 0;
         for (auto& v : vertices)
         {
             if (block_index % block_size_ == 0)
             {
-                float rand = math::random_real(0, 1);
-                color = generator->get(rand);
+                rand = math::random_real(0, 1);
             }
+            sf::Color color = generator->get(rand);
             color.a = v.color.a;
             v.color = color;
             ++block_index;
