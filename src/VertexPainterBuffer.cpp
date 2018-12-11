@@ -1,10 +1,11 @@
 #include "VertexPainterBuffer.h"
+#include "VertexPainterConstant.h"
 
 namespace colors
 {
     VertexPainterBuffer::VertexPainterBuffer()
         : Observable{}
-        , OPainter{std::make_shared<VertexPainterLinear>()}
+        , OPainter{std::make_shared<VertexPainterConstant>()}
     {
         add_callback([this](){notify();});
     }
