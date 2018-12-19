@@ -104,10 +104,10 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
                                                production_cache_.end(),
                                                [](const auto& pair1, const auto& pair2)
                                                { return pair1.first < pair2.first; });
-    auto highest_iteration= std::max_element(iteration_count_cache_.begin(),
-                                                   iteration_count_cache_.end(),
-                                                   [](const auto& pair1, const auto& pair2)
-                                                   { return pair1.first < pair2.first; });
+    auto highest_iteration = std::max_element(iteration_count_cache_.begin(),
+                                              iteration_count_cache_.end(),
+                                              [](const auto& pair1, const auto& pair2)
+                                              { return pair1.first < pair2.first; });
 
     // Invariant check: the production cache element count must be equal or
     // greater than the iteration one.
@@ -167,7 +167,7 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
                 }
             }
 
-            // If the current predecessor must be counter, add 1 to each element
+            // If the current predecessor must be counted, add 1 to each element
             // of the successor.
             char order = base_iteration.at(j);
             if (iteration_predecessors_.find(c) != std::string::npos)
@@ -185,7 +185,7 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
         else
         {
             base_production = tmp_production;
-            production_cache_.emplace(highest_production->first + i + 1, tmp_production);
+            production_cache_.emplace(highest_iteration->first + i + 1, tmp_production);
         }
 
         base_iteration = tmp_iteration;
@@ -198,6 +198,8 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
     // a notification of the LSystem. A second notify would double the
     // computation time and may double the computation time of the hungrier
     // 'drawing::compute_vertices()' function.
+
+    Ensures(production_cache_.size() >= iteration_count_cache_.size());
     
     return {production_cache_.at(n), iteration_count_cache_.at(n).first, iteration_count_cache_.at(n).second};
 }
