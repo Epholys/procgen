@@ -52,13 +52,20 @@ namespace drawing
 
             // The current position and direction of the Turtle.
             struct State {
-                sf::Vector2<double> position;
-                sf::Vector2<double> direction;
+                ext::sf::Vector2d direction;
+                double width;
+                double old_width;
+                ext::sf::Vector2d position_right;
+                ext::sf::Vector2d position_left;
             };
-            State state { {0, 0}, // The position on-screen is set in
+            State state { {std::cos(parameters.get_starting_angle()),
+                           std::sin(parameters.get_starting_angle())},
+                           parameters.get_starting_width(),
+                           parameters.get_starting_width(),
+                           {0, 0}, // The position on-screen is set in
                                   // LSystemView with transforms.
-                          {std::cos(parameters.get_starting_angle()),
-                           std::sin(parameters.get_starting_angle())}};
+                           {-std::sin(parameters.get_starting_angle()) * parameters.get_starting_width(),
+                            std::cos(parameters.get_starting_angle()) * parameters.get_starting_width()}};
 
             // The state of a turtle can be saved and loaded in a stack.
             std::stack<State> stack { };

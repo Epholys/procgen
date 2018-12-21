@@ -3,13 +3,17 @@
 namespace drawing
 {
     DrawingParameters::DrawingParameters(const ext::sf::Vector2d& starting_position,
-                      double starting_angle,
-                      double delta_angle,
-                      double step,
-                      int n_iter)
+                                         double starting_angle,
+                                         double delta_angle,
+                                         double starting_width,
+                                         double width_ratio,
+                                         double step,
+                                         int n_iter)
         : starting_position_ {starting_position}
         , starting_angle_ {starting_angle}
         , delta_angle_ {delta_angle}
+        , starting_width_{starting_width}
+        , width_ratio_{width_ratio}
         , step_ {step}
         , n_iter_ {n_iter}
     {
@@ -31,6 +35,14 @@ namespace drawing
     double DrawingParameters::get_delta_angle() const
     {
         return delta_angle_;
+    }
+    double DrawingParameters::get_starting_width() const
+    {
+        return starting_width_;
+    }
+    double DrawingParameters::get_width_ratio() const
+    {
+        return width_ratio_;
     }
     double DrawingParameters::get_step() const
     {
@@ -67,6 +79,15 @@ namespace drawing
         n_iter_ = n_iter;
         notify();
     }
-
+    void DrawingParameters::set_starting_width(double starting_width)
+    {
+        starting_width_ = starting_width;
+        notify();
+    }
+    void DrawingParameters::set_width_ratio(double width_ratio)
+    {
+        width_ratio_ = width_ratio;
+        notify();
+    }
 }
 

@@ -28,6 +28,8 @@ namespace drawing
         DrawingParameters(const ext::sf::Vector2d& starting_position,
                           double starting_angle,
                           double delta_angle,
+                          double starting_width,
+                          double width_ratio,
                           double step,
                           int n_iter);
         DrawingParameters(const DrawingParameters& params) = default;
@@ -36,6 +38,8 @@ namespace drawing
         ext::sf::Vector2d get_starting_position() const;
         double get_starting_angle() const;
         double get_delta_angle() const;
+        double get_starting_width() const;
+        double get_width_ratio() const;
         double get_step() const;
         int get_n_iter() const;
 
@@ -45,6 +49,8 @@ namespace drawing
         void set_starting_position(const ext::sf::Vector2d starting_position); 
         void set_starting_angle(double starting_angle);
         void set_delta_angle(double delta_angle);
+        void set_starting_width(double starting_width);
+        void set_width_ratio(double width_ratio);
         void set_step(double step);
         void set_n_iter(int n_iter);
         
@@ -58,6 +64,10 @@ namespace drawing
         // radian). Initialized at an arbitrary value.
         double delta_angle_ {math::pi / 2 };
 
+        double starting_width_ {20.};
+
+        double width_ratio_ {0.95};
+        
         // When 'move_forward' order is executed, the Turtle will move
         // forward 'step' pixels (at default zoom level). Initialized
         // at an arbitrary value. 

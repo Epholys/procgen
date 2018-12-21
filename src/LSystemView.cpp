@@ -298,7 +298,7 @@ namespace procgui
         }
 
         // Draw the vertices.
-        target.draw(vertices_.data(), vertices_.size(), sf::LineStrip, get_transform());
+        target.draw(vertices_.data(), vertices_.size(), sf::Triangles, get_transform());
 
         if (is_selected_)
         {
