@@ -213,6 +213,8 @@ namespace procgui
         ImGui::Text("%.lf", math::rad_to_degree(parameters.get_delta_angle())); ImGui::SameLine();
         ImGui::Text("degree");
 
+        // TODO others
+        
         // --- Step ---
         ImGui::Text("Step:"); ImGui::SameLine(align);
         ImGui::Text("%.1lf", parameters.get_step());
@@ -274,6 +276,21 @@ namespace procgui
             parameters.set_delta_angle(math::degree_to_rad(delta_angle_deg));
         }
 
+        double starting_width = parameters.get_starting_width();
+        if (ext::ImGui::DragDouble("Starting width", &starting_width,
+                                   0.1, 0., std::numeric_limits<double>::max()))
+        {
+            parameters.set_starting_width(starting_width);
+        }
+
+        double width_ratio = parameters.get_width_ratio();
+        if (ext::ImGui::DragDouble("Width ratio", &width_ratio,
+                                   0.001, 0., 1.))
+        {
+            parameters.set_width_ratio(width_ratio);
+        }
+
+        
         // --- Step ---
         double step = parameters.get_step();
         if(ext::ImGui::DragDouble("Step", &step, 0.2f, 0.f, 0.f, "%#.1lf"))
