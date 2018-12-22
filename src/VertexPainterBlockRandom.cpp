@@ -88,7 +88,7 @@ namespace colors
                 rand = math::random_real(0, 1);
             }
             sf::Color color = generator->get(rand);
-            color.a = v.color.a;
+            // color.a = v.color.a;
             v.color = color;
             ++block_index;
         }

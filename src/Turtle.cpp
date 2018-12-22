@@ -22,6 +22,8 @@ namespace drawing
     {
         const auto [str, rec, max] = lsys.produce(parameters.get_n_iter());
         Turtle turtle (parameters, rec);
+
+        // std::cout << "________________________________________________________________";
         
         for (auto c : str)
         {

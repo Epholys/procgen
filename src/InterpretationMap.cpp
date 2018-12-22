@@ -18,13 +18,12 @@ namespace drawing
         // Go forward following the direction vector.
         // turtle.vertices.push_back(sf::Vector2f(turtle.state.position));
         // turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-        double new_width = turtle.state.width * turtle.parameters.get_width_ratio();
-        new_width = new_width < 1. ? 1. : new_width;
-        double difference = (turtle.state.width - new_width) / 2.;
+        //double new_width = turtle.state.old_width * turtle.parameters.get_width_ratio();
+        double difference = (turtle.state.old_width - turtle.state.width) / 2.;
         double dx1 = turtle.parameters.get_step() * turtle.state.direction.x - normal.x * difference;
-        double dy1 = turtle.parameters.get_step() * -turtle.state.direction.y - normal.y * difference;
+        double dy1 = turtle.parameters.get_step() * -turtle.state.direction.y + normal.y * difference;
         double dx2 = turtle.parameters.get_step() * turtle.state.direction.x + normal.x * difference;
-        double dy2 = turtle.parameters.get_step() * -turtle.state.direction.y + normal.y * difference;
+        double dy2 = turtle.parameters.get_step() * -turtle.state.direction.y - normal.y * difference;
         ext::sf::Vector2d upleft = downleft + ext::sf::Vector2d{dx1, dy1};
         ext::sf::Vector2d upright = downright + ext::sf::Vector2d{dx2, dy2};
 
@@ -41,9 +40,11 @@ namespace drawing
         turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
         turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
 
+        // std::cout << "old_Width: " << turtle.state.old_width << " ; width : " << turtle.state.width << "\n";
+        
         turtle.state.position_left = upleft;
         turtle.state.position_right = upright;
-        turtle.state.width = new_width;
+        turtle.state.old_width = turtle.state.width;
     }
 
     void turn_right_fn(Turtle& turtle)
@@ -94,9 +95,11 @@ namespace drawing
         turtle.state.position_left = v;
     }
 
+    // TODO change "position"
     void save_position_fn(Turtle& turtle)
     {
         turtle.stack.push(turtle.state);
+        turtle.state.width = turtle.state.width * turtle.parameters.get_width_ratio();
     }
 
     void load_position_fn(Turtle& turtle)
@@ -107,8 +110,10 @@ namespace drawing
         }
         else
         {
+            // std::cout << "before: " << turtle.state.width << " ; ";
             // turtle.vertices.push_back( {turtle.vertices.back().position, sf::Color::Transparent} );
             turtle.state = turtle.stack.top();
+            // std::cout << "after: " << turtle.state.width << std::endl;
             // turtle.vertices.push_back( {sf::Vector2f(turtle.state.position), sf::Color::Transparent} );
             // turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
             // turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));

@@ -82,7 +82,7 @@ namespace colors
             float integral;
             float lerp = std::modf((i * factor_) / size, &integral);
             sf::Color color = generator->get(lerp);
-            color.a = vertices[i].color.a;
+            // color.a = vertices[i].color.a;
             vertices[i].color = color;
         }
     }

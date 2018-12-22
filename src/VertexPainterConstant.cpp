@@ -61,7 +61,7 @@ namespace colors
         for (auto& v : vertices)
         {
             sf::Color color = generator->get(.5);
-            color.a = v.color.a;
+            // color.a = v.color.a;
             v.color = color;
         }
     }

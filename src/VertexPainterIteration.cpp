@@ -72,7 +72,7 @@ namespace colors
         {
             sf::Color color = generator->get((vertices_iteration.at(i)-1) / (float(max_iteration)-1));
             sf::Vertex& v = vertices.at(i);
-            color.a = v.color.a;
+            // color.a = v.color.a;
             v.color = color;
         }
     }

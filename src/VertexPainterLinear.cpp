@@ -96,7 +96,7 @@ namespace colors
             float lerp = geometry::distance(projection, opposite_intersection) / distance;
 
             sf::Color color = generator->get(lerp);
-            color.a = v.color.a;
+            // color.a = v.color.a;
             v.color = color;
         }
 
