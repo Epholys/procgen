@@ -25,7 +25,10 @@ using namespace controller;
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(window::window_size.x, window::window_size.y), "Procgen");
+    sf::RenderWindow window(sf::VideoMode(window::window_size.x, window::window_size.y),
+                            "Procgen",
+                            sf::Style::Default,
+                            sf::ContextSettings(0, 0, 8));
     window.setVerticalSyncEnabled(true);
     ImGui::SFML::Init(window);
 
