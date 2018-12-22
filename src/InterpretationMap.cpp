@@ -27,18 +27,18 @@ namespace drawing
         ext::sf::Vector2d upleft = downleft + ext::sf::Vector2d{dx1, dy1};
         ext::sf::Vector2d upright = downright + ext::sf::Vector2d{dx2, dy2};
 
-        turtle.vertices.push_back(sf::Vector2f(downleft));
-        turtle.vertices.push_back(sf::Vector2f(upleft));
-        turtle.vertices.push_back(sf::Vector2f(downright));
-        turtle.vertices.push_back(sf::Vector2f(downright));
-        turtle.vertices.push_back(sf::Vector2f(upleft));
-        turtle.vertices.push_back(sf::Vector2f(upright));
-        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
+        turtle.vertices.push_front(sf::Vector2f(downleft));
+        turtle.vertices.push_front(sf::Vector2f(upleft));
+        turtle.vertices.push_front(sf::Vector2f(downright));
+        turtle.vertices.push_front(sf::Vector2f(downright));
+        turtle.vertices.push_front(sf::Vector2f(upleft));
+        turtle.vertices.push_front(sf::Vector2f(upright));
+        turtle.iteration_of_vertices.push_front(turtle.iteration_vec.at(turtle.iteration_index));
+        turtle.iteration_of_vertices.push_front(turtle.iteration_vec.at(turtle.iteration_index));
+        turtle.iteration_of_vertices.push_front(turtle.iteration_vec.at(turtle.iteration_index));
+        turtle.iteration_of_vertices.push_front(turtle.iteration_vec.at(turtle.iteration_index));
+        turtle.iteration_of_vertices.push_front(turtle.iteration_vec.at(turtle.iteration_index));
+        turtle.iteration_of_vertices.push_front(turtle.iteration_vec.at(turtle.iteration_index));
 
         // std::cout << "old_Width: " << turtle.state.old_width << " ; width : " << turtle.state.width << "\n";
         
@@ -60,12 +60,12 @@ namespace drawing
              v.x * -turtle.sin + v.y * turtle.cos};
         v += turtle.state.position_left;
 
-        turtle.vertices.push_back(sf::Vector2f(turtle.state.position_left));
-        turtle.vertices.push_back(sf::Vector2f(turtle.state.position_right));
-        turtle.vertices.push_back(sf::Vector2f(v));
-        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
+        turtle.vertices.push_front(sf::Vector2f(turtle.state.position_left));
+        turtle.vertices.push_front(sf::Vector2f(turtle.state.position_right));
+        turtle.vertices.push_front(sf::Vector2f(v));
+        turtle.iteration_of_vertices.push_front(turtle.iteration_vec.at(turtle.iteration_index));
+        turtle.iteration_of_vertices.push_front(turtle.iteration_vec.at(turtle.iteration_index));
+        turtle.iteration_of_vertices.push_front(turtle.iteration_vec.at(turtle.iteration_index));
 
         turtle.state.position_right = v;
 
@@ -84,12 +84,12 @@ namespace drawing
              v.x * turtle.sin + v.y * turtle.cos};
         v += turtle.state.position_right;
 
-        turtle.vertices.push_back(sf::Vector2f(turtle.state.position_left));
-        turtle.vertices.push_back(sf::Vector2f(turtle.state.position_right));
-        turtle.vertices.push_back(sf::Vector2f(v));
-        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
+        turtle.vertices.push_front(sf::Vector2f(turtle.state.position_left));
+        turtle.vertices.push_front(sf::Vector2f(turtle.state.position_right));
+        turtle.vertices.push_front(sf::Vector2f(v));
+        turtle.iteration_of_vertices.push_front(turtle.iteration_vec.at(turtle.iteration_index));
+        turtle.iteration_of_vertices.push_front(turtle.iteration_vec.at(turtle.iteration_index));
+        turtle.iteration_of_vertices.push_front(turtle.iteration_vec.at(turtle.iteration_index));
 
 
         turtle.state.position_left = v;

@@ -44,7 +44,10 @@ namespace drawing
             ++turtle.iteration_index;
         }
 
+        std::vector<sf::Vertex> vertices (begin(turtle.vertices), end(turtle.vertices));
+        std::vector<int> iteration_of_vertices (begin(turtle.iteration_of_vertices), end(turtle.iteration_of_vertices));
+        
         Ensures(turtle.vertices.size() == turtle.iteration_of_vertices.size());
-        return {turtle.vertices, turtle.iteration_of_vertices, max};
+        return {vertices, iteration_of_vertices, max};
     }
 }

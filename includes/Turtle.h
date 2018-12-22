@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <deque>
 #include <stack>
 
 #include "LSystem.h"
@@ -73,7 +74,7 @@ namespace drawing
             // Each time the Turtle changes its position, the new one is saved
             // in a vertex. However, we can jump from position to position, so
             // it there is additional transparent vertices between jumps.
-            std::vector<sf::Vertex> vertices { };
+            std::deque<sf::Vertex> vertices { };
 
 
             // All the iteration count produced by the LSystem. For each new
@@ -87,7 +88,7 @@ namespace drawing
             // iteration count is produced by the LSystem and saved in
             // 'iteration_vec', the operation is simply to copy it in this
             // vector corresponding to the vertices.
-            std::vector<int> iteration_of_vertices;
+            std::deque<int> iteration_of_vertices;
         };
     }
 
