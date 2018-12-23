@@ -67,9 +67,15 @@ namespace colors
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 
+        static bool has_copied_painter();
+        static std::shared_ptr<VertexPainter> get_copied_painter();
+        static void save_painter(std::shared_ptr<VertexPainter> painter);
+
     private:
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone_impl() const override;
+
+        static std::shared_ptr<VertexPainter> copied_painter_;
 
         friend impl::ColorGeneratorComposite;
         std::shared_ptr<impl::ColorGeneratorComposite> color_distributor_;        

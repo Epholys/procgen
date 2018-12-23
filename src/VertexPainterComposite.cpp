@@ -93,6 +93,8 @@ namespace colors
 
     //----------------------------------------------------------------------
     
+    std::shared_ptr<VertexPainter> VertexPainterComposite::copied_painter_ {};
+
     VertexPainterComposite::VertexPainterComposite()
         : VertexPainter{}
         , color_distributor_{std::make_shared<impl::ColorGeneratorComposite>(*this)}
@@ -256,5 +258,20 @@ namespace colors
         }
 
         vertices = vertices_copy;
+    }
+
+
+    bool VertexPainterComposite::has_copied_painter()
+    {
+        return bool(copied_painter_);
+    }
+    std::shared_ptr<VertexPainter> VertexPainterComposite::get_copied_painter()
+    {
+        Expects(has_copied_painter());
+        return copied_painter_->clone();
+    }
+    void VertexPainterComposite::save_painter(std::shared_ptr<VertexPainter> painter)
+    {
+        copied_painter_ = painter->clone();
     }
 }
