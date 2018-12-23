@@ -504,16 +504,27 @@ namespace
         int index = 0;
         auto child_painters = painter.get_child_painters();
         auto to_remove = end(child_painters);
-        bool add_painter = false;
+        bool add_new_painter = false;
+        bool add_copied_painter = false;
         auto to_add = end(child_painters);
 
         ::ext::ImGui::PushStyleGreenButton();
         if (ImGui::Button("Add Painter here"))
         {
             to_add = begin(child_painters);
-            add_painter = true;
+            add_new_painter = true;
         }
         ImGui::PopStyleColor(3);
+
+        ::ext::ImGui::PushStyleTurquoiseButton();
+        if (colors::VertexPainterComposite::has_copied_painter() && ImGui::Button("Paste copied Painter here"))
+        {
+            ImGui::SameLine();
+            to_add = begin(child_painters);
+            add_copied_painter = true;
+        }
+        ImGui::PopStyleColor(3);
+
         
         for (auto it = begin(child_painters); it != end(child_painters); ++it)
         {
@@ -523,33 +534,63 @@ namespace
             ::procgui::interact_with(**it, "", false /* is_slave_of_composite */);
             pop_embedded();
 
-            ::ext::ImGui::PushStyleRedButton();
-            if (it != begin(child_painters) && ImGui::Button("Remove Previous Painter"))
-            {
-                to_remove = it;
-            }
-            ImGui::PopStyleColor(3);
-
             ::ext::ImGui::PushStyleGreenButton();
             if (ImGui::Button("Add Painter here"))
             {
                 to_add = next(it);
-                add_painter = true;
+                add_new_painter = true;
             }
             ImGui::PopStyleColor(3);
 
+            if (it != begin(child_painters))
+            {
+                ImGui::SameLine();
+                ::ext::ImGui::PushStyleRedButton();
+                if (ImGui::Button("Remove previous Painter"))
+                {
+                    to_remove = it;
+                }
+                ImGui::PopStyleColor(3);
+            }
+
+            ::ext::ImGui::PushStylePurpleButton();
+            if (ImGui::Button("Copy previous Painter"))
+            {
+                colors::VertexPainterComposite::save_painter((*it)->get_target());
+            }
+            ImGui::PopStyleColor(3);
+
+            if (colors::VertexPainterComposite::has_copied_painter())
+            {
+                ImGui::SameLine();
+                ::ext::ImGui::PushStyleTurquoiseButton();
+                if(ImGui::Button("Paste copied Painter here"))
+                {
+                    to_add = next(it);
+                    add_copied_painter = true;
+                }
+                ImGui::PopStyleColor(3);
+            }
+            
+            ImGui::Separator();
             ImGui::PopID();
             index++;
         }
-
+        
         if (to_remove != end(child_painters))
         {
             child_painters.erase(to_remove);
             painter.set_child_painters(child_painters);
         }
-        else if (add_painter)
+        else if (add_new_painter)
         {
             child_painters.insert(to_add, std::make_shared<colors::VertexPainterBuffer>());
+            painter.set_child_painters(child_painters);
+        }
+        else if (add_copied_painter)
+        {
+            child_painters.insert(to_add,
+                                  std::make_shared<colors::VertexPainterBuffer>(colors::VertexPainterComposite::get_copied_painter()));
             painter.set_child_painters(child_painters);
         }
     }
