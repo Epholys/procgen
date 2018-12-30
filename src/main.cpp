@@ -23,7 +23,7 @@ using namespace math;
 using namespace procgui;
 using namespace controller;
 
-int main()
+int main(int argc, char* argv[])
 {
     sf::RenderWindow window(sf::VideoMode(window::window_size.x, window::window_size.y),
                             "Procgen",
@@ -32,42 +32,70 @@ int main()
     window.setVerticalSyncEnabled(true);
     ImGui::SFML::Init(window);
 
-    // auto serpinski = std::make_shared<LSystem>(LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
-    auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } }, "X" });
-    // auto fract = std::make_shared<LSystem>(LSystem { "F", { { 'F', "FF+F" } } });
-    auto map = std::make_shared<InterpretationMap>(default_interpretation_map);
-
-    // auto serpinski_param = std::make_shared<DrawingParameters>();
-    // serpinski_param->set_starting_position({ 1000, 600 });
-    // serpinski_param->set_starting_angle(0.f);
-    // serpinski_param->set_delta_angle(degree_to_rad(60.f));
-    // serpinski_param->set_step(7);
-    // serpinski_param->set_n_iter(5);
-    
-    auto plant_param = std::make_shared<DrawingParameters>();
-    plant_param->set_starting_position({ 400, 800 });
-    plant_param->set_starting_angle(degree_to_rad(80.f));
-    plant_param->set_delta_angle(degree_to_rad(25.f));
-    plant_param->set_n_iter(6);
-    plant_param->set_step(4);
-
-    // auto fract_param = std::make_shared<DrawingParameters>();
-    // fract_param->set_starting_position({ 400., 800. });
-    // fract_param->set_starting_angle(degree_to_rad(0.));
-    // fract_param->set_delta_angle(degree_to_rad(120.));
-    // fract_param->set_step(20.);
-    // fract_param->set_n_iter(10);
-
-    
-    LSystemView plant_view ("Plant", plant, map, plant_param);
-    // LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
-    // LSystemView fract_view ("Fract", fract, map, fract_param);
-    
+    bool open_default_lsystem = false;
     std::list<LSystemView> views;
-    // views.push_back(std::move(serpinski_view));
-    views.push_back(std::move(plant_view));
-    // views.push_back(std::move(fract_view));
+    if (argc == 2)
+    {
+        std::string filename = std::string(argv[1]);
+        std::cout << filename << std::endl;
+        std::ifstream ifs (filename);
+        if (!ifs.is_open())
+        {
+            open_default_lsystem = true;
+            std::cout << "is not open\n";
+        }
+        else
+        {
+            procgui::LSystemView loaded_view ({0, 0});
+            cereal::JSONInputArchive archive(ifs);
+            archive(loaded_view);
+            loaded_view.ref_parameters().set_starting_position({window::window_size.x / 4, window::window_size.y / 3});
+            views.push_back(std::move(loaded_view));
+        }
+    }
+    else
+    {
+        open_default_lsystem = true;
+    }
 
+    if (open_default_lsystem)
+    {
+        // auto serpinski = std::make_shared<LSystem>(LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
+        auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } }, "X" });
+        // auto fract = std::make_shared<LSystem>(LSystem { "F", { { 'F', "FF+F" } } });
+        auto map = std::make_shared<InterpretationMap>(default_interpretation_map);
+
+        // auto serpinski_param = std::make_shared<DrawingParameters>();
+        // serpinski_param->set_starting_position({ 1000, 600 });
+        // serpinski_param->set_starting_angle(0.f);
+        // serpinski_param->set_delta_angle(degree_to_rad(60.f));
+        // serpinski_param->set_step(7);
+        // serpinski_param->set_n_iter(5);
+    
+        auto plant_param = std::make_shared<DrawingParameters>();
+        plant_param->set_starting_position({ 400, 800 });
+        plant_param->set_starting_angle(degree_to_rad(80.f));
+        plant_param->set_delta_angle(degree_to_rad(25.f));
+        plant_param->set_n_iter(6);
+        plant_param->set_step(4);
+
+        // auto fract_param = std::make_shared<DrawingParameters>();
+        // fract_param->set_starting_position({ 400., 800. });
+        // fract_param->set_starting_angle(degree_to_rad(0.));
+        // fract_param->set_delta_angle(degree_to_rad(120.));
+        // fract_param->set_step(20.);
+        // fract_param->set_n_iter(10);
+
+    
+        LSystemView plant_view ("Plant", plant, map, plant_param);
+        // LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
+        // LSystemView fract_view ("Fract", fract, map, fract_param);
+    
+        // views.push_back(std::move(serpinski_view));
+        views.push_back(std::move(plant_view));
+        // views.push_back(std::move(fract_view));
+    }
+    
     sf::Clock delta_clock;
     while (window.isOpen())
     {
