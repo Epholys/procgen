@@ -10,7 +10,6 @@ namespace math
 {
     static const double pi = std::acos(-1.0L);
     static std::random_device random_dev;
-    static std::mt19937 random_generator(random_dev());
 
     double degree_to_rad (double deg);
     double rad_to_degree (double rad);
@@ -18,7 +17,13 @@ namespace math
     float degree_to_rad (float deg);
     float rad_to_degree (float rad);
 
-    double random_real(double min, double max);
+    template<typename Generator>
+    double random_real(Generator& gen, double min, double max)
+    {
+        std::uniform_real_distribution<> dis(min, max);
+        return dis(gen);
+    }
+    
 }
 
 namespace ext::sf

@@ -431,6 +431,13 @@ namespace
         {
             painter.set_block_size(block_size);
         }
+
+        ext::ImGui::PushStyleGreenButton();
+        if (ImGui::Button("Randomize"))
+        {
+            painter.randomize();
+        }
+        ImGui::PopStyleColor(3);
         
         if (!from_composite)
         {

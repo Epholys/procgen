@@ -7,11 +7,4 @@ namespace math
 
     float degree_to_rad (float deg) { return deg * pi / 180; }
     float rad_to_degree (float rad) { return rad * 180 / pi; }
-
-    double random_real(double min, double max)
-    {
-        std::uniform_real_distribution<> dis(min, max);
-        return dis(random_generator);
-    }
-
 }

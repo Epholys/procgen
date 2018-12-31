@@ -3,6 +3,7 @@
 
 
 #include "VertexPainter.h"
+#include "helper_math.h"
 
 namespace colors
 {
@@ -16,6 +17,8 @@ namespace colors
         VertexPainterRandom(VertexPainterRandom&& other);
         VertexPainterRandom& operator=(const VertexPainterRandom& other);
         VertexPainterRandom& operator=(VertexPainterRandom&& other);
+        
+        void randomize();
         
         int get_block_size() const;
         void set_block_size(int block_size);
@@ -32,6 +35,8 @@ namespace colors
         virtual std::shared_ptr<VertexPainter> clone_impl() const override;
 
         int block_size_;
+        std::mt19937::result_type random_seed_;
+        std::mt19937 random_generator_;
     };
 }
 
