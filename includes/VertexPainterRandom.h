@@ -17,8 +17,9 @@ namespace colors
         VertexPainterRandom& operator=(const VertexPainterRandom& other);
         VertexPainterRandom& operator=(VertexPainterRandom&& other);
         
-        void randomize() const;
-        
+        int get_block_size() const;
+        void set_block_size(int block_size);
+
         // Paint 'vertices' according to a random real number.
         // 'bounding_box', 'iteration_of_vertices' and 'max_recursion' are not used.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
@@ -29,6 +30,8 @@ namespace colors
     private:
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone_impl() const override;
+
+        int block_size_;
     };
 }
 
