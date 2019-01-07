@@ -82,7 +82,7 @@ namespace procgui
         // Translation transform to correct screen-space position of the
         // LSystem. 
         sf::Transform get_transform() const;
-        
+
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();
         void paint_vertices();
@@ -104,9 +104,9 @@ namespace procgui
     private:
         void update_callbacks();
         
-        // Unique identifier for each instance (with a growing id_count_).
-        // Used in the GUI.
-        static int id_count_;
+        // // Unique identifier for each instance (with a growing id_count_).
+        // // Used in the GUI.
+        // static int id_count_;
         int id_;
         // The unique color generator. Each id is associated with a unique
         // color. Static as shared between every objects.

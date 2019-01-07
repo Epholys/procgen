@@ -26,13 +26,15 @@ namespace colors
     class UniqueColor
     {
     public:
-        // Register an identifier 'id' and returns a unique color.
-        // If there is no available colors, generate a new color.
-        // Otherwise, link 'id' to an available color.
-        // Precondition:
-        //   - 'id' must be positive
-        //   - 'id' must not be already registered.
-        sf::Color register_id(int id);
+        // // Register an identifier 'id' and returns a unique color.
+        // // If there is no available colors, generate a new color.
+        // // Otherwise, link 'id' to an available color.
+        // // Precondition:
+        // //   - 'id' must be positive
+        // //   - 'id' must not be already registered.
+        // sf::Color register_id(int id);
+        int get_id();
+        
 
         // Remove an identifier 'id' from the 'map_' and mark its associated
         // color as available.
@@ -50,7 +52,16 @@ namespace colors
 
         // Set of color/identifier associations. A value of '-1' for an
         // identifier means the color associated is available.
-        std::vector<std::pair<sf::Color, int>> map_;
+        // A std::map<> is not used as the '-1' id is not unique, or as the
+        // sf::Color does not have a hash function.
+        std::vector<std::tuple<sf::Color, int, bool>> map_ {};
+
+        enum TupleElement
+        {
+            Color = 0,
+            Id,
+            Empty
+        };
 
         // Color generator variable.
         // Iteration number of the 'pass_'th pass.
@@ -58,6 +69,9 @@ namespace colors
         // The 'pass_' number. Each pass generate a color in a smaller
         // subdivision. 
         int pass_ {0};
+
+        int current_id_ {0};
+
     };
 }
 
