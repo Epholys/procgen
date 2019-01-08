@@ -127,10 +127,27 @@ namespace controller
             ImGui::Separator();
             try
             {
+                std::vector<fs::directory_entry> files;
                 // For each file of the 'save_dir_' directory...
                 for (const auto& file : fs::directory_iterator(save_dir_))
-                { 
-                    // ... displays it in a selectable list ...
+                {
+                    files.emplace_back(file);
+                }
+                std::sort(begin(files), end(files),
+                          [](const auto& left, const auto& right)
+                          {
+                              auto left_str = left.path().string();
+                              std::transform(begin(left_str), end(left_str), begin(left_str),
+                                             [](unsigned char c){return std::tolower(c);});
+                              auto right_str = right.path().string();
+                              std::transform(begin(right_str), end(right_str), begin(right_str),
+                                             [](unsigned char c){return std::tolower(c);});
+                              return left_str < right_str;                          
+                          });
+
+                for (const auto& file : files)
+                {
+                   // ... displays it in a selectable list ...
                    if (fs::is_regular_file(file.path()) &&
                         ImGui::Selectable(file.path().filename().c_str()))
                     {
@@ -237,8 +254,25 @@ namespace controller
             ImGui::Separator();
             try
             {
+                std::vector<fs::directory_entry> files;
                 // For each file of the 'save_dir_' directory...
                 for (const auto& file : fs::directory_iterator(save_dir_))
+                {
+                    files.emplace_back(file);
+                }
+                std::sort(begin(files), end(files),
+                          [](const auto& left, const auto& right)
+                          {
+                              auto left_str = left.path().string();
+                              std::transform(begin(left_str), end(left_str), begin(left_str),
+                                             [](unsigned char c){return std::tolower(c);});
+                              auto right_str = right.path().string();
+                              std::transform(begin(right_str), end(right_str), begin(right_str),
+                                             [](unsigned char c){return std::tolower(c);});
+                              return left_str < right_str;                          
+                          });
+
+                for (const auto& file : files)
                 {
                     // ... displays it in a selectable list ...
                     if (fs::is_regular_file(file.path()) &&
