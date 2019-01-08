@@ -8,7 +8,8 @@ namespace procgui
     using namespace colors;
 
     // int LSystemView::id_count_ = 0;
-    UniqueColor LSystemView::color_gen_ {};
+    UniqueId LSystemView::unique_ids_ {};
+    UniqueColor LSystemView::unique_colors_ {};
 
     void LSystemView::update_callbacks()
     {
@@ -27,8 +28,8 @@ namespace procgui
         , OMap {map}
         , OParams {params}
         , OPainter {painter}
-        , id_{color_gen_.get_id()}
-        , color_id_{color_gen_.get_color(id_)}
+        , id_{unique_ids_.get_id()}
+        , color_id_{unique_colors_.get_color(id_)}
         , name_ {name}
         , lsys_buff_ {lsys}
         , interpretation_buff_ {map}
@@ -62,8 +63,8 @@ namespace procgui
         , OMap {other.OMap::get_target()}
         , OParams {other.OParams::get_target()}
         , OPainter {other.OPainter::get_target()}
-        , id_{color_gen_.get_id()}
-        , color_id_{color_gen_.get_color(id_)}
+        , id_{unique_ids_.get_id()}
+        , color_id_{unique_colors_.get_color(id_)}
         , name_ {other.name_}
         , lsys_buff_ {other.lsys_buff_}
         , interpretation_buff_ {other.interpretation_buff_}
@@ -105,7 +106,6 @@ namespace procgui
         other.OPainter::set_target(nullptr);
 
         // the 'other' object must not matter in the 'color_gen_' anymore.
-        color_gen_.remove_id(other.id_);
         other.id_ = -1;
         other.color_id_ = sf::Color::Black;
         other.bounding_box_ = {};
@@ -120,8 +120,8 @@ namespace procgui
             OMap::set_target(other.OMap::get_target());
             OParams::set_target(other.OParams::get_target());
             OPainter::set_target(other.OPainter::get_target());
-            id_ = color_gen_.get_id();
-            color_id_ = color_gen_.get_color(id_);
+            id_ = unique_ids_.get_id();
+            color_id_ = unique_colors_.get_color(id_);
             name_ = {other.name_};
             lsys_buff_ = {other.lsys_buff_};
             interpretation_buff_ = {other.interpretation_buff_};
@@ -146,8 +146,8 @@ namespace procgui
             OMap::set_target(std::move(other.OMap::get_target()));
             OParams::set_target(std::move(other.OParams::get_target()));
             OPainter::set_target(std::move(other.OPainter::get_target()));
-            id_ =color_gen_.get_id();
-            color_id_ =color_gen_.get_color(id_);
+            id_ = other.id_;
+            color_id_ = other.color_id_;
             name_ = {std::move(other.name_)};
             lsys_buff_ = {std::move(other.lsys_buff_)};
             interpretation_buff_ = {std::move(other.interpretation_buff_)};
@@ -168,7 +168,6 @@ namespace procgui
             other.OPainter::set_target(nullptr);
 
             // the 'other' object must not matter in the 'color_gen_' anymore.
-            color_gen_.remove_id(other.id_);
             other.id_ = -1;
             other.color_id_ = sf::Color::Black;
             other.bounding_box_ = {};
@@ -184,7 +183,7 @@ namespace procgui
         // Unregister the id unless the object was moved.
         if (id_ != -1)
         {
-            color_gen_.remove_id(id_);
+            unique_ids_.remove_id(id_);
         }
     }
 

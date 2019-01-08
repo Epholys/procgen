@@ -26,21 +26,21 @@ namespace colors
     class UniqueColor
     {
     public:
-        // // Register an identifier 'id' and returns a unique color.
-        // // If there is no available colors, generate a new color.
-        // // Otherwise, link 'id' to an available color.
-        // // Precondition:
-        // //   - 'id' must be positive
-        // //   - 'id' must not be already registered.
-        // sf::Color register_id(int id);
-        int get_id();
+        // // // Register an identifier 'id' and returns a unique color.
+        // // // If there is no available colors, generate a new color.
+        // // // Otherwise, link 'id' to an available color.
+        // // // Precondition:
+        // // //   - 'id' must be positive
+        // // //   - 'id' must not be already registered.
+        // // sf::Color register_id(int id);
+        // int get_id();
         
 
-        // Remove an identifier 'id' from the 'map_' and mark its associated
-        // color as available.
-        // Precondition:
-        //   - 'id' must be registered.
-        void remove_id(int id);
+        // // Remove an identifier 'id' from the 'map_' and mark its associated
+        // // color as available.
+        // // Precondition:
+        // //   - 'id' must be registered.
+        // void remove_id(int id);
 
         // Get the color associated to the identifier 'id'.
         //   - 'id' must be registered.
@@ -50,18 +50,18 @@ namespace colors
         // Generate a new unique color.
         sf::Color new_color();
 
-        // Set of color/identifier associations. A value of '-1' for an
-        // identifier means the color associated is available.
-        // A std::map<> is not used as the '-1' id is not unique, or as the
-        // sf::Color does not have a hash function.
-        std::vector<std::tuple<sf::Color, int, bool>> map_ {};
+        // // Set of color/identifier associations. A value of '-1' for an
+        // // identifier means the color associated is available.
+        // // A std::map<> is not used as the '-1' id is not unique, or as the
+        // // sf::Color does not have a hash function.
+        // std::vector<std::tuple<sf::Color, int, bool>> map_ {};
 
-        enum TupleElement
-        {
-            Color = 0,
-            Id,
-            Empty
-        };
+        // enum TupleElement
+        // {
+        //     Color = 0,
+        //     Id,
+        //     Empty
+        // };
 
         // Color generator variable.
         // Iteration number of the 'pass_'th pass.
@@ -70,8 +70,8 @@ namespace colors
         // subdivision. 
         int pass_ {0};
 
-        int current_id_ {0};
-
+        // int current_id_ {0};
+        std::vector<sf::Color> colors_;
     };
 }
 

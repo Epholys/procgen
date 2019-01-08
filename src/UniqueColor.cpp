@@ -32,45 +32,46 @@ namespace colors
     //     }
     // }
 
-    int UniqueColor::get_id()
+    // int UniqueColor::get_id()
+    // {
+    //     auto empty_slot = std::find_if(begin(map_), end(map_),
+    //                                    [](const auto& p)
+    //                                    {return std::get<Empty>(p);});
+    //     if (empty_slot != end(map_))
+    //     {
+    //         std::get<Empty>(*empty_slot) = false;
+    //         return std::get<Id>(*empty_slot);
+    //     }
+    //     else
+    //     {
+    //         map_.push_back({new_color(), current_id_, false});
+    //         return current_id_++;
+    //     }
+    // }
+    
+    // void UniqueColor::remove_id(int id)
+    // {
+    //     // Assert precondition: 'id' must have been registered.
+    //     auto it = std::find_if(begin(map_), end(map_),
+    //                            [id](const auto& p)
+    //                            {return std::get<Id>(p) == id &&
+    //                                    !std::get<Empty>(p);});
+    //     Expects(it != end(map_));
+
+    //     // Mark the color as available.
+    //     std::get<Empty>(*it) = true;;
+    // }
+    sf::Color UniqueColor::get_color(int id)
     {
-        auto empty_slot = std::find_if(begin(map_), end(map_),
-                                       [](const auto& p)
-                                       {return std::get<Empty>(p);});
-        if (empty_slot != end(map_))
+        Expects(id >= 0 && id <= long(colors_.size()));
+        if (id == long(colors_.size()))
         {
-            std::get<Empty>(*empty_slot) = false;
-            return std::get<Id>(*empty_slot);
+            return new_color();
         }
         else
         {
-            map_.push_back({new_color(), current_id_, false});
-            return current_id_++;
+            return colors_.at(id);
         }
-    }
-    
-    void UniqueColor::remove_id(int id)
-    {
-        // Assert precondition: 'id' must have been registered.
-        auto it = std::find_if(begin(map_), end(map_),
-                               [id](const auto& p)
-                               {return std::get<Id>(p) == id &&
-                                       !std::get<Empty>(p);});
-        Expects(it != end(map_));
-
-        // Mark the color as available.
-        std::get<Empty>(*it) = true;;
-    }
-    sf::Color UniqueColor::get_color(int id)
-    {
-        // 'id' must have been registered.
-        auto it = std::find_if(begin(map_), end(map_),
-                               [id](const auto& p)
-                               {return std::get<Id>(p) == id &&
-                                       !std::get<Empty>(p);});
-        Expects(it != end(map_));
-
-        return std::get<Color>(*it);
     }
 
     sf::Color UniqueColor::new_color()
@@ -103,6 +104,8 @@ namespace colors
 
         float r, g, b;
         ImGui::ColorConvertHSVtoRGB(hue, .8, .8, r, g, b);
-        return sf::Color(r*255, g*255, b*255);
+        sf::Color new_color (r*255, g*255, b*255);
+        colors_.push_back(new_color);
+        return  new_color;
     }
 }

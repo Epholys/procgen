@@ -10,6 +10,7 @@
 #include "LSystemBuffer.h"
 #include "InterpretationMapBuffer.h"
 #include "UniqueColor.h"
+#include "UniqueId.h"
 #include "VertexPainterBuffer.h"
 
 namespace procgui
@@ -104,15 +105,19 @@ namespace procgui
     private:
         void update_callbacks();
         
-        // // Unique identifier for each instance (with a growing id_count_).
-        // // Used in the GUI.
-        // static int id_count_;
+        // // // Unique identifier for each instance (with a growing id_count_).
+        // // // Used in the GUI.
+        // // static int id_count_;
+        // int id_;
+        // // The unique color generator. Each id is associated with a unique
+        // // color. Static as shared between every objects.
+        // static colors::UniqueColor color_gen_;
+        // sf::Color color_id_; // Color associated to the id.
+        static UniqueId unique_ids_;
+        static colors::UniqueColor unique_colors_;
         int id_;
-        // The unique color generator. Each id is associated with a unique
-        // color. Static as shared between every objects.
-        static colors::UniqueColor color_gen_;
-        sf::Color color_id_; // Color associated to the id.
-
+        sf::Color color_id_;
+        
         // The window's name.
         std::string name_;
 
