@@ -15,54 +15,26 @@ namespace colors
     // interval between two values. The saturation and value component of HSV
     // are set to '0.8'.
     // 
-    // Usage: to get a unique color associated to an identifier, use
-    // 'register_id(id)'. 'get_color(id)' is used to get again the color
-    // associated to 'id'. 'remove_id(id)' remove the identifier and the
-    // associated color is marked as available for a new identifier.
+    // Usage: Usually defined as a static member, this class must be used in
+    // coordination with UniqueId : it generates the identifiers and UniqueColor
+    // generates the colors. Otherwise, the first id MUST be 0 and each new id
+    // MUST be the next number after the last id.
     // 
     // Invariant:
-    //   - Each color of 'map_' is unique.
-    //   - Each identifier of 'map_' is unique.
+    //   - Each color in 'colors_' is unique.
     class UniqueColor
     {
     public:
-        // // // Register an identifier 'id' and returns a unique color.
-        // // // If there is no available colors, generate a new color.
-        // // // Otherwise, link 'id' to an available color.
-        // // // Precondition:
-        // // //   - 'id' must be positive
-        // // //   - 'id' must not be already registered.
-        // // sf::Color register_id(int id);
-        // int get_id();
-        
-
-        // // Remove an identifier 'id' from the 'map_' and mark its associated
-        // // color as available.
-        // // Precondition:
-        // //   - 'id' must be registered.
-        // void remove_id(int id);
-
         // Get the color associated to the identifier 'id'.
-        //   - 'id' must be registered.
+        // Exceptions:
+        //   - Precondition: The first call to this function must have a 'id' of
+        //   0. Each new 'id' must the next number after the previous one.
         sf::Color get_color(int id);
 
     private:
-        // Generate a new unique color.
+        // Generate a new unique color. Must respect the invariant.
         sf::Color new_color();
-
-        // // Set of color/identifier associations. A value of '-1' for an
-        // // identifier means the color associated is available.
-        // // A std::map<> is not used as the '-1' id is not unique, or as the
-        // // sf::Color does not have a hash function.
-        // std::vector<std::tuple<sf::Color, int, bool>> map_ {};
-
-        // enum TupleElement
-        // {
-        //     Color = 0,
-        //     Id,
-        //     Empty
-        // };
-
+        
         // Color generator variable.
         // Iteration number of the 'pass_'th pass.
         int iter_ {0};
@@ -70,7 +42,7 @@ namespace colors
         // subdivision. 
         int pass_ {0};
 
-        // int current_id_ {0};
+        // All the unique colors, indexed by their position in this vector.
         std::vector<sf::Color> colors_;
     };
 }

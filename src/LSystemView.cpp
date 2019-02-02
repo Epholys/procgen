@@ -183,7 +183,7 @@ namespace procgui
         // Unregister the id unless the object was moved.
         if (id_ != -1)
         {
-            unique_ids_.remove_id(id_);
+            unique_ids_.free_id(id_);
         }
     }
 
