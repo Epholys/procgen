@@ -46,9 +46,8 @@ namespace drawing
 
             // Cosine and sine of the 'delta_angle'. Computed once to speed up
             // calculations.
-            const double cos = std::cos(parameters.get_delta_angle());
-            const double sin = std::sin(parameters.get_delta_angle());
-
+            double cos = std::cos(parameters.get_delta_angle());
+            double sin = std::sin(parameters.get_delta_angle());
 
             // The current position and direction of the Turtle.
             struct State {

@@ -10,7 +10,8 @@ namespace math
 {
     static const double pi = std::acos(-1.0L);
     static std::random_device random_dev;
-
+    static std::mt19937 default_random_generator_ {random_dev()};
+    
     double degree_to_rad (double deg);
     double rad_to_degree (double rad);
 
