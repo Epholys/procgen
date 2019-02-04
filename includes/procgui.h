@@ -61,7 +61,7 @@ namespace procgui {
 
     void interact_with(colors::VertexPainterBuffer& painter_buffer,
                        const std::string& name,
-                       bool is_slave_of_composite=false);
+                       bool is_from_composite=false);
 
     enum class color_buffer_mode
     {

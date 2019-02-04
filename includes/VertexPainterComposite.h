@@ -41,6 +41,8 @@ namespace colors
             VertexPainterBufferObserver& operator=(VertexPainterBufferObserver&& other);
 
             std::shared_ptr<VertexPainterBuffer> get_painter_buffer() const;
+            void set_painter_buffer(std::shared_ptr<VertexPainterBuffer> painter_buff);
+            
         private:
             VertexPainterComposite& painter_;
         };
@@ -59,6 +61,7 @@ namespace colors
 
         std::list<std::shared_ptr<VertexPainterBuffer>> get_child_painters() const;
         std::shared_ptr<VertexPainterBuffer> get_main_painter() const;
+        void set_main_painter(std::shared_ptr<VertexPainterBuffer> painter_buff);
                 
         void set_child_painters(const std::list<std::shared_ptr<VertexPainterBuffer>> painters);
        

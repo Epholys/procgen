@@ -88,7 +88,12 @@ namespace colors
         {
             return get_target();
         }
+        void VertexPainterBufferObserver::set_painter_buffer(std::shared_ptr<VertexPainterBuffer> painter_buff)
+        {
+            set_target(painter_buff);
+        }
 
+        
     }
 
     //----------------------------------------------------------------------
@@ -179,6 +184,12 @@ namespace colors
     {
         return main_painter_.get_painter_buffer();
     }
+
+    void VertexPainterComposite::set_main_painter(std::shared_ptr<VertexPainterBuffer> painter_buff)
+    {
+        main_painter_.set_painter_buffer(painter_buff);
+    }
+
                  
     void VertexPainterComposite::set_child_painters(const std::list<std::shared_ptr<VertexPainterBuffer>> painters)
     {
