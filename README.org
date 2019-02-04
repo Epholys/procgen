@@ -13,26 +13,45 @@
    - Dynamic GUIs to interact with the parameters
    - Basic and necessary user interactions (mouse dragging, adding, removing, copy-pasting)
    - Saving and loading LSystems to and from files
-   - Stub of colors
+   - Colors
 
 ** Main Roadmap
-   1. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
+   1. Make the generated vertices pretty (colors, growth, and width)
       * Painting the vertices by height, order of recursion, ...
       * Composite painting (e.g. i-th recursion brown, j-th recursion shade of greens)
       * Growth as the turtle order, recursion order, ...
       * Rectangle of different widths for recursion
       * Shaders ?
-   2. Add genetic algorithm or constraint-based algorithm for new LSystem generation
-   3. Extend the L-System and turtle interpretation
+   2. FIRST RELEASE !
+      * Correct [[Known Bugs]]
+      * Refactor [[Code Smells]]
+   3. Automate the application: generate images from the commandline
+   4. Add genetic algorithm or constraint-based algorithm for new LSystem generation
+   5. Extend the L-System and turtle interpretation
       * Parametric L-System
       * Context-sensitive L-System
       * Stochastic L-System
       * Parameters for each interpretation order (step for go_forward, delta_angle for turn_*)
 
 ** Known Bugs
-   - double precision is not enough when dealing with big geometric L-systems
-   - the GUI sometimes become irresponsive
-   - Correct zoom level and drag behaviour when resizing window (in Gnome)
+   - GUI sometimes become irresponsive (linked to the key 'CTRL')
+   - Zoom level and drag behaviour when resizing window is out of whack (in Gnome)
+   - Sometimes clicking outside of the windows makes the view jump
+
+** Code Smells
+   For the people who want to take a look at the code, there is some very ugly stuff, despite all my efforts. Here are some of them that will be fixed before the next release:
+   - Using the term "Buffer" and not "Wrapper"
+   - The wrappers are not consistently named as such (which could lead to confusion with the wrapped objects)
+   - In 'Observer', 'get/set_target()' is public
+   - Abuse of shared_ptr:
+     - too many dependencies
+     - not enough 'const' in getters and setters
+
+** Compiling
+   Make sure you have SFML installed, a C++17 compiler (with std::filesystem), and make.
+   Simply type =make optimized= :).
+   Other make recipees are documented in the Makefile.
+   
 
 ** Development framework
    - *Environment:* debian sid chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=
@@ -71,13 +90,12 @@
     Memory usage is directly linked to the size of the L-Systems calculated. These sizes grow exponentialy, so does the memory. As an example, with a simple L-System and 16 iterations, the resulting string is composed of tens of million of symbols. Saving these symbols and the 20-bytes-long vertices associated takes at least hundreds of MB in memory.
     Moreover, during the execution of =logo::computes_vertices=, we use a =std::vector= as data structure. Its allocation strategy (in g++ and MSVC) is to multiply the capacity by a number. As a consequence, this vector is at most "factor" times too large. In our case of hundreds of MB, it can be a serious toll. Fortunately, this vector is truncated when returned by the function.
     
-    I don't see an *obvious* way to reduce memory consumption. Symbols and vertices are already very small. We could reduce the size of the aforementioned vector by reserving just enough bytes for the vertices. But that means we would have to approximate a small upper-bound of the result of the L-System and also how much of its symbols will produce a new vertex. A whole mathematical problem.
+    We could reduce the size of the aforementioned vector by reserving just enough bytes for the vertices. But that means we would have to approximate a small upper-bound of the result of the L-System and also how much of its symbols will produce a new vertex. A whole mathematical problem.
 
     For now, I'll do nothing: I see no reasonable case to computes and display so much iterations of a L-System. I'll concentrate on optimizing execution time (with memory consumption in mind).
 
 *** Optimization ideas
     - Use raw OpenGL vertices instead of SFML's sf::Vertex to reduce their size (no texcoord for example)
-    - Use `sqrt` instead of `cos` and `sin` for angles to calculate vertex's position
 
 
 
