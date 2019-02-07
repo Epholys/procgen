@@ -664,24 +664,14 @@ namespace procgui
                        const std::string& name,
                        bool is_from_composite)
     {
-        if (!is_from_composite && !set_up(name))
+        if (!set_up(name))
         {
             // Early out if the display zone is collapsed.
             return;
         }
-        else if (is_from_composite) // TODO REMOVE
-        {
-            bool is_active = ImGui::TreeNode(name.c_str());
-            if(!is_active)
-            {
-                return;
-            }
-            ImGui::PushID(name.c_str());
-            ImGui::Indent();
-        }
 
         auto painter = painter_buffer.get_painter();
-        auto composite = std::shared_ptr<colors::VertexPainterComposite>();
+        std::shared_ptr<colors::VertexPainterComposite> composite;
         int index = -1;
         
         const auto& info = typeid(*painter).hash_code();
@@ -690,7 +680,7 @@ namespace procgui
         {
             composite = std::dynamic_pointer_cast<colors::VertexPainterComposite>(painter);
             index = ::vertex_painter_list(*(composite->get_main_painter()));
-            painter = composite->get_main_painter()->get_painter();
+            painter = composite->get_main_painter()->get_painter();  // UGLY ???!!!
         }
         else
         {
@@ -704,16 +694,16 @@ namespace procgui
 
         if (create_new_composite)
         {
-            composite = std::make_shared<colors::VertexPainterComposite>(painter->get_generator_buffer()->get_generator()->clone());
+            composite = std::make_shared<colors::VertexPainterComposite>();
             composite->set_main_painter(std::make_shared<colors::VertexPainterBuffer>(painter));
             painter_buffer.set_painter(composite);
-            // painter = painter_buffer.get_painter(); // UGLY ???!!!
         }
         if (remove_composite)
         {
-            composite = std::dynamic_pointer_cast<colors::VertexPainterComposite>(painter);
-            painter_buffer.set_painter(composite->get_main_painter()->get_painter());
-            // painter = painter_buffer.get_painter(); // UGLY ???!!!
+            painter = composite->get_main_painter()->get_painter();
+            painter->set_generator_buffer(std::make_shared<colors::ColorGeneratorBuffer>());
+            painter_buffer.set_painter(painter);
+            composite.reset();
         }
 
         // Does not use embedded_level, the generator will be displayed just
@@ -721,6 +711,7 @@ namespace procgui
         switch (index)
         {
         case 0:
+
         {
             auto constant = std::dynamic_pointer_cast<colors::VertexPainterConstant>(painter);
             ::interact_with(*constant, is_composite);
@@ -767,16 +758,8 @@ namespace procgui
             ::interact_with(*composite);
         }
         
-        if (!is_from_composite)
-        {
-            conclude();
-        }
-        else
-        {
-            ImGui::Unindent();
-            ImGui::PopID();
-            ImGui::TreePop();
-        }
+        
+        conclude();
     }
 }
 namespace

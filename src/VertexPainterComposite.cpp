@@ -23,12 +23,13 @@ namespace colors
             auto size = painter_.child_painters_.size();
             unsigned index = std::floor(f * size);
             Expects(index < size);
+            Expects(!painter_.vertices_index_groups_.empty());
             auto it = painter_.vertices_index_groups_.begin();
             for (auto i=0u; i<index; ++i)
             {
                 ++it;
             }
-            it->push_back(index_++);
+            it->push_back(index_++); // ULGY index_ vs index
             
             return sf::Color::Transparent;
         }
@@ -91,6 +92,8 @@ namespace colors
         void VertexPainterBufferObserver::set_painter_buffer(std::shared_ptr<VertexPainterBuffer> painter_buff)
         {
             set_target(painter_buff);
+            add_callback([this](){painter_.notify();});
+            painter_.notify();
         }
 
         
@@ -119,6 +122,7 @@ namespace colors
         , child_painters_{{impl::VertexPainterBufferObserver(std::make_shared<VertexPainterBuffer>(), *this)}}
 
     {
+        // TODO: 'gen' unused
     }
     
     VertexPainterComposite::VertexPainterComposite(const VertexPainterComposite& other)
@@ -187,7 +191,17 @@ namespace colors
 
     void VertexPainterComposite::set_main_painter(std::shared_ptr<VertexPainterBuffer> painter_buff)
     {
+        // hack
+        vertices_index_groups_.clear();
+        for(auto i=0u; i<child_painters_.size(); ++i)
+        {
+            vertices_index_groups_.push_back({});
+        }
+
+
+        painter_buff->get_painter()->get_generator_buffer()->set_generator(color_distributor_);
         main_painter_.set_painter_buffer(painter_buff);
+        notify(); // double call?
     }
 
                  

@@ -37,8 +37,9 @@ namespace colors
         // copy itself into a polymorphic pointer.
         std::shared_ptr<VertexPainter> clone() const;
         
-        // Getters
+        // Getters/Setters
         std::shared_ptr<ColorGeneratorBuffer> get_generator_buffer() const;
+        void set_generator_buffer(std::shared_ptr<ColorGeneratorBuffer> color_generator_buffer);
 
         // Paint 'vertices' with the informations of 'bounding_box' and
         // 'iteration_of_vertices' according to a rule with the colors from

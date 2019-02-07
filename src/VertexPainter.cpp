@@ -67,4 +67,9 @@ namespace colors
     {
         return get_target();
     }
+    void VertexPainter::set_generator_buffer(std::shared_ptr<ColorGeneratorBuffer> color_generator_buffer)
+    {
+        set_target(color_generator_buffer);
+    }
+
 }
