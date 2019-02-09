@@ -482,6 +482,8 @@ namespace
         bool add_new_painter = false;
         bool add_copied_painter = false;
         auto to_add = end(child_painters);
+        
+        ImGui::Separator();
 
         ::ext::ImGui::PushStyleGreenButton();
         if (ImGui::Button("Add Painter here"))
@@ -500,6 +502,7 @@ namespace
         }
         ImGui::PopStyleColor(3);
 
+        ImGui::Separator();
         
         for (auto it = begin(child_painters); it != end(child_painters); ++it)
         {
@@ -508,6 +511,8 @@ namespace
             push_embedded();
             ::procgui::interact_with(**it, "");
             pop_embedded();
+
+            ImGui::Separator();
 
             ::ext::ImGui::PushStyleGreenButton();
             if (ImGui::Button("Add Painter here"))
