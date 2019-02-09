@@ -790,9 +790,13 @@ namespace
 
         // Display the ConstantColor preview.
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-        ImVec2 size {500., 30.};
-        draw_list->AddRectFilled(ImVec2(pos.x, pos.y), ImVec2(pos.x+size.x, pos.y+size.y),
+        ImVec2 screen_pos = ImGui::GetCursorScreenPos();
+        ImVec2 window_pos = ImGui::GetCursorPos();
+        float space_until_border = ImGui::GetWindowWidth() - window_pos.x  - 10.f;
+        float xsize = (space_until_border < 400) ? space_until_border : 400;
+        ImVec2 size {xsize, 30.};
+        draw_list->AddRectFilled(ImVec2(screen_pos.x, screen_pos.y),
+                                 ImVec2(screen_pos.x+size.x, screen_pos.y+size.y),
                                  ImGui::ColorConvertFloat4ToU32(imcolor));
         ImGui::Dummy(size);
     }
@@ -857,22 +861,25 @@ namespace
         // Preview the color gradient
         auto k = gen.get_sanitized_keys();
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-        ImVec2 size {500., 30.};
-        float x = pos.x;
+        ImVec2 screen_pos = ImGui::GetCursorScreenPos();
+        ImVec2 window_pos = ImGui::GetCursorPos();
+        float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 10.f;
+        float xsize = (space_until_border < 400) ? space_until_border : 400;
+        ImVec2 size {xsize, 30.};
+        float x = screen_pos.x;
         double ratio = 0.f;
         for (unsigned i=0; i<k.size()-1; ++i)
         {
             const auto& col1 = k.at(i).first;
             const auto& col2 = k.at(i+1).first;
             const auto& f = k.at(i+1).second;
-            draw_list->AddRectFilledMultiColor({x, pos.y}, ImVec2(x+size.x*(f-ratio), pos.y+size.y),
+            draw_list->AddRectFilledMultiColor({x, screen_pos.y}, ImVec2(x+size.x*(f-ratio), screen_pos.y+size.y),
                                                IM_COL32(col1.r, col1.g, col1.b, col1.a),
                                                IM_COL32(col2.r, col2.g, col2.b, col2.a),
                                                IM_COL32(col2.r, col2.g, col2.b, col2.a),
                                                IM_COL32(col1.r, col1.g, col1.b, col1.a));
             ratio = f;
-            x = pos.x + size.x*f;
+            x = screen_pos.x + size.x*f;
         }
 
         ImGui::Dummy(size);
@@ -971,13 +978,16 @@ namespace
         // Preview the color gradient
         std::vector<sf::Color> colors = gen.get_colors();
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-        ImVec2 size {500., 30.};
-        float x = pos.x;
+        ImVec2 screen_pos = ImGui::GetCursorScreenPos();
+        ImVec2 window_pos = ImGui::GetCursorPos();
+        float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 10.f;
+        float xsize = (space_until_border < 400) ? space_until_border : 400;
+        ImVec2 size {xsize, 30.};
+        float x = screen_pos.x;
         double width = size.x / colors.size();
         for (const auto& color : colors)
         {
-            draw_list->AddRectFilled({x, pos.y}, ImVec2(x+width, pos.y+size.y), IM_COL32(color.r, color.g, color.b, color.a));
+            draw_list->AddRectFilled({x, screen_pos.y}, ImVec2(x+width, screen_pos.y+size.y), IM_COL32(color.r, color.g, color.b, color.a));
             x += width;
         }
         ImGui::Dummy(size);
