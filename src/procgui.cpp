@@ -572,32 +572,47 @@ namespace
 
     void create_new_vertex_painter(colors::VertexPainterBuffer& buffer,
                                    std::shared_ptr<colors::VertexPainter> painter,
-                                   int index)
+                                   int index,
+                                   int old_index)
     {
+        std::shared_ptr<colors::ColorGenerator> generator;
+        if (index == 0)
+        {
+            generator = std::make_shared<colors::ConstantColor>();
+        }
+        else if (index != 0 && old_index == 0)
+        {
+            generator = std::make_shared<colors::LinearGradient>();
+        }
+        else
+        {
+            generator = painter->get_generator_buffer()->get_generator()->clone();
+        }
+
         switch(index)
         {   
         case 0:
-            painter = std::make_shared<colors::VertexPainterConstant>(painter->get_generator_buffer()->get_generator()->clone());
+            painter = std::make_shared<colors::VertexPainterConstant>(generator);
             break;
-                    
+            
         case 1:
-            painter = std::make_shared<colors::VertexPainterLinear>(painter->get_generator_buffer()->get_generator()->clone());
+            painter = std::make_shared<colors::VertexPainterLinear>(generator);
             break;
-
+            
         case 2:
-            painter = std::make_shared<colors::VertexPainterRadial>(painter->get_generator_buffer()->get_generator()->clone());
+            painter = std::make_shared<colors::VertexPainterRadial>(generator);
             break;
 
         case 3:
-            painter = std::make_shared<colors::VertexPainterRandom>(painter->get_generator_buffer()->get_generator()->clone());
+            painter = std::make_shared<colors::VertexPainterRandom>(generator);
             break;
 
         case 4:
-            painter = std::make_shared<colors::VertexPainterSequential>(painter->get_generator_buffer()->get_generator()->clone());
+            painter = std::make_shared<colors::VertexPainterSequential>(generator);
             break;
 
         case 5:
-            painter = std::make_shared<colors::VertexPainterIteration>(painter->get_generator_buffer()->get_generator()->clone());
+            painter = std::make_shared<colors::VertexPainterIteration>(generator);
             break;
 
         default:
@@ -645,6 +660,7 @@ namespace
             Expects(false);
         }
 
+        int old_index = index;
         const char* generators[6] = {"Constant", "Linear", "Radial",
                                      "Random", "Sequential", "Iterative"};
         bool new_generator = ImGui::ListBox("Vertex Painter", &index, generators, 6);
@@ -652,7 +668,7 @@ namespace
         // Create a new VertexPainter
         if (new_generator)
         {
-            create_new_vertex_painter(painter_buffer, painter, index);
+            create_new_vertex_painter(painter_buffer, painter, index, old_index);
         }
         
         return index;
