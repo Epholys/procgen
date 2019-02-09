@@ -505,7 +505,7 @@ namespace
             ImGui::PushID(index);
             
             push_embedded();
-            ::procgui::interact_with(**it, "", true /* is_slave_of_composite */);
+            ::procgui::interact_with(**it, "");
             pop_embedded();
 
             ::ext::ImGui::PushStyleGreenButton();
@@ -603,8 +603,7 @@ namespace
             Ensures(false);
             break;
         }
-        // Updates ColorGeneratorBuffer and VertexPainter and a 'notify()'
-        // waterfall. 
+
         buffer.set_painter(painter);
     }
     
@@ -661,8 +660,7 @@ namespace
 namespace procgui
 {
     void interact_with(colors::VertexPainterBuffer& painter_buffer,
-                       const std::string& name,
-                       bool is_from_composite)
+                       const std::string& name)
     {
         if (!set_up(name))
         {
@@ -670,36 +668,51 @@ namespace procgui
             return;
         }
 
+        // Get the painter from the buffer.
         auto painter = painter_buffer.get_painter();
+
+        // Define an empty VertexPainterComposite pointer. If 'painter' is a
+        // VertexPainterComposite or if a new composite is created, this pointer
+        // will be filled.
         std::shared_ptr<colors::VertexPainterComposite> composite;
-        int index = -1;
+        int index = -1; // Index defining the type of 'painter'. Values are
+                        // defined in 'vertex_painter_list()'.
         
         const auto& info = typeid(*painter).hash_code();
         bool is_composite = info == typeid(colors::VertexPainterComposite).hash_code();
         if (is_composite)
         {
+            // If 'painter' is a composite, it will now be accesses through
+            // 'composite'. 'painter' now refers to the main painter of
+            // 'composite'.
             composite = std::dynamic_pointer_cast<colors::VertexPainterComposite>(painter);
             index = ::vertex_painter_list(*(composite->get_main_painter()));
-            painter = composite->get_main_painter()->get_painter();  // UGLY ???!!!
+            painter = composite->get_main_painter()->get_painter();
         }
         else
         {
+            // Show the 'vertex_painter_list()' and update 'painter' in case in
+            // which 'painter' is modified.
             index = ::vertex_painter_list(painter_buffer);
-            painter = painter_buffer.get_painter(); // UGLY ???!!!
+            painter = painter_buffer.get_painter();
         }
 
+        // Checkbox to choose if the VertexPainter is composite.
         bool checked = ImGui::Checkbox("Composite", &is_composite);
         bool create_new_composite = checked && is_composite;
         bool remove_composite = checked && (!is_composite);
 
         if (create_new_composite)
         {
+            // A new VertexPainterComposite is created and refered by
+            // 'composite'. 'painter' is now the main painter of 'composite'.
             composite = std::make_shared<colors::VertexPainterComposite>();
             composite->set_main_painter(std::make_shared<colors::VertexPainterBuffer>(painter));
             painter_buffer.set_painter(composite);
         }
         if (remove_composite)
         {
+            // The main painter of 'composite' is promoted as the real painter.
             painter = composite->get_main_painter()->get_painter();
             painter->set_generator_buffer(std::make_shared<colors::ColorGeneratorBuffer>());
             painter_buffer.set_painter(painter);

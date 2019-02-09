@@ -20,6 +20,12 @@ namespace colors
             // it to just before 1.
             f = f >= 1. ? 1.-std::numeric_limits<float>::epsilon() : f;
 
+            // painter_.vertices_index_groups_.clear();
+            // for(auto i=0u; i<painter_.child_painters_.size(); ++i)
+            // {
+            //     painter_.vertices_index_groups_.push_back({});
+            // } 
+            
             auto size = painter_.child_painters_.size();
             unsigned index = std::floor(f * size);
             Expects(index < size);
@@ -117,7 +123,7 @@ namespace colors
         : VertexPainter{gen}
         , color_distributor_{std::make_shared<impl::ColorGeneratorComposite>(*this)}
         , main_painter_{std::make_shared<VertexPainterBuffer>(
-                            std::make_shared<VertexPainterLinear>(color_distributor_)), *this}
+            std::make_shared<VertexPainterLinear>(color_distributor_)), *this}
         , vertices_index_groups_{}
         , child_painters_{{impl::VertexPainterBufferObserver(std::make_shared<VertexPainterBuffer>(), *this)}}
 
@@ -191,17 +197,17 @@ namespace colors
 
     void VertexPainterComposite::set_main_painter(std::shared_ptr<VertexPainterBuffer> painter_buff)
     {
-        // hack
+        // Hack, as 'color_distributor_' will be called.
+        // Moving this in 'color_distributor_.get()' does not work.
         vertices_index_groups_.clear();
         for(auto i=0u; i<child_painters_.size(); ++i)
         {
             vertices_index_groups_.push_back({});
-        }
-
+        } 
 
         painter_buff->get_painter()->get_generator_buffer()->set_generator(color_distributor_);
         main_painter_.set_painter_buffer(painter_buff);
-        notify(); // double call?
+        notify();
     }
 
                  
@@ -217,20 +223,24 @@ namespace colors
     }
 
     void VertexPainterComposite::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<int>& iteration_of_vertices,
-                                    int max_recursion,
-                                    sf::FloatRect bounding_box)
+                                                const std::vector<int>& iteration_of_vertices,
+                                                int max_recursion,
+                                                sf::FloatRect bounding_box)
 
     {
         auto vertices_copy = vertices;
         auto iteration_of_vertices_copy = iteration_of_vertices;
         color_distributor_->reset_index();
+
+
+        
         vertices_index_groups_.clear();
         for(auto i=0u; i<child_painters_.size(); ++i)
         {
             vertices_index_groups_.push_back({});
-        }
+        } 
 
+        
         main_painter_.get_painter_buffer()->get_painter()->paint_vertices(vertices_copy,
                                                                           iteration_of_vertices,
                                                                           max_recursion,

@@ -60,8 +60,7 @@ namespace procgui {
     void interact_with(LSystemView& lsys_view, const std::string& name, bool* open = nullptr);
 
     void interact_with(colors::VertexPainterBuffer& painter_buffer,
-                       const std::string& name,
-                       bool is_from_composite=false);
+                       const std::string& name);
 
     enum class color_buffer_mode
     {
