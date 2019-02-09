@@ -449,6 +449,7 @@ namespace
     void interact_with(colors::VertexPainterSequential& painter, bool from_composite=false)
     {
         float angle = painter.get_factor();
+        
         if (ImGui::DragFloat("Repetition factor", &angle,
                              0.01f, 0.f, std::numeric_limits<float>::max(), "%.2f") )
         {
@@ -490,10 +491,10 @@ namespace
         }
         ImGui::PopStyleColor(3);
 
-        ::ext::ImGui::PushStyleTurquoiseButton();
-        if (colors::VertexPainterComposite::has_copied_painter() && ImGui::Button("Paste copied Painter here"))
-        {
-            ImGui::SameLine();
+            ::ext::ImGui::PushStyleTurquoiseButton();
+        if (colors::VertexPainterComposite::has_copied_painter() &&
+            ImGui::Button("Paste copied Painter here"))
+        { 
             to_add = begin(child_painters);
             add_copied_painter = true;
         }
@@ -518,7 +519,7 @@ namespace
 
             if (it != begin(child_painters))
             {
-                ImGui::SameLine();
+                ImGui::SameLine();                
                 ::ext::ImGui::PushStyleRedButton();
                 if (ImGui::Button("Remove previous Painter"))
                 {
@@ -662,11 +663,12 @@ namespace procgui
     void interact_with(colors::VertexPainterBuffer& painter_buffer,
                        const std::string& name)
     {
-        if (!set_up(name))
+        if(!set_up(name))
         {
             // Early out if the display zone is collapsed.
             return;
         }
+        ImGui::Indent();
 
         // Get the painter from the buffer.
         auto painter = painter_buffer.get_painter();
@@ -771,7 +773,7 @@ namespace procgui
             ::interact_with(*composite);
         }
         
-        
+        ImGui::Unindent();
         conclude();
     }
 }
