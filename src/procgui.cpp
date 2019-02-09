@@ -386,8 +386,8 @@ namespace
     {
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.get_generator_buffer(), "Colors",
-                                     ::procgui::color_buffer_mode::CONSTANT);
+            ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
+                                     ::procgui::color_wrapper_mode::CONSTANT);
         }
     }
     void interact_with(colors::VertexPainterLinear& painter, bool from_composite=false)
@@ -402,8 +402,8 @@ namespace
 
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.get_generator_buffer(), "Colors",
-                                     ::procgui::color_buffer_mode::GRADIENTS);
+            ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
+                                     ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
 
@@ -419,8 +419,8 @@ namespace
         
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.get_generator_buffer(), "Colors",
-                                     ::procgui::color_buffer_mode::GRADIENTS);
+            ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
+                                     ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
 
@@ -441,8 +441,8 @@ namespace
         
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.get_generator_buffer(), "Colors",
-                                     ::procgui::color_buffer_mode::GRADIENTS);
+            ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
+                                     ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
     
@@ -458,8 +458,8 @@ namespace
             
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.get_generator_buffer(), "Colors",
-                                     ::procgui::color_buffer_mode::GRADIENTS);
+            ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
+                                     ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
 
@@ -467,8 +467,8 @@ namespace
     {
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.get_generator_buffer(), "Colors",
-                                     ::procgui::color_buffer_mode::GRADIENTS);
+            ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
+                                     ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
 
@@ -564,18 +564,18 @@ namespace
         }
         else if (add_new_painter)
         {
-            child_painters.insert(to_add, std::make_shared<colors::VertexPainterBuffer>());
+            child_painters.insert(to_add, std::make_shared<colors::VertexPainterWrapper>());
             painter.set_child_painters(child_painters);
         }
         else if (add_copied_painter)
         {
             child_painters.insert(to_add,
-                                  std::make_shared<colors::VertexPainterBuffer>(colors::VertexPainterComposite::get_copied_painter()));
+                                  std::make_shared<colors::VertexPainterWrapper>(colors::VertexPainterComposite::get_copied_painter()));
             painter.set_child_painters(child_painters);
         }
     }
 
-    void create_new_vertex_painter(colors::VertexPainterBuffer& buffer,
+    void create_new_vertex_painter(colors::VertexPainterWrapper& wrapper,
                                    std::shared_ptr<colors::VertexPainter> painter,
                                    int index,
                                    int old_index)
@@ -591,7 +591,7 @@ namespace
         }
         else
         {
-            generator = painter->get_generator_buffer()->get_generator()->clone();
+            generator = painter->get_generator_wrapper()->unwrap()->clone();
         }
 
         switch(index)
@@ -625,12 +625,12 @@ namespace
             break;
         }
 
-        buffer.set_painter(painter);
+        wrapper.wrap(painter);
     }
     
-    int vertex_painter_list(colors::VertexPainterBuffer& painter_buffer)
+    int vertex_painter_list(colors::VertexPainterWrapper& painter_wrapper)
     {
-        auto painter = painter_buffer.get_painter();
+        auto painter = painter_wrapper.unwrap();
         
         // Represents the index of the next ListBox. Set by inspecting the
         // polyphormism. 
@@ -673,7 +673,7 @@ namespace
         // Create a new VertexPainter
         if (new_generator)
         {
-            create_new_vertex_painter(painter_buffer, painter, index, old_index);
+            create_new_vertex_painter(painter_wrapper, painter, index, old_index);
         }
         
         return index;
@@ -681,7 +681,7 @@ namespace
 }
 namespace procgui
 {
-    void interact_with(colors::VertexPainterBuffer& painter_buffer,
+    void interact_with(colors::VertexPainterWrapper& painter_wrapper,
                        const std::string& name)
     {
         if(!set_up(name))
@@ -691,8 +691,8 @@ namespace procgui
         }
         ImGui::Indent();
 
-        // Get the painter from the buffer.
-        auto painter = painter_buffer.get_painter();
+        // Get the painter from the wrapper.
+        auto painter = painter_wrapper.unwrap();
 
         // Define an empty VertexPainterComposite pointer. If 'painter' is a
         // VertexPainterComposite or if a new composite is created, this pointer
@@ -710,14 +710,14 @@ namespace procgui
             // 'composite'.
             composite = std::dynamic_pointer_cast<colors::VertexPainterComposite>(painter);
             index = ::vertex_painter_list(*(composite->get_main_painter()));
-            painter = composite->get_main_painter()->get_painter();
+            painter = composite->get_main_painter()->unwrap();
         }
         else
         {
             // Show the 'vertex_painter_list()' and update 'painter' in case in
             // which 'painter' is modified.
-            index = ::vertex_painter_list(painter_buffer);
-            painter = painter_buffer.get_painter();
+            index = ::vertex_painter_list(painter_wrapper);
+            painter = painter_wrapper.unwrap();
         }
 
         // Checkbox to choose if the VertexPainter is composite.
@@ -730,15 +730,15 @@ namespace procgui
             // A new VertexPainterComposite is created and refered by
             // 'composite'. 'painter' is now the main painter of 'composite'.
             composite = std::make_shared<colors::VertexPainterComposite>();
-            composite->set_main_painter(std::make_shared<colors::VertexPainterBuffer>(painter));
-            painter_buffer.set_painter(composite);
+            composite->set_main_painter(std::make_shared<colors::VertexPainterWrapper>(painter));
+            painter_wrapper.wrap(composite);
         }
         if (remove_composite)
         {
             // The main painter of 'composite' is promoted as the real painter.
-            painter = composite->get_main_painter()->get_painter();
-            painter->set_generator_buffer(std::make_shared<colors::ColorGeneratorBuffer>());
-            painter_buffer.set_painter(painter);
+            painter = composite->get_main_painter()->unwrap();
+            painter->set_generator_wrapper(std::make_shared<colors::ColorGeneratorWrapper>());
+            painter_wrapper.wrap(painter);
             composite.reset();
         }
 
@@ -1021,14 +1021,14 @@ namespace
 } // namespace 
 namespace procgui
 { 
-    void interact_with(colors::ColorGeneratorBuffer& color_buffer,
+    void interact_with(colors::ColorGeneratorWrapper& color_wrapper,
                        const std::string&,
-                       color_buffer_mode mode)
+                       color_wrapper_mode mode)
     {
        // Always call this function in a predefined window.
         Expects(embedded_level > 0);
 
-        auto gen = color_buffer.get_generator();
+        auto gen = color_wrapper.unwrap();
         
         // Represents the index of the next ListBox. Set by inspecting the
         // polyphormism. 
@@ -1052,19 +1052,19 @@ namespace procgui
         }
 
         bool new_generator = false;
-        if (mode == color_buffer_mode::CONSTANT)
+        if (mode == color_wrapper_mode::CONSTANT)
         {
             const char* generators[1] = {"Constant"};
             new_generator = ImGui::ListBox("Color Generator", &index, generators, 1);
         }
-        else if (mode == color_buffer_mode::GRADIENTS)
+        else if (mode == color_wrapper_mode::GRADIENTS)
         {
             --index;
             const char* generators[2] = {"Linear Gradient", "Discrete Gradient"};
             new_generator = ImGui::ListBox("Color Generator", &index, generators, 2);
             ++index;
         }
-        else if (mode == color_buffer_mode::ALL)
+        else if (mode == color_wrapper_mode::ALL)
         {
             const char* generators[3] = {"Constant", "Linear Gradient", "Discrete Gradient"};
             new_generator = ImGui::ListBox("Color Generator", &index, generators, 3);
@@ -1094,9 +1094,9 @@ namespace procgui
             {
                 Ensures(false);
             }
-            // Updates ColorGeneratorBuffer and VertexPainter and a 'notify()'
+            // Updates ColorGeneratorWrapper and VertexPainter and a 'notify()'
             // waterfall. 
-            color_buffer.set_generator(gen);
+            color_wrapper.wrap(gen);
         }
 
         // Does not use embedded_level, the generator will be displayed just
@@ -1189,7 +1189,7 @@ namespace procgui
         interact_with(lsys_view.ref_parameters(), "Drawing Parameters"+ss.str());
         interact_with(lsys_view.ref_lsystem_buffer(), "LSystem"+ss.str());
         interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map"+ss.str());
-        interact_with(lsys_view.ref_vertex_painter_buffer(), "Painter");
+        interact_with(lsys_view.ref_vertex_painter_wrapper(), "Painter");
         pop_embedded();
 
         conclude();

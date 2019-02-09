@@ -3,7 +3,7 @@
 
 
 #include <list>
-#include "VertexPainterBuffer.h"
+#include "VertexPainterWrapper.h"
 
 namespace colors
 {
@@ -27,21 +27,21 @@ namespace colors
             std::size_t index_;
         };
 
-        class VertexPainterBufferObserver : public Observer<VertexPainterBuffer>
+        class VertexPainterWrapperObserver : public Observer<VertexPainterWrapper>
         {
         public:
-            using OBuffer = Observer<VertexPainterBuffer>;
+            using OWrapper = Observer<VertexPainterWrapper>;
             
-            explicit VertexPainterBufferObserver(std::shared_ptr<VertexPainterBuffer> painter_buffer,
+            explicit VertexPainterWrapperObserver(std::shared_ptr<VertexPainterWrapper> painter_wrapper,
                                                  VertexPainterComposite& painter_composite);
             // Shallow rule-of-five constructors.
-            VertexPainterBufferObserver(const VertexPainterBufferObserver& other);
-            VertexPainterBufferObserver(VertexPainterBufferObserver&& other);
-            VertexPainterBufferObserver& operator=(const VertexPainterBufferObserver& other);
-            VertexPainterBufferObserver& operator=(VertexPainterBufferObserver&& other);
+            VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other);
+            VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other);
+            VertexPainterWrapperObserver& operator=(const VertexPainterWrapperObserver& other);
+            VertexPainterWrapperObserver& operator=(VertexPainterWrapperObserver&& other);
 
-            std::shared_ptr<VertexPainterBuffer> get_painter_buffer() const;
-            void set_painter_buffer(std::shared_ptr<VertexPainterBuffer> painter_buff);
+            std::shared_ptr<VertexPainterWrapper> get_painter_wrapper() const;
+            void set_painter_wrapper(std::shared_ptr<VertexPainterWrapper> painter_buff);
             
         private:
             VertexPainterComposite& painter_;
@@ -59,11 +59,11 @@ namespace colors
         VertexPainterComposite& operator=(const VertexPainterComposite& other);
         VertexPainterComposite& operator=(VertexPainterComposite&& other);
 
-        std::list<std::shared_ptr<VertexPainterBuffer>> get_child_painters() const;
-        std::shared_ptr<VertexPainterBuffer> get_main_painter() const;
-        void set_main_painter(std::shared_ptr<VertexPainterBuffer> painter_buff);
+        std::list<std::shared_ptr<VertexPainterWrapper>> get_child_painters() const;
+        std::shared_ptr<VertexPainterWrapper> get_main_painter() const;
+        void set_main_painter(std::shared_ptr<VertexPainterWrapper> painter_buff);
                 
-        void set_child_painters(const std::list<std::shared_ptr<VertexPainterBuffer>> painters);
+        void set_child_painters(const std::list<std::shared_ptr<VertexPainterWrapper>> painters);
        
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<int>& iteration_of_vertices,
@@ -82,11 +82,11 @@ namespace colors
 
         friend impl::ColorGeneratorComposite;
         std::shared_ptr<impl::ColorGeneratorComposite> color_distributor_;        
-        impl::VertexPainterBufferObserver main_painter_;
+        impl::VertexPainterWrapperObserver main_painter_;
 
         std::list<std::vector<std::size_t>> vertices_index_groups_;
-        friend impl::VertexPainterBufferObserver;
-        std::list<impl::VertexPainterBufferObserver> child_painters_;
+        friend impl::VertexPainterWrapperObserver;
+        std::list<impl::VertexPainterWrapperObserver> child_painters_;
     };
 }
 

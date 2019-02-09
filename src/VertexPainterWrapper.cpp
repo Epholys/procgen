@@ -1,29 +1,29 @@
-#include "VertexPainterBuffer.h"
+#include "VertexPainterWrapper.h"
 #include "VertexPainterConstant.h"
 
 namespace colors
 {
-    VertexPainterBuffer::VertexPainterBuffer()
+    VertexPainterWrapper::VertexPainterWrapper()
         : Observable{}
         , OPainter{std::make_shared<VertexPainterConstant>()}
     {
         add_callback([this](){notify();});
     }
 
-    VertexPainterBuffer::VertexPainterBuffer(std::shared_ptr<VertexPainter> painter)
+    VertexPainterWrapper::VertexPainterWrapper(std::shared_ptr<VertexPainter> painter)
         : OPainter{painter}
     {
         add_callback([this](){notify();});
     }
     
-    VertexPainterBuffer::VertexPainterBuffer(const VertexPainterBuffer& other)
+    VertexPainterWrapper::VertexPainterWrapper(const VertexPainterWrapper& other)
         : Observable{}
         , OPainter{other.get_target()}
     {
         add_callback([this](){notify();});
     }
     
-    VertexPainterBuffer::VertexPainterBuffer(VertexPainterBuffer&& other)
+    VertexPainterWrapper::VertexPainterWrapper(VertexPainterWrapper&& other)
         : Observable{}
         , OPainter{std::move(other.get_target())}
     {
@@ -31,7 +31,7 @@ namespace colors
         other.set_target(nullptr);
     }
     
-    VertexPainterBuffer& VertexPainterBuffer::operator=(const VertexPainterBuffer& other)
+    VertexPainterWrapper& VertexPainterWrapper::operator=(const VertexPainterWrapper& other)
     {
         if (this != &other)
         {
@@ -41,7 +41,7 @@ namespace colors
         return *this;
     }
     
-    VertexPainterBuffer& VertexPainterBuffer::operator=(VertexPainterBuffer&& other)
+    VertexPainterWrapper& VertexPainterWrapper::operator=(VertexPainterWrapper&& other)
     {
         if (this != &other)
         {
@@ -52,17 +52,17 @@ namespace colors
         return *this;
     }
 
-    VertexPainterBuffer VertexPainterBuffer::clone() const
+    VertexPainterWrapper VertexPainterWrapper::clone() const
     {
-        return VertexPainterBuffer(get_target()->clone());
+        return VertexPainterWrapper(get_target()->clone());
     }
     
-    std::shared_ptr<VertexPainter> VertexPainterBuffer::get_painter() const
+    std::shared_ptr<VertexPainter> VertexPainterWrapper::unwrap() const
     {
         return get_target();
     }
 
-    void VertexPainterBuffer::set_painter(std::shared_ptr<VertexPainter> painter)
+    void VertexPainterWrapper::wrap(std::shared_ptr<VertexPainter> painter)
     {
         set_target(painter);
         add_callback([this](){notify();});

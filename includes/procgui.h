@@ -14,8 +14,8 @@
 #include "Turtle.h"
 #include "helper_string.h"
 #include "ColorsGenerator.h"
-#include "ColorsGeneratorBuffer.h"
-#include "VertexPainterBuffer.h"
+#include "ColorsGeneratorWrapper.h"
+#include "VertexPainterWrapper.h"
 
 // Define 'display()' and 'interact_with()' for the structs and classes to
 // display.
@@ -59,18 +59,18 @@ namespace procgui {
     // view is un-selected and the window closed.
     void interact_with(LSystemView& lsys_view, const std::string& name, bool* open = nullptr);
 
-    void interact_with(colors::VertexPainterBuffer& painter_buffer,
+    void interact_with(colors::VertexPainterWrapper& painter_wrapper,
                        const std::string& name);
 
-    enum class color_buffer_mode
+    enum class color_wrapper_mode
     {
         CONSTANT = 1,
         GRADIENTS = 1 << 1,
         ALL = CONSTANT | GRADIENTS,
     };
-    void interact_with(colors::ColorGeneratorBuffer& color_buffer,
+    void interact_with(colors::ColorGeneratorWrapper& color_wrapper,
                        const std::string& name,
-                       color_buffer_mode mode = color_buffer_mode::ALL);
+                       color_wrapper_mode mode = color_wrapper_mode::ALL);
 
     #include "procgui.tpp"
 

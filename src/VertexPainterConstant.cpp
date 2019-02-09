@@ -42,7 +42,7 @@ namespace colors
 
     std::shared_ptr<VertexPainter> VertexPainterConstant::clone_impl() const
     {
-        return std::make_shared<VertexPainterConstant>(get_target()->get_generator()->clone());
+        return std::make_shared<VertexPainterConstant>(get_target()->unwrap()->clone());
     }
     
     void VertexPainterConstant::paint_vertices(std::vector<sf::Vertex>& vertices,
@@ -51,7 +51,7 @@ namespace colors
                                              sf::FloatRect)
 
     {
-        auto generator = get_target()->get_generator();
+        auto generator = get_target()->unwrap();
         if (!generator)
         {
             return;

@@ -50,7 +50,7 @@ namespace colors
 
     std::shared_ptr<VertexPainter> VertexPainterSequential::clone_impl() const
     {
-        return std::make_shared<VertexPainterSequential>(get_target()->get_generator()->clone());
+        return std::make_shared<VertexPainterSequential>(get_target()->unwrap()->clone());
     }
     
     float VertexPainterSequential::get_factor() const
@@ -70,7 +70,7 @@ namespace colors
                                                  sf::FloatRect)
 
     {
-        auto generator = get_target()->get_generator();
+        auto generator = get_target()->unwrap();
         if (!generator)
         {
             return;

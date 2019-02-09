@@ -1,35 +1,35 @@
-#include "ColorsGeneratorBuffer.h"
+#include "ColorsGeneratorWrapper.h"
 
 namespace colors
 {
-    ColorGeneratorBuffer::ColorGeneratorBuffer()
+    ColorGeneratorWrapper::ColorGeneratorWrapper()
         : Observable{}
         , OGen{std::make_shared<ConstantColor>()}
     {
         add_callback([this](){notify();});
     }
                                          
-    ColorGeneratorBuffer::ColorGeneratorBuffer(std::shared_ptr<ColorGenerator> gen)
+    ColorGeneratorWrapper::ColorGeneratorWrapper(std::shared_ptr<ColorGenerator> gen)
         : Observable{}
         , OGen{gen}
     {
         add_callback([this](){notify();});
     }
 
-    ColorGeneratorBuffer::ColorGeneratorBuffer(const ColorGeneratorBuffer& other)
+    ColorGeneratorWrapper::ColorGeneratorWrapper(const ColorGeneratorWrapper& other)
         : Observable{}
         , OGen{other.get_target()}
     {
         add_callback([this](){notify();});
     }
-    ColorGeneratorBuffer::ColorGeneratorBuffer(ColorGeneratorBuffer&& other)
+    ColorGeneratorWrapper::ColorGeneratorWrapper(ColorGeneratorWrapper&& other)
         : Observable{}
         , OGen{std::move(other.get_target())}
     {
         add_callback([this](){notify();});
         other.set_target(nullptr);
     }
-    ColorGeneratorBuffer& ColorGeneratorBuffer::operator=(const ColorGeneratorBuffer& other)
+    ColorGeneratorWrapper& ColorGeneratorWrapper::operator=(const ColorGeneratorWrapper& other)
     {
         if (this != &other)
         {
@@ -38,7 +38,7 @@ namespace colors
         }
         return *this;
     }
-    ColorGeneratorBuffer& ColorGeneratorBuffer::operator=(ColorGeneratorBuffer&& other)
+    ColorGeneratorWrapper& ColorGeneratorWrapper::operator=(ColorGeneratorWrapper&& other)
     {
         if (this != &other)
         {
@@ -49,12 +49,12 @@ namespace colors
         return *this;
     }
 
-    std::shared_ptr<ColorGenerator> ColorGeneratorBuffer::get_generator() const
+    std::shared_ptr<ColorGenerator> ColorGeneratorWrapper::unwrap() const
     {
         return get_target();
     }
 
-    void ColorGeneratorBuffer::set_generator(std::shared_ptr<ColorGenerator> gen)
+    void ColorGeneratorWrapper::wrap(std::shared_ptr<ColorGenerator> gen)
     {
         set_target(gen);
         add_callback([this](){notify();});

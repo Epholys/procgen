@@ -23,7 +23,7 @@ namespace procgui
                              std::shared_ptr<LSystem> lsys,
                              std::shared_ptr<InterpretationMap> map,
                              std::shared_ptr<DrawingParameters> params,
-                             std::shared_ptr<VertexPainterBuffer> painter)
+                             std::shared_ptr<VertexPainterWrapper> painter)
         : OLSys {lsys}
         , OMap {map}
         , OParams {params}
@@ -196,7 +196,7 @@ namespace procgui
             std::make_shared<LSystem>(*OLSys::get_target()),
             std::make_shared<InterpretationMap>(*OMap::get_target()),
             std::make_shared<DrawingParameters>(*OParams::get_target()),
-            std::make_shared<VertexPainterBuffer>(OPainter::get_target()->clone())
+            std::make_shared<VertexPainterWrapper>(OPainter::get_target()->clone())
                 );
     }
 
@@ -223,7 +223,7 @@ namespace procgui
     {
         return interpretation_buff_;
     }
-    colors::VertexPainterBuffer& LSystemView::ref_vertex_painter_buffer()
+    colors::VertexPainterWrapper& LSystemView::ref_vertex_painter_wrapper()
     {
         return *OPainter::get_target();
     }
@@ -243,7 +243,7 @@ namespace procgui
     {
         return interpretation_buff_;
     }
-    const colors::VertexPainterBuffer& LSystemView::get_vertex_painter_buffer() const
+    const colors::VertexPainterWrapper& LSystemView::get_vertex_painter_wrapper() const
     {
         return *OPainter::get_target();
     }

@@ -59,7 +59,7 @@ namespace colors
 
     std::shared_ptr<VertexPainter> VertexPainterRandom::clone_impl() const
     {
-        return std::make_shared<VertexPainterRandom>(get_target()->get_generator()->clone());
+        return std::make_shared<VertexPainterRandom>(get_target()->unwrap()->clone());
     }
 
     void VertexPainterRandom::randomize()
@@ -88,7 +88,7 @@ namespace colors
                                              sf::FloatRect)
 
     {
-        auto generator = get_target()->get_generator();
+        auto generator = get_target()->unwrap();
         if (!generator)
         {
             return;
