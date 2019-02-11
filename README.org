@@ -40,7 +40,6 @@
 
 ** Code Smells
    For the people who want to take a look at the code, there is some very ugly stuff, despite all my efforts. Here are some of them that will be fixed before the next release:
-   - Using the term "Buffer" and not "Wrapper"
    - The wrappers are not consistently named as such (which could lead to confusion with the wrapped objects)
    - In 'Observer', 'get/set_target()' is public
    - Abuse of shared_ptr:
