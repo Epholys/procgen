@@ -96,7 +96,6 @@ namespace colors
 
         random_generator_.seed(random_seed_); 
 
-        // TODO: document non-opt.
         int block_index = 0;
         float rand = 0;
         for (auto& v : vertices)
@@ -105,6 +104,8 @@ namespace colors
             {
                 rand = math::random_real(random_generator_, 0, 1);
             }
+            // We call 'get()' each time because we must interact nicely with
+            // 'VertexPainterComposite'. 
             sf::Color color = generator->get(rand);
             color.a = v.color.a;
             v.color = color;

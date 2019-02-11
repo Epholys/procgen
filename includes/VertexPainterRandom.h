@@ -18,8 +18,10 @@ namespace colors
         VertexPainterRandom& operator=(const VertexPainterRandom& other);
         VertexPainterRandom& operator=(VertexPainterRandom&& other);
         
+        // Generate a new seed.
         void randomize();
-        
+
+        // Getter/Setter
         int get_block_size() const;
         void set_block_size(int block_size);
 
@@ -34,7 +36,9 @@ namespace colors
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone_impl() const override;
 
+        // The number of consecutive vertices to paint the same color.
         int block_size_;
+        // The seed for 'random_generator_'.
         std::mt19937::result_type random_seed_;
         std::mt19937 random_generator_;
     };

@@ -9,40 +9,41 @@ namespace colors
     {
         ColorGeneratorComposite::ColorGeneratorComposite(VertexPainterComposite& painter)
             : painter_ {painter}
-            , index_ {0}
+            , global_index_ {0}
         {
         }
 
         sf::Color ColorGeneratorComposite::get(float f)
         {
+            // Should never happen.
+            Expects(!painter_.vertex_indices_pools_.empty());
+
             f = f < 0. ? 0. : f;
-            // We do not clamp to 1 as it would be a out-of-bound call. So we clamp
+            // We do not clamp to 1 as it would be an out-of-bound call. So we clamp
             // it to just before 1.
             f = f >= 1. ? 1.-std::numeric_limits<float>::epsilon() : f;
-
-            // painter_.vertices_index_groups_.clear();
-            // for(auto i=0u; i<painter_.child_painters_.size(); ++i)
-            // {
-            //     painter_.vertices_index_groups_.push_back({});
-            // } 
             
-            auto size = painter_.child_painters_.size();
-            unsigned index = std::floor(f * size);
-            Expects(index < size);
-            Expects(!painter_.vertices_index_groups_.empty());
-            auto it = painter_.vertices_index_groups_.begin();
-            for (auto i=0u; i<index; ++i)
+            auto size = painter_.child_painters_observers_.size();
+            // Compute which child painter is concerned by this vertex.
+            unsigned which_painter = std::floor(f * size);
+
+            // Get the correct pool
+            auto it = painter_.vertex_indices_pools_.begin();
+            for (auto i=0u; i<which_painter; ++i)
             {
                 ++it;
             }
-            it->push_back(index_++); // ULGY index_ vs index
-            
+
+            // Add the index of the current vertex in the correct pool.
+            it->push_back(global_index_++);
+
+            // Dummy color
             return sf::Color::Transparent;
         }
 
         void ColorGeneratorComposite::reset_index()
         {
-            index_ = 0;
+            global_index_ = 0;
         }        
         
         std::shared_ptr<ColorGenerator> ColorGeneratorComposite::clone_impl() const
@@ -112,40 +113,40 @@ namespace colors
     VertexPainterComposite::VertexPainterComposite()
         : VertexPainter{}
         , color_distributor_{std::make_shared<impl::ColorGeneratorComposite>(*this)}
-        , main_painter_{std::make_shared<VertexPainterWrapper>(
+        , main_painter_observer_{std::make_shared<VertexPainterWrapper>(
             std::make_shared<VertexPainterLinear>(color_distributor_)), *this}
-        , vertices_index_groups_{}
-        , child_painters_{{impl::VertexPainterWrapperObserver(std::make_shared<VertexPainterWrapper>(), *this)}}
+        , vertex_indices_pools_{}
+        , child_painters_observers_{{impl::VertexPainterWrapperObserver(std::make_shared<VertexPainterWrapper>(), *this)}}
     {
     }
 
     VertexPainterComposite::VertexPainterComposite(const std::shared_ptr<ColorGenerator> gen)
         : VertexPainter{gen}
         , color_distributor_{std::make_shared<impl::ColorGeneratorComposite>(*this)}
-        , main_painter_{std::make_shared<VertexPainterWrapper>(
+        , main_painter_observer_{std::make_shared<VertexPainterWrapper>(
             std::make_shared<VertexPainterLinear>(color_distributor_)), *this}
-        , vertices_index_groups_{}
-        , child_painters_{{impl::VertexPainterWrapperObserver(std::make_shared<VertexPainterWrapper>(), *this)}}
+        , vertex_indices_pools_{}
+        , child_painters_observers_{{impl::VertexPainterWrapperObserver(std::make_shared<VertexPainterWrapper>(), *this)}}
 
     {
-        // TODO: 'gen' unused
+        // Note: 'gen' is unused
     }
     
     VertexPainterComposite::VertexPainterComposite(const VertexPainterComposite& other)
         : VertexPainter{other}
         , color_distributor_{other.color_distributor_}
-        , main_painter_{other.main_painter_}
-        , vertices_index_groups_{other.vertices_index_groups_}
-        , child_painters_{other.child_painters_}
+        , main_painter_observer_{other.main_painter_observer_}
+        , vertex_indices_pools_{other.vertex_indices_pools_}
+        , child_painters_observers_{other.child_painters_observers_}
     {
     }
 
     VertexPainterComposite::VertexPainterComposite(VertexPainterComposite&& other)
         : VertexPainter{std::move(other)}
         , color_distributor_{std::move(other.color_distributor_)}
-        , main_painter_{std::move(other.main_painter_)}
-        , vertices_index_groups_{std::move(other.vertices_index_groups_)}
-        , child_painters_{std::move(other.child_painters_)}
+        , main_painter_observer_{std::move(other.main_painter_observer_)}
+        , vertex_indices_pools_{std::move(other.vertex_indices_pools_)}
+        , child_painters_observers_{std::move(other.child_painters_observers_)}
     {
     }
 
@@ -155,9 +156,9 @@ namespace colors
         {
             VertexPainter::operator=(other);
             color_distributor_ = other.color_distributor_;
-            main_painter_ = other.main_painter_;
-            child_painters_ = other.child_painters_;
-            vertices_index_groups_ = other.vertices_index_groups_;
+            main_painter_observer_ = other.main_painter_observer_;
+            child_painters_observers_ = other.child_painters_observers_;
+            vertex_indices_pools_ = other.vertex_indices_pools_;
         }
         return *this;
     }
@@ -168,9 +169,9 @@ namespace colors
         {
             VertexPainter::operator=(other);
             color_distributor_ = std::move(other.color_distributor_);
-            main_painter_ = std::move(other.main_painter_);
-            child_painters_ = std::move(other.child_painters_);
-            vertices_index_groups_ = std::move(other.vertices_index_groups_);
+            main_painter_observer_ = std::move(other.main_painter_observer_);
+            child_painters_observers_ = std::move(other.child_painters_observers_);
+            vertex_indices_pools_ = std::move(other.vertex_indices_pools_);
         }
         return *this;
     }
@@ -183,7 +184,7 @@ namespace colors
     std::list<std::shared_ptr<VertexPainterWrapper>> VertexPainterComposite::get_child_painters() const
     {
         std::list<std::shared_ptr<VertexPainterWrapper>> list;
-        for (const auto& observer : child_painters_)
+        for (const auto& observer : child_painters_observers_)
         {
             list.push_back(observer.get_target());
         }
@@ -192,21 +193,22 @@ namespace colors
 
     std::shared_ptr<VertexPainterWrapper> VertexPainterComposite::get_main_painter() const
     {
-        return main_painter_.get_painter_wrapper();
+        return main_painter_observer_.get_painter_wrapper();
     }
 
     void VertexPainterComposite::set_main_painter(std::shared_ptr<VertexPainterWrapper> painter_buff)
     {
-        // Hack, as 'color_distributor_' will be called.
+        // Hack, as 'color_distributor_' will be called by the 'notify()' of the
+        // 'wrap()' method of 'painter_buff'.
         // Moving this in 'color_distributor_.get()' does not work.
-        vertices_index_groups_.clear();
-        for(auto i=0u; i<child_painters_.size(); ++i)
+        vertex_indices_pools_.clear();
+        for(auto i=0u; i<child_painters_observers_.size(); ++i)
         {
-            vertices_index_groups_.push_back({});
+            vertex_indices_pools_.push_back({});
         } 
 
         painter_buff->unwrap()->get_generator_wrapper()->wrap(color_distributor_);
-        main_painter_.set_painter_wrapper(painter_buff);
+        main_painter_observer_.set_painter_wrapper(painter_buff);
         notify();
     }
 
@@ -218,7 +220,7 @@ namespace colors
         {
             list.push_back(impl::VertexPainterWrapperObserver(painter, *this));
         }
-        child_painters_ = list;
+        child_painters_observers_ = list;
         notify();
     }
 
@@ -230,65 +232,76 @@ namespace colors
     {
         auto vertices_copy = vertices;
         auto iteration_of_vertices_copy = iteration_of_vertices;
-        color_distributor_->reset_index();
-
-
         
-        vertices_index_groups_.clear();
-        for(auto i=0u; i<child_painters_.size(); ++i)
+        // Prepare the variable for ColorGeneratorComposite
+        color_distributor_->reset_index();
+        vertex_indices_pools_.clear();
+        for(auto i=0u; i<child_painters_observers_.size(); ++i)
         {
-            vertices_index_groups_.push_back({});
+            vertex_indices_pools_.push_back({});
         } 
 
-        
-        main_painter_.get_painter_wrapper()->unwrap()->paint_vertices(vertices_copy,
-                                                                          iteration_of_vertices,
-                                                                          max_recursion,
-                                                                          bounding_box);
+        // Fill the pools by making paint the main painter through 'color_distributor_'.
+        main_painter_observer_.get_painter_wrapper()->unwrap()->paint_vertices(vertices_copy,
+                                                                               iteration_of_vertices,
+                                                                               max_recursion,
+                                                                               bounding_box);
 
-        std::vector<std::vector<sf::Vertex>> vertices_groups;
-        std::vector<std::vector<int>> iteration_of_vertices_groups;
-        for(const auto& v : vertices_index_groups_)
+        // -- Get the vertices and their iteration from the indices in
+        // 'vertex_indices_pools_'. 
+        std::vector<std::vector<sf::Vertex>> vertices_pools;
+        std::vector<std::vector<int>> iteration_of_vertices_pools;
+
+        for(const auto& v : vertex_indices_pools_)
         {
+            // For each indices pools...
             std::vector<sf::Vertex> vertices_part;
             std::vector<int> iteration_of_vertices_part;
             for(auto idx : v)
             {
+                // ... get each index and get from the '*_copy' the vertex and
+                // its iteration.
                 vertices_part.push_back(vertices_copy.at(idx));
                 iteration_of_vertices_part.push_back(iteration_of_vertices_copy.at(idx));
             }
-            vertices_groups.push_back(vertices_part);
-            iteration_of_vertices_groups.push_back(iteration_of_vertices_part);
+            vertices_pools.push_back(vertices_part);
+            iteration_of_vertices_pools.push_back(iteration_of_vertices_part);
         }
 
         auto idx = 0u;
-        for(auto& painter_it : child_painters_)
+        for(auto& painter_it : child_painters_observers_)
         {
-            painter_it.get_painter_wrapper()->unwrap()->paint_vertices(vertices_groups.at(idx),
-                                                                           iteration_of_vertices_groups.at(idx),
-                                                                           max_recursion,
-                                                                           bounding_box);
+            // Call each child painter with its part of vertices with their index.
+            painter_it.get_painter_wrapper()->unwrap()->paint_vertices(vertices_pools.at(idx),
+                                                                       iteration_of_vertices_pools.at(idx),
+                                                                       max_recursion,
+                                                                       bounding_box);
             ++idx;
         }
 
-        std::vector<sf::Vertex> flattened_groups_;
+        // Flatten 'vertices_pools' into a single vertex std::vector.
+        std::vector<sf::Vertex> flattened_pool;
         std::size_t total_size = 0;
-        for (const auto& sub : vertices_groups)
+        for (const auto& sub : vertices_pools)
         {
             total_size += sub.size();
         }
-        flattened_groups_.reserve(total_size);
-        for (const auto& sub : vertices_groups)
+        flattened_pool.reserve(total_size);
+        for (const auto& sub : vertices_pools)
         {
-            flattened_groups_.insert(flattened_groups_.end(), sub.begin(), sub.end());
+            flattened_pool.insert(flattened_pool.end(), sub.begin(), sub.end());
         }
 
+        // By construction, the n-th vertex in 'flatten_pool' correspond to the
+        // n-th index in the flattened 'vertex_indices_pools_'. This index is
+        // the position in the global 'vertices' vector. So, this code put in
+        // order the painted vertices in 'vertices'.
         auto i = 0u;
-        for (const auto& v : vertices_index_groups_)
+        for (const auto& v : vertex_indices_pools_)
         {
             for (auto idx : v)
             {
-                vertices_copy.at(idx) = flattened_groups_.at(i++);
+                vertices_copy.at(idx) = flattened_pool.at(i++);
             }
         }
 

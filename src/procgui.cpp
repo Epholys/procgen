@@ -474,17 +474,21 @@ namespace
 
     void interact_with(colors::VertexPainterComposite& painter)
     {
-//        procgui::interact_with(*painter.get_main_painter(), "Slave Painter", true);
-
+        // ImGui's ID for the several child painters.
         int index = 0;
         auto child_painters = painter.get_child_painters();
+        // If set, 'to_remove' points to the child painter to remove.
         auto to_remove = end(child_painters);
-        bool add_new_painter = false;
-        bool add_copied_painter = false;
+        // If set, 'to_add' points to the position in which to add a painter.
         auto to_add = end(child_painters);
+        // If true, we add a new painter at 'to_add'.
+        bool add_new_painter = false;
+        // If true, we add the copied painter at 'to_add'.
+        bool add_copied_painter = false;
         
         ImGui::Separator();
 
+        // Button to add a new painter at the beginning.
         ::ext::ImGui::PushStyleGreenButton();
         if (ImGui::Button("Add Painter here"))
         {
@@ -493,7 +497,8 @@ namespace
         }
         ImGui::PopStyleColor(3);
 
-            ::ext::ImGui::PushStyleTurquoiseButton();
+        // Button to add the copied painter at the beginning.
+        ::ext::ImGui::PushStyleTurquoiseButton();
         if (colors::VertexPainterComposite::has_copied_painter() &&
             ImGui::Button("Paste copied Painter here"))
         { 
@@ -503,17 +508,20 @@ namespace
         ImGui::PopStyleColor(3);
 
         ImGui::Separator();
-        
+
+        // Begin the child painters
         for (auto it = begin(child_painters); it != end(child_painters); ++it)
         {
             ImGui::PushID(index);
-            
+
+            // Interact with this child painter.
             push_embedded();
             ::procgui::interact_with(**it, "");
             pop_embedded();
 
             ImGui::Separator();
 
+            // Button to add a new painter at this position.
             ::ext::ImGui::PushStyleGreenButton();
             if (ImGui::Button("Add Painter here"))
             {
@@ -522,6 +530,7 @@ namespace
             }
             ImGui::PopStyleColor(3);
 
+            // Button to remove the previous painter.
             if (it != begin(child_painters))
             {
                 ImGui::SameLine();                
@@ -533,6 +542,7 @@ namespace
                 ImGui::PopStyleColor(3);
             }
 
+            // Button to copy the previous painter.
             ::ext::ImGui::PushStylePurpleButton();
             if (ImGui::Button("Copy previous Painter"))
             {
@@ -540,6 +550,7 @@ namespace
             }
             ImGui::PopStyleColor(3);
 
+            // Button to add the copied painter at this position.
             if (colors::VertexPainterComposite::has_copied_painter())
             {
                 ImGui::SameLine();
@@ -556,17 +567,20 @@ namespace
             ImGui::PopID();
             index++;
         }
-        
+
+        // Remove the painter pointed by 'to_remove', if set.
         if (to_remove != end(child_painters))
         {
             child_painters.erase(to_remove);
             painter.set_child_painters(child_painters);
         }
+        // Add a new painter if necessary.
         else if (add_new_painter)
         {
             child_painters.insert(to_add, std::make_shared<colors::VertexPainterWrapper>());
             painter.set_child_painters(child_painters);
         }
+        // Paste the copied painter if necessary.
         else if (add_copied_painter)
         {
             child_painters.insert(to_add,
