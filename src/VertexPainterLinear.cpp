@@ -50,7 +50,7 @@ namespace colors
 
     std::shared_ptr<VertexPainter> VertexPainterLinear::clone_impl() const
     {
-        return std::make_shared<VertexPainterLinear>(get_target()->get_generator()->clone());
+        return std::make_shared<VertexPainterLinear>(get_target()->unwrap()->clone());
     }
     
     float VertexPainterLinear::get_angle() const
@@ -67,9 +67,9 @@ namespace colors
     void VertexPainterLinear::paint_vertices(std::vector<sf::Vertex>& vertices,
                                              const std::vector<int>&,
                                              int,
-                                             sf::FloatRect bounding_box) const
+                                             sf::FloatRect bounding_box)
     {
-        auto generator = get_target()->get_generator();
+        auto generator = get_target()->unwrap();
         if (!generator)
         {
             return;

@@ -7,7 +7,7 @@
 #include "Observable.h"
 #include "Observer.h"
 #include "ColorsGenerator.h"
-#include "ColorsGeneratorBuffer.h"
+#include "ColorsGeneratorWrapper.h"
 
 namespace colors
 {
@@ -15,15 +15,16 @@ namespace colors
     // For example, paints according to radial gradient with a ColorGenerator of
     // green hues.
     // VertexPainter is a base class with pure virtual methods, the child
-    // classes implement the coloring rules. It observes a ColorGeneratorBuffer
+    // classes implement the coloring rules. It observes a ColorGeneratorWrapper
     // and pass the 'notify()' call to the Observers.
     class VertexPainter : public Observable
-                        , public Observer<ColorGeneratorBuffer>
+                        , public Observer<ColorGeneratorWrapper>
     {
     public:
-        using OGenBuff = Observer<ColorGeneratorBuffer>;
+        using OGenBuff = Observer<ColorGeneratorWrapper>;
 
         VertexPainter(); // Create a default generator
+        virtual ~VertexPainter() {};
         explicit VertexPainter(const std::shared_ptr<ColorGenerator> gen);
         // Rule-of-five shallow copy
         VertexPainter(const VertexPainter& other);
@@ -36,16 +37,17 @@ namespace colors
         // copy itself into a polymorphic pointer.
         std::shared_ptr<VertexPainter> clone() const;
         
-        // Getters
-        std::shared_ptr<ColorGeneratorBuffer> get_generator_buffer() const;
+        // Getters/Setters
+        std::shared_ptr<ColorGeneratorWrapper> get_generator_wrapper() const;
+        void set_generator_wrapper(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper);
 
         // Paint 'vertices' with the informations of 'bounding_box' and
         // 'iteration_of_vertices' according to a rule with the colors from
-        // 'ColorGeneratorBuffer::ColorGenerator'.
+        // 'ColorGeneratorWrapper::ColorGenerator'.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<int>& iteration_of_vertices,
                                     int max_recursion,
-                                    sf::FloatRect bounding_box) const = 0;
+                                    sf::FloatRect bounding_box) = 0;
 
     private:
         // Clone implementation.

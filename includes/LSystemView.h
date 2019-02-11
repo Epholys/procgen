@@ -10,7 +10,8 @@
 #include "LSystemBuffer.h"
 #include "InterpretationMapBuffer.h"
 #include "UniqueColor.h"
-#include "VertexPainterBuffer.h"
+#include "UniqueId.h"
+#include "VertexPainterWrapper.h"
 
 namespace procgui
 {
@@ -26,9 +27,10 @@ namespace procgui
     // Invariant:
     //     - The 'vertices_' and 'iteration_of_vertices_' must correspond to the
     //     LSystem, InterpretationMap, and DrawingParameters.
-    //     - The 'vertices_' are at any time painted with VertexPainter
+    //     - The 'vertices_' are at any time painted with VertexPainter.
     //     - The 'bounding_box_' and 'sub_boxes_' must correspond with the
     //     'vertices_'.
+    //     - Each instance as a unique 'id_' and 'color_id_'
     //
     // Note:
     //    - LSystemView contain a shared ownership of the LSystem and the
@@ -37,21 +39,21 @@ namespace procgui
     class LSystemView : public Observer<LSystem>,
                         public Observer<drawing::InterpretationMap>,
                         public Observer<drawing::DrawingParameters>,
-                        public Observer<colors::VertexPainterBuffer>
+                        public Observer<colors::VertexPainterWrapper>
     {
     public:
         using OLSys = Observer<LSystem>;
         using OMap = Observer<drawing::InterpretationMap>;
         using OParams = Observer<drawing::DrawingParameters>;
-        using OPainter = Observer<colors::VertexPainterBuffer>;
+        using OPainter = Observer<colors::VertexPainterWrapper>;
 
         LSystemView(const std::string& name,
                     std::shared_ptr<LSystem> lsys,
                     std::shared_ptr<drawing::InterpretationMap> map,
                     std::shared_ptr<drawing::DrawingParameters> params,
-                    std::shared_ptr<colors::VertexPainterBuffer> painter = std::make_shared<colors::VertexPainterBuffer>());
+                    std::shared_ptr<colors::VertexPainterWrapper> painter = std::make_shared<colors::VertexPainterWrapper>());
         explicit LSystemView(const ext::sf::Vector2d& position);
-        // Shallow copy: LSystem, DrawingParameters and VertexPainterBuffer
+        // Shallow copy: LSystem, DrawingParameters and VertexPainterWrapper
         // are shared from 'other'. Use 'clone()' for a deep copy.
         LSystemView(const LSystemView& other);
         LSystemView(LSystemView&& other);
@@ -69,20 +71,20 @@ namespace procgui
         drawing::DrawingParameters& ref_parameters();
         LSystemBuffer& ref_lsystem_buffer();
         InterpretationMapBuffer& ref_interpretation_buffer();
-        colors::VertexPainterBuffer& ref_vertex_painter_buffer();
+        colors::VertexPainterWrapper& ref_vertex_painter_wrapper();
         // Getters
         // Correctly translated to screen-space bounding_box.
         sf::FloatRect get_bounding_box() const;
         const drawing::DrawingParameters& get_parameters() const;
         const LSystemBuffer& get_lsystem_buffer() const;
         const InterpretationMapBuffer& get_interpretation_buffer() const;
-        const colors::VertexPainterBuffer& get_vertex_painter_buffer() const;
+        const colors::VertexPainterWrapper& get_vertex_painter_wrapper() const;
         int get_id() const;
         sf::Color get_color() const;
         // Translation transform to correct screen-space position of the
         // LSystem. 
         sf::Transform get_transform() const;
-        
+
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();
         void paint_vertices();
@@ -104,15 +106,15 @@ namespace procgui
     private:
         void update_callbacks();
         
-        // Unique identifier for each instance (with a growing id_count_).
-        // Used in the GUI.
-        static int id_count_;
+        // The managers of unique identifiers and colors for each instance of
+        // LSystemView. 
+        static UniqueId unique_ids_;
+        static colors::UniqueColor unique_colors_;
+        // Unique identifier for each instance. Used in procgui.
         int id_;
-        // The unique color generator. Each id is associated with a unique
-        // color. Static as shared between every objects.
-        static colors::UniqueColor color_gen_;
-        sf::Color color_id_; // Color associated to the id.
-
+        // Unique color for each instance. Linked to 'id_'.
+        sf::Color color_id_;
+        
         // The window's name.
         std::string name_;
 

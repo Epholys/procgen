@@ -32,7 +32,7 @@ namespace colors
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<int>& iteration_of_vertices,
                                     int max_recursion,
-                                    sf::FloatRect bounding_box) const override;
+                                    sf::FloatRect bounding_box) override;
 
     private:
         // Implements the deep-copy cloning.

@@ -44,7 +44,7 @@ namespace drawing
 
     void load_position_fn(Turtle& turtle)
     {
-        if (turtle.stack.empty())
+        if (turtle.stack.empty() || turtle.vertices.size() == 0)
         {
             // Do nothing
         }
@@ -53,11 +53,8 @@ namespace drawing
             turtle.vertices.push_back( {turtle.vertices.back().position, sf::Color::Transparent} );
             turtle.state = turtle.stack.top();
             turtle.vertices.push_back( {sf::Vector2f(turtle.state.position), sf::Color::Transparent} );
-            // turtle.vertices.push_back( {sf::Vector2f(turtle.state.position)} );
-
             turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
             turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-            // turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
 
             turtle.stack.pop();
         }

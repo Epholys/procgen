@@ -1,29 +1,29 @@
-#ifndef VERTEX_PAINTER_RECURSION_H
-#define VERTEX_PAINTER_RECURSION_H
+#ifndef VERTEX_PAINTER_ITERATION_H
+#define VERTEX_PAINTER_ITERATION_H
 
 
 #include "VertexPainter.h"
 
 namespace colors
 {
-    class VertexPainterRecursion : public VertexPainter
+    class VertexPainterIteration : public VertexPainter
     {
     public:
-        VertexPainterRecursion(); // Create a default generator
-        explicit VertexPainterRecursion(const std::shared_ptr<ColorGenerator> gen);
+        VertexPainterIteration(); // Create a default generator
+        explicit VertexPainterIteration(const std::shared_ptr<ColorGenerator> gen);
         // Shallow rule-of-five constructors.
-        VertexPainterRecursion(const VertexPainterRecursion& other);
-        VertexPainterRecursion(VertexPainterRecursion&& other);
-        VertexPainterRecursion& operator=(const VertexPainterRecursion& other);
-        VertexPainterRecursion& operator=(VertexPainterRecursion&& other);
+        VertexPainterIteration(const VertexPainterIteration& other);
+        VertexPainterIteration(VertexPainterIteration&& other);
+        VertexPainterIteration& operator=(const VertexPainterIteration& other);
+        VertexPainterIteration& operator=(VertexPainterIteration&& other);
         
-        // Paint 'vertices' according to its recursion value: simply divide the
-        // current recursion by the max recursion.
+        // Paint 'vertices' according to its iteration value: simply divide the
+        // current iteration by the max iteration.
         // 'bounding_box' is not used.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<int>& vertices_recursion,
-                                    int max_recursion,
-                                    sf::FloatRect bounding_box) const override;
+                                    const std::vector<int>& vertices_iteration,
+                                    int max_iteration,
+                                    sf::FloatRect bounding_box) override;
 
     private:
         // Implements the deep-copy cloning.
@@ -32,4 +32,4 @@ namespace colors
 }
 
 
-#endif // VERTEX_PAINTER_RECURSION_H
+#endif // VERTEX_PAINTER_ITERATION_H

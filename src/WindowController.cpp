@@ -127,14 +127,33 @@ namespace controller
             ImGui::Separator();
             try
             {
-                // For each file of the 'save_dir_' directory...
+                std::vector<fs::directory_entry> files;
+                // Get all files in the 'save_dir_', ...
                 for (const auto& file : fs::directory_iterator(save_dir_))
-                { 
-                    // ... displays it in a selectable list ...
+                {
+                    files.emplace_back(file);
+                }
+
+                // ... sort them lexicographically, ...
+                std::sort(begin(files), end(files),
+                          [](const auto& left, const auto& right)
+                          {
+                              auto left_str = left.path().string();
+                              std::transform(begin(left_str), end(left_str), begin(left_str),
+                                             [](unsigned char c){return std::tolower(c);});
+                              auto right_str = right.path().string();
+                              std::transform(begin(right_str), end(right_str), begin(right_str),
+                                             [](unsigned char c){return std::tolower(c);});
+                              return left_str < right_str;                          
+                          });
+
+                for (const auto& file : files)
+                {
+                   // ... display them in a selectable list ...
                    if (fs::is_regular_file(file.path()) &&
                         ImGui::Selectable(file.path().filename().c_str()))
                     {
-                        // ... and set 'filename' to it when clicked (to overwrite this file).
+                        // ... and set 'filename' to if one is clicked (to overwrite this file).
                         filename = string_to_array<filename.size()>(file.path().filename());
                     }
                 }
@@ -237,14 +256,32 @@ namespace controller
             ImGui::Separator();
             try
             {
-                // For each file of the 'save_dir_' directory...
+                std::vector<fs::directory_entry> files;
+                // Get all files in the 'save_dir_' directory, ...
                 for (const auto& file : fs::directory_iterator(save_dir_))
                 {
-                    // ... displays it in a selectable list ...
+                    files.emplace_back(file);
+                }
+                // ... sort them lexicographically, ...
+                std::sort(begin(files), end(files),
+                          [](const auto& left, const auto& right)
+                          {
+                              auto left_str = left.path().string();
+                              std::transform(begin(left_str), end(left_str), begin(left_str),
+                                             [](unsigned char c){return std::tolower(c);});
+                              auto right_str = right.path().string();
+                              std::transform(begin(right_str), end(right_str), begin(right_str),
+                                             [](unsigned char c){return std::tolower(c);});
+                              return left_str < right_str;                          
+                          });
+
+                for (const auto& file : files)
+                {
+                    // ... displays them in a selectable list ...
                     if (fs::is_regular_file(file.path()) &&
                         ImGui::Selectable(file.path().filename().c_str()))
                     {
-                        // ... and set 'filename' to it when clicked (to
+                        // ... and set 'filename' to the one clicked (to
                         // load this file).
                         filename = string_to_array<filename.size()>(file.path().filename());
                     }

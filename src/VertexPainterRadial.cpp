@@ -50,7 +50,7 @@ namespace colors
 
     std::shared_ptr<VertexPainter> VertexPainterRadial::clone_impl() const
     {
-        return std::make_shared<VertexPainterRadial>(get_target()->get_generator()->clone());
+        return std::make_shared<VertexPainterRadial>(get_target()->unwrap()->clone());
     }
     
     sf::Vector2f VertexPainterRadial::get_center() const
@@ -67,9 +67,9 @@ namespace colors
     void VertexPainterRadial::paint_vertices(std::vector<sf::Vertex>& vertices,
                                              const std::vector<int>&, 
                                              int,
-                                             sf::FloatRect bounding_box) const
+                                             sf::FloatRect bounding_box)
     {
-        auto generator = get_target()->get_generator();
+        auto generator = get_target()->unwrap();
         if (!generator)
         {
             return;

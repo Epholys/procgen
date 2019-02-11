@@ -7,8 +7,9 @@ namespace procgui
     using namespace drawing;
     using namespace colors;
 
-    int LSystemView::id_count_ = 0;
-    UniqueColor LSystemView::color_gen_ {};
+    // int LSystemView::id_count_ = 0;
+    UniqueId LSystemView::unique_ids_ {};
+    UniqueColor LSystemView::unique_colors_ {};
 
     void LSystemView::update_callbacks()
     {
@@ -22,13 +23,13 @@ namespace procgui
                              std::shared_ptr<LSystem> lsys,
                              std::shared_ptr<InterpretationMap> map,
                              std::shared_ptr<DrawingParameters> params,
-                             std::shared_ptr<VertexPainterBuffer> painter)
+                             std::shared_ptr<VertexPainterWrapper> painter)
         : OLSys {lsys}
         , OMap {map}
         , OParams {params}
         , OPainter {painter}
-        , id_{id_count_++}
-        , color_id_{color_gen_.register_id(id_)}
+        , id_{unique_ids_.get_id()}
+        , color_id_{unique_colors_.get_color(id_)}
         , name_ {name}
         , lsys_buff_ {lsys}
         , interpretation_buff_ {map}
@@ -62,8 +63,8 @@ namespace procgui
         , OMap {other.OMap::get_target()}
         , OParams {other.OParams::get_target()}
         , OPainter {other.OPainter::get_target()}
-        , id_ {id_count_++}
-        , color_id_{color_gen_.register_id(id_)}
+        , id_{unique_ids_.get_id()}
+        , color_id_{unique_colors_.get_color(id_)}
         , name_ {other.name_}
         , lsys_buff_ {other.lsys_buff_}
         , interpretation_buff_ {other.interpretation_buff_}
@@ -119,8 +120,8 @@ namespace procgui
             OMap::set_target(other.OMap::get_target());
             OParams::set_target(other.OParams::get_target());
             OPainter::set_target(other.OPainter::get_target());
-            id_ = {id_count_++};
-            color_id_= {color_gen_.register_id(id_)};
+            id_ = unique_ids_.get_id();
+            color_id_ = unique_colors_.get_color(id_);
             name_ = {other.name_};
             lsys_buff_ = {other.lsys_buff_};
             interpretation_buff_ = {other.interpretation_buff_};
@@ -145,8 +146,8 @@ namespace procgui
             OMap::set_target(std::move(other.OMap::get_target()));
             OParams::set_target(std::move(other.OParams::get_target()));
             OPainter::set_target(std::move(other.OPainter::get_target()));
-            id_ = {other.id_};
-            color_id_= {std::move(other.color_id_)};
+            id_ = other.id_;
+            color_id_ = other.color_id_;
             name_ = {std::move(other.name_)};
             lsys_buff_ = {std::move(other.lsys_buff_)};
             interpretation_buff_ = {std::move(other.interpretation_buff_)};
@@ -182,7 +183,7 @@ namespace procgui
         // Unregister the id unless the object was moved.
         if (id_ != -1)
         {
-            color_gen_.remove_id(id_);
+            unique_ids_.free_id(id_);
         }
     }
 
@@ -195,7 +196,7 @@ namespace procgui
             std::make_shared<LSystem>(*OLSys::get_target()),
             std::make_shared<InterpretationMap>(*OMap::get_target()),
             std::make_shared<DrawingParameters>(*OParams::get_target()),
-            std::make_shared<VertexPainterBuffer>(OPainter::get_target()->clone())
+            std::make_shared<VertexPainterWrapper>(OPainter::get_target()->clone())
                 );
     }
 
@@ -222,7 +223,7 @@ namespace procgui
     {
         return interpretation_buff_;
     }
-    colors::VertexPainterBuffer& LSystemView::ref_vertex_painter_buffer()
+    colors::VertexPainterWrapper& LSystemView::ref_vertex_painter_wrapper()
     {
         return *OPainter::get_target();
     }
@@ -242,7 +243,7 @@ namespace procgui
     {
         return interpretation_buff_;
     }
-    const colors::VertexPainterBuffer& LSystemView::get_vertex_painter_buffer() const
+    const colors::VertexPainterWrapper& LSystemView::get_vertex_painter_wrapper() const
     {
         return *OPainter::get_target();
     }

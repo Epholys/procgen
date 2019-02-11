@@ -6,14 +6,14 @@ namespace colors
 {
     VertexPainter::VertexPainter()
         : Observable{}
-        , OGenBuff{std::make_shared<ColorGeneratorBuffer>()}
+        , OGenBuff{std::make_shared<ColorGeneratorWrapper>()}
     {
         add_callback([this](){notify();});
     }
 
     VertexPainter::VertexPainter(const std::shared_ptr<ColorGenerator> gen)
         : Observable{}
-        , OGenBuff{std::make_shared<ColorGeneratorBuffer>(gen)}
+        , OGenBuff{std::make_shared<ColorGeneratorWrapper>(gen)}
     {
         add_callback([this](){notify();});
     }
@@ -63,8 +63,13 @@ namespace colors
         return clone_impl();
     }
     
-    std::shared_ptr<ColorGeneratorBuffer> VertexPainter::get_generator_buffer() const
+    std::shared_ptr<ColorGeneratorWrapper> VertexPainter::get_generator_wrapper() const
     {
         return get_target();
     }
+    void VertexPainter::set_generator_wrapper(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper)
+    {
+        set_target(color_generator_wrapper);
+    }
+
 }
