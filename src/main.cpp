@@ -7,7 +7,6 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
 #include "cereal/archives/json.hpp"
-#include "cereal/types/vector.hpp"
 
 #include "LSystem.h"
 #include "RuleMapBuffer.h"
@@ -17,6 +16,7 @@
 #include "procgui.h"
 #include "WindowController.h"
 #include "RenderWindow.h"
+#include "ColorsGenerator.h"
 
 using namespace drawing;
 using namespace math;
@@ -59,7 +59,13 @@ int main()
     LSystemView plant_view ("Plant", plant, map, plant_param);
     // LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
     // LSystemView fract_view ("Fract", fract, map, fract_param);
-    
+
+    // {
+    //     cereal::JSONOutputArchive oarchive(std::cout);
+    //     colors::ConstantColor c (sf::Color::Cyan);
+    //     oarchive(cereal::make_nvp("Constant", c));
+    // }
+
     std::list<LSystemView> views;
     // views.push_back(std::move(serpinski_view));
     views.push_back(std::move(plant_view));

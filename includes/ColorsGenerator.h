@@ -1,10 +1,62 @@
 #ifndef COLORS_GENERATOR_H
 #define COLORS_GENERATOR_H
 
+#include <cstdio>
 #include <vector>
 #include <SFML/Graphics.hpp>
-
+#include "cereal/types/polymorphic.hpp"
+#include "cereal/cereal.hpp"
+#include "cereal/archives/json.hpp"
 #include "Observable.h"
+
+
+namespace cereal
+{
+    template <class Archive>
+    std::string save_minimal(const Archive&, sf::Color color)
+    {
+        char hex_color[8];
+        unsigned long r = color.r;
+        unsigned long g = color.g;
+        unsigned long b = color.b;
+        unsigned long a = color.a;
+        unsigned long  color_number = r << 24 | g << 16 | b << 8 | a;
+        snprintf(hex_color, 9, "%08lX", color_number);
+        std::string hex_string (hex_color);
+        hex_string.insert(begin(hex_string), '#');
+        return hex_string;
+    }
+
+    template <class Archive>
+    void load(const Archive&, sf::Color& color, const std::string& data)
+    {
+        std::string hex_string = data;
+        bool wrong_format = false;
+        for (char c : hex_string)
+        {
+            if (c != '#' || !std::isxdigit(c))
+            {
+                wrong_format = true;
+                break;
+            }
+        }
+        if (hex_string.size() == 0 || hex_string.at(0) != '#' || wrong_format)
+        {
+            throw RapidJSONException("Wrong hexadecimal format for sf::Color");
+        }
+        hex_string.erase(0);
+        unsigned long color_number;
+        sscanf(hex_string.data(), "%lX", &color_number);
+        color.a = color_number & 0xff;
+        color_number >>= 8;
+        color.b = color_number & 0xff;
+        color_number >>= 8;
+        color.g = color_number & 0xff;
+        color_number >>= 8;
+        color.r = color_number & 0xff;
+    }
+ 
+}
 
 namespace colors
 {
@@ -57,6 +109,13 @@ namespace colors
         // Clone 'this' and returns it as a 'shared_ptr'.
         std::shared_ptr<ColorGenerator> clone_impl() const override;
 
+        friend class cereal::access;
+        template<class Archive>
+        void serialize(Archive& ar)
+            {
+                ar(cereal::make_nvp("Color", color_));
+            }
+        
         // The unique color returned.
         sf::Color color_;
     };
@@ -166,5 +225,9 @@ namespace colors
     };
 }
 
+// CEREAL_REGISTER_TYPE(colors::ColorGenerator);
+// CEREAL_REGISTER_POLYMORPHIC_RELATION(Observable, colors::ColorGenerator)
+// CEREAL_REGISTER_TYPE(colors::ConstantColor);
+// CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::ColorGenerator, colors::ConstantColor)
 
 #endif // COLORS_GENERATOR_H
