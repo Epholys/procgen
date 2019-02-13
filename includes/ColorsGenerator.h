@@ -6,6 +6,8 @@
 #include <SFML/Graphics.hpp>
 #include "cereal/types/polymorphic.hpp"
 #include "cereal/cereal.hpp"
+#include "cereal/types/vector.hpp"
+#include "cereal/types/utility.hpp"
 #include "cereal/archives/json.hpp"
 #include "Observable.h"
 
@@ -28,23 +30,23 @@ namespace cereal
     }
 
     template <class Archive>
-    void load(const Archive&, sf::Color& color, const std::string& data)
+    void load_minimal(const Archive&, sf::Color& color, const std::string& data)
     {
         std::string hex_string = data;
         bool wrong_format = false;
         for (char c : hex_string)
         {
-            if (c != '#' || !std::isxdigit(c))
+            if (c != '#' && !std::isxdigit(c))
             {
                 wrong_format = true;
                 break;
             }
         }
-        if (hex_string.size() == 0 || hex_string.at(0) != '#' || wrong_format)
+        if (hex_string.size() != 9 || hex_string.at(0) != '#' || wrong_format)
         {
             throw RapidJSONException("Wrong hexadecimal format for sf::Color");
         }
-        hex_string.erase(0);
+        hex_string.erase(begin(hex_string));
         unsigned long color_number;
         sscanf(hex_string.data(), "%lX", &color_number);
         color.a = color_number & 0xff;
@@ -168,6 +170,14 @@ namespace colors
         // Clone 'this' and returns it as a 'shared_ptr'.
         std::shared_ptr<ColorGenerator> clone_impl() const override;
 
+        // friend class cereal::access;
+        // template<class Archive>
+        // void serialize(Archive& ar)
+        //     {
+        //         ar(sanitized_keys_);
+        //     }
+        
+        
         // The raw keys : they may be not ordered.
         keys raw_keys_;
         // The sanitized_keys_: derived from 'raw_keys_': all keys are sorted

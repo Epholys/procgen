@@ -60,10 +60,28 @@ int main()
     // LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
     // LSystemView fract_view ("Fract", fract, map, fract_param);
 
+    // std::stringstream ss;
+    // colors::ConstantColor c (sf::Color::Red);
     // {
     //     cereal::JSONOutputArchive oarchive(std::cout);
-    //     colors::ConstantColor c (sf::Color::Cyan);
-    //     oarchive(cereal::make_nvp("Constant", c));
+    //     cereal::JSONOutputArchive oarchivess(ss);
+    //     oarchive(cereal::make_nvp("Constant", c)); std::cout << std::endl;
+    //     oarchivess(cereal::make_nvp("Constant", c)); std::cout << std::endl;
+    //     c.set_color(sf::Color::White);
+    //     oarchive(c); std::cout << std::endl;
+    // }
+    // {
+    //     cereal::JSONOutputArchive oarchive(std::cout);
+    //     cereal::JSONInputArchive iarchivess(ss);
+    //     iarchivess(c);
+    //     oarchive(c); std::cout << std::endl;
+    // }
+        
+    
+    // {
+    //     cereal::JSONOutputArchive oarchive(std::cout);
+    //     colors::LinearGradient c ({{sf::Color::Red, 0.}, {sf::Color::Green, 0.25}, {sf::Color::Blue, 0.95}});
+    //     oarchive(cereal::make_nvp("Gradient", c));
     // }
 
     std::list<LSystemView> views;
