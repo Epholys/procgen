@@ -77,6 +77,7 @@ int main()
     //     oarchive(c); std::cout << std::endl;
     // }
             
+
     // std::stringstream ss;
     // colors::LinearGradient c ({{sf::Color::Red, 0.}, {sf::Color::Green, 0.25}, {sf::Color::Blue, 0.95}});
     // {
@@ -94,6 +95,24 @@ int main()
     //     oarchive(c); std::cout << std::endl;
     // }
 
+    std::stringstream ss;
+    colors::DiscreteGradient c ({{sf::Color::Red, 0}, {sf::Color::Green, 1}, {sf::Color::Blue, 4}});
+    {
+        cereal::JSONOutputArchive oarchive(std::cout);
+        cereal::JSONOutputArchive oarchivess(ss);
+        oarchive(cereal::make_nvp("Gradient", c)); std::cout << std::endl;
+        oarchivess(cereal::make_nvp("Gradient", c)); std::cout << std::endl;
+        c.set_keys({{sf::Color::Black, 0}, {sf::Color::White, 5}});
+        oarchive(c); std::cout << std::endl;
+    }
+    {
+        cereal::JSONOutputArchive oarchive(std::cout);
+        cereal::JSONInputArchive iarchivess(ss);
+        iarchivess(c);
+        oarchive(c); std::cout << std::endl;
+    }
+
+    
     std::list<LSystemView> views;
     // views.push_back(std::move(serpinski_view));
     views.push_back(std::move(plant_view));

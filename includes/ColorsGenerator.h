@@ -59,16 +59,16 @@ namespace cereal
         color.r = color_number & 0xff;
     }
 
-    template<class Archive,
+    template<class Archive, class N,
              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
-    void save(Archive& ar, const std::pair<sf::Color, float>& pair)
+    void save(Archive& ar, const std::pair<sf::Color, N>& pair)
     {
         ar(cereal::make_nvp(save_minimal(ar, pair.first), pair.second));
     }
 
-    template<class Archive,
+    template<class Archive, class N,
              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
-    void load(Archive& ar, std::pair<sf::Color, float>& pair)
+    void load(Archive& ar, std::pair<sf::Color, N>& pair)
     {
         std::string color_string = ar.getNodeName();
         float key; ar(key);
@@ -77,9 +77,9 @@ namespace cereal
         pair = std::make_pair(color, key);
     }
 
-    template<class Archive,
+    template<class Archive, class N,
              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
-    void save(Archive& ar, const std::vector<std::pair<sf::Color, float>>& color_keys)
+    void save(Archive& ar, const std::vector<std::pair<sf::Color, N>>& color_keys)
     {
         for (auto& p : color_keys)
         {
@@ -87,9 +87,9 @@ namespace cereal
         }
     }
     
-    template<class Archive,
+    template<class Archive, class N,
              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
-    void load(Archive& ar, std::vector<std::pair<sf::Color, float>>& color_keys)
+    void load(Archive& ar, std::vector<std::pair<sf::Color, N>>& color_keys)
     {
         color_keys.clear();
         while(true)
@@ -274,6 +274,13 @@ namespace colors
 
         // Clone 'this' and returns it as a 'shared_ptr'.
         std::shared_ptr<ColorGenerator> clone_impl() const override;
+
+        friend class cereal::access;
+        template<class Archive>
+        void serialize(Archive& ar)
+            {
+                ar(cereal::make_nvp("color_keys", keys_));
+            }
         
         // The keys. Always respect the relevant invariant.
         keys keys_;
