@@ -289,9 +289,11 @@ namespace colors
     };
 }
 
-// CEREAL_REGISTER_TYPE(colors::ColorGenerator);
-// CEREAL_REGISTER_POLYMORPHIC_RELATION(Observable, colors::ColorGenerator)
-// CEREAL_REGISTER_TYPE(colors::ConstantColor);
-// CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::ColorGenerator, colors::ConstantColor)
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::ConstantColor, "ConstantColor");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::ColorGenerator, colors::ConstantColor)
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::LinearGradient, "LinearGradient");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::ColorGenerator, colors::LinearGradient)
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::DiscreteGradient, "DiscreteGradient");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::ColorGenerator, colors::DiscreteGradient)
 
 #endif // COLORS_GENERATOR_H

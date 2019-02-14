@@ -96,20 +96,36 @@ int main()
     // }
 
     std::stringstream ss;
-    colors::DiscreteGradient c ({{sf::Color::Red, 0}, {sf::Color::Green, 1}, {sf::Color::Blue, 4}});
+    std::shared_ptr<colors::ColorGenerator> cc =
+        std::make_shared<colors::ConstantColor>(sf::Color::Red);
+    std::shared_ptr<colors::ColorGenerator> lc =
+        std::make_shared<colors::LinearGradient>(colors::LinearGradient::keys(
+                                                     {{sf::Color::Red, 0.},
+                                                         {sf::Color::Green, 0.25},
+                                                         {sf::Color::Blue, 0.95}}));
+    std::shared_ptr<colors::ColorGenerator> dc =
+        std::make_shared<colors::DiscreteGradient>(colors::DiscreteGradient::keys(
+                                                       {{sf::Color::Red, 0},
+                                                           {sf::Color::Green, 1},
+                                                           {sf::Color::Blue, 4}}));
     {
         cereal::JSONOutputArchive oarchive(std::cout);
         cereal::JSONOutputArchive oarchivess(ss);
-        oarchive(cereal::make_nvp("Gradient", c)); std::cout << std::endl;
-        oarchivess(cereal::make_nvp("Gradient", c)); std::cout << std::endl;
-        c.set_keys({{sf::Color::Black, 0}, {sf::Color::White, 5}});
-        oarchive(c); std::cout << std::endl;
+        oarchive(cereal::make_nvp("Constant", cc), cereal::make_nvp("Linear", lc), cereal::make_nvp("Discrete", dc)); std::cout << std::endl;
+        oarchivess(cereal::make_nvp("Constant", cc), cereal::make_nvp("Linear", lc), cereal::make_nvp("Discrete", dc)); std::cout << std::endl;
+        cc = std::make_shared<colors::ConstantColor>(sf::Color::White);
+        lc = std::make_shared<colors::LinearGradient>(colors::LinearGradient::keys(
+                                                          {{sf::Color::Black, 0.},
+                                                              {sf::Color::White, 0.25}}));
+        dc = std::make_shared<colors::DiscreteGradient>(colors::DiscreteGradient::keys(
+                                                            {{sf::Color::White, 0}, {sf::Color::Black, 1}}));
+        oarchive(cereal::make_nvp("Constant", cc), cereal::make_nvp("Linear", lc), cereal::make_nvp("Discrete", dc)); std::cout << std::endl;
     }
     {
         cereal::JSONOutputArchive oarchive(std::cout);
         cereal::JSONInputArchive iarchivess(ss);
-        iarchivess(c);
-        oarchive(c); std::cout << std::endl;
+        iarchivess(cc, lc, dc);
+        oarchive(cc, lc, dc); std::cout << std::endl;
     }
 
     
