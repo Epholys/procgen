@@ -7,14 +7,14 @@
 #include "cereal/types/polymorphic.hpp"
 #include "cereal/cereal.hpp"
 #include "cereal/types/vector.hpp"
-#include "cereal/types/utility.hpp"
 #include "cereal/archives/json.hpp"
 #include "Observable.h"
 
 
 namespace cereal
 {
-    template <class Archive>
+    template <class Archive,
+              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
     std::string save_minimal(const Archive&, sf::Color color)
     {
         char hex_color[8];
@@ -29,7 +29,8 @@ namespace cereal
         return hex_string;
     }
 
-    template <class Archive>
+    template <class Archive,
+              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
     void load_minimal(const Archive&, sf::Color& color, const std::string& data)
     {
         std::string hex_string = data;
@@ -57,7 +58,53 @@ namespace cereal
         color_number >>= 8;
         color.r = color_number & 0xff;
     }
- 
+
+    template<class Archive,
+             traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
+    void save(Archive& ar, const std::pair<sf::Color, float>& pair)
+    {
+        ar(cereal::make_nvp(save_minimal(ar, pair.first), pair.second));
+    }
+
+    template<class Archive,
+             traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
+    void load(Archive& ar, std::pair<sf::Color, float>& pair)
+    {
+        std::string color_string = ar.getNodeName();
+        float key; ar(key);
+        sf::Color color;
+        load_minimal(ar, pair.first, color_string);
+        pair = std::make_pair(color, key);
+    }
+
+    template<class Archive,
+             traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
+    void save(Archive& ar, const std::vector<std::pair<sf::Color, float>>& color_keys)
+    {
+        for (auto& p : color_keys)
+        {
+            save(ar, p);
+        }
+    }
+    
+    template<class Archive,
+             traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
+    void load(Archive& ar, std::vector<std::pair<sf::Color, float>>& color_keys)
+    {
+        color_keys.clear();
+        while(true)
+        {
+            const auto namePtr = ar.getNodeName();
+
+            if(!namePtr)
+                break;
+
+            std::pair<sf::Color, float> key;
+            load(ar, key);
+            color_keys.emplace_back(key);
+        }
+    }
+    
 }
 
 namespace colors
@@ -170,13 +217,13 @@ namespace colors
         // Clone 'this' and returns it as a 'shared_ptr'.
         std::shared_ptr<ColorGenerator> clone_impl() const override;
 
-        // friend class cereal::access;
-        // template<class Archive>
-        // void serialize(Archive& ar)
-        //     {
-        //         ar(sanitized_keys_);
-        //     }
-        
+        friend class cereal::access;
+        template<class Archive>
+        void serialize(Archive& ar)
+            {
+                ar(cereal::make_nvp("color_keys", sanitized_keys_));
+            }
+
         
         // The raw keys : they may be not ordered.
         keys raw_keys_;
