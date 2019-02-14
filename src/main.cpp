@@ -22,6 +22,7 @@ using namespace drawing;
 using namespace math;
 using namespace procgui;
 using namespace controller;
+using namespace colors;
 
 int main()
 {
@@ -59,75 +60,31 @@ int main()
     LSystemView plant_view ("Plant", plant, map, plant_param);
     // LSystemView serpinski_view ("Serpinski", serpinski, map, serpinski_param);
     // LSystemView fract_view ("Fract", fract, map, fract_param);
-
-    // std::stringstream ss;
-    // colors::ConstantColor c (sf::Color::Red);
-    // {
-    //     cereal::JSONOutputArchive oarchive(std::cout);
-    //     cereal::JSONOutputArchive oarchivess(ss);
-    //     oarchive(cereal::make_nvp("Constant", c)); std::cout << std::endl;
-    //     oarchivess(cereal::make_nvp("Constant", c)); std::cout << std::endl;
-    //     c.set_color(sf::Color::White);
-    //     oarchive(c); std::cout << std::endl;
-    // }
-    // {
-    //     cereal::JSONOutputArchive oarchive(std::cout);
-    //     cereal::JSONInputArchive iarchivess(ss);
-    //     iarchivess(c);
-    //     oarchive(c); std::cout << std::endl;
-    // }
             
-
-    // std::stringstream ss;
-    // colors::LinearGradient c ({{sf::Color::Red, 0.}, {sf::Color::Green, 0.25}, {sf::Color::Blue, 0.95}});
-    // {
-    //     cereal::JSONOutputArchive oarchive(std::cout);
-    //     cereal::JSONOutputArchive oarchivess(ss);
-    //     oarchive(cereal::make_nvp("Gradient", c)); std::cout << std::endl;
-    //     oarchivess(cereal::make_nvp("Gradient", c)); std::cout << std::endl;
-    //     c.set_keys({{sf::Color::Black, 0.}, {sf::Color::White, 0.25}});
-    //     oarchive(c); std::cout << std::endl;
-    // }
-    // {
-    //     cereal::JSONOutputArchive oarchive(std::cout);
-    //     cereal::JSONInputArchive iarchivess(ss);
-    //     iarchivess(c);
-    //     oarchive(c); std::cout << std::endl;
-    // }
-
     std::stringstream ss;
-    std::shared_ptr<colors::ColorGenerator> cc =
-        std::make_shared<colors::ConstantColor>(sf::Color::Red);
-    std::shared_ptr<colors::ColorGenerator> lc =
-        std::make_shared<colors::LinearGradient>(colors::LinearGradient::keys(
-                                                     {{sf::Color::Red, 0.},
-                                                         {sf::Color::Green, 0.25},
-                                                         {sf::Color::Blue, 0.95}}));
-    std::shared_ptr<colors::ColorGenerator> dc =
-        std::make_shared<colors::DiscreteGradient>(colors::DiscreteGradient::keys(
-                                                       {{sf::Color::Red, 0},
-                                                           {sf::Color::Green, 1},
-                                                           {sf::Color::Blue, 4}}));
+    std::shared_ptr<ColorGenerator> c = std::make_shared<LinearGradient>(LinearGradient::keys({{sf::Color::Red, 0.}, {sf::Color::Green, 0.25}, {sf::Color::Blue, 0.95}}));
+    std::shared_ptr<VertexPainterLinear> o = std::make_shared<VertexPainterLinear>(c);
+    o->set_angle(90.);
+    std::shared_ptr<VertexPainter> p = o;
     {
         cereal::JSONOutputArchive oarchive(std::cout);
         cereal::JSONOutputArchive oarchivess(ss);
-        oarchive(cereal::make_nvp("Constant", cc), cereal::make_nvp("Linear", lc), cereal::make_nvp("Discrete", dc)); std::cout << std::endl;
-        oarchivess(cereal::make_nvp("Constant", cc), cereal::make_nvp("Linear", lc), cereal::make_nvp("Discrete", dc)); std::cout << std::endl;
-        cc = std::make_shared<colors::ConstantColor>(sf::Color::White);
-        lc = std::make_shared<colors::LinearGradient>(colors::LinearGradient::keys(
-                                                          {{sf::Color::Black, 0.},
-                                                              {sf::Color::White, 0.25}}));
-        dc = std::make_shared<colors::DiscreteGradient>(colors::DiscreteGradient::keys(
-                                                            {{sf::Color::White, 0}, {sf::Color::Black, 1}}));
-        oarchive(cereal::make_nvp("Constant", cc), cereal::make_nvp("Linear", lc), cereal::make_nvp("Discrete", dc)); std::cout << std::endl;
+        oarchivess(cereal::make_nvp("Linear", p)); std::cout << std::endl;
+        std::cout << ss.str() << std::endl;
     }
     {
+        // std::shared_ptr<ColorGenerator> c = std::make_shared<LinearGradient>(LinearGradient::keys({{sf::Color::White, 0}, {sf::Color::Black, 1}}));
+        // std::shared_ptr<VertexPainterLinear> p  = std::make_shared<VertexPainterLinear>(c);
+        // p->set_angle(90.f);
+        // std::shared_ptr<VertexPainter> pp = p;
         cereal::JSONOutputArchive oarchive(std::cout);
         cereal::JSONInputArchive iarchivess(ss);
-        iarchivess(cc, lc, dc);
-        oarchive(cc, lc, dc); std::cout << std::endl;
+        std::cout << ss.str() << std::endl;
+        // oarchive(pp); std::cout << std::endl;
+        std::shared_ptr<VertexPainter> newp;
+        iarchivess(newp);
+        oarchive(newp); std::cout << std::endl;
     }
-
     
     std::list<LSystemView> views;
     // views.push_back(std::move(serpinski_view));

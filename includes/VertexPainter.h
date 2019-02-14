@@ -4,10 +4,12 @@
 
 #include <memory>
 #include <SFML/Graphics.hpp>
+#include "cereal/cereal.hpp"
+#include "cereal/types/polymorphic.hpp"
 #include "Observable.h"
 #include "Observer.h"
-#include "ColorsGenerator.h"
 #include "ColorsGeneratorWrapper.h"
+
 
 namespace colors
 {
@@ -55,7 +57,4 @@ namespace colors
     };
 }
 
-
 #endif // VERTEX_PAINTER_H
-
-

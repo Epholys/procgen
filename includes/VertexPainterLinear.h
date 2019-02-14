@@ -1,7 +1,6 @@
 #ifndef VERTEX_PAINTER_LINEAR_H
 #define VERTEX_PAINTER_LINEAR_H
 
-
 #include "VertexPainter.h"
 
 namespace colors
@@ -38,9 +37,29 @@ namespace colors
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone_impl() const override;
 
+        friend class cereal::access;
+        template<class Archive>
+        void save(Archive& ar) const
+            {
+                ar(cereal::make_nvp("angle", angle_),
+                   cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
+            }
+        template<class Archive>
+        void load(Archive& ar)
+            {
+                std::shared_ptr<ColorGenerator> generator;
+                ar(cereal::make_nvp("angle", angle_));
+                ar(cereal::make_nvp("ColorGenerator", generator));
+                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(generator));
+            }
+        
+        
         float angle_ {0};
     };
 }
+
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterLinear, "VertexPainterLinear");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterLinear)
 
 
 #endif // VERTEX_PAINTER_LINEAR_H
