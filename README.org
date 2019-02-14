@@ -22,8 +22,13 @@
       * Growth as the turtle order, recursion order, ...
       * Rectangle of different widths for recursion
       * Shaders ?
-   2. Add genetic algorithm or constraint-based algorithm for new LSystem generation
-   3. Extend the L-System and turtle interpretation
+   2. RELEASE
+   3. Add automation:
+      * Loading file from command-line
+      * Generating image(s) from command-line
+      * Adding a second layer to generate save files without hacking the polymorphism
+   4. Add genetic algorithm or constraint-based algorithm for new LSystem generation
+   5. Extend the L-System and turtle interpretation
       * Parametric L-System
       * Context-sensitive L-System
       * Stochastic L-System
