@@ -22,6 +22,7 @@
 #include "VertexPainterRadial.h"
 #include "VertexPainterRandom.h"
 #include "VertexPainterSequential.h"
+#include "VertexPainterComposite.h"
 
 using namespace drawing;
 using namespace math;
@@ -68,31 +69,41 @@ int main()
             
     std::stringstream ss;
 
+    std::shared_ptr<ColorGenerator> cc = std::make_shared<ConstantColor>(sf::Color::Red);
     std::shared_ptr<ColorGenerator> lc = std::make_shared<LinearGradient>(LinearGradient::keys({{sf::Color::Red, 0.}, {sf::Color::Green, 0.25}, {sf::Color::Blue, 0.95}}));
-
     std::shared_ptr<ColorGenerator> dc = std::make_shared<DiscreteGradient>(DiscreteGradient::keys({{sf::Color::Red, 0}, {sf::Color::Green, 3}, {sf::Color::Blue, 4}}));
+
     std::shared_ptr<VertexPainterLinear> vpl = std::make_shared<VertexPainterLinear>(lc);
     vpl->set_angle(90.);
-
+    
+    std::shared_ptr<VertexPainterConstant> vpc = std::make_shared<VertexPainterConstant>(cc);
+    
     std::shared_ptr<VertexPainterSequential> vps = std::make_shared<VertexPainterSequential>(dc);
     vps->set_factor(5.);
+
+    std::shared_ptr<VertexPainterWrapper> main = std::make_shared<VertexPainterWrapper>(vpl);
+    std::shared_ptr<VertexPainterWrapper> child1 = std::make_shared<VertexPainterWrapper>(vpc);
+    std::shared_ptr<VertexPainterWrapper> child2 = std::make_shared<VertexPainterWrapper>(vps);
+    std::list<std::shared_ptr<VertexPainterWrapper>> children {child1, child2};
     
-    std::shared_ptr<VertexPainter> vp0 = vpl;
-    std::shared_ptr<VertexPainter> vp1 = vps;
+    
+    std::shared_ptr<VertexPainterComposite> composite = std::make_shared<VertexPainterComposite>();
+    composite->set_main_painter(main);
+    composite->set_child_painters(children);    
+    std::shared_ptr<VertexPainter> painter= composite;
     {
         cereal::JSONOutputArchive oarchivess(ss);
-        oarchivess(cereal::make_nvp("Linear", vp0),
-                   cereal::make_nvp("Sequential", vp1));
-        std::cout << ss.str() << std::endl;
+        oarchivess(cereal::make_nvp("Composite", painter));
     }
-    {
-        cereal::JSONOutputArchive oarchive(std::cout);
-        cereal::JSONInputArchive iarchivess(ss);
-        std::shared_ptr<VertexPainter> newp0;
-        std::shared_ptr<VertexPainter> newp1;
-        iarchivess(newp0, newp1);
-        oarchive(newp0, newp1); std::cout << std::endl;
-    }
+    std::cout << ss.str() << std::endl;
+    // {
+    //     cereal::JSONOutputArchive oarchive(std::cout);
+    //     cereal::JSONInputArchive iarchivess(ss);
+    //     std::shared_ptr<VertexPainter> newp0;
+    //     std::shared_ptr<VertexPainter> newp1;
+    //     iarchivess(newp0, newp1);
+    //     oarchive(newp0, newp1); std::cout << std::endl;
+    // }
     
     std::list<LSystemView> views;
     // views.push_back(std::move(serpinski_view));

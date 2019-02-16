@@ -33,6 +33,7 @@ namespace colors
         class ColorGeneratorComposite : public ColorGenerator
         {
         public:
+            ColorGeneratorComposite();
             explicit ColorGeneratorComposite(VertexPainterComposite& painter);
 
             // Returns a dummy sf::Color::Transparent but as a side-effect fills
@@ -50,12 +51,18 @@ namespace colors
             // Deep-copy cloning method.
             std::shared_ptr<ColorGenerator> clone_impl() const override;
 
+            //TODO DOCUMENT WARNING WARNING WARNING
             // Reference to the linked VertexPainterComposite
-            VertexPainterComposite& painter_;
+            VertexPainterComposite* painter_;
             
             // The global 'index_' of the vertex array. Incremented at each
             // 'get()' call.
             std::size_t global_index_;
+
+            friend class cereal::access;
+            template<class Archive>
+            void serialize(Archive&)
+                { }
         };
 
         // A utility class to manipulate an Observer of a
@@ -79,6 +86,7 @@ namespace colors
             void set_painter_wrapper(std::shared_ptr<VertexPainterWrapper> painter_buff);
             
         private:
+            // Reference to the linked VertexPainterComposite
             VertexPainterComposite& painter_;
         };
     }
@@ -137,7 +145,33 @@ namespace colors
         std::list<std::vector<std::size_t>> vertex_indices_pools_;
 
         std::list<impl::VertexPainterWrapperObserver> child_painters_observers_;
+
+        friend class cereal::access;
+        template<class Archive>
+        void save(Archive& ar) const
+            {
+                std::shared_ptr<VertexPainter> main_painter = main_painter_observer_.get_painter_wrapper()->unwrap();
+                std::vector<std::shared_ptr<VertexPainter>> child_painters;
+                for(const auto& child : child_painters_observers_)
+                {
+                    child_painters.push_back(child.get_painter_wrapper()->unwrap());
+                }
+                ar(cereal::make_nvp("main_painter", main_painter),
+                   cereal::make_nvp("child_painters", child_painters));
+            }
+        template<class Archive>
+        void load(Archive& ar)
+            {
+                // TODO
+            }
+
     };
 }
+
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::impl::ColorGeneratorComposite, "ColorGeneratorComposite");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::ColorGenerator, colors::impl::ColorGeneratorComposite)
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterComposite, "VertexPainterComposite");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterComposite)
+
 
 #endif // VERTEX_PAINTER_COMPOSITE_H

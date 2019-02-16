@@ -7,8 +7,14 @@ namespace colors
 {
     namespace impl
     {
+        ColorGeneratorComposite::ColorGeneratorComposite()
+            : painter_{nullptr}
+            , global_index_{0}
+        {
+        }
+
         ColorGeneratorComposite::ColorGeneratorComposite(VertexPainterComposite& painter)
-            : painter_ {painter}
+            : painter_ {&painter}
             , global_index_ {0}
         {
         }
@@ -16,19 +22,20 @@ namespace colors
         sf::Color ColorGeneratorComposite::get(float f)
         {
             // Should never happen.
-            Expects(!painter_.vertex_indices_pools_.empty());
+            Expects(painter_);
+            Expects(!painter_->vertex_indices_pools_.empty());
 
             f = f < 0. ? 0. : f;
             // We do not clamp to 1 as it would be an out-of-bound call. So we clamp
             // it to just before 1.
             f = f >= 1. ? 1.-std::numeric_limits<float>::epsilon() : f;
             
-            auto size = painter_.child_painters_observers_.size();
+            auto size = painter_->child_painters_observers_.size();
             // Compute which child painter is concerned by this vertex.
             unsigned which_painter = std::floor(f * size);
 
             // Get the correct pool
-            auto it = painter_.vertex_indices_pools_.begin();
+            auto it = painter_->vertex_indices_pools_.begin();
             for (auto i=0u; i<which_painter; ++i)
             {
                 ++it;
@@ -48,7 +55,9 @@ namespace colors
         
         std::shared_ptr<ColorGenerator> ColorGeneratorComposite::clone_impl() const
         {
-            return painter_.color_distributor_;
+            // Should never happen.
+            Expects(painter_);
+            return painter_->color_distributor_;
         }
 
         //------------------------------------------------------------
