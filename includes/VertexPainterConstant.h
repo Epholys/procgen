@@ -28,7 +28,6 @@ namespace colors
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone_impl() const override;
 
-
         friend class cereal::access;
         template<class Archive>
         void save(Archive& ar) const

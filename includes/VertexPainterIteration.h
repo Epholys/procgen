@@ -28,8 +28,25 @@ namespace colors
     private:
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone_impl() const override;
+
+        friend class cereal::access;
+        template<class Archive>
+        void save(Archive& ar) const
+            {
+                ar(cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
+            }
+        template<class Archive>
+        void load(Archive& ar)
+            {
+                std::shared_ptr<ColorGenerator> generator;
+                ar(cereal::make_nvp("ColorGenerator", generator));
+                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(generator));
+            }
     };
 }
+
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterIteration, "VertexPainterIteration");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterIteration)
 
 
 #endif // VERTEX_PAINTER_ITERATION_H

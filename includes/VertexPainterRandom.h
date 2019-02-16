@@ -41,7 +41,26 @@ namespace colors
         // The seed for 'random_generator_'.
         std::mt19937::result_type random_seed_;
         std::mt19937 random_generator_;
+
+        friend class cereal::access;
+        template<class Archive>
+        void save(Archive& ar) const
+            {
+                ar(cereal::make_nvp("block_size", block_size_),
+                   cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
+            }
+        template<class Archive>
+        void load(Archive& ar)
+            {
+                std::shared_ptr<ColorGenerator> generator;
+                ar(cereal::make_nvp("block_size", block_size_));
+                ar(cereal::make_nvp("ColorGenerator", generator));
+                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(generator));
+            }
     };
 }
+
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterRandom, "VertexPainterRandom");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterRandom)
 
 #endif // VERTEX_PAINTER_RANDOM_H

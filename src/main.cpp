@@ -18,6 +18,10 @@
 #include "RenderWindow.h"
 #include "ColorsGenerator.h"
 #include "VertexPainterConstant.h"
+#include "VertexPainterIteration.h"
+#include "VertexPainterRadial.h"
+#include "VertexPainterRandom.h"
+#include "VertexPainterSequential.h"
 
 using namespace drawing;
 using namespace math;
@@ -66,27 +70,28 @@ int main()
 
     std::shared_ptr<ColorGenerator> lc = std::make_shared<LinearGradient>(LinearGradient::keys({{sf::Color::Red, 0.}, {sf::Color::Green, 0.25}, {sf::Color::Blue, 0.95}}));
 
-    std::shared_ptr<ColorGenerator> cc = std::make_shared<ConstantColor>(sf::Color::Red);
-
+    std::shared_ptr<ColorGenerator> dc = std::make_shared<DiscreteGradient>(DiscreteGradient::keys({{sf::Color::Red, 0}, {sf::Color::Green, 3}, {sf::Color::Blue, 4}}));
     std::shared_ptr<VertexPainterLinear> vpl = std::make_shared<VertexPainterLinear>(lc);
     vpl->set_angle(90.);
 
-    std::shared_ptr<VertexPainterConstant> vpc = std::make_shared<VertexPainterConstant>(cc);
+    std::shared_ptr<VertexPainterSequential> vps = std::make_shared<VertexPainterSequential>(dc);
+    vps->set_factor(5.);
     
-    
-    std::shared_ptr<VertexPainter> vp0 = vpc;
+    std::shared_ptr<VertexPainter> vp0 = vpl;
+    std::shared_ptr<VertexPainter> vp1 = vps;
     {
         cereal::JSONOutputArchive oarchivess(ss);
-        oarchivess(cereal::make_nvp("Constant", vp0)); std::cout << std::endl;
+        oarchivess(cereal::make_nvp("Linear", vp0),
+                   cereal::make_nvp("Sequential", vp1));
         std::cout << ss.str() << std::endl;
     }
     {
         cereal::JSONOutputArchive oarchive(std::cout);
         cereal::JSONInputArchive iarchivess(ss);
-        std::cout << ss.str() << std::endl;
-        std::shared_ptr<VertexPainter> newp;
-        iarchivess(newp);
-        oarchive(newp); std::cout << std::endl;
+        std::shared_ptr<VertexPainter> newp0;
+        std::shared_ptr<VertexPainter> newp1;
+        iarchivess(newp0, newp1);
+        oarchive(newp0, newp1); std::cout << std::endl;
     }
     
     std::list<LSystemView> views;
