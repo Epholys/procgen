@@ -17,6 +17,7 @@
 #include "WindowController.h"
 #include "RenderWindow.h"
 #include "ColorsGenerator.h"
+#include "VertexPainterConstant.h"
 
 using namespace drawing;
 using namespace math;
@@ -62,25 +63,27 @@ int main()
     // LSystemView fract_view ("Fract", fract, map, fract_param);
             
     std::stringstream ss;
-    std::shared_ptr<ColorGenerator> c = std::make_shared<LinearGradient>(LinearGradient::keys({{sf::Color::Red, 0.}, {sf::Color::Green, 0.25}, {sf::Color::Blue, 0.95}}));
-    std::shared_ptr<VertexPainterLinear> o = std::make_shared<VertexPainterLinear>(c);
-    o->set_angle(90.);
-    std::shared_ptr<VertexPainter> p = o;
+
+    std::shared_ptr<ColorGenerator> lc = std::make_shared<LinearGradient>(LinearGradient::keys({{sf::Color::Red, 0.}, {sf::Color::Green, 0.25}, {sf::Color::Blue, 0.95}}));
+
+    std::shared_ptr<ColorGenerator> cc = std::make_shared<ConstantColor>(sf::Color::Red);
+
+    std::shared_ptr<VertexPainterLinear> vpl = std::make_shared<VertexPainterLinear>(lc);
+    vpl->set_angle(90.);
+
+    std::shared_ptr<VertexPainterConstant> vpc = std::make_shared<VertexPainterConstant>(cc);
+    
+    
+    std::shared_ptr<VertexPainter> vp0 = vpc;
     {
-        cereal::JSONOutputArchive oarchive(std::cout);
         cereal::JSONOutputArchive oarchivess(ss);
-        oarchivess(cereal::make_nvp("Linear", p)); std::cout << std::endl;
+        oarchivess(cereal::make_nvp("Constant", vp0)); std::cout << std::endl;
         std::cout << ss.str() << std::endl;
     }
     {
-        // std::shared_ptr<ColorGenerator> c = std::make_shared<LinearGradient>(LinearGradient::keys({{sf::Color::White, 0}, {sf::Color::Black, 1}}));
-        // std::shared_ptr<VertexPainterLinear> p  = std::make_shared<VertexPainterLinear>(c);
-        // p->set_angle(90.f);
-        // std::shared_ptr<VertexPainter> pp = p;
         cereal::JSONOutputArchive oarchive(std::cout);
         cereal::JSONInputArchive iarchivess(ss);
         std::cout << ss.str() << std::endl;
-        // oarchive(pp); std::cout << std::endl;
         std::shared_ptr<VertexPainter> newp;
         iarchivess(newp);
         oarchive(newp); std::cout << std::endl;

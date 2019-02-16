@@ -73,7 +73,7 @@ namespace cereal
         std::string color_string = ar.getNodeName();
         float key; ar(key);
         sf::Color color;
-        load_minimal(ar, pair.first, color_string);
+        load_minimal(ar, color, color_string);
         pair = std::make_pair(color, key);
     }
 
