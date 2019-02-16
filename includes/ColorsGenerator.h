@@ -203,7 +203,7 @@ namespace colors
         const keys& get_sanitized_keys() const;
 
         // Setter to raw_keys_.
-        // sanitized_keys_ is update to respect the invariant.
+        // sanitized_keys_ is updated to respect the invariant.
         // Precondition: 'key_colors' must have at least two keys.
         void set_keys(const keys& keys);
 
@@ -222,6 +222,7 @@ namespace colors
         void serialize(Archive& ar)
             {
                 ar(cereal::make_nvp("color_keys", sanitized_keys_));
+                raw_keys_ = sanitized_keys_;
             }
 
         
@@ -280,6 +281,7 @@ namespace colors
         void serialize(Archive& ar)
             {
                 ar(cereal::make_nvp("color_keys", keys_));
+                generate_colors();
             }
         
         // The keys. Always respect the relevant invariant.

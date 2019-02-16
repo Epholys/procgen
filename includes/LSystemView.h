@@ -152,9 +152,10 @@ namespace procgui
         void save (Archive& ar, const std::uint32_t) const
             {
                 ar(cereal::make_nvp("name", name_),
-                   cereal::make_nvp("LSystem", *Observer<LSystem>::get_target()),
-                   cereal::make_nvp("DrawingParameters", *Observer<drawing::DrawingParameters>::get_target()),
-                   cereal::make_nvp("Interpretation Map", *Observer<drawing::InterpretationMap>::get_target()));
+                   cereal::make_nvp("LSystem", *OLSys::get_target()),
+                   cereal::make_nvp("DrawingParameters", *OParams::get_target()),
+                   cereal::make_nvp("Interpretation Map", *OMap::get_target()),
+                   cereal::make_nvp("VertexPainter", OPainter::get_target()->unwrap()));
             }
 
         template<class Archive>
@@ -164,16 +165,20 @@ namespace procgui
                 LSystem lsys;
                 drawing::DrawingParameters params;
                 drawing::InterpretationMap map;
-
+                std::shared_ptr<colors::VertexPainter> painter;                
+                
                 ar(name,
                    cereal::make_nvp("LSystem", lsys),
                    cereal::make_nvp("DrawingParameters", params),
-                   cereal::make_nvp("Interpretation Map", map));
+                   cereal::make_nvp("Interpretation Map", map),
+                   cereal::make_nvp("VertexPainter", painter));
 
+                
                 *this = LSystemView(name,
                                     std::make_shared<LSystem>(lsys),
                                     std::make_shared<drawing::InterpretationMap>(map),
-                                    std::make_shared<drawing::DrawingParameters>(params));
+                                    std::make_shared<drawing::DrawingParameters>(params),
+                                    std::make_shared<colors::VertexPainterWrapper>(painter));
 
             }
     };
