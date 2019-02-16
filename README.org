@@ -13,7 +13,7 @@
    - Dynamic GUIs to interact with the parameters
    - Basic and necessary user interactions (mouse dragging, adding, removing, copy-pasting)
    - Saving and loading LSystems to and from files
-   - Colors
+   - Procedural color generation
 
 ** Main Roadmap
    1. Make the generated vertices pretty (colors, growth, and width)
@@ -39,15 +39,17 @@
    - Sometimes clicking outside of the windows makes the view jump
 
 ** Code Smells
-   For the people who want to take a look at the code, there is some very ugly stuff, despite all my efforts. Here are some of them that will be fixed before the next release:
-   - The wrappers are not consistently named as such (which could lead to confusion with the wrapped objects)
+   For the people who want to take a look at the code, there is some ugly stuff, despite all my efforts. Here are some of them that *will be fixed* before the next release:
+   - The wrappers are not consistently named as such (which could lead to confusion with the wrapped objects) (fixed in dev branch)
    - In 'Observer', 'get/set_target()' is public
    - Abuse of shared_ptr:
      - too many dependencies
      - not enough 'const' in getters and setters
+   - `RuleMapBuffer` is an aberration that add negligible fancyness for 1k of not-so-great lines
+   - Abuse of `std::tuple`: simple structs would be better
 
 ** Compiling
-   Make sure you have SFML installed, a C++17 compiler (with std::filesystem), and make.
+   Make sure you have SFML installed, a C++17 compiler (with std::filesystem support), and make.
    Simply type =make optimized= :).
    Other make recipees are documented in the Makefile.
    
@@ -81,7 +83,7 @@
    - Automatic cross-compiling?
    - Automatic on-screen serialization?
 
-** Thoughts dump
+** Brain dump
   - Huge literature on the subject and extremely developed existing software. What does this project bring?
 *** Memory allocation with Valgrind (2017-09-17)
     =valgrind --tool\=massif --time-unit\=B --peak-inaccuracy=0.1=
