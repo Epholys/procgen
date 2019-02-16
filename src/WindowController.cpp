@@ -1,7 +1,6 @@
 #include <fstream>
 
 #include "imgui/imgui.h"
-#include "imgui/imgui-SFML.h"
 #include "cereal/archives/json.hpp"
 
 #include "helper_string.h"

@@ -8,10 +8,14 @@
 
 #include "SFML/Graphics.hpp"
 
-#include "LSystemView.h"
+namespace procgui
+{
+        class LSystemView;
+}
 
 namespace controller
 {
+    
     // LSystemController manages the behaviour of the LSystemViews beyond the
     // GUI: selection, dragging and riglt-click for example.
     //

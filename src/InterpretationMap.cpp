@@ -1,5 +1,3 @@
-#include <cmath>
-
 #include "InterpretationMap.h"
 #include "Turtle.h"
 

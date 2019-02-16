@@ -3,7 +3,6 @@
 
 
 #include "VertexPainter.h"
-#include "VertexPainterLinear.h"
 
 namespace colors
 {

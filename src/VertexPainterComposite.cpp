@@ -1,7 +1,6 @@
-#include "helper_math.h"
-#include "ColorsGenerator.h"
+#include <cmath>
 #include "VertexPainterComposite.h"
-#include "VertexPainterRadial.h"
+#include "VertexPainterLinear.h"
 
 namespace colors
 {

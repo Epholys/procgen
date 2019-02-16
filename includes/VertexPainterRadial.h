@@ -2,7 +2,6 @@
 #define VERTEX_PAINTER_RADIAL_H
 
 
-#include "cereal/archives/json.hpp"
 #include "VertexPainter.h"
 
 namespace cereal

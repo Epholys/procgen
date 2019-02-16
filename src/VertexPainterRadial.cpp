@@ -1,5 +1,4 @@
 #include "geometry.h"
-#include "helper_math.h"
 #include "VertexPainterRadial.h"
 
 namespace colors

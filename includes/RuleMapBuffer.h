@@ -3,11 +3,9 @@
 
 
 #include <list>
-#include <tuple>
 
-#include "RuleMap.h"
 #include "Observer.h"
-#include "LSystem.h"
+#include "RuleMap.h"
 #include "helper_algorithm.h"
 
 namespace procgui

@@ -2,7 +2,6 @@
 #define DRAWING_INTERPRETATION_H
 
 #include <functional>
-#include <unordered_map>
 
 #include "cereal/cereal.hpp"
 #include "cereal/types/unordered_map.hpp"

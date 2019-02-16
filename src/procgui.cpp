@@ -1,12 +1,11 @@
 #include <cctype>
 #include <cstring>
-#include <tuple>
-#include <chrono>
 #include "procgui.h"
 #include "helper_string.h"
-#include "WindowController.h"
 #include "RenderWindow.h"
+#include "WindowController.h"
 #include "VertexPainterRadial.h"
+#include "VertexPainterLinear.h"
 #include "VertexPainterRandom.h"
 #include "VertexPainterSequential.h"
 #include "VertexPainterIteration.h"

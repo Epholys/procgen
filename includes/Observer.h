@@ -1,11 +1,6 @@
 #ifndef OBSERVER_H
 #define OBSERVER_H
 
-
-#include <memory>
-#include <type_traits>
-#include <utility>
-
 #include "gsl/gsl"
 
 #include "Observable.h"

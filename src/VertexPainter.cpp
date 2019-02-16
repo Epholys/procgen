@@ -1,6 +1,4 @@
 #include "VertexPainter.h"
-#include "procgui.h"
-#include "geometry.h"
 
 namespace colors
 {

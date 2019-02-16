@@ -1,4 +1,3 @@
-#include <iostream>
 #include <sstream>
 #include <gtest/gtest.h>
 #include "cereal/archives/json.hpp"

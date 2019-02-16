@@ -2,8 +2,6 @@
 #define DRAWING_PARAMETERS_H
 
 
-
-#include <cmath>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
