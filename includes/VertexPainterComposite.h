@@ -162,9 +162,24 @@ namespace colors
         template<class Archive>
         void load(Archive& ar)
             {
-                // TODO
-            }
+                std::shared_ptr<VertexPainter> main_painter;
+                std::vector<std::shared_ptr<VertexPainter>> child_painters;
+                ar(cereal::make_nvp("main_painter", main_painter),
+                   cereal::make_nvp("child_painters", child_painters));
 
+                std::shared_ptr<VertexPainterWrapper> main_wrapper = std::make_shared<VertexPainterWrapper>();
+                main_wrapper->wrap(main_painter);
+                set_main_painter(main_wrapper);
+                
+                std::list<std::shared_ptr<VertexPainterWrapper>> child_wrappers;
+                for(auto painter : child_painters)
+                {
+                    std::shared_ptr<VertexPainterWrapper> wrapper = std::make_shared<VertexPainterWrapper>();;
+                    wrapper->wrap(painter);
+                    child_wrappers.push_back(wrapper);
+                }
+                set_child_painters(child_wrappers);
+            }
     };
 }
 

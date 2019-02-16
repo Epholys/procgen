@@ -96,14 +96,13 @@ int main()
         oarchivess(cereal::make_nvp("Composite", painter));
     }
     std::cout << ss.str() << std::endl;
-    // {
-    //     cereal::JSONOutputArchive oarchive(std::cout);
-    //     cereal::JSONInputArchive iarchivess(ss);
-    //     std::shared_ptr<VertexPainter> newp0;
-    //     std::shared_ptr<VertexPainter> newp1;
-    //     iarchivess(newp0, newp1);
-    //     oarchive(newp0, newp1); std::cout << std::endl;
-    // }
+    {
+        cereal::JSONOutputArchive oarchive(std::cout);
+        cereal::JSONInputArchive iarchivess(ss);
+        std::shared_ptr<VertexPainter> newp;
+        iarchivess(newp);
+        oarchive(newp); std::cout << std::endl;
+    }
     
     std::list<LSystemView> views;
     // views.push_back(std::move(serpinski_view));

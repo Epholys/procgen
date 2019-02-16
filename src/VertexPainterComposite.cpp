@@ -105,9 +105,9 @@ namespace colors
         {
             return get_target();
         }
-        void VertexPainterWrapperObserver::set_painter_wrapper(std::shared_ptr<VertexPainterWrapper> painter_buff)
+        void VertexPainterWrapperObserver::set_painter_wrapper(std::shared_ptr<VertexPainterWrapper> painter_wrapper)
         {
-            set_target(painter_buff);
+            set_target(painter_wrapper);
             add_callback([this](){painter_.notify();});
             painter_.notify();
         }
@@ -205,10 +205,10 @@ namespace colors
         return main_painter_observer_.get_painter_wrapper();
     }
 
-    void VertexPainterComposite::set_main_painter(std::shared_ptr<VertexPainterWrapper> painter_buff)
+    void VertexPainterComposite::set_main_painter(std::shared_ptr<VertexPainterWrapper> painter_wrapper)
     {
         // Hack, as 'color_distributor_' will be called by the 'notify()' of the
-        // 'wrap()' method of 'painter_buff'.
+        // 'wrap()' method of 'painter_wrapper'.
         // Moving this in 'color_distributor_.get()' does not work.
         vertex_indices_pools_.clear();
         for(auto i=0u; i<child_painters_observers_.size(); ++i)
@@ -216,8 +216,8 @@ namespace colors
             vertex_indices_pools_.push_back({});
         } 
 
-        painter_buff->unwrap()->get_generator_wrapper()->wrap(color_distributor_);
-        main_painter_observer_.set_painter_wrapper(painter_buff);
+        painter_wrapper->unwrap()->get_generator_wrapper()->wrap(color_distributor_);
+        main_painter_observer_.set_painter_wrapper(painter_wrapper);
         notify();
     }
 
