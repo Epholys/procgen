@@ -3,6 +3,17 @@
 
 #include "VertexPainter.h"
 
+namespace cereal
+{
+    template <class Archive, class N,
+              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
+    void serialize(Archive& ar, sf::Vector2<N>& vec)
+    {
+        ar(cereal::make_nvp("x", vec.x),
+           cereal::make_nvp("y", vec.y));
+    }
+}
+
 namespace colors
 {
     // Paint the vertices with a ColorGenerator following a line passing through
@@ -20,9 +31,11 @@ namespace colors
         
         // Getters
         float get_angle() const;
-
+        sf::Vector2f get_center() const;
+        
         // Setter
         void set_angle(float angle);
+        void set_center(sf::Vector2f center);
         
         // Paint 'vertices' following a line passing through the center at a
         // certain 'angle_' according to the informations of 'bounding_box'
@@ -42,6 +55,7 @@ namespace colors
         void save(Archive& ar) const
             {
                 ar(cereal::make_nvp("angle", angle_),
+                   cereal::make_nvp("center", center_),
                    cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
             }
         template<class Archive>
@@ -49,12 +63,14 @@ namespace colors
             {
                 std::shared_ptr<ColorGenerator> generator;
                 ar(cereal::make_nvp("angle", angle_));
+                ar(cereal::make_nvp("center", center_));
                 ar(cereal::make_nvp("ColorGenerator", generator));
                 set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(generator));
             }
         
         
         float angle_ {0};
+        sf::Vector2f center_ {0.5,0.5};
     };
 }
 
