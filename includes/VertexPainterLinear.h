@@ -2,17 +2,7 @@
 #define VERTEX_PAINTER_LINEAR_H
 
 #include "VertexPainter.h"
-
-namespace cereal
-{
-    template <class Archive, class N,
-              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
-    void serialize(Archive& ar, sf::Vector2<N>& vec)
-    {
-        ar(cereal::make_nvp("x", vec.x),
-           cereal::make_nvp("y", vec.y));
-    }
-}
+#include "helper_cereal.hpp"
 
 namespace colors
 {

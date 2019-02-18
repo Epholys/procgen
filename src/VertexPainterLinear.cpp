@@ -182,4 +182,5 @@ namespace colors
     //     vertices.push_back({{axis_opposite_intersection.x + 5, axis_opposite_intersection.y - 5}, sf::Color::Cyan});
     //     first_debug = false;
     // }
+    }
 }
