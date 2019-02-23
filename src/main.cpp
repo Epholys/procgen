@@ -57,7 +57,7 @@ int main()
     sf::Clock delta_clock;
     while (window.isOpen())
     {
-        window.clear();
+        window.clear(window::background_color);
 
         std::vector<sf::Event> events;
         sf::Event event;

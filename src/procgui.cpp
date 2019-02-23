@@ -813,7 +813,7 @@ namespace procgui
         {
             ::interact_with(*composite);
         }
-        
+
         ImGui::Unindent();
         conclude();
     }
@@ -1210,6 +1210,18 @@ namespace procgui
         interact_with(lsys_view.ref_lsystem_buffer(), "LSystem"+ss.str());
         interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map"+ss.str());
         interact_with(lsys_view.ref_vertex_painter_wrapper(), "Painter");
+
+
+        ImGui::Separator();
+        ImGui::PushID(name.c_str());
+        // Color selection widget.
+        ImVec4 imcolor = window::background_color;
+        if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+        {
+            window::background_color = imcolor;
+        }
+        ImGui::PopID();
+        
         pop_embedded();
 
         conclude();
