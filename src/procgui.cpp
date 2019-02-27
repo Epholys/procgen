@@ -404,7 +404,7 @@ namespace
         // --- Center ---
         float center[2] = {painter.get_center().x, painter.get_center().y};
         if (ImGui::DragFloat2("Gradient Circle Center", center,
-                              0.01f, 0.f, 1.f, "%.2f") )
+                              0.001f, 0.f, 1.f, "%.2f") )
         {
             if (center[0] >= 0 && center[0] <=1 &&
                 center[1] >= 0 && center[1] <=1)
@@ -425,7 +425,7 @@ namespace
         // --- Center ---
         float center[2] = {painter.get_center().x, painter.get_center().y};
         if (ImGui::DragFloat2("Circle Center", center,
-                              0.01f, 0.f, 1.f, "%.2f") )
+                              0.001f, 0.f, 1.f, "%.2f") )
         {
             if (center[0] >= 0 && center[0] <=1 &&
                 center[1] >= 0 && center[1] <=1)
