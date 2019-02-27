@@ -304,13 +304,16 @@ namespace procgui
         if (is_selected_)
         {
             auto box = get_transform().transformRect(bounding_box_);
-            // Draw the global bounding boxes with the unique color.
+            auto margin = (box.width*.02f > box.height*.02f) ? box.height*.02f : box.width*.02f;
+            margin = margin > 10 ? margin : 10;
+            
+            // Draw the global bounding boxes (with a little margin) with the unique color.
             std::array<sf::Vertex, 5> rect =
-                {{ {{ box.left, box.top}, color_id_},
-                   {{ box.left, box.top + box.height}, color_id_},
-                   {{ box.left + box.width, box.top + box.height}, color_id_},
-                   {{ box.left + box.width, box.top}, color_id_},
-                   {{ box.left, box.top}, color_id_}}};
+                {{ {{ box.left-margin, box.top-margin}, color_id_},
+                   {{ box.left-margin, box.top + box.height + margin}, color_id_},
+                   {{ box.left + box.width + margin, box.top + box.height + margin}, color_id_},
+                   {{ box.left + box.width + margin, box.top - margin}, color_id_},
+                   {{ box.left - margin, box.top - margin}, color_id_}}};
             target.draw(rect.data(), rect.size(), sf::LineStrip);
         }
 
