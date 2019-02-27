@@ -81,9 +81,24 @@ namespace procgui
         const colors::VertexPainterWrapper& get_vertex_painter_wrapper() const;
         int get_id() const;
         sf::Color get_color() const;
+
         // Translation transform to correct screen-space position of the
         // LSystem. 
         sf::Transform get_transform() const;
+
+        // Getter to is_selected_.
+        bool is_selected() const;
+        // Select the view.
+        void select();
+
+        // Getter and Setter to bounding_box_is_displayed;
+        bool box_is_visible() const;
+        void set_box_visibility(bool is_visible);
+
+        // Check if 'click' is inside one of the correctly translated
+        // 'bounding_box_'. 
+        bool is_inside(const sf::Vector2f& click) const;
+
 
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();
@@ -92,20 +107,10 @@ namespace procgui
         // Draw the vertices.
         void draw(sf::RenderTarget &target);
 
-        // Getter to is_selected_.
-        bool is_selected() const;
-
-        // Check if 'click' is inside one of the correctly translated
-        // 'bounding_box_'. 
-        bool is_inside(const sf::Vector2f& click) const;
-
-        // Select the view.
-        void select();
-
                 
     private:
         void update_callbacks();
-        
+
         // The managers of unique identifiers and colors for each instance of
         // LSystemView. 
         static UniqueId unique_ids_;
@@ -144,6 +149,8 @@ namespace procgui
 
         // True if the window is selected.
         bool is_selected_;
+        // True if the bounding box must be visible
+        bool bounding_box_is_visible_;
 
         // Serialization
         friend class cereal::access;

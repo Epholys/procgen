@@ -830,7 +830,7 @@ namespace procgui
         {
             ::interact_with(*composite);
         }
-        
+
         ImGui::Unindent();
         conclude();
     }
@@ -1159,6 +1159,29 @@ namespace procgui
         }
     }
 
+    void interact_with_graphics_parameters(bool& box_is_visible)
+    {
+        const std::string name = "Application parameters";
+        if (!set_up(name))
+        {
+            return;
+        }
+
+        // Select background color.
+        ImVec4 imcolor = window::background_color;
+        if(ImGui::ColorEdit4("Background Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+        {
+            window::background_color = imcolor;
+        }
+        ImGui::SameLine();
+        ImGui::Text("Background Color");
+
+        ImGui::Checkbox("LSystem's box visibility", &box_is_visible);
+
+        conclude();
+    }
+
+    
     void interact_with(LSystemView& lsys_view, const std::string& name, bool* open)
     {
         if (open && !(*open))
@@ -1227,6 +1250,10 @@ namespace procgui
         interact_with(lsys_view.ref_lsystem_buffer(), "LSystem"+ss.str());
         interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map"+ss.str());
         interact_with(lsys_view.ref_vertex_painter_wrapper(), "Painter");
+
+        bool bounding_box_visibility = lsys_view.box_is_visible();
+        interact_with_graphics_parameters(bounding_box_visibility);
+        lsys_view.set_box_visibility(bounding_box_visibility);
         pop_embedded();
 
         conclude();

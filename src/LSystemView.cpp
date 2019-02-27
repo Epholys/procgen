@@ -39,6 +39,7 @@ namespace procgui
         , bounding_box_ {}
         , sub_boxes_ {}
         , is_selected_ {false}
+        , bounding_box_is_visible_{true}
     {
         // Invariant respected: cohesion between the LSystem/InterpretationMap
         // and the vertices.             
@@ -74,6 +75,7 @@ namespace procgui
         , bounding_box_ {other.bounding_box_}
         , sub_boxes_ {other.sub_boxes_}
         , is_selected_ {other.is_selected_}
+        , bounding_box_is_visible_{other.bounding_box_is_visible_}
     {
         // Manually managing Observer<> callbacks.
         update_callbacks();
@@ -95,6 +97,7 @@ namespace procgui
         , bounding_box_ {std::move(other.bounding_box_)}
         , sub_boxes_ {std::move(other.sub_boxes_)}
         , is_selected_ {other.is_selected_}
+        , bounding_box_is_visible_{other.bounding_box_is_visible_}
     {
         // Manually managing Observer<> callbacks.
         update_callbacks();
@@ -122,16 +125,18 @@ namespace procgui
             OPainter::set_target(other.OPainter::get_target());
             id_ = unique_ids_.get_id();
             color_id_ = unique_colors_.get_color(id_);
-            name_ = {other.name_};
-            lsys_buff_ = {other.lsys_buff_};
-            interpretation_buff_ = {other.interpretation_buff_};
-            vertices_ = {other.vertices_};
-            iteration_of_vertices_ = {other.iteration_of_vertices_};
-            max_iteration_ = {other.max_iteration_};
-            bounding_box_ = {other.bounding_box_};
-            sub_boxes_ = {other.sub_boxes_};
-            is_selected_ = {other.is_selected_};
+            name_ = other.name_;
+            lsys_buff_ = other.lsys_buff_;
+            interpretation_buff_ = other.interpretation_buff_;
+            vertices_ = other.vertices_;
+            iteration_of_vertices_ = other.iteration_of_vertices_;
+            max_iteration_ = other.max_iteration_;
+            bounding_box_ = other.bounding_box_;
+            sub_boxes_ = other.sub_boxes_;
+            is_selected_ = other.is_selected_;
+            bounding_box_is_visible_ = other.bounding_box_is_visible_;
 
+            
             update_callbacks();
         }
 
@@ -148,15 +153,16 @@ namespace procgui
             OPainter::set_target(std::move(other.OPainter::get_target()));
             id_ = other.id_;
             color_id_ = other.color_id_;
-            name_ = {std::move(other.name_)};
-            lsys_buff_ = {std::move(other.lsys_buff_)};
-            interpretation_buff_ = {std::move(other.interpretation_buff_)};
-            vertices_ = {std::move(other.vertices_)};
-            iteration_of_vertices_ = {std::move(other.iteration_of_vertices_)};
-            max_iteration_ = {other.max_iteration_};
-            bounding_box_ = {std::move(other.bounding_box_)};
-            sub_boxes_ = {std::move(other.sub_boxes_)};
-            is_selected_ = {other.is_selected_};
+            name_ = std::move(other.name_);
+            lsys_buff_ = std::move(other.lsys_buff_);
+            interpretation_buff_ = std::move(other.interpretation_buff_);
+            vertices_ = std::move(other.vertices_);
+            iteration_of_vertices_ = std::move(other.iteration_of_vertices_);
+            max_iteration_ = other.max_iteration_;
+            bounding_box_ = std::move(other.bounding_box_);
+            sub_boxes_ = std::move(other.sub_boxes_);
+            is_selected_ = other.is_selected_;
+            bounding_box_is_visible_ = other.bounding_box_is_visible_;
 
             // Manually managing Observer<> callbacks.
             update_callbacks();
@@ -301,7 +307,7 @@ namespace procgui
         // Draw the vertices.
         target.draw(vertices_.data(), vertices_.size(), sf::LineStrip, get_transform());
 
-        if (is_selected_)
+        if (is_selected_ && bounding_box_is_visible_)
         {
             auto box = get_transform().transformRect(bounding_box_);
             auto margin = (box.width*.02f > box.height*.02f) ? box.height*.02f : box.width*.02f;
@@ -355,5 +361,14 @@ namespace procgui
     void LSystemView::select()
     {
         is_selected_ = true;
+    }
+
+    bool LSystemView::box_is_visible() const
+    {
+        return bounding_box_is_visible_;
+    }
+    void LSystemView::set_box_visibility(bool is_visible)
+    {
+        bounding_box_is_visible_ = is_visible;
     }
 }

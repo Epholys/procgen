@@ -59,6 +59,8 @@ namespace procgui {
     // view is un-selected and the window closed.
     void interact_with(LSystemView& lsys_view, const std::string& name, bool* open = nullptr);
 
+    void interact_with_graphics_parameters(bool& box_is_visible);
+    
     void interact_with(colors::VertexPainterWrapper& painter_wrapper,
                        const std::string& name);
 
