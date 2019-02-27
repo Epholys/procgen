@@ -287,7 +287,10 @@ namespace procgui
         int n_iter = parameters.get_n_iter();
         if(ImGui::SliderInt("Iterations", &n_iter, 0, n_iter_max))
         {
-            parameters.set_n_iter(n_iter);
+            if (n_iter >= 0)
+            {
+                parameters.set_n_iter(n_iter);
+            }
         }
         ImGui::SameLine(); ext::ImGui::ShowHelpMarker("CTRL+click and click to directly input values. Higher values will use all of your memory and CPU");
 
@@ -403,7 +406,11 @@ namespace
         if (ImGui::DragFloat2("Gradient Circle Center", center,
                               0.01f, 0.f, 1.f, "%.2f") )
         {
-            painter.set_center(sf::Vector2f(center[0], center[1]));
+            if (center[0] >= 0 && center[0] <=1 &&
+                center[1] >= 0 && center[1] <=1)
+            {                
+                painter.set_center(sf::Vector2f(center[0], center[1]));
+            }
         }
 
         if (!from_composite)
@@ -420,7 +427,11 @@ namespace
         if (ImGui::DragFloat2("Circle Center", center,
                               0.01f, 0.f, 1.f, "%.2f") )
         {
-            painter.set_center(sf::Vector2f(center[0], center[1]));
+            if (center[0] >= 0 && center[0] <=1 &&
+                center[1] >= 0 && center[1] <=1)
+            {                
+                painter.set_center(sf::Vector2f(center[0], center[1]));
+            }
         }
         
         if (!from_composite)
@@ -435,7 +446,10 @@ namespace
         int block_size = painter.get_block_size();
         if (ImGui::DragInt("Block size", &block_size, 1, 1, std::numeric_limits<int>::max()))
         {
-            painter.set_block_size(block_size);
+            if (block_size > 0)
+            {
+                painter.set_block_size(block_size);
+            }
         }
 
         ext::ImGui::PushStyleGreenButton();
@@ -454,12 +468,15 @@ namespace
     
     void interact_with(colors::VertexPainterSequential& painter, bool from_composite=false)
     {
-        float angle = painter.get_factor();
+        float factor = painter.get_factor();
         
-        if (ImGui::DragFloat("Repetition factor", &angle,
+        if (ImGui::DragFloat("Repetition factor", &factor,
                              0.01f, 0.f, std::numeric_limits<float>::max(), "%.2f") )
         {
-            painter.set_factor(angle);
+            if (factor >= 0)
+            {
+                painter.set_factor(factor);
+            }
         }
             
         if (!from_composite)

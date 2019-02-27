@@ -76,6 +76,7 @@ namespace colors
     
     void VertexPainterRandom::set_block_size(int block_size)
     {
+        Expects(block_size > 0);
         block_size_ = block_size;
         notify();
     }

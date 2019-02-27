@@ -37,6 +37,7 @@ namespace colors
         virtual std::shared_ptr<VertexPainter> clone_impl() const override;
 
         // The number of consecutive vertices to paint the same color.
+        // Invariant: must be strictly positive
         int block_size_;
         // The seed for 'random_generator_'.
         std::mt19937::result_type random_seed_;
