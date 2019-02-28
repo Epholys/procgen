@@ -1216,13 +1216,20 @@ namespace procgui
             if (pos.x + 500 > windowX)
             {
                 auto absolute_left_side = controller::WindowController::absolute_mouse_position({bounding_box.left,0});
-                pos.x = absolute_left_side.x - 550;                
+                pos.x = absolute_left_side.x - 550;
+
+                // If the window is still out of screen, shift it to the border.
+                if (pos.x < 0)
+                {
+                    pos.x = 0;
+                }
             }
             pos.y -= 150;
 
             // If the window is too far up or down, shift it down or up.
             pos.y = pos.y < 0 ? 0 : pos.y;
             pos.y = pos.y + 450 > windowY ? windowY-450 : pos.y;
+            
             ImGui::SetNextWindowPos(sf::Vector2i{pos.x,pos.y}, ImGuiSetCond_Appearing);
             ImGui::SetNextWindowSize({500,450}, ImGuiSetCond_Appearing);
 
