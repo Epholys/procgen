@@ -143,8 +143,10 @@ namespace colors
             float lerp = geometry::distance(projection, v.position) / distance;
 
             sf::Color color = generator->get(lerp);
-            color.a = v.color.a;
-            v.color = color;
+            if (v.color != sf::Color::Transparent)
+            {
+                v.color = color;
+            }
         }
 
         // // DEBUG

@@ -129,6 +129,7 @@ namespace colors
         color.r = inferior.first.r * (1-factor) + superior.first.r * factor;
         color.g = inferior.first.g * (1-factor) + superior.first.g * factor;
         color.b = inferior.first.b * (1-factor) + superior.first.b * factor;
+        color.a = inferior.first.a * (1-factor) + superior.first.a * factor;
         return color;
     }
 
@@ -210,6 +211,7 @@ namespace colors
             color.r = inferior->first.r * (1-factor) + superior->first.r * factor;
             color.g = inferior->first.g * (1-factor) + superior->first.g * factor;
             color.b = inferior->first.b * (1-factor) + superior->first.b * factor;
+            color.a = inferior->first.a * (1-factor) + superior->first.a * factor;
             colors_.push_back(color);
 
             ++i;

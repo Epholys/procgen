@@ -843,7 +843,11 @@ namespace
         ImVec4 imcolor = constant.get_color();
         if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
         {
-            constant.set_color(imcolor);
+            sf::Color color = imcolor;
+            if (color != sf::Color::Transparent)
+            {
+                constant.set_color(imcolor);
+            }
         }
 
         // Display the ConstantColor preview.
@@ -878,7 +882,10 @@ namespace
             {
                 is_modified = true;
             }
-            sfcolor = imcolor;
+            if (sf::Color(imcolor) != sf::Color::Transparent)
+            {
+                sfcolor = imcolor;
+            }
 
             // Position
             ImGui::PushItemWidth(50);
@@ -968,7 +975,10 @@ namespace
             {
                 is_modified = true;
             }
-            sfcolor = imcolor;
+            if (sf::Color(imcolor) != sf::Color::Transparent)
+            {
+                sfcolor = imcolor;
+            }
 
             ImGui::SameLine();
             ImGui::BeginGroup();

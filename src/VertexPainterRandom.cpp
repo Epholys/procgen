@@ -107,8 +107,10 @@ namespace colors
             // We call 'get()' each time because we must interact nicely with
             // 'VertexPainterComposite'. 
             sf::Color color = generator->get(rand);
-            color.a = v.color.a;
-            v.color = color;
+            if (v.color != sf::Color::Transparent)
+            {
+                v.color = color;
+            }
             ++block_index;
         }
     }

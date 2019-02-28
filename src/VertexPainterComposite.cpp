@@ -43,8 +43,9 @@ namespace colors
             // Add the index of the current vertex in the correct pool.
             it->push_back(global_index_++);
 
-            // Dummy color
-            return sf::Color::Transparent;
+            // Dummy color (BUT NOT TRANSPARENT (Transparent is a special value
+            // for save/load position))
+            return sf::Color(0,0,0,1);
         }
 
         void ColorGeneratorComposite::reset_index()
