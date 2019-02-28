@@ -49,12 +49,12 @@ namespace procgui
         paint_vertices();
     }
 
-    LSystemView::LSystemView(const ext::sf::Vector2d& position)
+    LSystemView::LSystemView(const ext::sf::Vector2d& position, double step)
         : LSystemView(
             "",
             std::make_shared<LSystem>(LSystem("F+F+F+F", {}, "")),
             std::make_shared<InterpretationMap>(default_interpretation_map),
-            std::make_shared<DrawingParameters>(position))
+            std::make_shared<DrawingParameters>(position, step))
     {
         // Arbitrary default LSystem.
     }

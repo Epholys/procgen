@@ -52,7 +52,8 @@ namespace procgui
                     std::shared_ptr<drawing::InterpretationMap> map,
                     std::shared_ptr<drawing::DrawingParameters> params,
                     std::shared_ptr<colors::VertexPainterWrapper> painter = std::make_shared<colors::VertexPainterWrapper>());
-        explicit LSystemView(const ext::sf::Vector2d& position);
+        // Special-case constructor when creating a default LSystem
+        LSystemView(const ext::sf::Vector2d& position, double step);
         // Shallow copy: LSystem, DrawingParameters and VertexPainterWrapper
         // are shared from 'other'. Use 'clone()' for a deep copy.
         LSystemView(const LSystemView& other);

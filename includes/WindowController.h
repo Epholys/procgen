@@ -82,7 +82,9 @@ namespace controller
 
         // The zoom level in the window.
         static float zoom_level_;
-
+        // Default step size at default zoom level
+        static const double default_step_;
+        
         // Current mouse position
         static sf::Vector2i mouse_position_;
 

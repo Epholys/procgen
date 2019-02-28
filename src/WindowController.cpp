@@ -25,6 +25,9 @@ namespace controller
     bool WindowController::save_menu_open_ {false};
     bool WindowController::load_menu_open_ {false};
 
+    const double WindowController::default_step_ {25.f}; 
+
+    
     fs::path WindowController::save_dir_ = fs::u8path(u8"saves");
     
     sf::Vector2f WindowController::real_mouse_position(sf::Vector2i mouse_click)
@@ -91,7 +94,8 @@ namespace controller
         {
             if (ImGui::MenuItem("New LSystem", "Ctrl+N"))
             {
-                lsys_views.emplace_front(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))));
+                lsys_views.emplace_front(procgui::LSystemView(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))),
+                                                              default_step_ * zoom_level_));
             }
             if (ImGui::MenuItem("Load LSystem", "Ctrl+O"))
             {
@@ -329,7 +333,7 @@ namespace controller
                 else
                 {
                     // Create a default LSystemView.
-                    procgui::LSystemView loaded_view({0,0});
+                    procgui::LSystemView loaded_view({0,0}, default_step_ * zoom_level_);
                     try
                     {
                         // Load it from the file.
@@ -406,7 +410,8 @@ namespace controller
                 }
                 else if (event.key.code == sf::Keyboard::N)
                 {
-                    lsys_views.emplace_front(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))));
+                    lsys_views.emplace_front(procgui::LSystemView(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))),
+                                                                  default_step_ * zoom_level_));
                 }
                 else if (event.key.code == sf::Keyboard::O)
                 {

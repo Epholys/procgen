@@ -22,7 +22,8 @@ namespace drawing
     {
     public:
         DrawingParameters() = default;
-        DrawingParameters(const ext::sf::Vector2d& starting_position);
+        // Special-case constructor when creating a default LSystem
+        DrawingParameters(const ext::sf::Vector2d& starting_position, double step);
         DrawingParameters(const ext::sf::Vector2d& starting_position,
                           double starting_angle,
                           double delta_angle,

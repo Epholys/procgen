@@ -15,8 +15,9 @@ namespace drawing
     {
     }
 
-    DrawingParameters::DrawingParameters(const ext::sf::Vector2d& starting_position)
+    DrawingParameters::DrawingParameters(const ext::sf::Vector2d& starting_position, double step)
         : starting_position_ {starting_position}
+        , step_ {step}
     {
     }
 
