@@ -279,7 +279,7 @@ namespace procgui
                                       *OParams::get_target());
         bounding_box_ = geometry::bounding_box(vertices_);
         sub_boxes_ = geometry::sub_boxes(vertices_, MAX_SUB_BOXES);
-        geometry::expand_boxes(sub_boxes_);
+        geometry::expand_boxes(sub_boxes_); // Add some margin
         paint_vertices();
     }
 
@@ -313,7 +313,8 @@ namespace procgui
             auto margin = (box.width*.02f > box.height*.02f) ? box.height*.02f : box.width*.02f;
             margin = margin > 10 ? margin : 10;
             
-            // Draw the global bounding boxes (with a little margin) with the unique color.
+            // Draw the global bounding boxes (with a little scaled margin) with
+            // the unique color.
             std::array<sf::Vertex, 5> rect =
                 {{ {{ box.left-margin, box.top-margin}, color_id_},
                    {{ box.left-margin, box.top + box.height + margin}, color_id_},

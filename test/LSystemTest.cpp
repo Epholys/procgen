@@ -89,7 +89,7 @@ TEST(LSystemTest, clear_rules)
     ASSERT_EQ(lsys.get_production_cache(), base_cache);
 }
 
-TEST(LSystemTest, set_recursion_predecessors)
+TEST(LSystemTest, set_iteration_predecessors)
 {
     LSystem lsys { "F", { { 'F', "F+F" }, { 'G', "GG" } }, "F" };
     std::string expected_predecessors = "";

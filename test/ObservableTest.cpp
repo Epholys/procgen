@@ -41,9 +41,9 @@ struct B : public Observable
         }
 };
     
-struct C : public Observer<A>
+struct A_Observer : public Observer<A>
 {
-    C(const shared_ptr<A>& a)
+    A_Observer(const shared_ptr<A>& a)
         : Observer<A>(a)
         {
             add_callback([this](){update();});
@@ -57,9 +57,9 @@ struct C : public Observer<A>
     int n { -1 };
 };
 
-struct D : public Observer<A>, public Observer<B>
+struct A_B_Observer : public Observer<A>, public Observer<B>
 {
-    D(const shared_ptr<A>& a, const shared_ptr<B>& b )
+    A_B_Observer(const shared_ptr<A>& a, const shared_ptr<B>& b )
         : Observer<A>(a)
         , Observer<B>(b)
 
@@ -84,7 +84,7 @@ struct D : public Observer<A>, public Observer<B>
 TEST(ObservableTest, observable_ctor)
 {
     auto a1 = std::make_shared<A>(0);
-    C c (a1);
+    A_Observer a_obs (a1);
     auto a2 (*a1);
     auto a3 = *a1;
 
@@ -97,9 +97,9 @@ TEST(ObservableTest, one_to_one)
 {
     auto a = std::make_shared<A>(0);
     {
-        C c (a);
+        A_Observer a_obs (a);
         a->increment();
-        ASSERT_EQ(c.n, 1);
+        ASSERT_EQ(a_obs.n, 1);
     }
     ASSERT_TRUE(a->empty());
 }
@@ -108,44 +108,44 @@ TEST(ObservableTest, multiple)
 {
     auto a1 = std::make_shared<A>(1);
     auto a2 = std::make_shared<A>(2);
-    auto b3 = std::make_shared<B>(3);
+    auto b = std::make_shared<B>(3);
     {
-        C c1_1 (a1);
-        C c1_2 (a1);
-        C c2 (a2);
-        D d13 (a1, b3); 
-        D d23 (a2, b3); 
+        A_Observer a1_obs_1 (a1);
+        A_Observer a1_obs_2 (a1);
+        A_Observer a2_obs (a2);
+        A_B_Observer a1_b_obs (a1, b); 
+        A_B_Observer a2_b_obs (a2, b); 
 
         a1->increment();
-        ASSERT_EQ(c1_1.n, 2);
-        ASSERT_EQ(c1_2.n, 2);
-        ASSERT_EQ(d13.n, 2);
+        ASSERT_EQ(a1_obs_1.n, 2);
+        ASSERT_EQ(a1_obs_2.n, 2);
+        ASSERT_EQ(a1_b_obs.n, 2);
 
         a2->increment();
-        ASSERT_EQ(c2.n, 3);
-        ASSERT_EQ(d23.n, 3);
+        ASSERT_EQ(a2_obs.n, 3);
+        ASSERT_EQ(a2_b_obs.n, 3);
 
-        b3->increment();
-        ASSERT_EQ(d13.m, 4);
-        ASSERT_EQ(d23.m, 4);
+        b->increment();
+        ASSERT_EQ(a1_b_obs.m, 4);
+        ASSERT_EQ(a2_b_obs.m, 4);
     }
     ASSERT_TRUE(a1->empty());
     ASSERT_TRUE(a2->empty());
-    ASSERT_TRUE(b3->empty());
+    ASSERT_TRUE(b->empty());
 }
 
 TEST(ObservableTest, set_target)
 {
     auto a1 = std::make_shared<A>(0);
     auto a2 = std::make_shared<A>(0);
-    C c (a1);
+    A_Observer a1_obs (a1);
 
-    c.set_target(a2);
-    c.add_callback([&c](){c.update();});
+    a1_obs.set_target(a2);
+    a1_obs.add_callback([&a1_obs](){a1_obs.update();});
     a1->increment();
     a2->increment();
 
     ASSERT_TRUE(a1->empty());
     ASSERT_FALSE(a2->empty());
-    ASSERT_EQ(1, c.n);
+    ASSERT_EQ(1, a1_obs.n);
 }
