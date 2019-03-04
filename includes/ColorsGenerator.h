@@ -160,7 +160,7 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void serialize(Archive& ar)
+        void serialize(Archive& ar, std::uint32_t)
             {
                 ar(cereal::make_nvp("Color", color_));
             }
@@ -219,7 +219,7 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void serialize(Archive& ar)
+        void serialize(Archive& ar, std::uint32_t)
             {
                 ar(cereal::make_nvp("color_keys", sanitized_keys_));
                 raw_keys_ = sanitized_keys_;
@@ -278,7 +278,7 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void serialize(Archive& ar)
+        void serialize(Archive& ar, std::uint32_t)
             {
                 ar(cereal::make_nvp("color_keys", keys_));
                 generate_colors();

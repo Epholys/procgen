@@ -148,7 +148,7 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void save(Archive& ar) const
+        void save(Archive& ar, const std::uint32_t) const
             {
                 std::shared_ptr<VertexPainter> main_painter = main_painter_observer_.get_painter_wrapper()->unwrap();
                 std::vector<std::shared_ptr<VertexPainter>> child_painters;
@@ -160,7 +160,7 @@ namespace colors
                    cereal::make_nvp("child_painters", child_painters));
             }
         template<class Archive>
-        void load(Archive& ar)
+        void load(Archive& ar, const std::uint32_t)
             {
                 std::shared_ptr<VertexPainter> main_painter;
                 std::vector<std::shared_ptr<VertexPainter>> child_painters;

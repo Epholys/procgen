@@ -42,14 +42,14 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void save(Archive& ar) const
+        void save(Archive& ar, const std::uint32_t) const
             {
                 ar(cereal::make_nvp("angle", angle_),
                    cereal::make_nvp("center", center_),
                    cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
             }
         template<class Archive>
-        void load(Archive& ar)
+        void load(Archive& ar, const std::uint32_t)
             {
                 std::shared_ptr<ColorGenerator> generator;
                 ar(cereal::make_nvp("angle", angle_));
