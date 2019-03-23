@@ -32,6 +32,7 @@ namespace geometry
 
     float angle_from_vector(const sf::Vector2f vec)
     {
+        // TODO: use atan2!
          // y axis is downward
         if (vec.x == 0 && vec.y <= 0)
         {
