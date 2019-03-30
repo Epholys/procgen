@@ -1,6 +1,7 @@
 #include <cctype>
 #include <cstring>
 #include "procgui.h"
+#include "imgui/imgui_internal.h"
 #include "helper_string.h"
 #include "RenderWindow.h"
 #include "WindowController.h"
@@ -857,6 +858,12 @@ namespace
         float space_until_border = ImGui::GetWindowWidth() - window_pos.x  - 10.f;
         float xsize = (space_until_border < 400) ? space_until_border : 400;
         ImVec2 size {xsize, 30.};
+        float checker_box_size = 10.f;
+        ImGui::RenderColorRectWithAlphaCheckerboard(ImVec2(screen_pos.x, screen_pos.y),
+                                                    ImVec2(screen_pos.x+size.x, screen_pos.y+size.y),
+                                                    IM_COL32(0, 0, 0, 0),
+                                                    checker_box_size,
+                                                    ImVec2(0, 0));
         draw_list->AddRectFilled(ImVec2(screen_pos.x, screen_pos.y),
                                  ImVec2(screen_pos.x+size.x, screen_pos.y+size.y),
                                  ImGui::ColorConvertFloat4ToU32(imcolor));
@@ -931,6 +938,12 @@ namespace
         float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 10.f;
         float xsize = (space_until_border < 400) ? space_until_border : 400;
         ImVec2 size {xsize, 30.};
+        float checker_box_size = 10.f;
+        ImGui::RenderColorRectWithAlphaCheckerboard(ImVec2(screen_pos.x, screen_pos.y),
+                                                    ImVec2(screen_pos.x+size.x, screen_pos.y+size.y),
+                                                    IM_COL32(0, 0, 0, 0),
+                                                    checker_box_size,
+                                                    ImVec2(0, 0));
         float x = screen_pos.x;
         double ratio = 0.f;
         for (unsigned i=0; i<k.size()-1; ++i)
@@ -1051,6 +1064,12 @@ namespace
         float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 10.f;
         float xsize = (space_until_border < 400) ? space_until_border : 400;
         ImVec2 size {xsize, 30.};
+        float checker_box_size = 10.f;
+        ImGui::RenderColorRectWithAlphaCheckerboard(ImVec2(screen_pos.x, screen_pos.y),
+                                                    ImVec2(screen_pos.x+size.x, screen_pos.y+size.y),
+                                                    IM_COL32(0, 0, 0, 0),
+                                                    checker_box_size,
+                                                    ImVec2(0, 0));
         float x = screen_pos.x;
         double width = size.x / colors.size();
         for (const auto& color : colors)
