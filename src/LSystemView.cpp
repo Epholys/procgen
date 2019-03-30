@@ -1,6 +1,7 @@
 #include "procgui.h"
 #include "LSystemView.h"
 #include "helper_math.h"
+#include "WindowController.h"
 
 namespace procgui
 {
@@ -310,8 +311,9 @@ namespace procgui
         if (is_selected_ && bounding_box_is_visible_)
         {
             auto box = get_transform().transformRect(bounding_box_);
-            auto margin = (box.width*.02f > box.height*.02f) ? box.height*.02f : box.width*.02f;
-            margin = margin > 10 ? margin : 10;
+            auto margin = (box.width*.05f > box.height*.05f) ? box.height*.05f : box.width*.05f;
+            float zoom = controller::WindowController::get_zoom_level();
+            margin = margin > 7.5*zoom ? margin : 7.5*zoom;
             
             // Draw the global bounding boxes (with a little scaled margin) with
             // the unique color.

@@ -56,6 +56,10 @@ namespace controller
         return mouse_position_;
     }
 
+    float WindowController::get_zoom_level()
+    {
+        return zoom_level_;
+    }
 
     void WindowController::paste_view(std::list<procgui::LSystemView>& lsys_views,
                                       const std::optional<procgui::LSystemView>& view,

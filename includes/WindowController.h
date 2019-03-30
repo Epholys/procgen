@@ -42,6 +42,9 @@ namespace controller
         
         // Get the absolute mouse position
         static sf::Vector2i get_mouse_position();
+
+        // Getter for the zoom level
+        static float get_zoom_level();
         
         // Public flag to message WindowController to start the save menu. It is
         // also used to let the window open between frames.
