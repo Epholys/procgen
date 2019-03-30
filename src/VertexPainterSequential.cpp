@@ -49,7 +49,9 @@ namespace colors
 
     std::shared_ptr<VertexPainter> VertexPainterSequential::clone_impl() const
     {
-        return std::make_shared<VertexPainterSequential>(get_target()->unwrap()->clone());
+        auto clone = std::make_shared<VertexPainterSequential>(*this);
+        clone->set_target(std::make_shared<ColorGeneratorWrapper>(get_target()->clone()));
+        return clone;
     }
     
     float VertexPainterSequential::get_factor() const

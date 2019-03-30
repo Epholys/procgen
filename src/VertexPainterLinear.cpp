@@ -57,7 +57,9 @@ namespace colors
 
     std::shared_ptr<VertexPainter> VertexPainterLinear::clone_impl() const
     {
-        return std::make_shared<VertexPainterLinear>(get_target()->unwrap()->clone());
+        auto clone = std::make_shared<VertexPainterLinear>(*this);
+        clone->set_target(std::make_shared<ColorGeneratorWrapper>(get_target()->clone()));
+        return clone;
     }
     
     float VertexPainterLinear::get_angle() const

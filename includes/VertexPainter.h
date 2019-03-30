@@ -28,7 +28,7 @@ namespace colors
         VertexPainter(); // Create a default generator
         virtual ~VertexPainter() {};
         explicit VertexPainter(const std::shared_ptr<ColorGenerator> gen);
-        // Rule-of-five shallow copy
+        // Rule-of-five shallow copy TODO delete
         VertexPainter(const VertexPainter& other);
         VertexPainter(VertexPainter&& other);
         VertexPainter& operator=(const VertexPainter& other);

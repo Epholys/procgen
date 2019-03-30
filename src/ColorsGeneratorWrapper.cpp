@@ -49,6 +49,11 @@ namespace colors
         return *this;
     }
 
+    ColorGeneratorWrapper ColorGeneratorWrapper::clone() const
+    {
+        return ColorGeneratorWrapper(get_target()->clone());
+    }
+    
     std::shared_ptr<ColorGenerator> ColorGeneratorWrapper::unwrap() const
     {
         return get_target();

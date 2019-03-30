@@ -26,6 +26,8 @@ namespace colors
         ColorGeneratorWrapper& operator=(const ColorGeneratorWrapper& other);
         ColorGeneratorWrapper& operator=(ColorGeneratorWrapper&& other);
 
+        ColorGeneratorWrapper clone() const;
+        
         // Getter
         std::shared_ptr<ColorGenerator> unwrap() const;
 

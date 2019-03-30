@@ -42,7 +42,9 @@ namespace colors
 
     std::shared_ptr<VertexPainter> VertexPainterIteration::clone_impl() const
     {
-        return std::make_shared<VertexPainterIteration>(get_target()->unwrap()->clone());
+        auto clone = std::make_shared<VertexPainterIteration>(*this);
+        clone->set_target(std::make_shared<ColorGeneratorWrapper>(get_target()->clone()));
+        return clone;
     }
     
     void VertexPainterIteration::paint_vertices(std::vector<sf::Vertex>& vertices,

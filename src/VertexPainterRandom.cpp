@@ -58,7 +58,9 @@ namespace colors
 
     std::shared_ptr<VertexPainter> VertexPainterRandom::clone_impl() const
     {
-        return std::make_shared<VertexPainterRandom>(get_target()->unwrap()->clone());
+        auto clone = std::make_shared<VertexPainterRandom>(*this);
+        clone->set_target(std::make_shared<ColorGeneratorWrapper>(get_target()->clone()));
+        return clone;
     }
 
     void VertexPainterRandom::randomize()

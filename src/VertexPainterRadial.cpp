@@ -49,7 +49,9 @@ namespace colors
 
     std::shared_ptr<VertexPainter> VertexPainterRadial::clone_impl() const
     {
-        return std::make_shared<VertexPainterRadial>(get_target()->unwrap()->clone());
+        auto clone = std::make_shared<VertexPainterRadial>(*this);
+        clone->set_target(std::make_shared<ColorGeneratorWrapper>(get_target()->clone()));
+        return clone;
     }
     
     sf::Vector2f VertexPainterRadial::get_center() const
