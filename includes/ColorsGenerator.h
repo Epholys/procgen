@@ -17,7 +17,7 @@ namespace cereal
               traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
     std::string save_minimal(const Archive&, sf::Color color)
     {
-        char hex_color[8];
+        char hex_color[9];
         unsigned long r = color.r;
         unsigned long g = color.g;
         unsigned long b = color.b;
@@ -160,7 +160,12 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void serialize(Archive& ar, std::uint32_t)
+        void save(Archive& ar, std::uint32_t) const
+            {
+                ar(cereal::make_nvp("Color", color_));
+            }
+        template<class Archive>
+        void load(Archive& ar, std::uint32_t)
             {
                 ar(cereal::make_nvp("Color", color_));
             }
