@@ -35,7 +35,12 @@ namespace colors
         public:
             ColorGeneratorComposite();
             explicit ColorGeneratorComposite(VertexPainterComposite& painter);
-
+            
+            ColorGeneratorComposite(const ColorGeneratorComposite&) = delete;
+            ColorGeneratorComposite(ColorGeneratorComposite&&) = delete;
+            ColorGeneratorComposite& operator=(const ColorGeneratorComposite&) = delete;
+            ColorGeneratorComposite& operator=(ColorGeneratorComposite&&) = delete;
+            
             // Returns a dummy sf::Color::Transparent but as a side-effect fills
             // 'vertex_indices_pools_' of VertexPainterComposite.
             //
@@ -74,19 +79,22 @@ namespace colors
         public:
             using OWrapper = Observer<VertexPainterWrapper>;
             
+            VertexPainterWrapperObserver() = delete;
             explicit VertexPainterWrapperObserver(std::shared_ptr<VertexPainterWrapper> painter_wrapper,
                                                  VertexPainterComposite& painter_composite);
-            // Shallow rule-of-five constructors.
-            VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other);
-            VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other);
-            VertexPainterWrapperObserver& operator=(const VertexPainterWrapperObserver& other);
-            VertexPainterWrapperObserver& operator=(VertexPainterWrapperObserver&& other);
+            // TODO remove? Shallow rule-of-five constructors.
+            VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other) = delete;
+            VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other) = delete;
+            VertexPainterWrapperObserver& operator=(const VertexPainterWrapperObserver& other) = delete;
+            VertexPainterWrapperObserver& operator=(VertexPainterWrapperObserver&& other) = delete;
 
             std::shared_ptr<VertexPainterWrapper> get_painter_wrapper() const;
             void set_painter_wrapper(std::shared_ptr<VertexPainterWrapper> painter_buff);
+
+            void set_composite_painter(VertexPainterComposite& painter);
             
         private:
-            // Reference to the linked VertexPainterComposite
+            // TODO doc Reference to the linked VertexPainterComposite
             VertexPainterComposite& painter_;
         };
     }

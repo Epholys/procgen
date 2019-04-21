@@ -56,50 +56,51 @@ namespace colors
         std::shared_ptr<ColorGenerator> ColorGeneratorComposite::clone_impl() const
         {
             // Should never happen.
-            Expects(painter_);
-            return painter_->color_distributor_;
+            // Expects(painter_);
+            // return painter_->color_distributor_;
+            return std::make_shared<ColorGeneratorComposite>();
         }
 
         //------------------------------------------------------------
 
         VertexPainterWrapperObserver::VertexPainterWrapperObserver(std::shared_ptr<VertexPainterWrapper> painter_wrapper,
-                                                                 VertexPainterComposite& painter_composite)
+                                                                   VertexPainterComposite& painter_composite)
             : OWrapper {painter_wrapper}
             , painter_ {painter_composite}
         {
             add_callback([this](){painter_.notify();});
         }
-        // Shallow rule-of-five constructors.
-        VertexPainterWrapperObserver::VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other)
-            : OWrapper{other.get_target()}
-            , painter_{other.painter_}
-        {
-            add_callback([this](){painter_.notify();});
-        }
-        VertexPainterWrapperObserver::VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other)
-            : OWrapper{std::move(other.get_target())}
-            , painter_{other.painter_}
-        {
-            add_callback([this](){painter_.notify();});
-        }
-        VertexPainterWrapperObserver& VertexPainterWrapperObserver::operator=(const VertexPainterWrapperObserver& other)
-        {
-            if (this != &other)
-            {
-                set_target(other.get_target());
-                add_callback([this](){painter_.notify();});
-            }
-            return *this;
-        }
-        VertexPainterWrapperObserver& VertexPainterWrapperObserver::operator=(VertexPainterWrapperObserver&& other)
-        {
-            if (this != &other)
-            {
-                set_target(std::move(other.get_target()));
-                add_callback([this](){painter_.notify();});
-            }
-            return *this;
-        }
+        // // Shallow rule-of-five constructors.
+        // VertexPainterWrapperObserver::VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other)
+        //     : OWrapper{other.get_target()}
+        //     , painter_{other.painter_}
+        // {
+        //     add_callback([this](){painter_.notify();});
+        // }
+        // VertexPainterWrapperObserver::VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other)
+        //     : OWrapper{std::move(other.get_target())}
+        //     , painter_{other.painter_}
+        // {
+        //     add_callback([this](){painter_.notify();});
+        // }
+        // VertexPainterWrapperObserver& VertexPainterWrapperObserver::operator=(const VertexPainterWrapperObserver& other)
+        // {
+        //     if (this != &other)
+        //     {
+        //         set_target(other.get_target());
+        //         add_callback([this](){painter_.notify();});
+        //     }
+        //     return *this;
+        // }
+        // VertexPainterWrapperObserver& VertexPainterWrapperObserver::operator=(VertexPainterWrapperObserver&& other)
+        // {
+        //     if (this != &other)
+        //     {
+        //         set_target(std::move(other.get_target()));
+        //         add_callback([this](){painter_.notify();});
+        //     }
+        //     return *this;
+        // }
 
         std::shared_ptr<VertexPainterWrapper> VertexPainterWrapperObserver::get_painter_wrapper() const
         {
@@ -112,7 +113,12 @@ namespace colors
             painter_.notify();
         }
 
-        
+        void VertexPainterWrapperObserver::set_composite_painter(VertexPainterComposite& painter)
+        {
+            painter_ = painter;
+            add_callback([this](){painter_.notify();});
+            painter_.notify();
+        }
     }
 
     //----------------------------------------------------------------------
@@ -120,43 +126,56 @@ namespace colors
     std::shared_ptr<VertexPainter> VertexPainterComposite::copied_painter_ {};
 
     VertexPainterComposite::VertexPainterComposite()
+        : VertexPainter{} 
+        , color_distributor_{std::make_shared<impl::ColorGeneratorComposite>(*this)}
+        , main_painter_observer_{std::make_shared<VertexPainterWrapper>(
+            std::make_shared<VertexPainterLinear>(color_distributor_)), *this}
+        , vertex_indices_pools_{}
+        , child_painters_observers_{}
+    {
+        child_painters_observers_.emplace_back(std::make_shared<VertexPainterWrapper>(), *this);
+    }
+
+    VertexPainterComposite::VertexPainterComposite(const std::shared_ptr<ColorGenerator>)
         : VertexPainter{}
         , color_distributor_{std::make_shared<impl::ColorGeneratorComposite>(*this)}
         , main_painter_observer_{std::make_shared<VertexPainterWrapper>(
             std::make_shared<VertexPainterLinear>(color_distributor_)), *this}
         , vertex_indices_pools_{}
-        , child_painters_observers_{{impl::VertexPainterWrapperObserver(std::make_shared<VertexPainterWrapper>(), *this)}}
+        , child_painters_observers_{}
     {
-    }
-
-    VertexPainterComposite::VertexPainterComposite(const std::shared_ptr<ColorGenerator> gen)
-        : VertexPainter{gen}
-        , color_distributor_{std::make_shared<impl::ColorGeneratorComposite>(*this)}
-        , main_painter_observer_{std::make_shared<VertexPainterWrapper>(
-            std::make_shared<VertexPainterLinear>(color_distributor_)), *this}
-        , vertex_indices_pools_{}
-        , child_painters_observers_{{impl::VertexPainterWrapperObserver(std::make_shared<VertexPainterWrapper>(), *this)}}
-
-    {
-        // Note: 'gen' is unused
+        child_painters_observers_.emplace_back(std::make_shared<VertexPainterWrapper>(), *this);
     }
     
     VertexPainterComposite::VertexPainterComposite(const VertexPainterComposite& other)
         : VertexPainter{other}
-        , color_distributor_{other.color_distributor_}
-        , main_painter_observer_{other.main_painter_observer_}
+        , color_distributor_{std::make_shared<impl::ColorGeneratorComposite>(*this)}
+        , main_painter_observer_{other.main_painter_observer_.get_painter_wrapper(), *this}
         , vertex_indices_pools_{other.vertex_indices_pools_}
-        , child_painters_observers_{other.child_painters_observers_}
+        , child_painters_observers_{}
     {
+        main_painter_observer_.get_painter_wrapper()->unwrap()->set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(color_distributor_));
+        for (const auto& child : other.child_painters_observers_)
+        {
+            child_painters_observers_.emplace_back(child.get_painter_wrapper(), *this);
+        }
     }
 
     VertexPainterComposite::VertexPainterComposite(VertexPainterComposite&& other)
         : VertexPainter{std::move(other)}
-        , color_distributor_{std::move(other.color_distributor_)}
-        , main_painter_observer_{std::move(other.main_painter_observer_)}
+        , color_distributor_{std::make_shared<impl::ColorGeneratorComposite>(*this)}
+        , main_painter_observer_{other.main_painter_observer_.get_painter_wrapper(), *this}
         , vertex_indices_pools_{std::move(other.vertex_indices_pools_)}
-        , child_painters_observers_{std::move(other.child_painters_observers_)}
+        , child_painters_observers_{}
     {
+        main_painter_observer_.get_painter_wrapper()->unwrap()->set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(color_distributor_));
+        other.main_painter_observer_.set_target(nullptr);
+
+        for (auto& child : other.child_painters_observers_)
+        {
+            child_painters_observers_.emplace_back(child.get_painter_wrapper(), *this);
+            child.set_painter_wrapper(nullptr);
+        }
     }
 
     VertexPainterComposite& VertexPainterComposite::operator=(const VertexPainterComposite& other)
@@ -164,10 +183,19 @@ namespace colors
         if (this != &other)
         {
             VertexPainter::operator=(other);
-            color_distributor_ = other.color_distributor_;
-            main_painter_observer_ = other.main_painter_observer_;
-            child_painters_observers_ = other.child_painters_observers_;
+            color_distributor_ = std::make_shared<impl::ColorGeneratorComposite>(*this);
+
+            main_painter_observer_.set_painter_wrapper(other.main_painter_observer_.get_painter_wrapper());
+            main_painter_observer_.get_painter_wrapper()->unwrap()->set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(color_distributor_));
+            main_painter_observer_.set_composite_painter(*this);
+
             vertex_indices_pools_ = other.vertex_indices_pools_;
+
+            child_painters_observers_.clear();
+            for (const auto& child : other.child_painters_observers_)
+            {
+                child_painters_observers_.emplace_back(child.get_painter_wrapper(), *this);
+            }
         }
         return *this;
     }
@@ -177,17 +205,39 @@ namespace colors
         if (this != &other)
         {
             VertexPainter::operator=(other);
-            color_distributor_ = std::move(other.color_distributor_);
-            main_painter_observer_ = std::move(other.main_painter_observer_);
-            child_painters_observers_ = std::move(other.child_painters_observers_);
+            color_distributor_ = std::make_shared<impl::ColorGeneratorComposite>(*this);
+
+            main_painter_observer_.set_painter_wrapper(other.main_painter_observer_.get_painter_wrapper());
+            main_painter_observer_.set_composite_painter(*this);
+            main_painter_observer_.get_painter_wrapper()->unwrap()->set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(color_distributor_));
+            other.main_painter_observer_.set_target(nullptr);
+
             vertex_indices_pools_ = std::move(other.vertex_indices_pools_);
+
+            child_painters_observers_.clear();
+            for (auto& child : other.child_painters_observers_)
+            {
+                child_painters_observers_.emplace_back(child.get_painter_wrapper(), *this);
+                child.set_painter_wrapper(nullptr);
+            }
         }
         return *this;
     }
 
     std::shared_ptr<VertexPainter> VertexPainterComposite::clone_impl() const
     {
-        return std::make_shared<VertexPainterComposite>(get_target()->unwrap()->clone());
+        auto clone = std::make_shared<VertexPainterComposite>(*this);
+        
+        clone->main_painter_observer_.set_painter_wrapper(std::make_shared<VertexPainterWrapper>(main_painter_observer_.get_painter_wrapper()->clone()));
+        clone->main_painter_observer_.get_painter_wrapper()->unwrap()->set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(clone->color_distributor_));
+        
+        auto it = begin(child_painters_observers_);
+        auto clone_it = begin(clone->child_painters_observers_);
+        for (auto i = 0u; i < child_painters_observers_.size(); ++i)
+        {
+            clone_it->set_painter_wrapper(std::make_shared<VertexPainterWrapper>(it->get_painter_wrapper()->clone()));
+        }
+        return clone;
     }
     
     std::list<std::shared_ptr<VertexPainterWrapper>> VertexPainterComposite::get_child_painters() const
@@ -224,12 +274,11 @@ namespace colors
                  
     void VertexPainterComposite::set_child_painters(const std::list<std::shared_ptr<VertexPainterWrapper>> painters)
     {
-        std::list<impl::VertexPainterWrapperObserver> list;
+        child_painters_observers_.clear();
         for (const auto& painter : painters)
         {
-            list.push_back(impl::VertexPainterWrapperObserver(painter, *this));
+            child_painters_observers_.emplace_back(painter, *this);
         }
-        child_painters_observers_ = list;
         notify();
     }
 
