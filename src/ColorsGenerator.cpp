@@ -199,7 +199,7 @@ namespace colors
         colors_.clear();
 
         auto inferior = keys_.begin();
-        auto superior = ++keys_.begin(); // could be 'end(keys)' but the loop
+        auto superior = ++keys_.begin(); // TODO VALGRIND WRONG LOADING COLORS.lsys could be 'end(keys)' but the loop
                                          // condition stop the method before
                                          // dereferencing it.
         size_t i = 0;
