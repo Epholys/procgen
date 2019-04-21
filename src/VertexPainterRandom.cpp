@@ -10,56 +10,59 @@ namespace colors
     {
     }
 
-    VertexPainterRandom::VertexPainterRandom(const std::shared_ptr<ColorGenerator> gen)
-        : VertexPainter{gen}
+    VertexPainterRandom::VertexPainterRandom(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+        : VertexPainter{wrapper}
         , block_size_{1}
         , random_seed_(math::random_dev())
         , random_generator_(random_seed_)
     {
     }
     
-    VertexPainterRandom::VertexPainterRandom(const VertexPainterRandom& other)
-        : VertexPainter{other}
-        , block_size_{other.block_size_}
-        , random_seed_{other.random_seed_}
-        , random_generator_(random_seed_) 
-    {
-    }
+    // VertexPainterRandom::VertexPainterRandom(const VertexPainterRandom& other)
+    //     : VertexPainter{other}
+    //     , block_size_{other.block_size_}
+    //     , random_seed_{other.random_seed_}
+    //     , random_generator_(random_seed_) 
+    // {
+    // }
 
-    VertexPainterRandom::VertexPainterRandom(VertexPainterRandom&& other)
-        : VertexPainter{std::move(other)}
-        , block_size_{other.block_size_}
-        , random_seed_{other.random_seed_}
-        , random_generator_(random_seed_) 
-    {
-    }
+    // VertexPainterRandom::VertexPainterRandom(VertexPainterRandom&& other)
+    //     : VertexPainter{std::move(other)}
+    //     , block_size_{other.block_size_}
+    //     , random_seed_{other.random_seed_}
+    //     , random_generator_(random_seed_) 
+    // {
+    // }
 
-    VertexPainterRandom& VertexPainterRandom::operator=(const VertexPainterRandom& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-            block_size_ = other.block_size_;
-            random_seed_ = other.random_seed_;
-            random_generator_.seed(random_seed_); 
-        }
-        return *this;
-    }
+    // VertexPainterRandom& VertexPainterRandom::operator=(const VertexPainterRandom& other)
+    // {
+    //     if (this != &other)
+    //     {
+    //         VertexPainter::operator=(other);
+    //         block_size_ = other.block_size_;
+    //         random_seed_ = other.random_seed_;
+    //         random_generator_.seed(random_seed_); 
+    //     }
+    //     return *this;
+    // }
 
-    VertexPainterRandom& VertexPainterRandom::operator=(VertexPainterRandom&& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-            random_seed_ = other.random_seed_;
-        }
-        return *this;
-    }
+    // VertexPainterRandom& VertexPainterRandom::operator=(VertexPainterRandom&& other)
+    // {
+    //     if (this != &other)
+    //     {
+    //         VertexPainter::operator=(other);
+    //         random_seed_ = other.random_seed_;
+    //     }
+    //     return *this;
+    // }
 
     std::shared_ptr<VertexPainter> VertexPainterRandom::clone_impl() const
     {
-        auto clone = std::make_shared<VertexPainterRandom>(*this);
-        clone->set_target(std::make_shared<ColorGeneratorWrapper>(get_target()->clone()));
+        auto clone = std::make_shared<VertexPainterRandom>();
+        clone->block_size_ = block_size_;
+        clone->random_seed_ = random_seed_;
+        clone->random_generator_ = random_generator_;
+        clone->set_target(std::make_shared<ColorGeneratorWrapper>(*get_target()));
         return clone;
     }
 

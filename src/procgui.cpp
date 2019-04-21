@@ -618,44 +618,46 @@ namespace
                                    int index,
                                    int old_index)
     {
-        std::shared_ptr<colors::ColorGenerator> generator;
+        std::shared_ptr<colors::ColorGeneratorWrapper> next_generator;
         if (index == 0)
         {
-            generator = std::make_shared<colors::ConstantColor>();
+            auto default_generator = std::make_shared<colors::ConstantColor>();
+            next_generator = std::make_shared<colors::ColorGeneratorWrapper>(default_generator);
         }
         else if (index != 0 && old_index == 0)
         {
-            generator = std::make_shared<colors::LinearGradient>();
+            auto default_generator = std::make_shared<colors::LinearGradient>();
+            next_generator = std::make_shared<colors::ColorGeneratorWrapper>(default_generator);
         }
         else
         {
-            generator = painter->get_generator_wrapper()->unwrap()->clone();
+            next_generator = painter->get_generator_wrapper();
         }
 
         switch(index)
         {   
         case 0:
-            painter = std::make_shared<colors::VertexPainterConstant>(generator);
+            painter = std::make_shared<colors::VertexPainterConstant>(next_generator);
             break;
             
         case 1:
-            painter = std::make_shared<colors::VertexPainterLinear>(generator);
+            painter = std::make_shared<colors::VertexPainterLinear>(next_generator);
             break;
             
         case 2:
-            painter = std::make_shared<colors::VertexPainterRadial>(generator);
+            painter = std::make_shared<colors::VertexPainterRadial>(next_generator);
             break;
 
         case 3:
-            painter = std::make_shared<colors::VertexPainterRandom>(generator);
+            painter = std::make_shared<colors::VertexPainterRandom>(next_generator);
             break;
 
         case 4:
-            painter = std::make_shared<colors::VertexPainterSequential>(generator);
+            painter = std::make_shared<colors::VertexPainterSequential>(next_generator);
             break;
 
         case 5:
-            painter = std::make_shared<colors::VertexPainterIteration>(generator);
+            painter = std::make_shared<colors::VertexPainterIteration>(next_generator);
             break;
 
         default:

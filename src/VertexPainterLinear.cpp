@@ -12,53 +12,55 @@ namespace colors
     {
     }
 
-    VertexPainterLinear::VertexPainterLinear(const std::shared_ptr<ColorGenerator> gen)
-        : VertexPainter{gen}
+    VertexPainterLinear::VertexPainterLinear(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+        : VertexPainter{wrapper}
         , angle_{0}
         , center_{0.5,0.5}
     {
     }
     
-    VertexPainterLinear::VertexPainterLinear(const VertexPainterLinear& other)
-        : VertexPainter{other}
-        , angle_ {other.angle_}
-        , center_{other.center_}
-    {
-    }
+    // VertexPainterLinear::VertexPainterLinear(const VertexPainterLinear& other)
+    //     : VertexPainter{other}
+    //     , angle_ {other.angle_}
+    //     , center_{other.center_}
+    // {
+    // }
 
-    VertexPainterLinear::VertexPainterLinear(VertexPainterLinear&& other)
-        : VertexPainter{std::move(other)}
-        , angle_ {other.angle_}
-        , center_{other.center_}
-    {
-    }
+    // VertexPainterLinear::VertexPainterLinear(VertexPainterLinear&& other)
+    //     : VertexPainter{std::move(other)}
+    //     , angle_ {other.angle_}
+    //     , center_{other.center_}
+    // {
+    // }
 
-    VertexPainterLinear& VertexPainterLinear::operator=(const VertexPainterLinear& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-            angle_ = other.angle_;
-            center_  = other.center_;
-        }
-        return *this;
-    }
+    // VertexPainterLinear& VertexPainterLinear::operator=(const VertexPainterLinear& other)
+    // {
+    //     if (this != &other)
+    //     {
+    //         VertexPainter::operator=(other);
+    //         angle_ = other.angle_;
+    //         center_  = other.center_;
+    //     }
+    //     return *this;
+    // }
 
-    VertexPainterLinear& VertexPainterLinear::operator=(VertexPainterLinear&& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-            angle_ = other.angle_;
-            center_  = other.center_;
-        }
-        return *this;
-    }
+    // VertexPainterLinear& VertexPainterLinear::operator=(VertexPainterLinear&& other)
+    // {
+    //     if (this != &other)
+    //     {
+    //         VertexPainter::operator=(other);
+    //         angle_ = other.angle_;
+    //         center_  = other.center_;
+    //     }
+    //     return *this;
+    // }
 
     std::shared_ptr<VertexPainter> VertexPainterLinear::clone_impl() const
     {
-        auto clone = std::make_shared<VertexPainterLinear>(*this);
-        clone->set_target(std::make_shared<ColorGeneratorWrapper>(get_target()->clone()));
+        auto clone = std::make_shared<VertexPainterLinear>();
+        clone->angle_ = angle_;
+        clone->center_ = center_;
+        clone->set_target(std::make_shared<ColorGeneratorWrapper>(*get_target()));
         return clone;
     }
     

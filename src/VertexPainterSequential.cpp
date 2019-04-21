@@ -9,48 +9,49 @@ namespace colors
     {
     }
 
-    VertexPainterSequential::VertexPainterSequential(const std::shared_ptr<ColorGenerator> gen)
-        : VertexPainter{gen}
+    VertexPainterSequential::VertexPainterSequential(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+        : VertexPainter{wrapper}
         , factor_{1}
     {
     }
     
-    VertexPainterSequential::VertexPainterSequential(const VertexPainterSequential& other)
-        : VertexPainter{other}
-        , factor_ {other.factor_}
-    {
-    }
+    // VertexPainterSequential::VertexPainterSequential(const VertexPainterSequential& other)
+    //     : VertexPainter{other}
+    //     , factor_ {other.factor_}
+    // {
+    // }
 
-    VertexPainterSequential::VertexPainterSequential(VertexPainterSequential&& other)
-        : VertexPainter{std::move(other)}
-        , factor_ {other.factor_}
-    {
-    }
+    // VertexPainterSequential::VertexPainterSequential(VertexPainterSequential&& other)
+    //     : VertexPainter{std::move(other)}
+    //     , factor_ {other.factor_}
+    // {
+    // }
 
-    VertexPainterSequential& VertexPainterSequential::operator=(const VertexPainterSequential& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-            factor_ = other.factor_;
-        }
-        return *this;
-    }
+    // VertexPainterSequential& VertexPainterSequential::operator=(const VertexPainterSequential& other)
+    // {
+    //     if (this != &other)
+    //     {
+    //         VertexPainter::operator=(other);
+    //         factor_ = other.factor_;
+    //     }
+    //     return *this;
+    // }
 
-    VertexPainterSequential& VertexPainterSequential::operator=(VertexPainterSequential&& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-            factor_ = other.factor_;
-        }
-        return *this;
-    }
+    // VertexPainterSequential& VertexPainterSequential::operator=(VertexPainterSequential&& other)
+    // {
+    //     if (this != &other)
+    //     {
+    //         VertexPainter::operator=(other);
+    //         factor_ = other.factor_;
+    //     }
+    //     return *this;
+    // }
 
     std::shared_ptr<VertexPainter> VertexPainterSequential::clone_impl() const
     {
-        auto clone = std::make_shared<VertexPainterSequential>(*this);
-        clone->set_target(std::make_shared<ColorGeneratorWrapper>(get_target()->clone()));
+        auto clone = std::make_shared<VertexPainterSequential>();
+        clone->factor_ = factor_;
+        clone->set_target(std::make_shared<ColorGeneratorWrapper>(*get_target()));
         return clone;
     }
     

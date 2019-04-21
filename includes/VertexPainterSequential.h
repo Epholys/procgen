@@ -10,12 +10,12 @@ namespace colors
     {
     public:
         VertexPainterSequential(); // Create a default generator
-        explicit VertexPainterSequential(const std::shared_ptr<ColorGenerator> gen);
+        explicit VertexPainterSequential(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
         // Shallow rule-of-five constructors.
-        VertexPainterSequential(const VertexPainterSequential& other);
-        VertexPainterSequential(VertexPainterSequential&& other);
-        VertexPainterSequential& operator=(const VertexPainterSequential& other);
-        VertexPainterSequential& operator=(VertexPainterSequential&& other);
+        VertexPainterSequential(const VertexPainterSequential& other) = delete;
+        VertexPainterSequential(VertexPainterSequential&& other) = delete;
+        VertexPainterSequential& operator=(const VertexPainterSequential& other) = delete;
+        VertexPainterSequential& operator=(VertexPainterSequential&& other) = delete;
         
         // Getters
         float get_factor() const;

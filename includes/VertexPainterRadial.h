@@ -11,12 +11,12 @@ namespace colors
     {
     public:
         VertexPainterRadial(); // Create a default generator
-        explicit VertexPainterRadial(const std::shared_ptr<ColorGenerator> gen);
-        // Shallow rule-of-five constructors.
-        VertexPainterRadial(const VertexPainterRadial& other);
-        VertexPainterRadial(VertexPainterRadial&& other);
-        VertexPainterRadial& operator=(const VertexPainterRadial& other);
-        VertexPainterRadial& operator=(VertexPainterRadial&& other);
+        explicit VertexPainterRadial(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        // TODO doc "slice" Shallow rule-of-five constructors.
+        VertexPainterRadial(const VertexPainterRadial& other) = delete;
+        VertexPainterRadial(VertexPainterRadial&& other) = delete;
+        VertexPainterRadial& operator=(const VertexPainterRadial& other) = delete;
+        VertexPainterRadial& operator=(VertexPainterRadial&& other) = delete;
         
         // Getters
         sf::Vector2f get_center() const;

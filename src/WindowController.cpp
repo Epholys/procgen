@@ -80,13 +80,13 @@ namespace controller
         middle = pasted_view.get_parameters().get_starting_position() - middle;
         if (!is_loaded_from_disk && LSystemController::is_clone())
         {
-            auto cloned_view = pasted_view.clone();
+            auto cloned_view = pasted_view;
             cloned_view.ref_parameters().set_starting_position(pos + middle);
             lsys_views.emplace_front(cloned_view);
         }
         else
         {
-            auto duplicated_view = pasted_view.duplicate();
+            auto duplicated_view = pasted_view.shallow_clone();
             duplicated_view.ref_parameters().set_starting_position(pos + middle);
             lsys_views.emplace_front(duplicated_view);
         }

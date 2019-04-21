@@ -54,7 +54,7 @@ namespace procgui
                     std::shared_ptr<colors::VertexPainterWrapper> painter = std::make_shared<colors::VertexPainterWrapper>());
         // Special-case constructor when creating a default LSystem
         LSystemView(const ext::sf::Vector2d& position, double step);
-        // Shallow copy: LSystem, DrawingParameters and VertexPainterWrapper
+        // TODO DOC DEEP Shallow copy: LSystem, DrawingParameters and VertexPainterWrapper
         // are shared from 'other'. Use 'clone()' for a deep copy.
         LSystemView(const LSystemView& other);
         LSystemView(LSystemView&& other);
@@ -62,11 +62,11 @@ namespace procgui
         LSystemView& operator=(LSystemView&& other);
         ~LSystemView();
         
-        // Clone the LSystemView into an independant other view: deep copy.
-        LSystemView clone() const;
+        // // Clone the LSystemView into an independant other view: deep copy.
+        // LSystemView clone() const;
 
         // Shallow-copy 'this'.
-        LSystemView duplicate() const;
+        LSystemView shallow_clone() const;
         
         // Reference Getters
         drawing::DrawingParameters& ref_parameters();

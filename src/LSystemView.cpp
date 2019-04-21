@@ -61,10 +61,10 @@ namespace procgui
     }
 
     LSystemView::LSystemView(const LSystemView& other)
-        : OLSys {other.OLSys::get_target()}
-        , OMap {other.OMap::get_target()}
-        , OParams {other.OParams::get_target()}
-        , OPainter {other.OPainter::get_target()}
+        : OLSys {std::make_shared<LSystem>(*other.OLSys::get_target())}
+        , OMap {std::make_shared<InterpretationMap>(*other.OMap::get_target())}
+        , OParams {std::make_shared<DrawingParameters>(*other.OParams::get_target())}
+        , OPainter {std::make_shared<VertexPainterWrapper>(*other.OPainter::get_target())}
         , id_{unique_ids_.get_id()}
         , color_id_{unique_colors_.get_color(id_)}
         , name_ {other.name_}
@@ -83,10 +83,10 @@ namespace procgui
     }
 
     LSystemView::LSystemView(LSystemView&& other)
-        : OLSys {std::move(other.OLSys::get_target())}
-        , OMap {std::move(other.OMap::get_target())}
-        , OParams {std::move(other.OParams::get_target())}
-        , OPainter {std::move(other.OPainter::get_target())}
+        : OLSys {other.OLSys::get_target()} // with std::move, clang warning
+        , OMap {other.OMap::get_target()}
+        , OParams {other.OParams::get_target()}
+        , OPainter {other.OPainter::get_target()}
         , id_ {other.id_}
         , color_id_{std::move(other.color_id_)}
         , name_ {std::move(other.name_)}
@@ -120,10 +120,10 @@ namespace procgui
     {
         if (this != &other)
         {
-            OLSys::set_target(other.OLSys::get_target());
-            OMap::set_target(other.OMap::get_target());
-            OParams::set_target(other.OParams::get_target());
-            OPainter::set_target(other.OPainter::get_target());
+            OLSys::set_target(std::make_shared<LSystem>(*other.OLSys::get_target()));
+            OMap::set_target(std::make_shared<InterpretationMap>(*other.OMap::get_target()));
+            OParams::set_target(std::make_shared<DrawingParameters>(*other.OParams::get_target()));
+            OPainter::set_target(std::make_shared<VertexPainterWrapper>(*other.OPainter::get_target()));
             id_ = unique_ids_.get_id();
             color_id_ = unique_colors_.get_color(id_);
             name_ = other.name_;
@@ -148,10 +148,10 @@ namespace procgui
     {
         if (this != &other)
         {
-            OLSys::set_target(std::move(other.OLSys::get_target()));
-            OMap::set_target(std::move(other.OMap::get_target()));
-            OParams::set_target(std::move(other.OParams::get_target()));
-            OPainter::set_target(std::move(other.OPainter::get_target()));
+            OLSys::set_target(other.OLSys::get_target());
+            OMap::set_target(other.OMap::get_target());
+            OParams::set_target(other.OParams::get_target());
+            OPainter::set_target(other.OPainter::get_target());
             id_ = other.id_;
             color_id_ = other.color_id_;
             name_ = std::move(other.name_);
@@ -195,30 +195,32 @@ namespace procgui
     }
 
 
-    LSystemView LSystemView::clone() const
-    {        
-        // Deep copy.
-        return LSystemView(
-            name_,
-            std::make_shared<LSystem>(*OLSys::get_target()),
-            std::make_shared<InterpretationMap>(*OMap::get_target()),
-            std::make_shared<DrawingParameters>(*OParams::get_target()),
-            std::make_shared<VertexPainterWrapper>(OPainter::get_target()->clone())
-                );
-    }
+    // LSystemView LSystemView::clone() const
+    // {        
+    //     // Deep copy.
+    //     return LSystemView(
+    
+    //         name_,
+    //         std::make_shared<LSystem>(*OLSys::get_target()),
+    //         std::make_shared<InterpretationMap>(*OMap::get_target()),
+    //         std::make_shared<DrawingParameters>(*OParams::get_target()),
+    //         std::make_shared<VertexPainterWrapper>(OPainter::get_target()->clone())
+    //             );
+    // }
 
-    LSystemView LSystemView::duplicate() const
+    LSystemView LSystemView::shallow_clone() const
     {
-        return LSystemView(
-            name_,
-            lsys_buff_.get_target(),
-            interpretation_buff_.get_target(),
-            std::make_shared<DrawingParameters>(*OParams::get_target()),
-            OPainter::get_target());
+        auto copy_view = LSystemView(*this);
+        copy_view.OLSys::set_target(OLSys::get_target());
+        copy_view.OMap::set_target(OMap::get_target());
+        copy_view.OParams::set_target(OParams::get_target());
+        copy_view.OPainter::set_target(OPainter::get_target());
+        copy_view.update_callbacks();
+        return copy_view;
     }
     
 
-    drawing::DrawingParameters& LSystemView::ref_parameters()
+    DrawingParameters& LSystemView::ref_parameters()
     {
         return *OParams::get_target();
     }
@@ -230,7 +232,7 @@ namespace procgui
     {
         return interpretation_buff_;
     }
-    colors::VertexPainterWrapper& LSystemView::ref_vertex_painter_wrapper()
+    VertexPainterWrapper& LSystemView::ref_vertex_painter_wrapper()
     {
         return *OPainter::get_target();
     }
@@ -238,7 +240,7 @@ namespace procgui
     {
         return get_transform().transformRect(bounding_box_);
     }
-    const drawing::DrawingParameters& LSystemView::get_parameters() const
+    const DrawingParameters& LSystemView::get_parameters() const
     {
         return *OParams::get_target();
     }
@@ -250,7 +252,7 @@ namespace procgui
     {
         return interpretation_buff_;
     }
-    const colors::VertexPainterWrapper& LSystemView::get_vertex_painter_wrapper() const
+    const VertexPainterWrapper& LSystemView::get_vertex_painter_wrapper() const
     {
         return *OPainter::get_target();
     }

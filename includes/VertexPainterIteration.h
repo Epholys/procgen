@@ -10,12 +10,12 @@ namespace colors
     {
     public:
         VertexPainterIteration(); // Create a default generator
-        explicit VertexPainterIteration(const std::shared_ptr<ColorGenerator> gen);
-        // Shallow rule-of-five constructors.
-        VertexPainterIteration(const VertexPainterIteration& other);
-        VertexPainterIteration(VertexPainterIteration&& other);
-        VertexPainterIteration& operator=(const VertexPainterIteration& other);
-        VertexPainterIteration& operator=(VertexPainterIteration&& other);
+        explicit VertexPainterIteration(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        // TODO doc "slice"? :Shallow rule-of-five constructors.
+        VertexPainterIteration(const VertexPainterIteration& other) = delete;
+        VertexPainterIteration(VertexPainterIteration&& other) = delete;
+        VertexPainterIteration& operator=(const VertexPainterIteration& other) = delete;
+        VertexPainterIteration& operator=(VertexPainterIteration&& other) = delete;
         
         // Paint 'vertices' according to its iteration value: simply divide the
         // current iteration by the max iteration.

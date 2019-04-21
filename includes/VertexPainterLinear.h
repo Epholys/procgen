@@ -12,12 +12,12 @@ namespace colors
     {
     public:
         VertexPainterLinear(); // Create a default generator
-        explicit VertexPainterLinear(const std::shared_ptr<ColorGenerator> gen);
-        // Shallow rule-of-five constructors.
-        VertexPainterLinear(const VertexPainterLinear& other);
-        VertexPainterLinear(VertexPainterLinear&& other);
-        VertexPainterLinear& operator=(const VertexPainterLinear& other);
-        VertexPainterLinear& operator=(VertexPainterLinear&& other);
+        explicit VertexPainterLinear(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        // TODO doc "slice" Shallow rule-of-five constructors.
+        VertexPainterLinear(const VertexPainterLinear& other) = delete;
+        VertexPainterLinear(VertexPainterLinear&& other) = delete;
+        VertexPainterLinear& operator=(const VertexPainterLinear& other) = delete;
+        VertexPainterLinear& operator=(VertexPainterLinear&& other) = delete;
         
         // Getters
         float get_angle() const;
@@ -40,6 +40,9 @@ namespace colors
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone_impl() const override;
 
+        float angle_ {0};
+        sf::Vector2f center_ {0.5,0.5};
+        
         friend class cereal::access;
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const
@@ -57,10 +60,6 @@ namespace colors
                 ar(cereal::make_nvp("ColorGenerator", generator));
                 set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(generator));
             }
-        
-        
-        float angle_ {0};
-        sf::Vector2f center_ {0.5,0.5};
     };
 }
 

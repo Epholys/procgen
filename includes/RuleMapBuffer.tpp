@@ -1,5 +1,5 @@
 template<typename Target>
-RuleMapBuffer<Target>::RuleMapBuffer(const std::shared_ptr<Target>& target)
+RuleMapBuffer<Target>::RuleMapBuffer(std::shared_ptr<Target> target)
     : Observer<Target>(target)
     , buffer_ {}
     , instruction_ {nullptr}

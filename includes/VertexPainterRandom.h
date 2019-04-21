@@ -11,12 +11,12 @@ namespace colors
     {
     public:
         VertexPainterRandom(); // Create a default generator
-        explicit VertexPainterRandom(const std::shared_ptr<ColorGenerator> gen);
-        // Shallow rule-of-five constructors.
-        VertexPainterRandom(const VertexPainterRandom& other);
-        VertexPainterRandom(VertexPainterRandom&& other);
-        VertexPainterRandom& operator=(const VertexPainterRandom& other);
-        VertexPainterRandom& operator=(VertexPainterRandom&& other);
+        explicit VertexPainterRandom(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        // TODO doc delete Shallow rule-of-five constructors.
+        VertexPainterRandom(const VertexPainterRandom& other) = delete;
+        VertexPainterRandom(VertexPainterRandom&& other) = delete;
+        VertexPainterRandom& operator=(const VertexPainterRandom& other) = delete;
+        VertexPainterRandom& operator=(VertexPainterRandom&& other) = delete;
         
         // Generate a new seed.
         void randomize();

@@ -29,7 +29,8 @@ public:
     Observable(const Observable& other);
     Observable(Observable&& other);
     Observable& operator=(Observable other);
-
+    // TODO RULE OF FIVE
+    
     // Add a callback and return its unique identifier.
     // Exception:
     //  - Precondition: 'f' must not be a nullptr.

@@ -9,48 +9,49 @@ namespace colors
     {
     }
 
-    VertexPainterRadial::VertexPainterRadial(const std::shared_ptr<ColorGenerator> gen)
-        : VertexPainter{gen}
+    VertexPainterRadial::VertexPainterRadial(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+        : VertexPainter{wrapper}
         , center_{.5,.5}
     {
     }
     
-    VertexPainterRadial::VertexPainterRadial(const VertexPainterRadial& other)
-        : VertexPainter{other}
-        , center_ {other.center_}
-    {
-    }
+    // VertexPainterRadial::VertexPainterRadial(const VertexPainterRadial& other)
+    //     : VertexPainter{other}
+    //     , center_ {other.center_}
+    // {
+    // }
 
-    VertexPainterRadial::VertexPainterRadial(VertexPainterRadial&& other)
-        : VertexPainter{std::move(other)}
-        , center_ {other.center_}
-    {
-    }
+    // VertexPainterRadial::VertexPainterRadial(VertexPainterRadial&& other)
+    //     : VertexPainter{std::move(other)}
+    //     , center_ {other.center_}
+    // {
+    // }
 
-    VertexPainterRadial& VertexPainterRadial::operator=(const VertexPainterRadial& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-            center_ = other.center_;
-        }
-        return *this;
-    }
+    // VertexPainterRadial& VertexPainterRadial::operator=(const VertexPainterRadial& other)
+    // {
+    //     if (this != &other)
+    //     {
+    //         VertexPainter::operator=(other);
+    //         center_ = other.center_;
+    //     }
+    //     return *this;
+    // }
 
-    VertexPainterRadial& VertexPainterRadial::operator=(VertexPainterRadial&& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-            center_ = other.center_;
-        }
-        return *this;
-    }
+    // VertexPainterRadial& VertexPainterRadial::operator=(VertexPainterRadial&& other)
+    // {
+    //     if (this != &other)
+    //     {
+    //         VertexPainter::operator=(other);
+    //         center_ = other.center_;
+    //     }
+    //     return *this;
+    // }
 
     std::shared_ptr<VertexPainter> VertexPainterRadial::clone_impl() const
     {
-        auto clone = std::make_shared<VertexPainterRadial>(*this);
-        clone->set_target(std::make_shared<ColorGeneratorWrapper>(get_target()->clone()));
+        auto clone = std::make_shared<VertexPainterRadial>();
+        clone->center_ = center_;
+        clone->set_target(std::make_shared<ColorGeneratorWrapper>(*get_target()));
         return clone;
     }
     

@@ -24,7 +24,7 @@ public:
     // Exception:
     //  - Precondition: 't' must not be a nullptr.
     Observer() = delete;
-    Observer(const std::shared_ptr<T>& t)
+    Observer(std::shared_ptr<T> t)
         : target_(t)
         , id_ { -1, false }
         {
@@ -70,7 +70,7 @@ public:
             }
         }
     
-    void set_target(const std::shared_ptr<T>& t)
+    void set_target(std::shared_ptr<T> t)
         {
             if (target_ && id_.second)
             {
@@ -81,7 +81,7 @@ public:
             target_ = t;
         }
 
-    const std::shared_ptr<T>& get_target() const
+    std::shared_ptr<T> get_target() const
         {
             return target_;
         }

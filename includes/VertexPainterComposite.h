@@ -34,7 +34,7 @@ namespace colors
         {
         public:
             ColorGeneratorComposite();
-            explicit ColorGeneratorComposite(VertexPainterComposite& painter);
+            explicit ColorGeneratorComposite(VertexPainterComposite* painter);
             
             ColorGeneratorComposite(const ColorGeneratorComposite&) = delete;
             ColorGeneratorComposite(ColorGeneratorComposite&&) = delete;
@@ -81,7 +81,7 @@ namespace colors
             
             VertexPainterWrapperObserver() = delete;
             explicit VertexPainterWrapperObserver(std::shared_ptr<VertexPainterWrapper> painter_wrapper,
-                                                 VertexPainterComposite& painter_composite);
+                                                 VertexPainterComposite* painter_composite);
             // TODO remove? Shallow rule-of-five constructors.
             VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other) = delete;
             VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other) = delete;
@@ -91,11 +91,11 @@ namespace colors
             std::shared_ptr<VertexPainterWrapper> get_painter_wrapper() const;
             void set_painter_wrapper(std::shared_ptr<VertexPainterWrapper> painter_buff);
 
-            void set_composite_painter(VertexPainterComposite& painter);
+            void set_composite_painter(VertexPainterComposite* painter);
             
         private:
             // TODO doc Reference to the linked VertexPainterComposite
-            VertexPainterComposite& painter_;
+            VertexPainterComposite* painter_;
         };
     }
     
@@ -106,12 +106,12 @@ namespace colors
     {
     public:
         VertexPainterComposite(); // Create a default generator
-        explicit VertexPainterComposite(const std::shared_ptr<ColorGenerator> gen);
-        // Shallow rule-of-five constructors.
-        VertexPainterComposite(const VertexPainterComposite& other);
-        VertexPainterComposite(VertexPainterComposite&& other);
-        VertexPainterComposite& operator=(const VertexPainterComposite& other);
-        VertexPainterComposite& operator=(VertexPainterComposite&& other);
+        explicit VertexPainterComposite(const std::shared_ptr<ColorGeneratorWrapper>); // TODO DOC no wrap
+        // TODO doc deep": Rule-of-five shallow copy TODO delete
+        VertexPainterComposite(const VertexPainterComposite& other) = delete;;
+        VertexPainterComposite(VertexPainterComposite&& other) = delete;;
+        VertexPainterComposite& operator=(const VertexPainterComposite& other) = delete;;
+        VertexPainterComposite& operator=(VertexPainterComposite&& other) = delete;;
 
         // Getters/Setters
         std::list<std::shared_ptr<VertexPainterWrapper>> get_child_painters() const;

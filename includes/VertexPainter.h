@@ -27,12 +27,12 @@ namespace colors
 
         VertexPainter(); // Create a default generator
         virtual ~VertexPainter() {};
-        explicit VertexPainter(const std::shared_ptr<ColorGenerator> gen);
-        // Rule-of-five shallow copy TODO delete
-        VertexPainter(const VertexPainter& other);
-        VertexPainter(VertexPainter&& other);
-        VertexPainter& operator=(const VertexPainter& other);
-        VertexPainter& operator=(VertexPainter&& other);
+        explicit VertexPainter(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        // TODO doc deep": Rule-of-five shallow copy TODO delete
+        VertexPainter(const VertexPainter&) = delete;
+        VertexPainter(VertexPainter&&) = delete;
+        VertexPainter& operator=(const VertexPainter&) = delete;
+        VertexPainter& operator=(VertexPainter&&) = delete;
 
         // Clone method to do a deep copy of the 'this' object with the correct
         // child class. Calls 'clone_impl()' internally, so the child class can

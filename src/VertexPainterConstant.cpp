@@ -7,42 +7,43 @@ namespace colors
     {
     }
 
-    VertexPainterConstant::VertexPainterConstant(const std::shared_ptr<ColorGenerator> gen)
-        : VertexPainter{gen}
+    VertexPainterConstant::VertexPainterConstant(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+        : VertexPainter{wrapper}
     {
     }
     
-    VertexPainterConstant::VertexPainterConstant(const VertexPainterConstant& other)
-        : VertexPainter{other}
-    {
-    }
+    // VertexPainterConstant::VertexPainterConstant(const VertexPainterConstant& other)
+    //     : VertexPainter{other}
+    // {
+    // }
 
-    VertexPainterConstant::VertexPainterConstant(VertexPainterConstant&& other)
-        : VertexPainter{std::move(other)}
-    {
-    }
+    // VertexPainterConstant::VertexPainterConstant(VertexPainterConstant&& other)
+    //     : VertexPainter{std::move(other)}
+    // {
+    // }
 
-    VertexPainterConstant& VertexPainterConstant::operator=(const VertexPainterConstant& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-        }
-        return *this;
-    }
+    // VertexPainterConstant& VertexPainterConstant::operator=(const VertexPainterConstant& other)
+    // {
+    //     if (this != &other)
+    //     {
+    //         VertexPainter::operator=(other);
+    //     }
+    //     return *this;
+    // }
 
-    VertexPainterConstant& VertexPainterConstant::operator=(VertexPainterConstant&& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-        }
-        return *this;
-    }
+    // VertexPainterConstant& VertexPainterConstant::operator=(VertexPainterConstant&& other)
+    // {
+    //     if (this != &other)
+    //     {
+    //         VertexPainter::operator=(other);
+    //     }
+    //     return *this;
+    // }
 
     std::shared_ptr<VertexPainter> VertexPainterConstant::clone_impl() const
     {
-        return std::make_shared<VertexPainterConstant>(get_target()->unwrap()->clone());
+        auto color_wrapper = std::make_shared<ColorGeneratorWrapper>(*get_target());
+        return std::make_shared<VertexPainterConstant>(color_wrapper);
     }
     
     void VertexPainterConstant::paint_vertices(std::vector<sf::Vertex>& vertices,

@@ -10,12 +10,12 @@ namespace colors
     {
     public:
         VertexPainterConstant(); // Create a default generator
-        explicit VertexPainterConstant(const std::shared_ptr<ColorGenerator> gen);
-        // Shallow rule-of-five constructors.
-        VertexPainterConstant(const VertexPainterConstant& other);
-        VertexPainterConstant(VertexPainterConstant&& other);
-        VertexPainterConstant& operator=(const VertexPainterConstant& other);
-        VertexPainterConstant& operator=(VertexPainterConstant&& other);
+        explicit VertexPainterConstant(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        // TODO doc "slicing"? Shallow rule-of-five constructors.
+        VertexPainterConstant(const VertexPainterConstant& other) = delete;
+        VertexPainterConstant(VertexPainterConstant&& other) = delete;
+        VertexPainterConstant& operator=(const VertexPainterConstant& other) = delete;
+        VertexPainterConstant& operator=(VertexPainterConstant&& other) = delete;
         
         // Paint 'vertices' according to a constant real number.
         // 'bounding_box', 'iteration_of_vertices' and 'max_recursion' are not used.
