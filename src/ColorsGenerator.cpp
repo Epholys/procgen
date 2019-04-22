@@ -142,7 +142,7 @@ namespace colors
     //------------------------------------------------------------
 
     DiscreteGradient::DiscreteGradient()
-        : DiscreteGradient({{sf::Color::White, 0}})
+        : DiscreteGradient({{sf::Color::White, 0}, {sf::Color::White, 1}})
     {
     }
 
@@ -152,7 +152,7 @@ namespace colors
         , colors_{}
     {
         // Verify the invariant.
-        Expects(keys.size() > 0);
+        Expects(keys.size() > 1);
         Expects(keys.at(0).second == 0);
         Expects(std::is_sorted(begin(keys), end(keys),
                                [](const auto& a, const auto& b)
@@ -184,7 +184,7 @@ namespace colors
     void DiscreteGradient::set_keys(keys keys)
     {
         // Verify the invariant
-        Expects(keys.size() > 0);
+        Expects(keys.size() > 1);
         Expects(keys.at(0).second == 0);
         Expects(std::is_sorted(begin(keys), end(keys),
                                [](const auto& a, const auto& b)
@@ -196,15 +196,9 @@ namespace colors
 
     void DiscreteGradient::generate_colors()
     {
-        Expects(keys_.size() > 0);
+        Expects(keys_.size() > 1);
         
         colors_.clear();
-
-        if (keys_.size() == 1)
-        {
-            colors_.push_back(keys_.at(0).first);
-            return;
-        }
 
         auto inferior = keys_.begin();
         auto superior = ++keys_.begin();
