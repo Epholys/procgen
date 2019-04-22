@@ -196,12 +196,19 @@ namespace colors
 
     void DiscreteGradient::generate_colors()
     {
+        Expects(keys_.size() > 0);
+        
         colors_.clear();
 
+        if (keys_.size() == 1)
+        {
+            colors_.push_back(keys_.at(0).first);
+            return;
+        }
+
         auto inferior = keys_.begin();
-        auto superior = ++keys_.begin(); // TODO VALGRIND WRONG LOADING COLORS.lsys could be 'end(keys)' but the loop
-                                         // condition stop the method before
-                                         // dereferencing it.
+        auto superior = ++keys_.begin();
+
         size_t i = 0;
         while(i <= keys_.back().second)
         {

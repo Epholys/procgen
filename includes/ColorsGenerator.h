@@ -276,6 +276,7 @@ namespace colors
     private:
         // Generate 'colors_' from 'keys_'.
         // The invariant are assumed respected.
+        // TODO DOC PRECOND
         void generate_colors();
 
         // Clone 'this' and returns it as a 'shared_ptr'.
