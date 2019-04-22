@@ -385,13 +385,10 @@ namespace procgui
 }
 namespace
 {
-    void interact_with(colors::VertexPainterConstant& painter, bool from_composite=false)
+    void interact_with(colors::VertexPainterConstant& painter)
     {
-        if (!from_composite)
-        {
-            ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
-                                     ::procgui::color_wrapper_mode::CONSTANT);
-        }
+        ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
+                                 ::procgui::color_wrapper_mode::CONSTANT);
     }
     void interact_with(colors::VertexPainterLinear& painter, bool from_composite=false)
     {
@@ -741,11 +738,11 @@ namespace procgui
         int index = -1; // Index defining the type of 'painter'. Values are
                         // defined in 'vertex_painter_list()'.
         
-        const auto& info = typeid(*painter).hash_code();
+        auto info = typeid(*painter).hash_code();
         bool is_composite = info == typeid(colors::VertexPainterComposite).hash_code();
         if (is_composite)
         {
-            // If 'painter' is a composite, it will now be accesses through
+            // If 'painter' is a composite, it will now be accessed through
             // 'composite'. 'painter' now refers to the main painter of
             // 'composite'.
             composite = std::dynamic_pointer_cast<colors::VertexPainterComposite>(painter);
@@ -760,24 +757,39 @@ namespace procgui
             painter = painter_wrapper.unwrap();
         }
 
-        // Checkbox to choose if the VertexPainter is composite.
-        bool checked = ImGui::Checkbox("Composite", &is_composite);
-        bool create_new_composite = checked && is_composite;
-        bool remove_composite = checked && (!is_composite);
 
-        if (create_new_composite)
+        // Check if the new/main painter is a VertexPainterConstant
+        bool is_constant = index == 0;
+        
+        // If not, composite features are shown
+        if (!is_constant)
         {
-            // A new VertexPainterComposite is created and refered by
-            // 'composite'. 'painter' is now the main painter of 'composite'.
-            composite = std::make_shared<colors::VertexPainterComposite>();
-            composite->set_main_painter(std::make_shared<colors::VertexPainterWrapper>(painter));
-            painter_wrapper.wrap(composite);
+            // Checkbox to choose if the VertexPainter is composite.
+            bool checked = ImGui::Checkbox("Composite", &is_composite);
+            bool create_new_composite = checked && is_composite;
+            bool remove_composite = checked && (!is_composite);
+
+            if (create_new_composite)
+            {
+                // A new VertexPainterComposite is created and refered by
+                // 'composite'. 'painter' is now the main painter of 'composite'.
+                composite = std::make_shared<colors::VertexPainterComposite>();
+                composite->set_main_painter(std::make_shared<colors::VertexPainterWrapper>(painter));
+                painter_wrapper.wrap(composite);
+            }
+            if (remove_composite)
+            {
+                // The main painter of 'composite' is promoted as the real painter.
+                auto default_generator = std::make_shared<colors::LinearGradient>();
+                painter->set_generator_wrapper(std::make_shared<colors::ColorGeneratorWrapper>(default_generator));
+                painter_wrapper.wrap(painter);
+                composite.reset();
+            }
         }
-        if (remove_composite)
+        // Special case if we switch from a composite to a constant
+        else if (is_composite)
         {
-            // The main painter of 'composite' is promoted as the real painter.
-            painter = composite->get_main_painter()->unwrap();
-            painter->set_generator_wrapper(std::make_shared<colors::ColorGeneratorWrapper>());
+            is_composite = false;
             painter_wrapper.wrap(painter);
             composite.reset();
         }
@@ -787,10 +799,9 @@ namespace procgui
         switch (index)
         {
         case 0:
-
         {
             auto constant = std::dynamic_pointer_cast<colors::VertexPainterConstant>(painter);
-            ::interact_with(*constant, is_composite);
+            ::interact_with(*constant);
             break;
         }
             
