@@ -888,15 +888,41 @@ namespace
         bool is_modified = false;
         
         auto keys = gen.get_raw_keys();
-
+        bool will_insert = false;
+        auto to_insert = begin(keys);
+        bool will_remove = false;
+        auto to_remove = begin(keys);
+        int index = 0;
+        
         // Modify 'gen''s keys: colors and position
-        for (unsigned i=0; i<keys.size(); ++i)
+        for (auto it = begin(keys); it != end(keys); ++it)
         {
-            ImGui::PushID(i);
+            ImGui::PushID(index);
+
+            // Button '+' to add a key.
+            ext::ImGui::PushStyleGreenButton();
+            if (ImGui::Button("+"))
+            {
+                will_insert = true;
+                to_insert = it;
+            }
+            ImGui::PopStyleColor(3);
+            ImGui::SameLine();
+
+            ext::ImGui::PushStyleRedButton();
+            if (keys.size() > 2 && ImGui::Button("-"))
+            {
+                will_remove = true;
+                to_remove = it;
+            }
+            ImGui::PopStyleColor(3);
+            ImGui::SameLine();
+
+
             ImGui::BeginGroup();
 
             // Color
-            auto& sfcolor = keys.at(i).first;
+            auto& sfcolor = it->first;
             ImVec4 imcolor = sfcolor;
             if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
             {
@@ -909,22 +935,28 @@ namespace
 
             // Position
             ImGui::PushItemWidth(50);
-            if(ImGui::DragFloat("", &keys.at(i).second, 0.01, 0., 1., "%.2f"))
+            if(ImGui::DragFloat("", &it->second, 0.01, 0., 1., "%.2f"))
             {
                 is_modified = true;
             }
             ImGui::PopItemWidth();
 
             ImGui::EndGroup();
+            
             ImGui::PopID();
             ImGui::SameLine();
+
+            ++index;
         }
 
-        // Button '+' to add a key.
+        // Button '+' to add a key at the end.
         ext::ImGui::PushStyleGreenButton();
         if (ImGui::Button("+"))
         {
             is_modified = true;
+            auto ultimate_it = prev(end(keys));
+            auto penultimate_it = prev(ultimate_it);
+            ultimate_it->second = (1 + penultimate_it->second) / 2.;
             keys.push_back({sf::Color::White, 1.f});
         }
         ImGui::PopStyleColor(3);
@@ -935,9 +967,39 @@ namespace
         {
             is_modified = true;
             keys.pop_back();
+            keys.back().second = 1.f;
         }
         ImGui::PopStyleColor(3);
         
+        if (will_insert)
+        {
+            is_modified = true;
+            if (to_insert == begin(keys))
+            {
+                auto first_it = begin(keys);
+                auto second_it = next(first_it);
+                first_it->second = second_it->second / 2.;
+                keys.insert(to_insert, {sf::Color::White, 0.f});
+            }
+            else
+            {
+                keys.insert(to_insert,
+                            {sf::Color::White,
+                                    (to_insert->second + prev(to_insert)->second) / 2.});
+            }
+        }
+        else if (will_remove)
+        {
+            is_modified = true;
+            if (to_remove == begin(keys))
+            {
+                next(to_remove)->second = 0.;
+            }
+            keys.erase(to_remove);
+        }
+        
+
+
         if (is_modified)
         {
             gen.set_keys(keys);
@@ -1062,7 +1124,7 @@ namespace
 
         // Button '-' to remove a key
         ext::ImGui::PushStyleRedButton();
-        if (keys.size() > 1 && (ImGui::SameLine(), ImGui::Button("-")))
+        if (keys.size() > 2 && (ImGui::SameLine(), ImGui::Button("-")))
         {
             is_modified = true;
             keys.pop_back();
