@@ -63,8 +63,7 @@ namespace controller
 
     void WindowController::paste_view(std::list<procgui::LSystemView>& lsys_views,
                                       const std::optional<procgui::LSystemView>& view,
-                                      const sf::Vector2f& position,
-                                      bool is_loaded_from_disk)
+                                      const sf::Vector2f& position)
     {
         if (!view)
         {
@@ -73,23 +72,13 @@ namespace controller
 
         // Before adding the view to the vector<>, update
         // 'starting_position' to the new location.
-        const auto& pasted_view = *view;
+        auto pasted_view = *view;
         auto box = pasted_view.get_bounding_box();
         ext::sf::Vector2d pos {position};
         ext::sf::Vector2d middle = {box.left + box.width/2, box.top + box.height/2};
         middle = pasted_view.get_parameters().get_starting_position() - middle;
-        if (!is_loaded_from_disk && LSystemController::is_clone())
-        {
-            auto cloned_view = pasted_view;
-            cloned_view.ref_parameters().set_starting_position(pos + middle);
-            lsys_views.emplace_front(cloned_view);
-        }
-        else
-        {
-            auto duplicated_view = pasted_view.shallow_clone();
-            duplicated_view.ref_parameters().set_starting_position(pos + middle);
-            lsys_views.emplace_front(duplicated_view);
-        }
+        pasted_view.ref_parameters().set_starting_position(pos + middle);
+        lsys_views.emplace_front(pasted_view);
     }
     
     void WindowController::right_click_menu(sf::RenderWindow& window, std::list<procgui::LSystemView>& lsys_views)
@@ -354,7 +343,7 @@ namespace controller
                     {
                         // Paste the new LSystemView at the correct position.
                         auto tmp = std::make_optional(loaded_view);
-                        paste_view(lsys_views, tmp, mouse_position_to_load_, true);
+                        paste_view(lsys_views, tmp, mouse_position_to_load_);
                         load_menu_open_ = false;
                     }
                 }
