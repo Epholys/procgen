@@ -960,16 +960,6 @@ namespace
             keys.push_back({sf::Color::White, 1.f});
         }
         ImGui::PopStyleColor(3);
-
-        // Button '-' to remove a key
-        ext::ImGui::PushStyleRedButton();
-        if (keys.size() > 2 && (ImGui::SameLine(), ImGui::Button("-")))
-        {
-            is_modified = true;
-            keys.pop_back();
-            keys.back().second = 1.f;
-        }
-        ImGui::PopStyleColor(3);
         
         if (will_insert)
         {
@@ -1056,6 +1046,17 @@ namespace
         {
             ImGui::PushID(i);
 
+            ImGui::PushID(i*2);
+            ext::ImGui::PushStyleGreenButton();
+            ImGui::Button("+");
+            ImGui::PopStyleColor(3);
+            ImGui::SameLine();
+            ext::ImGui::PushStyleRedButton();
+            ImGui::Button("-");
+            ImGui::PopStyleColor(3);
+            ImGui::SameLine();
+            ImGui::PopID();
+            
             // Key Color
             auto& sfcolor = keys.at(i).first;
             ImVec4 imcolor = sfcolor;
@@ -1067,31 +1068,30 @@ namespace
             {
                 sfcolor = imcolor;
             }
-
             ImGui::SameLine();
-            ImGui::BeginGroup();
 
+            ImGui::PushID(i*3);
+            ext::ImGui::PushStyleGreenButton();
+            ImGui::Button("+");
+            ImGui::PopStyleColor(3);
+            ImGui::SameLine();
+            ImGui::PopID();
+
+            ImGui::BeginGroup();
+            ImGui::Text("");
+            
             // Number of transitional colors.
             int diff = keys.at(i+1).second - keys.at(i).second - 1;
-            ImGui::Text(std::to_string(diff).c_str());
+            int diff_copy = diff;
 
-            // '+' button to add a transitional color.
-            ext::ImGui::PushStyleGreenButton();
-            if (ImGui::Button("+"))
+            ImGui::PushItemWidth(75.f);
+            if (ImGui::InputInt("", &diff, 1, 1) && diff >= 0)
             {
+                std::cout << "clicked\n";
                 is_modified = true;
-                ++modifier;
+                modifier += diff - diff_copy; 
             }
-            ImGui::PopStyleColor(3);
-            ImGui::SameLine();
-            // '-' button to remove a transitional color
-            ext::ImGui::PushStyleRedButton();
-            if (diff > 0 && ImGui::Button("-"))
-            {
-                is_modified = true;
-                --modifier;
-            }
-            ImGui::PopStyleColor(3);
+            ImGui::PopItemWidth();
 
             // Offset the current key.
             keys.at(i+1).second += modifier;
