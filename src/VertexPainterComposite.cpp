@@ -234,11 +234,11 @@ namespace colors
         clone->main_painter_observer_.set_painter_wrapper(main_painter_clone);
 
 
-        auto it = begin(child_painters_observers_);
-        auto clone_it = begin(clone->child_painters_observers_);
-        for (auto i = 0u; i < child_painters_observers_.size(); ++i)
+        clone->child_painters_observers_.clear();
+        for (auto it = begin(child_painters_observers_); it != end(child_painters_observers_); ++it)
         {
-            clone_it->set_painter_wrapper(std::make_shared<VertexPainterWrapper>(*it->get_painter_wrapper()));
+            auto child_clone = std::make_shared<VertexPainterWrapper>(*it->get_painter_wrapper());
+            clone->child_painters_observers_.emplace_back(child_clone, &(*clone));
         }
 
         clone->vertex_indices_pools_ = vertex_indices_pools_;
