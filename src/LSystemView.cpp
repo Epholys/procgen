@@ -75,8 +75,8 @@ namespace procgui
         , max_iteration_ {other.max_iteration_}
         , bounding_box_ {other.bounding_box_}
         , sub_boxes_ {other.sub_boxes_}
-        , is_selected_ {other.is_selected_}
-        , bounding_box_is_visible_{other.bounding_box_is_visible_}
+        , is_selected_ {false}
+        , bounding_box_is_visible_{true}
     {
         // Manually managing Observer<> callbacks.
         update_callbacks();
@@ -97,8 +97,8 @@ namespace procgui
         , max_iteration_ {other.max_iteration_}
         , bounding_box_ {std::move(other.bounding_box_)}
         , sub_boxes_ {std::move(other.sub_boxes_)}
-        , is_selected_ {other.is_selected_}
-        , bounding_box_is_visible_{other.bounding_box_is_visible_}
+        , is_selected_ {false}
+        , bounding_box_is_visible_{true}
     {
         // Manually managing Observer<> callbacks.
         update_callbacks();
@@ -134,8 +134,8 @@ namespace procgui
             max_iteration_ = other.max_iteration_;
             bounding_box_ = other.bounding_box_;
             sub_boxes_ = other.sub_boxes_;
-            is_selected_ = other.is_selected_;
-            bounding_box_is_visible_ = other.bounding_box_is_visible_;
+            is_selected_ = false;
+            bounding_box_is_visible_ = true;
 
             
             update_callbacks();
@@ -162,8 +162,8 @@ namespace procgui
             max_iteration_ = other.max_iteration_;
             bounding_box_ = std::move(other.bounding_box_);
             sub_boxes_ = std::move(other.sub_boxes_);
-            is_selected_ = other.is_selected_;
-            bounding_box_is_visible_ = other.bounding_box_is_visible_;
+            is_selected_ = false;
+            bounding_box_is_visible_ = true;
 
             // Manually managing Observer<> callbacks.
             update_callbacks();
