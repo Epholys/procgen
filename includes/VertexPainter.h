@@ -42,7 +42,8 @@ namespace colors
         // Getters/Setters
         std::shared_ptr<ColorGeneratorWrapper> get_generator_wrapper() const;
         void set_generator_wrapper(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper);
-
+        void set_target(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper);
+        
         // Paint 'vertices' with the informations of 'bounding_box' and
         // 'iteration_of_vertices' according to a rule with the colors from
         // 'ColorGeneratorWrapper::ColorGenerator'.

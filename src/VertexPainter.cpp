@@ -67,8 +67,13 @@ namespace colors
     }
     void VertexPainter::set_generator_wrapper(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper)
     {
-        set_target(color_generator_wrapper);
+        OGenBuff::set_target(color_generator_wrapper);
         add_callback([this](){notify();});
         notify();
     }
+    void VertexPainter::set_target(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper)
+    {
+        set_generator_wrapper(color_generator_wrapper);
+    }
+
 }
