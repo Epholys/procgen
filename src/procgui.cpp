@@ -552,7 +552,7 @@ namespace
             ImGui::PopStyleColor(3);
 
             // Button to remove the previous painter.
-            if (it != begin(child_painters))
+            if (child_painters.size() > 1)
             {
                 ImGui::SameLine();                
                 ::ext::ImGui::PushStyleRedButton();
