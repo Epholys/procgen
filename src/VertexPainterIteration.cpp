@@ -78,3 +78,7 @@ namespace colors
         }
     }
 }
+
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterIteration, "VertexPainterIteration");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterIteration)
+

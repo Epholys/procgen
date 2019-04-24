@@ -123,3 +123,6 @@ namespace colors
         // vertices.push_back({{relative_center.x - 5, relative_center.y - 5}, sf::Color::Magenta});
     }
 }
+
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterRadial, "VertexPainterRadial");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterRadial)

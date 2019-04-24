@@ -69,3 +69,7 @@ namespace colors
         }
     }
 }
+
+
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterConstant, "VertexPainterConstant");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterConstant)

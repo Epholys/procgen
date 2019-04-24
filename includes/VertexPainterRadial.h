@@ -58,7 +58,5 @@ namespace colors
     };
 }
 
-CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterRadial, "VertexPainterRadial");
-CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterRadial)
 
 #endif // VERTEX_PAINTER_RADIAL_H

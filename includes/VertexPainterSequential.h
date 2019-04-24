@@ -56,8 +56,5 @@ namespace colors
     };
 }
 
-CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterSequential, "VertexPainterSequential");
-CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterSequential)
-
 
 #endif // VERTEX_PAINTER_SEQUENTIAL_H
