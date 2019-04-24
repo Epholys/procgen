@@ -885,6 +885,8 @@ namespace
 
     void interact_with(colors::LinearGradient& gen)
     {
+        static bool is_focusing = false;
+        bool one_focusing = false;
         bool is_modified = false;
         
         auto keys = gen.get_raw_keys();
@@ -939,6 +941,10 @@ namespace
             {
                 is_modified = true;
             }
+            if (ImGui::IsItemActive())
+            {
+                one_focusing = true;
+            }
             ImGui::PopItemWidth();
 
             ImGui::EndGroup();
@@ -987,14 +993,22 @@ namespace
             }
             keys.erase(to_remove);
         }
-        
-
-
         if (is_modified)
         {
             gen.set_keys(keys);
         }
 
+        if (one_focusing)
+        {
+            is_focusing = true;
+        }
+        else if (!one_focusing && is_focusing)
+        {
+            gen.sort_keys();
+            is_focusing = false;
+        }
+
+        
         // Preview the color gradient
         auto k = gen.get_sanitized_keys();
         ImDrawList* draw_list = ImGui::GetWindowDrawList();

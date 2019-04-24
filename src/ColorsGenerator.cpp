@@ -58,6 +58,7 @@ namespace colors
         , sanitized_keys_(keys)
     {
         Expects(keys.size() >= 2);
+        sort_keys();
         sanitize_keys();
     }
 
@@ -75,7 +76,7 @@ namespace colors
         // Sort the elements.
         std::sort(begin(sanitized_keys_), end(sanitized_keys_),
                   [](const auto& p1, const auto& p2){return p1.second < p2.second;});
-
+        
         // The highest key is at 1 and the lowest at 0.
         sanitized_keys_.front().second = 0.f;
         sanitized_keys_.back().second = 1.f;
@@ -97,6 +98,12 @@ namespace colors
         raw_keys_ = keys;
         sanitize_keys();
         notify();
+    }
+
+    void LinearGradient::sort_keys()
+    {
+        std::sort(begin(raw_keys_), end(raw_keys_),
+                  [](const auto& p1, const auto& p2){return p1.second < p2.second;});
     }
 
     sf::Color LinearGradient::get(float f)

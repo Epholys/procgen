@@ -212,6 +212,8 @@ namespace colors
         // Precondition: 'key_colors' must have at least two keys.
         void set_keys(const keys& keys);
 
+        void sort_keys();
+        
     private:
         // Sanitize 'raw_keys_' into 'sanitize_keys_':
         // - The keys must be included between 0 and 1.
