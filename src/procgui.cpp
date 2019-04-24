@@ -1033,6 +1033,11 @@ namespace
         bool is_modified = false;
         
         auto keys = gen.get_keys();
+        bool will_insert = false;
+        bool insert_before = false;
+        auto to_insert = begin(keys);
+        bool will_remove = false;
+        auto to_remove = begin(keys);
 
         // Modify 'gen''s keys: key's color and transitional colors between
         // these keys.
@@ -1041,24 +1046,35 @@ namespace
         // next keys' position. 'modifier' conserve the offset's value.
         // The last color is managed at the end, to not add the transitional
         // colors part.
+        int index = 0;
         int modifier = 0;
-        for (unsigned i=0; i<keys.size()-1; ++i)
+        for (auto it = begin(keys); it != prev(end(keys)); ++it, ++index)
         {
-            ImGui::PushID(i);
+            ImGui::PushID(index);
 
-            ImGui::PushID(i*2);
+            ImGui::PushID(0);
             ext::ImGui::PushStyleGreenButton();
-            ImGui::Button("+");
+            if (ImGui::Button("+"))
+            {
+                will_insert = true;
+                insert_before = true;
+                to_insert = it;
+            }
             ImGui::PopStyleColor(3);
+            
             ImGui::SameLine();
             ext::ImGui::PushStyleRedButton();
-            ImGui::Button("-");
+            if (ImGui::Button("-"))
+            {
+                will_remove = true;
+                to_remove = it;
+            }
             ImGui::PopStyleColor(3);
             ImGui::SameLine();
             ImGui::PopID();
             
             // Key Color
-            auto& sfcolor = keys.at(i).first;
+            auto& sfcolor = it->first;
             ImVec4 imcolor = sfcolor;
             if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
             {
@@ -1068,39 +1084,69 @@ namespace
             {
                 sfcolor = imcolor;
             }
-            ImGui::SameLine();
 
-            ImGui::PushID(i*3);
-            ext::ImGui::PushStyleGreenButton();
-            ImGui::Button("+");
-            ImGui::PopStyleColor(3);
+            ImGui::PushID(1);
             ImGui::SameLine();
+            ext::ImGui::PushStyleGreenButton();
+            if (ImGui::Button("+"))
+            {
+                will_insert = true;
+                insert_before = false;
+                to_insert = it;
+            }
+            ImGui::PopStyleColor(3);
             ImGui::PopID();
 
+            ImGui::SameLine();
             ImGui::BeginGroup();
             ImGui::Text("");
             
             // Number of transitional colors.
-            int diff = keys.at(i+1).second - keys.at(i).second - 1;
+            int diff = next(it)->second - it->second - 1;
             int diff_copy = diff;
 
             ImGui::PushItemWidth(75.f);
             if (ImGui::InputInt("", &diff, 1, 1) && diff >= 0)
             {
-                std::cout << "clicked\n";
                 is_modified = true;
                 modifier += diff - diff_copy; 
             }
             ImGui::PopItemWidth();
 
             // Offset the current key.
-            keys.at(i+1).second += modifier;
+            next(it)->second += modifier;
 
             ImGui::EndGroup();
             ImGui::PopID();
             ImGui::SameLine();
         }
 
+        ImGui::SameLine();
+        // Button '+' to add a key.
+        ext::ImGui::PushStyleGreenButton();
+        if (ImGui::Button("+"))
+        {
+            will_insert = true;
+            insert_before = true;
+            to_insert = prev(end(keys));
+            // is_modified = true;
+            // keys.push_back({sf::Color::White, keys.back().second+1});
+        }
+        ImGui::PopStyleColor(3);
+
+        ImGui::SameLine();
+        // Button '-' to remove a key
+        ext::ImGui::PushStyleRedButton();
+        if (keys.size() > 2 && (ImGui::SameLine(), ImGui::Button("-")))
+        {
+            will_remove = true;
+            to_remove = prev(end(keys));
+            // is_modified = true;
+            // keys.pop_back();
+        }
+        ImGui::PopStyleColor(3);
+
+        ImGui::SameLine();
         // Last color widget.
         ImGui::PushID(keys.size());
         auto& sfcolor = keys.back().first;
@@ -1112,6 +1158,7 @@ namespace
         sfcolor = imcolor;
         ImGui::PopID();
 
+        ImGui::PushID(keys.size());
         ImGui::SameLine();
         // Button '+' to add a key.
         ext::ImGui::PushStyleGreenButton();
@@ -1121,15 +1168,53 @@ namespace
             keys.push_back({sf::Color::White, keys.back().second+1});
         }
         ImGui::PopStyleColor(3);
+        ImGui::PopID();
 
-        // Button '-' to remove a key
-        ext::ImGui::PushStyleRedButton();
-        if (keys.size() > 2 && (ImGui::SameLine(), ImGui::Button("-")))
+        
+        if (will_insert && insert_before)
         {
             is_modified = true;
-            keys.pop_back();
+            auto inserted = begin(keys);
+            if (to_insert == begin(keys))
+            {
+                inserted = keys.insert(to_insert, {sf::Color::White, 0});
+            }
+            else
+            {
+                inserted = keys.insert(to_insert, {sf::Color::White, to_insert->second});
+            }
+            for (auto it = next(inserted); it != end(keys); ++it)
+            {
+                it->second += 1;
+            }
         }
-        ImGui::PopStyleColor(3);
+        else if (will_insert && !insert_before)
+        {
+            is_modified = true;
+            auto inserted = keys.insert(next(to_insert), {sf::Color::White, to_insert->second + 1});
+            for (auto it = next(inserted); it != end(keys); ++it)
+            {
+                it->second += 1;
+            }
+        }
+        else if (will_remove)
+        {
+            is_modified = true;
+            if (to_remove == begin(keys))
+            {
+                keys.erase(to_remove);
+                int first_key_index = begin(keys)->second;
+                for (auto it = begin(keys); it != end(keys); ++it)
+                {
+                    it->second -= first_key_index;
+                }
+            }
+            else
+            { 
+                keys.erase(to_remove);
+            }
+        }
+        
         
         // Preview the color gradient
         std::vector<sf::Color> colors = gen.get_colors();
