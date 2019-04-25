@@ -104,6 +104,8 @@ namespace colors
     {
         std::sort(begin(raw_keys_), end(raw_keys_),
                   [](const auto& p1, const auto& p2){return p1.second < p2.second;});
+        raw_keys_.front().second = 0;
+        raw_keys_.back().second = 1;
     }
 
     sf::Color LinearGradient::get(float f)
