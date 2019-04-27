@@ -58,6 +58,7 @@ namespace procgui
             std::make_shared<DrawingParameters>(position, step))
     {
         // Arbitrary default LSystem.
+        update_callbacks();
     }
 
     LSystemView::LSystemView(const LSystemView& other)
@@ -68,8 +69,8 @@ namespace procgui
         , id_{unique_ids_.get_id()}
         , color_id_{unique_colors_.get_color(id_)}
         , name_ {other.name_}
-        , lsys_buff_ {other.lsys_buff_}
-        , interpretation_buff_ {other.interpretation_buff_}
+        , lsys_buff_ {other.lsys_buff_, OLSys::get_target()}
+        , interpretation_buff_ {other.interpretation_buff_, OMap::get_target()}
         , vertices_ {other.vertices_}
         , iteration_of_vertices_ {other.iteration_of_vertices_}
         , max_iteration_ {other.max_iteration_}
@@ -127,8 +128,8 @@ namespace procgui
             id_ = unique_ids_.get_id();
             color_id_ = unique_colors_.get_color(id_);
             name_ = other.name_;
-            lsys_buff_ = other.lsys_buff_;
-            interpretation_buff_ = other.interpretation_buff_;
+            lsys_buff_ = LSystemBuffer(other.lsys_buff_, OLSys::get_target());
+            interpretation_buff_ = InterpretationMapBuffer(other.interpretation_buff_, OMap::get_target());
             vertices_ = other.vertices_;
             iteration_of_vertices_ = other.iteration_of_vertices_;
             max_iteration_ = other.max_iteration_;

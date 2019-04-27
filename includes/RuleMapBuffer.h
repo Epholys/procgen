@@ -88,6 +88,7 @@ namespace procgui
         // we need to register a callback for the new object to
         // 'Observer<Target>'
         RuleMapBuffer(const RuleMapBuffer& other);
+        RuleMapBuffer(const RuleMapBuffer& other, std::shared_ptr<Target> target);
         RuleMapBuffer(RuleMapBuffer&& other);
         RuleMapBuffer& operator=(const RuleMapBuffer& other);
         RuleMapBuffer& operator=(RuleMapBuffer&& other);
