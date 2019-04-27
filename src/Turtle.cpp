@@ -12,6 +12,11 @@ namespace drawing
           // The other members are set in header as they all derives from
           // 'parameters' or 'iteration_vec'.
     {
+        if (!iteration_vec.empty())
+        {
+            vertices.push_back(sf::Vector2f(state.position));
+            iteration_of_vertices.push_back(iteration_vec.at(iteration_index));
+        }
     }
 
     std::tuple<std::vector<sf::Vertex>, std::vector<int>, int>
