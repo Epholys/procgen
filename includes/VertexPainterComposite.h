@@ -54,7 +54,7 @@ namespace colors
             
         private:
             // Deep-copy cloning method.
-            std::shared_ptr<ColorGenerator> clone_impl() const override;
+            std::shared_ptr<ColorGenerator> clone() const override;
 
             //TODO DOCUMENT WARNING WARNING WARNING
             // Reference to the linked VertexPainterComposite

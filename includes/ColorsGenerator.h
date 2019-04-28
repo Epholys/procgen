@@ -118,21 +118,16 @@ namespace colors
     {
     public:
         ColorGenerator() = default;
-        virtual ~ColorGenerator() {};
+        virtual ~ColorGenerator() = default;
         
         // Interface: returns a color from a float between 0 and 1.
         virtual sf::Color get(float f) = 0;
 
         // Clone the current object and returns it as an object managed by a
-        // 'shared_ptr'. Calls internally 'clone_impl()'. The rational behind it
-        // is to have the correct object when copying or copy-constructing an
-        // object havino a 'ColorGenerator' as an attribute.
-        std::shared_ptr<ColorGenerator> clone() const;
-
-    private:
-        // Implements the 'clone()' method. Returns a 'shared_ptr' constructed
-        // as the child class' type.
-        virtual std::shared_ptr<ColorGenerator> clone_impl() const = 0;
+        // 'shared_ptr'. The rational behind it is to have the correct object
+        // when copying or copy-constructing an object havino a 'ColorGenerator'
+        // as an attribute.
+        virtual std::shared_ptr<ColorGenerator> clone() const = 0;
     };
 
     
@@ -144,7 +139,12 @@ namespace colors
     {
     public:
         // Construct a pure white ConstantColor.
-        ConstantColor();
+        ConstantColor() = default;
+        ConstantColor(const ConstantColor& other) = default;
+        ConstantColor(ConstantColor&& other) = default;
+        ConstantColor& operator=(const ConstantColor& other) = default;
+        ConstantColor& operator=(ConstantColor&& other) = default;
+        
         explicit ConstantColor(const sf::Color& color);
 
         // For every float 'f', returns 'color_'
@@ -156,7 +156,7 @@ namespace colors
         
     private:
         // Clone 'this' and returns it as a 'shared_ptr'.
-        std::shared_ptr<ColorGenerator> clone_impl() const override;
+        std::shared_ptr<ColorGenerator> clone() const override;
 
         friend class cereal::access;
         template<class Archive>
@@ -192,7 +192,11 @@ namespace colors
         using keys = std::vector<std::pair<sf::Color, float>>;
 
         // Construct a two-key gradient from white to white.
-        LinearGradient();
+        LinearGradient() = default;
+        LinearGradient(const LinearGradient& other) = default;
+        LinearGradient(LinearGradient&& other) = default;
+        LinearGradient& operator=(const LinearGradient& other) = default;
+        LinearGradient& operator=(LinearGradient&& other) = default;
 
         // Create a LinearGradient with 'raw_keys_' as 'key_colors' and
         // 'sanitized_keys' as the sanitized 'key_colors'.
@@ -212,6 +216,7 @@ namespace colors
         // Precondition: 'key_colors' must have at least two keys.
         void set_keys(const keys& keys);
 
+        
         void sort_keys();
         
     private:
@@ -222,7 +227,7 @@ namespace colors
         void sanitize_keys();
 
         // Clone 'this' and returns it as a 'shared_ptr'.
-        std::shared_ptr<ColorGenerator> clone_impl() const override;
+        std::shared_ptr<ColorGenerator> clone() const override;
 
         friend class cereal::access;
         template<class Archive>
@@ -282,7 +287,7 @@ namespace colors
         void generate_colors();
 
         // Clone 'this' and returns it as a 'shared_ptr'.
-        std::shared_ptr<ColorGenerator> clone_impl() const override;
+        std::shared_ptr<ColorGenerator> clone() const override;
 
         friend class cereal::access;
         template<class Archive>
@@ -298,6 +303,5 @@ namespace colors
         std::vector<sf::Color> colors_;
     };
 }
-
 
 #endif // COLORS_GENERATOR_H

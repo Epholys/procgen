@@ -4,14 +4,6 @@
 
 namespace colors
 {
-    // Returns a cloned copy of this. Managed by the children.
-    std::shared_ptr<ColorGenerator> ColorGenerator::clone() const
-    {
-        return clone_impl();
-    }
-
-    //------------------------------------------------------------
-    
     ConstantColor::ConstantColor()
         : ConstantColor(sf::Color::White)
     {
@@ -40,7 +32,7 @@ namespace colors
     }
 
     // Return a copy of this as a shared_ptr for polymorphic purpose.
-    std::shared_ptr<ColorGenerator> ConstantColor::clone_impl() const
+    std::shared_ptr<ColorGenerator> ConstantColor::clone() const
     {
         return std::make_shared<ConstantColor>(*this);
     }
@@ -143,7 +135,7 @@ namespace colors
     }
 
     // Return a copy of this as a shared_ptr for polymorphic purpose.
-    std::shared_ptr<ColorGenerator> LinearGradient::clone_impl() const
+    std::shared_ptr<ColorGenerator> LinearGradient::clone() const
     {
         return std::make_shared<LinearGradient>(*this);
     }
@@ -235,7 +227,7 @@ namespace colors
     }
 
     // Return a copy of this as a shared_ptr for polymorphic purpose.
-    std::shared_ptr<ColorGenerator> DiscreteGradient::clone_impl() const
+    std::shared_ptr<ColorGenerator> DiscreteGradient::clone() const
     {
         return std::make_shared<DiscreteGradient>(*this);
     }

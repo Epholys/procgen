@@ -3,6 +3,65 @@
 
 using namespace colors;
 
+TEST(ColorGeneratorTest, color_serialization)
+{
+    std::stringstream ss;
+    
+    sf::Color color (0x11, 0x22, 0x33, 0x44);
+    std::string expected_str = "#11223344";
+    // Unused generic archive
+    cereal::JSONOutputArchive ar (ss);
+    
+    auto tested_str = cereal::save_minimal(ar, color);
+    ASSERT_EQ(expected_str, tested_str);
+
+    sf::Color tested_color;
+    cereal::load_minimal(ar, tested_color, tested_str);
+    ASSERT_EQ(color, tested_color);
+}
+
+TEST(ColorGeneratorTest, pair_color_serialization)
+{
+    sf::Color color (0x11, 0x22, 0x33, 0x44);
+    std::pair<sf::Color, int> expected_pair {color, 42};
+    std::pair<sf::Color, int> tested_pair {sf::Color::Transparent, -1};
+
+    std::stringstream ss;
+    {
+        cereal::JSONOutputArchive ar (ss);
+        ar(expected_pair);
+    }
+    {
+        cereal::JSONInputArchive ar (ss);
+        ar(tested_pair);
+    }
+
+    ASSERT_EQ(expected_pair, tested_pair);
+}
+
+TEST(ColorGeneratorTest, vector_pair_serialization)
+{
+    std::vector<std::pair<sf::Color, int>> expected_vector =
+        { {sf::Color::Red, 7      },
+          {sf::Color::Blue, 42    },
+          {sf::Color::Green, 1337 } };
+    std::vector<std::pair<sf::Color, int>> tested_vector;
+
+    std::stringstream ss;
+    {
+        cereal::JSONOutputArchive ar (ss);
+        ar(expected_vector);
+    }
+    {
+        cereal::JSONInputArchive ar (ss);
+        ar(tested_vector);
+    }
+
+    ASSERT_EQ(expected_vector, tested_vector);
+}
+
+//------------------------------------------------------------
+
 TEST(ColorGeneratorTest, constant_ctor)
 {
     ConstantColor c {sf::Color::Blue};

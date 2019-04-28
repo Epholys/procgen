@@ -54,7 +54,7 @@ namespace colors
             global_index_ = 0;
         }        
         
-        std::shared_ptr<ColorGenerator> ColorGeneratorComposite::clone_impl() const
+        std::shared_ptr<ColorGenerator> ColorGeneratorComposite::clone() const
         {
             // Should never happen.
             // Expects(painter_);
