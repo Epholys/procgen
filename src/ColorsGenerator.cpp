@@ -4,11 +4,6 @@
 
 namespace colors
 {
-    ConstantColor::ConstantColor()
-        : ConstantColor(sf::Color::White)
-    {
-    }
-
     ConstantColor::ConstantColor(const sf::Color& color)
         : ColorGenerator()
         , color_{color}
@@ -44,61 +39,89 @@ namespace colors
     {
     }
     
+    // LinearGradient::LinearGradient(const LinearGradient::keys& keys)
+    //     : ColorGenerator()
+    //     , raw_keys_(keys)
+    //     , sanitized_keys_(keys)
+    // {
+    //     Expects(keys.size() >= 2);
+    //     sanitize_keys();
+    //     raw_keys_ = sanitized_keys_;
+    // }
     LinearGradient::LinearGradient(const LinearGradient::keys& keys)
         : ColorGenerator()
-        , raw_keys_(keys)
-        , sanitized_keys_(keys)
+        , keys_(keys)
     {
         Expects(keys.size() >= 2);
-        sort_keys();
-        sanitize_keys();
     }
 
-    void LinearGradient::sanitize_keys()
-    {
-        sanitized_keys_ = raw_keys_;
+    // void LinearGradient::sanitize_keys()
+    // {
+    //     sanitized_keys_ = raw_keys_;
         
+    //     // Clamp every keys between 0 and 1.
+    //     for (auto& p : sanitized_keys_)
+    //     {
+    //         p.second = p.second < 0. ? 0. : p.second;
+    //         p.second = p.second > 1. ? 1. : p.second;
+    //     }
+
+    //     // Sort the elements.
+    //     std::sort(begin(sanitized_keys_), end(sanitized_keys_),
+    //               [](const auto& p1, const auto& p2){return p1.second < p2.second;});
+        
+    //     // The highest key is at 1 and the lowest at 0.
+    //     sanitized_keys_.front().second = 0.f;
+    //     sanitized_keys_.back().second = 1.f;
+    // }
+
+    // void LinearGradient::validate_raw_keys()
+    // {
+    //     raw_keys_ = sanitized_keys_;
+    // }
+    
+    // const LinearGradient::keys& LinearGradient::get_raw_keys() const
+    // {
+    //     return raw_keys_;
+    // }
+ 
+    const LinearGradient::keys& LinearGradient::get_keys() const
+    {
+        return keys_;
+    }
+
+    void LinearGradient::set_keys(const keys& keys)
+    {
+        Expects(keys.size() >= 2);
+
+        keys_ = keys;
         // Clamp every keys between 0 and 1.
-        for (auto& p : sanitized_keys_)
+        for (auto& p : keys_)
         {
             p.second = p.second < 0. ? 0. : p.second;
             p.second = p.second > 1. ? 1. : p.second;
         }
 
         // Sort the elements.
-        std::sort(begin(sanitized_keys_), end(sanitized_keys_),
+        std::sort(begin(keys_), end(keys_),
                   [](const auto& p1, const auto& p2){return p1.second < p2.second;});
         
         // The highest key is at 1 and the lowest at 0.
-        sanitized_keys_.front().second = 0.f;
-        sanitized_keys_.back().second = 1.f;
-    }
+        keys_.front().second = 0.f;
+        keys_.back().second = 1.f;
 
-    const LinearGradient::keys& LinearGradient::get_raw_keys() const
-    {
-        return raw_keys_;
-    }
- 
-    const LinearGradient::keys& LinearGradient::get_sanitized_keys() const
-    {
-        return sanitized_keys_;
-    }
-
-    void LinearGradient::set_keys(const keys& keys)
-    {
-        Expects(keys.size() >= 2);
-        raw_keys_ = keys;
-        sanitize_keys();
+        
         notify();
     }
 
-    void LinearGradient::sort_keys()
-    {
-        std::sort(begin(raw_keys_), end(raw_keys_),
-                  [](const auto& p1, const auto& p2){return p1.second < p2.second;});
-        raw_keys_.front().second = 0;
-        raw_keys_.back().second = 1;
-    }
+    // void LinearGradient::setr_raw_keys(const keys& keys)
+    // {
+    //     Expects(keys.size() >= 2);
+    //     raw_keys_ = keys;
+    //     sanitize_keys();
+    //     notify();
+    // }
+
 
     sf::Color LinearGradient::get(float f)
     {
@@ -107,13 +130,13 @@ namespace colors
         f = f > 1. ? 1. : f;
 
         // Find the upper-bound key...
-        auto superior_it = std::find_if(begin(sanitized_keys_), end(sanitized_keys_),
+        auto superior_it = std::find_if(begin(keys_), end(keys_),
                                 [f](const auto& p){return f <= p.second;});
-        Expects(superior_it != end(sanitized_keys_)); // (should never happen if correctly sanitized)
-        auto superior_index = std::distance(begin(sanitized_keys_), superior_it);
+        Expects(superior_it != end(keys_)); // (should never happen if correctly sanitized)
+        auto superior_index = std::distance(begin(keys_), superior_it);
         auto inferior_index = superior_index == 0 ? 0 : superior_index-1; // ...and the lower-bound one.
-        const auto& superior = sanitized_keys_.at(superior_index);
-        const auto& inferior = sanitized_keys_.at(inferior_index);
+        const auto& superior = keys_.at(superior_index);
+        const auto& inferior = keys_.at(inferior_index);
 
         float factor = 0.f;
         if (superior == inferior)
@@ -145,6 +168,7 @@ namespace colors
     DiscreteGradient::DiscreteGradient()
         : DiscreteGradient({{sf::Color::White, 0}, {sf::Color::White, 1}})
     {
+        generate_colors();
     }
 
     DiscreteGradient::DiscreteGradient(const keys& keys)

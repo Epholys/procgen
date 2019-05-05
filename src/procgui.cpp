@@ -885,15 +885,34 @@ namespace
 
     void interact_with(colors::LinearGradient& gen)
     {
-        static bool is_focusing = false;
-        bool one_focusing = false;
+        // Two flags to check if the user just stopped to modify the gradient.
+        // Used as a poor-man buffer to separate actual color generator
+        // (sanitized_keys) and the GUI colors and key (raw_keys). The GUI may
+        // be different than the actual generator when switching the positions
+        // of colors, making the last color the middle one for example.
+        static bool was_focusing_previous_frame = false;
+        static colors::LinearGradient::keys keys_buffer;
+        bool is_focusing_this_frame = false;
+
         bool is_modified = false;
         
-        auto keys = gen.get_raw_keys();
+        colors::LinearGradient::keys keys;
+        if (was_focusing_previous_frame)
+        {
+            keys = keys_buffer;
+        }
+        else
+        {
+            keys = gen.get_keys();
+        }
+
+        // Insertion flag and positions
         bool will_insert = false;
         auto to_insert = begin(keys);
+        // Deletion flag and positions
         bool will_remove = false;
         auto to_remove = begin(keys);
+        // Used as ID for ImGui
         int index = 0;
         
         // Modify 'gen''s keys: colors and position
@@ -911,6 +930,7 @@ namespace
             ImGui::PopStyleColor(3);
             ImGui::SameLine();
 
+            // Button '-' to remove a key.
             ext::ImGui::PushStyleRedButton();
             if (keys.size() > 2 && ImGui::Button("-"))
             {
@@ -943,7 +963,7 @@ namespace
             }
             if (ImGui::IsItemActive())
             {
-                one_focusing = true;
+                is_focusing_this_frame = true;
             }
             ImGui::PopItemWidth();
 
@@ -959,14 +979,12 @@ namespace
         ext::ImGui::PushStyleGreenButton();
         if (ImGui::Button("+"))
         {
-            is_modified = true;
-            auto ultimate_it = prev(end(keys));
-            auto penultimate_it = prev(ultimate_it);
-            ultimate_it->second = (1 + penultimate_it->second) / 2.;
-            keys.push_back({sf::Color::White, 1.f});
+            will_insert = true;
+            to_insert = end(keys);
         }
         ImGui::PopStyleColor(3);
-        
+
+        // Insertion at 'will_insert'
         if (will_insert)
         {
             is_modified = true;
@@ -977,6 +995,13 @@ namespace
                 first_it->second = second_it->second / 2.;
                 keys.insert(to_insert, {sf::Color::White, 0.f});
             }
+            else if (to_insert == end(keys))
+            {
+                auto ultimate_it = prev(end(keys));
+                auto penultimate_it = prev(ultimate_it);
+                ultimate_it->second = (1 + penultimate_it->second) / 2.;
+                keys.push_back({sf::Color::White, 1.f});                
+            }
             else
             {
                 keys.insert(to_insert,
@@ -984,6 +1009,7 @@ namespace
                                     (to_insert->second + prev(to_insert)->second) / 2.});
             }
         }
+        // Deletion at 'will_remove'
         else if (will_remove)
         {
             is_modified = true;
@@ -993,24 +1019,27 @@ namespace
             }
             keys.erase(to_remove);
         }
+
         if (is_modified)
         {
             gen.set_keys(keys);
         }
 
-        if (one_focusing)
+        if (is_focusing_this_frame)
         {
-            is_focusing = true;
+            // The user started key modification
+            was_focusing_previous_frame = true;
+            keys_buffer = keys;
         }
-        else if (!one_focusing && is_focusing)
+        else if (!is_focusing_this_frame && was_focusing_previous_frame)
         {
-            gen.sort_keys();
-            is_focusing = false;
+            // The user stopped key modification
+            was_focusing_previous_frame = false;
         }
 
         
         // Preview the color gradient
-        auto k = gen.get_sanitized_keys();
+        auto k = gen.get_keys();
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 screen_pos = ImGui::GetCursorScreenPos();
         ImVec2 window_pos = ImGui::GetCursorPos();
