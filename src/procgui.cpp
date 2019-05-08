@@ -886,18 +886,17 @@ namespace
     void interact_with(colors::LinearGradient& gen)
     {
         // Two flags to check if the user just stopped to modify the gradient.
-        // Used as a poor-man buffer to separate actual color generator
-        // (sanitized_keys) and the GUI colors and key (raw_keys). The GUI may
-        // be different than the actual generator when switching the positions
-        // of colors, making the last color the middle one for example.
         static bool was_focusing_previous_frame = false;
-        static colors::LinearGradient::keys keys_buffer;
         bool is_focusing_this_frame = false;
+        static colors::LinearGradient* generator_address = nullptr;
+        static colors::LinearGradient::keys keys_buffer;
 
         bool is_modified = false;
         
         colors::LinearGradient::keys keys;
-        if (was_focusing_previous_frame)
+        if (generator_address &&
+            generator_address == &gen &&
+            was_focusing_previous_frame)
         {
             keys = keys_buffer;
         }
@@ -1030,11 +1029,16 @@ namespace
             // The user started key modification
             was_focusing_previous_frame = true;
             keys_buffer = keys;
+            generator_address = &gen;
         }
-        else if (!is_focusing_this_frame && was_focusing_previous_frame)
+        else if (generator_address &&
+                 generator_address == &gen &&
+                 !is_focusing_this_frame &&
+                 was_focusing_previous_frame)
         {
             // The user stopped key modification
             was_focusing_previous_frame = false;
+            generator_address = nullptr;
         }
 
         
