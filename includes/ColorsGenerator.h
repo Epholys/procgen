@@ -181,7 +181,9 @@ namespace colors
     // Contains a set of keys defining a linear RGB gradient.
     // From the float, returns a color from this gradient.
     //
-    // Invariant: the 'sanitized_keys_' are always sanitized from 'raw_keys_'.
+    // Invariant: 'keys_' must:
+    //   - have at least two key
+    //   - have the first key at '0' and the last at '1'
     class LinearGradient : public ColorGenerator
     {
     public:
@@ -193,64 +195,34 @@ namespace colors
 
         // Construct a two-key gradient from white to white.
         LinearGradient();
+        // Precondition: 'key_colors' must have at least 2 elements.
+        // Note: 'key_colors' will be formated to respect the invariant.
+        explicit LinearGradient(const keys& key_colors);
         LinearGradient(const LinearGradient& other) = default;
         LinearGradient(LinearGradient&& other) = default;
         LinearGradient& operator=(const LinearGradient& other) = default;
         LinearGradient& operator=(LinearGradient&& other) = default;
 
-        // Create a LinearGradient with 'raw_keys_' as 'key_colors' and
-        // 'sanitized_keys' as the sanitized 'key_colors'.
-        // Precondition: 'key_colors' must have at least two keys.
-        explicit LinearGradient(const keys& key_colors);
-
         // Returns the RGB interpolation between the two adjacent keys of 'f'.
         // 'f' is automatically clamped.
         sf::Color get(float f) override;
 
-        // // Getters
-        // const keys& get_raw_keys() const;
-        // const keys& get_sanitized_keys() const;
-
-        // // Setter to raw_keys_.
-        // // sanitized_keys_ is updated to respect the invariant.
-        // // Precondition: 'key_colors' must have at least two keys.
-        // void set_raw_keys(const keys& keys);
-
-        // // Assign 'sanitized_keys_' to 'raw_keys_'
-        // void validate_raw_keys();
-
+        // Getter/Setter
         const keys& get_keys() const;
         void set_keys(const keys& keys);
 
     private:
-        // // Sanitize 'raw_keys_' into 'sanitize_keys_':
-        // // - The keys must be included between 0 and 1.
-        // // - The lowest key is always at 0 and the highest is always as 1.
-        // // - The keys are always sorted in the vector.
-        // void sanitize_keys();
-
         // Clone 'this' and returns it as a 'shared_ptr'.
         std::shared_ptr<ColorGenerator> clone() const override;
 
         friend class cereal::access;
-        // template<class Archive>
-        // void serialize(Archive& ar, std::uint32_t)
-        //     {
-        //         ar(cereal::make_nvp("color_keys", sanitized_keys_));
-        //         raw_keys_ = sanitized_keys_;
-        //     }
         template<class Archive>
         void serialize(Archive& ar, std::uint32_t)
             {
                 ar(cereal::make_nvp("color_keys", keys_));
             }
 
-        
-        // // The raw keys : they may be not ordered at any time.
-        // keys raw_keys_;
-        // // The sanitized_keys_: derived from 'raw_keys_': all keys are sorted
-        // // from 0 to 1.
-        // keys sanitized_keys_;
+        // Keys
         keys keys_;
     };
 

@@ -888,8 +888,14 @@ namespace
         // Two flags to check if the user just stopped to modify the gradient.
         static bool was_focusing_previous_frame = false;
         bool is_focusing_this_frame = false;
-        static colors::LinearGradient* generator_address = nullptr;
+        // Persistent keys to freely modify them here without perverting the
+        // pure ones of LinearGradient. 
         static colors::LinearGradient::keys keys_buffer;
+        // Hacky pointer to make 'keys_buffer' and 'was_focusing_previous_frame'
+        // exclusive to one generator. This function is called for each existing
+        // LinearGradient, so all the static variables are shared... but we only
+        // want the keys buffer behavior for one generator, hence this pointer.
+        static colors::LinearGradient* generator_address = nullptr;
 
         bool is_modified = false;
         
@@ -898,6 +904,7 @@ namespace
             generator_address == &gen &&
             was_focusing_previous_frame)
         {
+            // Correct generator && user is interacting with the keys.
             keys = keys_buffer;
         }
         else
@@ -954,7 +961,7 @@ namespace
                 sfcolor = imcolor;
             }
 
-            // Position
+            // Key's Position
             ImGui::PushItemWidth(50);
             if(ImGui::DragFloat("", &it->second, 0.01, 0., 1., "%.2f"))
             {
@@ -1036,7 +1043,7 @@ namespace
                  !is_focusing_this_frame &&
                  was_focusing_previous_frame)
         {
-            // The user stopped key modification
+            // The user stopped key modification for the concerned generator.
             was_focusing_previous_frame = false;
             generator_address = nullptr;
         }

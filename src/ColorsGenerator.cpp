@@ -38,52 +38,14 @@ namespace colors
         : LinearGradient({{sf::Color::White, 0.},{sf::Color::White, 1.}})
     {
     }
-    
-    // LinearGradient::LinearGradient(const LinearGradient::keys& keys)
-    //     : ColorGenerator()
-    //     , raw_keys_(keys)
-    //     , sanitized_keys_(keys)
-    // {
-    //     Expects(keys.size() >= 2);
-    //     sanitize_keys();
-    //     raw_keys_ = sanitized_keys_;
-    // }
+
     LinearGradient::LinearGradient(const LinearGradient::keys& keys)
         : ColorGenerator()
-        , keys_(keys)
+        , keys_()
     {
-        Expects(keys.size() >= 2);
+        // Sanitize
+        set_keys(keys);
     }
-
-    // void LinearGradient::sanitize_keys()
-    // {
-    //     sanitized_keys_ = raw_keys_;
-        
-    //     // Clamp every keys between 0 and 1.
-    //     for (auto& p : sanitized_keys_)
-    //     {
-    //         p.second = p.second < 0. ? 0. : p.second;
-    //         p.second = p.second > 1. ? 1. : p.second;
-    //     }
-
-    //     // Sort the elements.
-    //     std::sort(begin(sanitized_keys_), end(sanitized_keys_),
-    //               [](const auto& p1, const auto& p2){return p1.second < p2.second;});
-        
-    //     // The highest key is at 1 and the lowest at 0.
-    //     sanitized_keys_.front().second = 0.f;
-    //     sanitized_keys_.back().second = 1.f;
-    // }
-
-    // void LinearGradient::validate_raw_keys()
-    // {
-    //     raw_keys_ = sanitized_keys_;
-    // }
-    
-    // const LinearGradient::keys& LinearGradient::get_raw_keys() const
-    // {
-    //     return raw_keys_;
-    // }
  
     const LinearGradient::keys& LinearGradient::get_keys() const
     {
@@ -113,15 +75,6 @@ namespace colors
         
         notify();
     }
-
-    // void LinearGradient::setr_raw_keys(const keys& keys)
-    // {
-    //     Expects(keys.size() >= 2);
-    //     raw_keys_ = keys;
-    //     sanitize_keys();
-    //     notify();
-    // }
-
 
     sf::Color LinearGradient::get(float f)
     {
