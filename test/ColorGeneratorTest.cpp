@@ -67,6 +67,32 @@ TEST(ColorGeneratorTest, constant_ctor)
     ConstantColor c {sf::Color::Blue};
     ASSERT_EQ(sf::Color::Blue, c.get_color());
 }
+TEST(ColorGeneratorTest, constant_copy_ctor)
+{
+    ConstantColor c {sf::Color::Blue};
+    ConstantColor c_copy (c);
+    ASSERT_EQ(c.get_color(), c_copy.get_color());
+}
+TEST(ColorGeneratorTest, constant_assigned_ctor)
+{
+    ConstantColor c {sf::Color::Blue};
+    ConstantColor c_assigned {sf::Color::Red};
+    c_assigned = c;
+    ASSERT_EQ(c.get_color(), c_assigned.get_color());
+}
+TEST(ColorGeneratorTest, constant_move_ctor)
+{
+    ConstantColor c {sf::Color::Blue};
+    ConstantColor c_moved {std::move(c)};
+    ASSERT_EQ(sf::Color::Blue, c_moved.get_color());
+}
+TEST(ColorGeneratorTest, constant_moved_assigned_ctor)
+{
+    ConstantColor c {sf::Color::Blue};
+    ConstantColor c_moved_assigned {sf::Color::Red};
+    c_moved_assigned = std::move(c);
+    ASSERT_EQ(sf::Color::Blue, c_moved_assigned.get_color());
+}
 
 TEST(ColorGeneratorTest, constant_setter)
 {
@@ -109,34 +135,69 @@ TEST(ColorGeneratorTest, constant_serialization)
 
 //------------------------------------------------------------
 
+namespace colors
+{
+    inline bool operator== (const LinearGradient::Key left, const LinearGradient::Key right)
+    {
+        return left.color == right.color && left.position == right.position;
+    }
+}
+
 TEST(ColorGeneratorTest, linear_ctor)
 {
     LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
     LinearGradient l {keys};
-    ASSERT_EQ(keys, l.get_raw_keys());
+    ASSERT_EQ(keys, l.get_keys());
 }
-
-TEST(ColorGeneratorTest, linear_sanitize)
+TEST(ColorGeneratorTest, linear_raw_ctor)
 {
+    LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
     LinearGradient::keys raw_keys {{sf::Color::Red, -1},{sf::Color::Green, 0.5},{sf::Color::Blue, 2}};
-    LinearGradient::keys sanitized_keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1}};
-    LinearGradient l1 {raw_keys};
-    ASSERT_EQ(sanitized_keys, l1.get_sanitized_keys());
-
-    raw_keys  = {{sf::Color::Red, 0.2},{sf::Color::Green, 0.5},{sf::Color::Blue, 0.8}};
-    LinearGradient l2 {raw_keys};
-    ASSERT_EQ(sanitized_keys, l2.get_sanitized_keys());
+    LinearGradient l {raw_keys};
+    ASSERT_EQ(keys, l.get_keys());
+}
+TEST(ColorGeneratorTest, linear_copy_ctor)
+{
+    LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
+    LinearGradient l {keys};
+    LinearGradient l_copy (l);
+    ASSERT_EQ(l.get_keys(), l_copy.get_keys());
+}
+TEST(ColorGeneratorTest, linear_assigned_ctor)
+{
+    LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
+    LinearGradient l {keys};
+    LinearGradient l_assigned {{{sf::Color::Yellow, 0}, {sf::Color::Magenta, 1}}};
+    l_assigned = l;
+    ASSERT_EQ(l.get_keys(), l_assigned.get_keys());
+}
+TEST(ColorGeneratorTest, linear_move_ctor)
+{
+    LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
+    LinearGradient l {keys};
+    LinearGradient l_moved {std::move(l)};
+    ASSERT_EQ(keys, l_moved.get_keys());
+}
+TEST(ColorGeneratorTest, linear_moved_assigned_ctor)
+{
+    LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
+    LinearGradient l {keys};
+    LinearGradient l_moved_assigned {{{sf::Color::Yellow, 0}, {sf::Color::Magenta, 1}}};
+    l_moved_assigned = std::move(l);
+    ASSERT_EQ(keys, l_moved_assigned.get_keys());
 }
 
 TEST(ColorGeneratorTest, linear_setter)
 {
-    LinearGradient l {};
-    LinearGradient::keys raw_keys {{sf::Color::Red, -1},{sf::Color::Green, 0.5},{sf::Color::Blue, 2}};
     LinearGradient::keys sanitized_keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1}};
-    l.set_keys(raw_keys);
 
-    ASSERT_EQ(raw_keys, l.get_raw_keys());
-    ASSERT_EQ(sanitized_keys, l.get_sanitized_keys());
+    LinearGradient::keys raw_keys {{sf::Color::Red, -1},{sf::Color::Green, 0.5},{sf::Color::Blue, 2}};
+    LinearGradient l {raw_keys};
+    ASSERT_EQ(sanitized_keys, l.get_keys());
+
+    raw_keys  = {{sf::Color::Red, 0.2},{sf::Color::Green, 0.5},{sf::Color::Blue, 0.8}};
+    l.set_keys(raw_keys);
+    ASSERT_EQ(sanitized_keys, l.get_keys());
 }
 
 TEST(ColorGeneratorTest, linear_get)
@@ -175,10 +236,18 @@ TEST(ColorGeneratorTest, linear_serialization)
         iarchive(ilinear);
     }
 
-    ASSERT_EQ(olinear.get_sanitized_keys(), ilinear.get_sanitized_keys());
+    ASSERT_EQ(olinear.get_keys(), ilinear.get_keys());
 }
 
 //------------------------------------------------------------
+
+namespace colors
+{
+    inline bool operator== (const DiscreteGradient::Key left, const DiscreteGradient::Key right)
+    {
+        return left.color == right.color && left.index == right.index;
+    }
+}
 
 TEST(ColorGeneratorTest, discrete_ctor)
 {
@@ -186,6 +255,36 @@ TEST(ColorGeneratorTest, discrete_ctor)
     DiscreteGradient d {keys};
 
     ASSERT_EQ(keys, d.get_keys());
+}
+TEST(ColorGeneratorTest, discrete_copy_ctor)
+{
+    DiscreteGradient::keys keys {{sf::Color::Blue, 0}, {sf::Color::Red, 2}};
+    DiscreteGradient d {keys};
+    DiscreteGradient d_copy (d);
+    ASSERT_EQ(d.get_keys(), d_copy.get_keys());
+}
+TEST(ColorGeneratorTest, discrete_assigned_ctor)
+{
+    DiscreteGradient::keys keys {{sf::Color::Blue, 0}, {sf::Color::Red, 2}};
+    DiscreteGradient d {keys};
+    DiscreteGradient d_assigned {{{sf::Color::Yellow, 0},{sf::Color::Magenta, 1}}};
+    d_assigned = d;
+    ASSERT_EQ(d.get_keys(), d_assigned.get_keys());
+}
+TEST(ColorGeneratorTest, discrete_move_ctor)
+{
+    DiscreteGradient::keys keys {{sf::Color::Blue, 0}, {sf::Color::Red, 2}};
+    DiscreteGradient d {keys};
+    DiscreteGradient d_moved {std::move(d)};
+    ASSERT_EQ(keys, d_moved.get_keys());
+}
+TEST(ColorGeneratorTest, discrete_moved_assigned_ctor)
+{ 
+    DiscreteGradient::keys keys {{sf::Color::Blue, 0}, {sf::Color::Red, 2}};
+    DiscreteGradient d {keys};
+    DiscreteGradient d_moved_assigned {{{sf::Color::Yellow, 0},{sf::Color::Magenta, 1}}};
+    d_moved_assigned = std::move(d);
+    ASSERT_EQ(keys, d_moved_assigned.get_keys());
 }
 
 TEST(ColorGeneratorTest, discrete_generate)
