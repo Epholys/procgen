@@ -950,7 +950,7 @@ namespace
             ImGui::BeginGroup();
 
             // Color
-            auto& sfcolor = it->first;
+            auto& sfcolor = it->color;
             ImVec4 imcolor = sfcolor;
             if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
             {
@@ -963,7 +963,7 @@ namespace
 
             // Key's Position
             ImGui::PushItemWidth(50);
-            if(ImGui::DragFloat("", &it->second, 0.01, 0., 1., "%.2f"))
+            if(ImGui::DragFloat("", &it->position, 0.01, 0., 1., "%.2f"))
             {
                 is_modified = true;
             }
@@ -998,21 +998,21 @@ namespace
             {
                 auto first_it = begin(keys);
                 auto second_it = next(first_it);
-                first_it->second = second_it->second / 2.;
+                first_it->position = second_it->position / 2.;
                 keys.insert(to_insert, {sf::Color::White, 0.f});
             }
             else if (to_insert == end(keys))
             {
                 auto ultimate_it = prev(end(keys));
                 auto penultimate_it = prev(ultimate_it);
-                ultimate_it->second = (1 + penultimate_it->second) / 2.;
+                ultimate_it->position = (1 + penultimate_it->position) / 2.;
                 keys.push_back({sf::Color::White, 1.f});                
             }
             else
             {
                 keys.insert(to_insert,
                             {sf::Color::White,
-                                    (to_insert->second + prev(to_insert)->second) / 2.});
+                                    (to_insert->position + prev(to_insert)->position) / 2.f});
             }
         }
         // Deletion at 'will_remove'
@@ -1021,7 +1021,7 @@ namespace
             is_modified = true;
             if (to_remove == begin(keys))
             {
-                next(to_remove)->second = 0.;
+                next(to_remove)->position = 0.;
             }
             keys.erase(to_remove);
         }
@@ -1067,9 +1067,9 @@ namespace
         double ratio = 0.f;
         for (unsigned i=0; i<k.size()-1; ++i)
         {
-            const auto& col1 = k.at(i).first;
-            const auto& col2 = k.at(i+1).first;
-            const auto& f = k.at(i+1).second;
+            const auto& col1 = k.at(i).color;
+            const auto& col2 = k.at(i+1).color;
+            const auto& f = k.at(i+1).position;
             draw_list->AddRectFilledMultiColor({x, screen_pos.y}, ImVec2(x+size.x*(f-ratio), screen_pos.y+size.y),
                                                IM_COL32(col1.r, col1.g, col1.b, col1.a),
                                                IM_COL32(col2.r, col2.g, col2.b, col2.a),
@@ -1128,7 +1128,7 @@ namespace
             ImGui::PopID();
             
             // Key Color
-            auto& sfcolor = it->first;
+            auto& sfcolor = it->color;
             ImVec4 imcolor = sfcolor;
             if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
             {
@@ -1156,7 +1156,7 @@ namespace
             ImGui::Text("");
             
             // Number of transitional colors.
-            int diff = next(it)->second - it->second - 1;
+            int diff = next(it)->index - it->index - 1;
             int diff_copy = diff;
 
             ImGui::PushItemWidth(75.f);
@@ -1168,7 +1168,7 @@ namespace
             ImGui::PopItemWidth();
 
             // Offset the current key.
-            next(it)->second += modifier;
+            next(it)->index += modifier;
 
             ImGui::EndGroup();
             ImGui::PopID();
@@ -1203,7 +1203,7 @@ namespace
         ImGui::SameLine();
         // Last color widget.
         ImGui::PushID(keys.size());
-        auto& sfcolor = keys.back().first;
+        auto& sfcolor = keys.back().color;
         ImVec4 imcolor = sfcolor;
         if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
         {
@@ -1219,7 +1219,7 @@ namespace
         if (ImGui::Button("+"))
         {
             is_modified = true;
-            keys.push_back({sf::Color::White, keys.back().second+1});
+            keys.push_back({sf::Color::White, keys.back().index+1});
         }
         ImGui::PopStyleColor(3);
         ImGui::PopID();
@@ -1235,20 +1235,20 @@ namespace
             }
             else
             {
-                inserted = keys.insert(to_insert, {sf::Color::White, to_insert->second});
+                inserted = keys.insert(to_insert, {sf::Color::White, to_insert->index});
             }
             for (auto it = next(inserted); it != end(keys); ++it)
             {
-                it->second += 1;
+                it->index += 1;
             }
         }
         else if (will_insert && !insert_before)
         {
             is_modified = true;
-            auto inserted = keys.insert(next(to_insert), {sf::Color::White, to_insert->second + 1});
+            auto inserted = keys.insert(next(to_insert), {sf::Color::White, to_insert->index + 1});
             for (auto it = next(inserted); it != end(keys); ++it)
             {
-                it->second += 1;
+                it->index += 1;
             }
         }
         else if (will_remove)
@@ -1257,10 +1257,10 @@ namespace
             if (to_remove == begin(keys))
             {
                 keys.erase(to_remove);
-                int first_key_index = begin(keys)->second;
+                int first_key_index = begin(keys)->index;
                 for (auto it = begin(keys); it != end(keys); ++it)
                 {
-                    it->second -= first_key_index;
+                    it->index -= first_key_index;
                 }
             }
             else

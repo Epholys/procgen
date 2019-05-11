@@ -60,17 +60,17 @@ namespace colors
         // Clamp every keys between 0 and 1.
         for (auto& p : keys_)
         {
-            p.second = p.second < 0. ? 0. : p.second;
-            p.second = p.second > 1. ? 1. : p.second;
+            p.position = p.position < 0. ? 0. : p.position;
+            p.position = p.position > 1. ? 1. : p.position;
         }
 
         // Sort the elements.
         std::sort(begin(keys_), end(keys_),
-                  [](const auto& p1, const auto& p2){return p1.second < p2.second;});
+                  [](const auto& p1, const auto& p2){return p1.position < p2.position;});
         
         // The highest key is at 1 and the lowest at 0.
-        keys_.front().second = 0.f;
-        keys_.back().second = 1.f;
+        keys_.front().position = 0.f;
+        keys_.back().position = 1.f;
 
         
         notify();
@@ -84,7 +84,7 @@ namespace colors
 
         // Find the upper-bound key...
         auto superior_it = std::find_if(begin(keys_), end(keys_),
-                                [f](const auto& p){return f <= p.second;});
+                                [f](const auto& p){return f <= p.position;});
         Expects(superior_it != end(keys_)); // (should never happen if correctly sanitized)
         auto superior_index = std::distance(begin(keys_), superior_it);
         auto inferior_index = superior_index == 0 ? 0 : superior_index-1; // ...and the lower-bound one.
@@ -92,21 +92,21 @@ namespace colors
         const auto& inferior = keys_.at(inferior_index);
 
         float factor = 0.f;
-        if (superior == inferior)
+        if (superior_index == inferior_index)
         {
             factor = 1.f; // at the corner case f = 0
         }
         else
         {
-            factor = (f - inferior.second) / (superior.second - inferior.second);
+            factor = (f - inferior.position) / (superior.position - inferior.position);
         }
 
         // Interpolate.
         sf::Color color;
-        color.r = inferior.first.r * (1-factor) + superior.first.r * factor;
-        color.g = inferior.first.g * (1-factor) + superior.first.g * factor;
-        color.b = inferior.first.b * (1-factor) + superior.first.b * factor;
-        color.a = inferior.first.a * (1-factor) + superior.first.a * factor;
+        color.r = inferior.color.r * (1-factor) + superior.color.r * factor;
+        color.g = inferior.color.g * (1-factor) + superior.color.g * factor;
+        color.b = inferior.color.b * (1-factor) + superior.color.b * factor;
+        color.a = inferior.color.a * (1-factor) + superior.color.a * factor;
         return color;
     }
 
@@ -131,10 +131,10 @@ namespace colors
     {
         // Verify the invariant.
         Expects(keys.size() > 1);
-        Expects(keys.at(0).second == 0);
+        Expects(keys.at(0).index == 0);
         Expects(std::is_sorted(begin(keys), end(keys),
                                [](const auto& a, const auto& b)
-                               {return a.second < b.second;}));
+                               {return a.index < b.index;}));
         generate_colors();
     }
 
@@ -163,10 +163,10 @@ namespace colors
     {
         // Verify the invariant
         Expects(keys.size() > 1);
-        Expects(keys.at(0).second == 0);
+        Expects(keys.at(0).index == 0);
         Expects(std::is_sorted(begin(keys), end(keys),
                                [](const auto& a, const auto& b)
-                               {return a.second < b.second;}));
+                               {return a.index < b.index;}));
         keys_ = keys;
         generate_colors();
         notify();
@@ -182,19 +182,19 @@ namespace colors
         auto superior = ++keys_.begin();
 
         size_t i = 0;
-        while(i <= keys_.back().second)
+        while(i <= keys_.back().index)
         {
             // Interpolate
-            float factor = (static_cast<float>(i) - inferior->second) / (superior->second - inferior->second);
+            float factor = (static_cast<float>(i) - inferior->index) / (superior->index - inferior->index);
             sf::Color color;
-            color.r = inferior->first.r * (1-factor) + superior->first.r * factor;
-            color.g = inferior->first.g * (1-factor) + superior->first.g * factor;
-            color.b = inferior->first.b * (1-factor) + superior->first.b * factor;
-            color.a = inferior->first.a * (1-factor) + superior->first.a * factor;
+            color.r = inferior->color.r * (1-factor) + superior->color.r * factor;
+            color.g = inferior->color.g * (1-factor) + superior->color.g * factor;
+            color.b = inferior->color.b * (1-factor) + superior->color.b * factor;
+            color.a = inferior->color.a * (1-factor) + superior->color.a * factor;
             colors_.push_back(color);
 
             ++i;
-            if (i > superior->second)
+            if (i > superior->index)
             {
                 // Change the surrounding keys.
                 ++inferior;

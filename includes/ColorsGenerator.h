@@ -103,8 +103,7 @@ namespace cereal
             load(ar, key);
             color_keys.emplace_back(key);
         }
-    }
-    
+    }    
 }
 
 namespace colors
@@ -160,12 +159,7 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void save(Archive& ar, std::uint32_t) const
-            {
-                ar(cereal::make_nvp("Color", color_));
-            }
-        template<class Archive>
-        void load(Archive& ar, std::uint32_t)
+        void serialize(Archive& ar, std::uint32_t)
             {
                 ar(cereal::make_nvp("Color", color_));
             }
@@ -187,11 +181,17 @@ namespace colors
     class LinearGradient : public ColorGenerator
     {
     public:
+        struct Key
+        {
+            sf::Color color {sf::Color::White};
+            float position {0.f};
+        };
+        
         // A key is a color associated to a position defined by a float. On the
         // gradient, at the key's position there will be the key's
         // color. Between two keys, at any position the color returned will be
         // the linear RGB interpolation of the adjacent keys.
-        using keys = std::vector<std::pair<sf::Color, float>>;
+        using keys = std::vector<Key>;
 
         // Construct a two-key gradient from white to white.
         LinearGradient();
@@ -217,9 +217,27 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void serialize(Archive& ar, std::uint32_t)
+        void save(Archive& ar, std::uint32_t) const
             {
-                ar(cereal::make_nvp("color_keys", keys_));
+                std::vector<std::pair<sf::Color, float>> keys;
+                for (const auto& k : keys_)
+                {
+                    keys.push_back({k.color, k.position});
+                }
+                ar(cereal::make_nvp("color_keys", keys));
+            }
+        friend class cereal::access;
+        template<class Archive>
+        void load(Archive& ar, std::uint32_t)
+            {
+                std::vector<std::pair<sf::Color, float>> loaded_keys;
+                std::vector<Key> keys;
+                ar(cereal::make_nvp("color_keys", loaded_keys));
+                for (const auto& k : loaded_keys)
+                {
+                    keys.push_back({k.first, k.second});
+                }
+                set_keys(keys);
             }
 
         // Keys
@@ -234,11 +252,17 @@ namespace colors
     class DiscreteGradient : public ColorGenerator
     {
     public:
+        struct Key
+        {
+            sf::Color color {sf::Color::White};
+            float index {0};
+        };
+
         // A key is a pair of a Color and an integer. The integer is the index
         // of the corresponding color. For example, a key set of
         // {{White,0},{Black,3}} means that the colors will be
         // {White, Light Gray, Dark Gray, Black}.
-        using keys = std::vector<std::pair<sf::Color, size_t>>;
+        using keys = std::vector<Key>;
 
         // Construct a DiscreteGradient consisting of a single white color.
         DiscreteGradient();
@@ -272,10 +296,27 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void serialize(Archive& ar, std::uint32_t)
+        void save(Archive& ar, std::uint32_t) const
             {
-                ar(cereal::make_nvp("color_keys", keys_));
-                generate_colors();
+                std::vector<std::pair<sf::Color, float>> keys;
+                for (const auto& k : keys_)
+                {
+                    keys.push_back({k.color, k.index});
+                }
+                ar(cereal::make_nvp("color_keys", keys));
+            }
+        friend class cereal::access;
+        template<class Archive>
+        void load(Archive& ar, std::uint32_t)
+            {
+                std::vector<std::pair<sf::Color, float>> loaded_keys;
+                std::vector<Key> keys;
+                ar(cereal::make_nvp("color_keys", loaded_keys));
+                for (const auto& k : loaded_keys)
+                {
+                    keys.push_back({k.first, k.second});
+                }
+                set_keys(keys);
             }
         
         // The keys. Always respect the relevant invariant.
