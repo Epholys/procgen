@@ -20,13 +20,12 @@ namespace colors
         ColorGeneratorWrapper();
         // Construct initializing 'generator_' with 'gen'
         explicit ColorGeneratorWrapper(std::shared_ptr<ColorGenerator> gen);
-        // TODO "deep": Rule-of-five shallow copy.
+        // Rule-of-five depp copy.
         ColorGeneratorWrapper(const ColorGeneratorWrapper& other);
         ColorGeneratorWrapper(ColorGeneratorWrapper&& other);
         ColorGeneratorWrapper& operator=(const ColorGeneratorWrapper& other);
         ColorGeneratorWrapper& operator=(ColorGeneratorWrapper&& other);
 
-        // ColorGeneratorWrapper clone() const;
         
         // Getter
         std::shared_ptr<ColorGenerator> unwrap() const;
