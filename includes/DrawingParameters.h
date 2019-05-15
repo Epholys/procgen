@@ -22,6 +22,7 @@ namespace drawing
     {
     public:
         DrawingParameters() = default;
+        virtual ~DrawingParameters() = default;
         // Special-case constructor when creating a default LSystem
         DrawingParameters(const ext::sf::Vector2d& starting_position, double step);
         DrawingParameters(const ext::sf::Vector2d& starting_position,
@@ -30,6 +31,9 @@ namespace drawing
                           double step,
                           int n_iter);
         DrawingParameters(const DrawingParameters& params) = default;
+        DrawingParameters(DrawingParameters&& params) = default;
+        DrawingParameters& operator=(const DrawingParameters& params) = default;
+        DrawingParameters& operator=(DrawingParameters&& params) = default;
 
         // Getters
         ext::sf::Vector2d get_starting_position() const;
