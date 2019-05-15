@@ -139,6 +139,7 @@ namespace colors
     public:
         // Construct a pure white ConstantColor.
         ConstantColor() = default;
+        virtual ~ConstantColor() = default;
         ConstantColor(const ConstantColor& other) = default;
         ConstantColor(ConstantColor&& other) = default;
         ConstantColor& operator=(const ConstantColor& other) = default;
@@ -195,6 +196,7 @@ namespace colors
 
         // Construct a two-key gradient from white to white.
         LinearGradient();
+        virtual ~LinearGradient() = default;
         // Precondition: 'key_colors' must have at least 2 elements.
         // Note: 'key_colors' will be formated to respect the invariant.
         explicit LinearGradient(const keys& key_colors);
@@ -266,6 +268,7 @@ namespace colors
 
         // Construct a DiscreteGradient consisting of a single white color.
         DiscreteGradient();
+        virtual ~DiscreteGradient() = default;
 
         // Construct a DiscreteGradient respecting the invariants.
         explicit DiscreteGradient(const keys& keys);

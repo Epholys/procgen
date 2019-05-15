@@ -18,6 +18,7 @@ namespace colors
         
         // Construct this object with a white ConstantColor.
         ColorGeneratorWrapper();
+        virtual ~ColorGeneratorWrapper() = default;
         // Construct initializing 'generator_' with 'gen'
         explicit ColorGeneratorWrapper(std::shared_ptr<ColorGenerator> gen);
         // Rule-of-five depp copy.
