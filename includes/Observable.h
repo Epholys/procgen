@@ -26,6 +26,7 @@ public:
     Observable() = default;
     // The rule-of-five is necessary as the 'observers_' must not be copied from
     // an Observable to another (but can be moved).
+    virtual ~Observable() = default;
     Observable(const Observable& other);
     Observable(Observable&& other);
     Observable& operator=(Observable other);
