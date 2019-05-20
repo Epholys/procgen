@@ -21,11 +21,6 @@ namespace drawing
 
     void turn_right_fn(Turtle& turtle)
     {
-        turtle.cos = std::cos(turtle.parameters.get_delta_angle() *
-                              math::random_real(math::default_random_generator_, .6, 1.4));
-        turtle.sin = std::sin(turtle.parameters.get_delta_angle() *
-                              math::random_real(math::default_random_generator_, .6, 1.4));
-
         // Updates the direction vector.
         ext::sf::Vector2d v
         {turtle.state.direction.x * turtle.cos - turtle.state.direction.y * turtle.sin,
@@ -35,11 +30,6 @@ namespace drawing
 
     void turn_left_fn(Turtle& turtle)
     {
-        turtle.cos = std::cos(turtle.parameters.get_delta_angle() *
-                              math::random_real(math::default_random_generator_, .6, 1.4));
-        turtle.sin = std::sin(turtle.parameters.get_delta_angle() *
-                              math::random_real(math::default_random_generator_, .6, 1.4));
-
         // Updates the direction vector.
         ext::sf::Vector2d v
         {turtle.state.direction.x * turtle.cos - turtle.state.direction.y * (-turtle.sin),
@@ -68,6 +58,18 @@ namespace drawing
 
             turtle.stack.pop();
         }
+    }
+
+    void jitter_angle_fn(impl::Turtle& turtle)
+    {
+        // TODO: do not randomize the current angle, just the base angle
+        // TOOD: global rule, the first branching randomize also the angle for
+        // the next branches, while the last branch randomize only its
+        // branch. adequate behavior ?
+        turtle.cos = std::cos(turtle.parameters.get_delta_angle() *
+                              math::random_real(math::default_random_generator_, .6, 1.4));
+        turtle.sin = std::sin(turtle.parameters.get_delta_angle() *
+                              math::random_real(math::default_random_generator_, .6, 1.4));
     }
 
     InterpretationMap::InterpretationMap(const rule_map& rules)

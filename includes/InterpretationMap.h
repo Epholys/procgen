@@ -31,6 +31,7 @@ namespace drawing
         TURN_LEFT,
         SAVE_POSITION,
         LOAD_POSITION,
+        JITTER_ANGLE,
     };
     
     void go_forward_fn(impl::Turtle& turtle);
@@ -39,6 +40,7 @@ namespace drawing
     void turn_left_fn(impl::Turtle& turtle);
     void save_position_fn(impl::Turtle& turtle);
     void load_position_fn(impl::Turtle& turtle);
+    void jitter_angle_fn(impl::Turtle& turtle);
     
     // An 'Order' is the association of an 'order_fn', an identifier to allow
     // equality comparison between orders (as 'std::function<>' does not have
@@ -63,10 +65,11 @@ namespace drawing
     const Order turn_left     { OrderID::TURN_LEFT,     turn_left_fn, "Turn left"  };
     const Order save_position { OrderID::SAVE_POSITION, save_position_fn, "Save Position" };
     const Order load_position { OrderID::LOAD_POSITION, load_position_fn, "Load position" };
+    const Order jitter_angle { OrderID::JITTER_ANGLE, jitter_angle_fn, "Jitter Angle" };
         
     // All the orders available.
     const std::vector<Order> all_orders { go_forward, turn_right, turn_left,
-                                          save_position, load_position };
+            save_position, load_position, jitter_angle };
     // All the names of the orders (used in the GUI).
     // Note: They must be in the same strict order as 'all_orders'.
     const std::vector<const char*> all_orders_name =
