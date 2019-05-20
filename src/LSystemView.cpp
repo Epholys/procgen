@@ -193,33 +193,7 @@ namespace procgui
         {
             unique_ids_.free_id(id_);
         }
-    }
-
-
-    // LSystemView LSystemView::clone() const
-    // {        
-    //     // Deep copy.
-    //     return LSystemView(
-    
-    //         name_,
-    //         std::make_shared<LSystem>(*OLSys::get_target()),
-    //         std::make_shared<InterpretationMap>(*OMap::get_target()),
-    //         std::make_shared<DrawingParameters>(*OParams::get_target()),
-    //         std::make_shared<VertexPainterWrapper>(OPainter::get_target()->clone())
-    //             );
-    // }
-
-    LSystemView LSystemView::shallow_clone() const
-    {
-        auto copy_view = LSystemView(*this);
-        copy_view.OLSys::set_target(OLSys::get_target());
-        copy_view.OMap::set_target(OMap::get_target());
-        copy_view.OParams::set_target(OParams::get_target());
-        copy_view.OPainter::set_target(OPainter::get_target());
-        copy_view.update_callbacks();
-        return copy_view;
-    }
-    
+    }    
 
     DrawingParameters& LSystemView::ref_parameters()
     {

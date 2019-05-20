@@ -61,8 +61,10 @@ TEST(ColorGeneratorTest, vector_pair_serialization)
     ASSERT_EQ(expected_vector, tested_vector);
 }
 
-//------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
+// Lots of not-so-useful tests, as the constructors are
+// defaulted-generated. They do no harm, so we keep it.
 TEST(ColorGeneratorTest, constant_ctor)
 {
     ConstantColor c {sf::Color::Blue};
@@ -144,6 +146,7 @@ namespace colors
     }
 }
 
+// Lots of useless tests, as the constructors are defaulted-generated.
 TEST(ColorGeneratorTest, linear_ctor)
 {
     LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
@@ -250,6 +253,7 @@ namespace colors
     }
 }
 
+// Lots of useless tests, as the constructors are defaulted-generated.
 TEST(ColorGeneratorTest, discrete_ctor)
 {
     DiscreteGradient::keys keys {{sf::Color::Blue, 0}, {sf::Color::Red, 2}};

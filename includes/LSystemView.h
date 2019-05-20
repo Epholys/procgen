@@ -47,6 +47,9 @@ namespace procgui
         using OParams = Observer<drawing::DrawingParameters>;
         using OPainter = Observer<colors::VertexPainterWrapper>;
 
+        // Too many moving pieces to serenely let a default constructor
+        LSystemView() = delete;
+        virtual ~LSystemView();
         LSystemView(const std::string& name,
                     std::shared_ptr<LSystem> lsys,
                     std::shared_ptr<drawing::InterpretationMap> map,
@@ -54,19 +57,15 @@ namespace procgui
                     std::shared_ptr<colors::VertexPainterWrapper> painter = std::make_shared<colors::VertexPainterWrapper>());
         // Special-case constructor when creating a default LSystem
         LSystemView(const ext::sf::Vector2d& position, double step);
-        // TODO DOC DEEP Shallow copy: LSystem, DrawingParameters and VertexPainterWrapper
-        // are shared from 'other'. Use 'clone()' for a deep copy.
+        // Deep copy;
+        //   - All Observers' pointers are cloned or moved
+        //   - These pointers are set to the RuleMapBuffers (LSys and Map)
+        //   - Id and colors are created or moved
+        //   - Selection is reset
         LSystemView(const LSystemView& other);
         LSystemView(LSystemView&& other);
         LSystemView& operator=(const LSystemView& other);
         LSystemView& operator=(LSystemView&& other);
-        ~LSystemView();
-        
-        // // Clone the LSystemView into an independant other view: deep copy.
-        // LSystemView clone() const;
-
-        // Shallow-copy 'this'.
-        LSystemView shallow_clone() const;
         
         // Reference Getters
         drawing::DrawingParameters& ref_parameters();

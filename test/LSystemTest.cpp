@@ -4,6 +4,8 @@
 #include "LSystem.h"
 
 
+// Check if all the members are initialized. Not so useful by itself, except if
+// one of the members suddenly does not have a default initialization.
 TEST(LSystemTest, default_ctor)
 {
     LSystem lsys;
@@ -33,6 +35,7 @@ TEST(LSystemTest, complete_ctor)
     ASSERT_EQ(lsys.get_iteration_predecessors(), "F");
     ASSERT_EQ(lsys.get_iteration_cache(), expected_recursion_cache);
 }
+// Other constructors are defaulted, we assume the implementation is correct.
 
 TEST(LSystemTest, get_axiom)
 {

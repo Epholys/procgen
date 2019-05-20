@@ -94,7 +94,12 @@ public:
         
     // Constructors
     LSystem() = default;
+    virtual ~LSystem() = default;
     LSystem(const std::string& axiom, const production_rules& prod, const std::string& preds);
+    LSystem(const LSystem& other) = default;
+    LSystem& operator=(const LSystem& other) = default;
+    LSystem(LSystem&& other) = default;
+    LSystem& operator=(LSystem&& other) = default;
 
     // Getters and setters
     std::string get_axiom() const;

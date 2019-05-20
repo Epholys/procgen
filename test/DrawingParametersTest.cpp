@@ -22,6 +22,8 @@ TEST(DrawingParametersTest, complete_ctor)
     ASSERT_EQ(expected_iter, params.get_n_iter());    
 }
 
+// Other constructors are defaulted, we assume the implementation is correct.
+
 //---------------------------------------------------------------------------------------
 
 class Obs : public Observer<DrawingParameters>

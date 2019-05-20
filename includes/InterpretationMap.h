@@ -99,7 +99,7 @@ namespace drawing
     public:
         // Constructors simply redirecting to RuleMap<Order> constructors.
         InterpretationMap() = default;
-        virtual ~InterpretationMap() {}
+        virtual ~InterpretationMap() = default;
         explicit InterpretationMap(const rule_map& rules);
         InterpretationMap(std::initializer_list<typename rule_map::value_type> init);
         InterpretationMap(const InterpretationMap& other) = default;

@@ -49,6 +49,11 @@ namespace sf
     }
 }
 
+// Some InterpretationMap's constructors are defaulted, we assume the
+// implementation is correct.
+// The other constructors are dead-simple by calling the parent class.
+
+
 // Test the go_forward order.
 TEST_F(DrawingTest, go_forward)
 {
