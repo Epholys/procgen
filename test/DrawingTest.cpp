@@ -130,6 +130,7 @@ TEST_F(DrawingTest, compute_paths)
     ASSERT_EQ(iter, expected_iter);
 }
 
+// Also test 'Order' save/load
 TEST_F(DrawingTest, serialization)
 {
     InterpretationMap imap;
@@ -146,3 +147,4 @@ TEST_F(DrawingTest, serialization)
 
     ASSERT_EQ(interpretation.get_rules(), imap.get_rules());
 }
+
