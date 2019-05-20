@@ -1,7 +1,7 @@
 {
     "LSystemView": {
         "cereal_class_version": 0,
-        "name": "Serpinski",
+        "name": "Plant",
         "LSystem": {
             "cereal_class_version": 0,
             "axiom": "F",
@@ -13,19 +13,40 @@
         },
         "DrawingParameters": {
             "cereal_class_version": 0,
-            "starting_angle": 0.0,
-            "delta_angle": 60,
-            "step": 7.0,
-            "n_iter": 5
+            "starting_angle": 180.0,
+            "delta_angle": 60.0,
+            "step_": 7.0,
+            "n_iter_": 6
         },
         "Interpretation Map": {
             "cereal_class_version": 0,
             "]": "Load position",
-            "-": "Turn right",
-            "+": "Turn left",
             "G": "Go forward",
+            "+": "Turn left",
+            "-": "Turn right",
             "[": "Save Position",
             "F": "Go forward"
+        },
+        "VertexPainter": {
+            "polymorphic_id": 2147483649,
+            "polymorphic_name": "VertexPainterConstant",
+            "ptr_wrapper": {
+                "id": 2147483649,
+                "data": {
+                        "cereal_class_version": 0,
+                        "ColorGenerator": {
+                        "polymorphic_id": 2147483650,
+                        "polymorphic_name": "ConstantColor",
+                        "ptr_wrapper": {
+                            "id": 2147483650,
+                            "data": {
+                                "cereal_class_version": 0,
+                                "Color": "#FFFFFFFF"
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
