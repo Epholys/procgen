@@ -24,13 +24,13 @@ public:
     using callback = std::function<void()>;
 
     Observable() = default;
-    // The rule-of-five is necessary as the 'observers_' must not be copied from
-    // an Observable to another (but can be moved).
+    // The rule-of-five is necessary as the 'observers_' must not be copied or
+    // moved from an Observable to another. 
     virtual ~Observable() = default;
     Observable(const Observable& other);
+    Observable& operator=(const Observable& other);
     Observable(Observable&& other);
-    Observable& operator=(Observable other);
-    // TODO RULE OF FIVE
+    Observable& operator=(Observable&& other);
     
     // Add a callback and return its unique identifier.
     // Exception:

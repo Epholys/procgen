@@ -81,12 +81,13 @@ struct A_B_Observer : public Observer<A>, public Observer<B>
     int m { -1 };
 };
 
-TEST(ObservableTest, observable_ctor)
+TEST(ObservableTest, observable_ctors)
 {
     auto a1 = std::make_shared<A>(0);
     A_Observer a_obs (a1);
     auto a2 (*a1);
-    auto a3 = *a1;
+    A a3 (0);
+    a3 = *a1;
 
     ASSERT_FALSE(a1->empty());
     ASSERT_TRUE(a2.empty());

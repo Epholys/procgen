@@ -1,26 +1,41 @@
 #include "Observable.h"
 
 Observable::Observable(const Observable&)
-    : Observable{}
 {
+    id_ = {0};
+    observers_ = {};
+}
+Observable& Observable::operator=(const Observable& other)
+{
+    if (this != &other)
+    {
+        id_ = {0};
+        observers_ = {};
+    }
+    return *this;
 }
 
 Observable::Observable(Observable&& other)
     : Observable{}
 {
-    id_ = other.id_;
-    observers_ = other.observers_;
-    
+    id_ = {0};
+    observers_ = {};
     other.id_ = {0};
     other.observers_ = {};
 }
 
-Observable& Observable::operator=(Observable)
+Observable& Observable::operator=(Observable&& other)
 {
-    id_ = {0};
-    observers_ = {};
+    if (this != &other)
+    {
+        id_ = {0};
+        observers_ = {};
+        other.id_ = {0};
+        other.observers_ = {};
+    }
     return *this;
 }
+    
 
 // Exception:
 //  - Precondition: 'f' must not be a nullptr.
