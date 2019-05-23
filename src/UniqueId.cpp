@@ -6,13 +6,13 @@ int UniqueId::get_id()
 {
     //Search if there is a free slot in 'map_'.
     auto free_slot = std::find_if(begin(map_), end(map_),
-                                   [](const auto& p)
-                                   {return std::get<IsFree>(p);});
+                                   [](const auto& e)
+                                   {return e.is_free;});
     if (free_slot != end(map_))
     {
         // There is, return the associated identifier
-        std::get<IsFree>(*free_slot) = false;
-        return std::get<Id>(*free_slot);
+        free_slot->is_free = false;
+        return free_slot->id;
     }
     else
     {
@@ -26,12 +26,12 @@ void UniqueId::free_id(int id)
 {
     // Assert precondition: 'id' must have been registered.
     auto it = std::find_if(begin(map_), end(map_),
-                           [id](const auto& p)
-                           {return std::get<Id>(p) == id &&
-                            !std::get<IsFree>(p);});
+                           [id](const auto& e)
+                           {return e.id == id &&
+                            !e.is_free;});
     Expects(it != end(map_));
 
     // Mark the id as available.
-    std::get<IsFree>(*it) = true;;
+    it->is_free = true;;
 }
 
