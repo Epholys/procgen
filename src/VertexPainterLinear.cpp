@@ -18,44 +18,7 @@ namespace colors
         , center_{0.5,0.5}
     {
     }
-    
-    // VertexPainterLinear::VertexPainterLinear(const VertexPainterLinear& other)
-    //     : VertexPainter{other}
-    //     , angle_ {other.angle_}
-    //     , center_{other.center_}
-    // {
-    // }
-
-    // VertexPainterLinear::VertexPainterLinear(VertexPainterLinear&& other)
-    //     : VertexPainter{std::move(other)}
-    //     , angle_ {other.angle_}
-    //     , center_{other.center_}
-    // {
-    // }
-
-    // VertexPainterLinear& VertexPainterLinear::operator=(const VertexPainterLinear& other)
-    // {
-    //     if (this != &other)
-    //     {
-    //         VertexPainter::operator=(other);
-    //         angle_ = other.angle_;
-    //         center_  = other.center_;
-    //     }
-    //     return *this;
-    // }
-
-    // VertexPainterLinear& VertexPainterLinear::operator=(VertexPainterLinear&& other)
-    // {
-    //     if (this != &other)
-    //     {
-    //         VertexPainter::operator=(other);
-    //         angle_ = other.angle_;
-    //         center_  = other.center_;
-    //     }
-    //     return *this;
-    // }
-
-    std::shared_ptr<VertexPainter> VertexPainterLinear::clone_impl() const
+    std::shared_ptr<VertexPainter> VertexPainterLinear::clone() const
     {
         auto clone = std::make_shared<VertexPainterLinear>();
         clone->angle_ = angle_;
@@ -100,7 +63,7 @@ namespace colors
         }
 
         sf::Vector2f direction = {std::cos(math::degree_to_rad(angle_)), -std::sin(math::degree_to_rad(angle_))};
-//        sf::Vector2f middle = {bounding_box.left + bounding_box.width/2, bounding_box.top + bounding_box.height/2};
+        // sf::Vector2f middle = {bounding_box.left + bounding_box.width/2, bounding_box.top + bounding_box.height/2};
         // Get center coordinates relative to the 'center_'.
         sf::Vector2f relative_center {bounding_box.left + bounding_box.width * center_.x,
                                       bounding_box.top + bounding_box.height * (1.f-center_.y)};

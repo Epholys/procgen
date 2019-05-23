@@ -12,35 +12,7 @@ namespace colors
     {
     }
     
-    // VertexPainterConstant::VertexPainterConstant(const VertexPainterConstant& other)
-    //     : VertexPainter{other}
-    // {
-    // }
-
-    // VertexPainterConstant::VertexPainterConstant(VertexPainterConstant&& other)
-    //     : VertexPainter{std::move(other)}
-    // {
-    // }
-
-    // VertexPainterConstant& VertexPainterConstant::operator=(const VertexPainterConstant& other)
-    // {
-    //     if (this != &other)
-    //     {
-    //         VertexPainter::operator=(other);
-    //     }
-    //     return *this;
-    // }
-
-    // VertexPainterConstant& VertexPainterConstant::operator=(VertexPainterConstant&& other)
-    // {
-    //     if (this != &other)
-    //     {
-    //         VertexPainter::operator=(other);
-    //     }
-    //     return *this;
-    // }
-
-    std::shared_ptr<VertexPainter> VertexPainterConstant::clone_impl() const
+    std::shared_ptr<VertexPainter> VertexPainterConstant::clone() const
     {
         auto color_wrapper = std::make_shared<ColorGeneratorWrapper>(*get_target());
         return std::make_shared<VertexPainterConstant>(color_wrapper);

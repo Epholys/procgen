@@ -19,13 +19,11 @@ namespace colors
         // Default constructor, construct an empy VertexPainter.
         VertexPainterWrapper();
         explicit VertexPainterWrapper(std::shared_ptr<VertexPainter> painter);
-        // TODO "deep": Rule-of-five shallow copy.
+        // Rule-of-five deep copy.
         VertexPainterWrapper(const VertexPainterWrapper& other);
         VertexPainterWrapper(VertexPainterWrapper&& other);
         VertexPainterWrapper& operator=(const VertexPainterWrapper& other);
         VertexPainterWrapper& operator=(VertexPainterWrapper&& other);
-
-        // VertexPainterWrapper clone() const;
 
         // Getter
         std::shared_ptr<VertexPainter> unwrap() const;

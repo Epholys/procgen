@@ -107,7 +107,8 @@ namespace colors
     public:
         VertexPainterComposite(); // Create a default generator
         explicit VertexPainterComposite(const std::shared_ptr<ColorGeneratorWrapper>); // TODO DOC no wrap
-        // TODO doc deep": Rule-of-five shallow copy TODO delete
+        // This class is mainly used polymorphic-ally, so deleting these
+        // constructors saved some LoC so potential bugs.
         VertexPainterComposite(const VertexPainterComposite& other) = delete;;
         VertexPainterComposite(VertexPainterComposite&& other) = delete;;
         VertexPainterComposite& operator=(const VertexPainterComposite& other) = delete;;
@@ -129,9 +130,9 @@ namespace colors
         static std::shared_ptr<VertexPainter> get_copied_painter();
         static void save_painter(std::shared_ptr<VertexPainter> painter);
 
-    private:
         // Implements the deep-copy cloning.
-        virtual std::shared_ptr<VertexPainter> clone_impl() const override;
+        virtual std::shared_ptr<VertexPainter> clone() const override;
+    private:
 
         // The copied painter
         static std::shared_ptr<VertexPainter> copied_painter_;

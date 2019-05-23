@@ -11,7 +11,8 @@ namespace colors
     public:
         VertexPainterSequential(); // Create a default generator
         explicit VertexPainterSequential(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
-        // Shallow rule-of-five constructors.
+        // This class is mainly used polymorphic-ally, so deleting these
+        // constructors saved some LoC so potential bugs.
         VertexPainterSequential(const VertexPainterSequential& other) = delete;
         VertexPainterSequential(VertexPainterSequential&& other) = delete;
         VertexPainterSequential& operator=(const VertexPainterSequential& other) = delete;
@@ -31,11 +32,10 @@ namespace colors
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 
+        // Implements the deep-copy cloning.
+        virtual std::shared_ptr<VertexPainter> clone() const override;
 
     private:
-        // Implements the deep-copy cloning.
-        virtual std::shared_ptr<VertexPainter> clone_impl() const override;
-
         friend class cereal::access;
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const

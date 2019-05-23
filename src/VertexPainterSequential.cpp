@@ -14,40 +14,8 @@ namespace colors
         , factor_{1}
     {
     }
-    
-    // VertexPainterSequential::VertexPainterSequential(const VertexPainterSequential& other)
-    //     : VertexPainter{other}
-    //     , factor_ {other.factor_}
-    // {
-    // }
 
-    // VertexPainterSequential::VertexPainterSequential(VertexPainterSequential&& other)
-    //     : VertexPainter{std::move(other)}
-    //     , factor_ {other.factor_}
-    // {
-    // }
-
-    // VertexPainterSequential& VertexPainterSequential::operator=(const VertexPainterSequential& other)
-    // {
-    //     if (this != &other)
-    //     {
-    //         VertexPainter::operator=(other);
-    //         factor_ = other.factor_;
-    //     }
-    //     return *this;
-    // }
-
-    // VertexPainterSequential& VertexPainterSequential::operator=(VertexPainterSequential&& other)
-    // {
-    //     if (this != &other)
-    //     {
-    //         VertexPainter::operator=(other);
-    //         factor_ = other.factor_;
-    //     }
-    //     return *this;
-    // }
-
-    std::shared_ptr<VertexPainter> VertexPainterSequential::clone_impl() const
+    std::shared_ptr<VertexPainter> VertexPainterSequential::clone() const
     {
         auto clone = std::make_shared<VertexPainterSequential>();
         clone->factor_ = factor_;

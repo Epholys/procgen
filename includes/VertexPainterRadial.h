@@ -12,7 +12,8 @@ namespace colors
     public:
         VertexPainterRadial(); // Create a default generator
         explicit VertexPainterRadial(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
-        // TODO doc "slice" Shallow rule-of-five constructors.
+        // This class is mainly used polymorphic-ally, so deleting these
+        // constructors saved some LoC so potential bugs.
         VertexPainterRadial(const VertexPainterRadial& other) = delete;
         VertexPainterRadial(VertexPainterRadial&& other) = delete;
         VertexPainterRadial& operator=(const VertexPainterRadial& other) = delete;
@@ -33,10 +34,10 @@ namespace colors
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 
-    private:
         // Implements the deep-copy cloning.
-        virtual std::shared_ptr<VertexPainter> clone_impl() const override;
+        virtual std::shared_ptr<VertexPainter> clone() const override;
 
+    private:
         // [0, 1] center: 0 is the left/up of the bounding_box and 1 the right/down.
         sf::Vector2f center_ {0, 0};
         

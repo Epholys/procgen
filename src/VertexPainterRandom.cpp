@@ -18,45 +18,7 @@ namespace colors
     {
     }
     
-    // VertexPainterRandom::VertexPainterRandom(const VertexPainterRandom& other)
-    //     : VertexPainter{other}
-    //     , block_size_{other.block_size_}
-    //     , random_seed_{other.random_seed_}
-    //     , random_generator_(random_seed_) 
-    // {
-    // }
-
-    // VertexPainterRandom::VertexPainterRandom(VertexPainterRandom&& other)
-    //     : VertexPainter{std::move(other)}
-    //     , block_size_{other.block_size_}
-    //     , random_seed_{other.random_seed_}
-    //     , random_generator_(random_seed_) 
-    // {
-    // }
-
-    // VertexPainterRandom& VertexPainterRandom::operator=(const VertexPainterRandom& other)
-    // {
-    //     if (this != &other)
-    //     {
-    //         VertexPainter::operator=(other);
-    //         block_size_ = other.block_size_;
-    //         random_seed_ = other.random_seed_;
-    //         random_generator_.seed(random_seed_); 
-    //     }
-    //     return *this;
-    // }
-
-    // VertexPainterRandom& VertexPainterRandom::operator=(VertexPainterRandom&& other)
-    // {
-    //     if (this != &other)
-    //     {
-    //         VertexPainter::operator=(other);
-    //         random_seed_ = other.random_seed_;
-    //     }
-    //     return *this;
-    // }
-
-    std::shared_ptr<VertexPainter> VertexPainterRandom::clone_impl() const
+    std::shared_ptr<VertexPainter> VertexPainterRandom::clone() const
     {
         auto clone = std::make_shared<VertexPainterRandom>();
         clone->block_size_ = block_size_;

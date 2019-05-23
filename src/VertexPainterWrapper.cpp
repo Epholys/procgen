@@ -51,11 +51,6 @@ namespace colors
         }
         return *this;
     }
-
-    // VertexPainterWrapper VertexPainterWrapper::clone() const
-    // {
-    //     return VertexPainterWrapper(get_target()->clone());
-    // }
     
     std::shared_ptr<VertexPainter> VertexPainterWrapper::unwrap() const
     {

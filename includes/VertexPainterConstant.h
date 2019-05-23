@@ -11,7 +11,8 @@ namespace colors
     public:
         VertexPainterConstant(); // Create a default generator
         explicit VertexPainterConstant(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
-        // TODO doc "slicing"? Shallow rule-of-five constructors.
+        // This class is mainly used polymorphic-ally, so deleting these
+        // constructors saved some LoC so potential bugs.
         VertexPainterConstant(const VertexPainterConstant& other) = delete;
         VertexPainterConstant(VertexPainterConstant&& other) = delete;
         VertexPainterConstant& operator=(const VertexPainterConstant& other) = delete;
@@ -23,11 +24,10 @@ namespace colors
                                     const std::vector<int>& iteration_of_vertices,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
+        // Implements the deep-copy cloning.
+        virtual std::shared_ptr<VertexPainter> clone() const override;
 
     private:
-        // Implements the deep-copy cloning.
-        virtual std::shared_ptr<VertexPainter> clone_impl() const override;
-
         friend class cereal::access;
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const

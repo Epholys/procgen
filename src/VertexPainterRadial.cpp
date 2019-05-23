@@ -15,39 +15,7 @@ namespace colors
     {
     }
     
-    // VertexPainterRadial::VertexPainterRadial(const VertexPainterRadial& other)
-    //     : VertexPainter{other}
-    //     , center_ {other.center_}
-    // {
-    // }
-
-    // VertexPainterRadial::VertexPainterRadial(VertexPainterRadial&& other)
-    //     : VertexPainter{std::move(other)}
-    //     , center_ {other.center_}
-    // {
-    // }
-
-    // VertexPainterRadial& VertexPainterRadial::operator=(const VertexPainterRadial& other)
-    // {
-    //     if (this != &other)
-    //     {
-    //         VertexPainter::operator=(other);
-    //         center_ = other.center_;
-    //     }
-    //     return *this;
-    // }
-
-    // VertexPainterRadial& VertexPainterRadial::operator=(VertexPainterRadial&& other)
-    // {
-    //     if (this != &other)
-    //     {
-    //         VertexPainter::operator=(other);
-    //         center_ = other.center_;
-    //     }
-    //     return *this;
-    // }
-
-    std::shared_ptr<VertexPainter> VertexPainterRadial::clone_impl() const
+    std::shared_ptr<VertexPainter> VertexPainterRadial::clone() const
     {
         auto clone = std::make_shared<VertexPainterRadial>();
         clone->center_ = center_;

@@ -13,7 +13,8 @@ namespace colors
     public:
         VertexPainterLinear(); // Create a default generator
         explicit VertexPainterLinear(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
-        // TODO doc "slice" Shallow rule-of-five constructors.
+        // This class is mainly used polymorphic-ally, so deleting these
+        // constructors saved some LoC so potential bugs.
         VertexPainterLinear(const VertexPainterLinear& other) = delete;
         VertexPainterLinear(VertexPainterLinear&& other) = delete;
         VertexPainterLinear& operator=(const VertexPainterLinear& other) = delete;
@@ -36,9 +37,10 @@ namespace colors
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 
-    private:
         // Implements the deep-copy cloning.
-        virtual std::shared_ptr<VertexPainter> clone_impl() const override;
+        virtual std::shared_ptr<VertexPainter> clone() const override;
+
+    private:
 
         float angle_ {0};
         sf::Vector2f center_ {0.5,0.5};

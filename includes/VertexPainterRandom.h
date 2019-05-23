@@ -12,7 +12,8 @@ namespace colors
     public:
         VertexPainterRandom(); // Create a default generator
         explicit VertexPainterRandom(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
-        // TODO doc delete Shallow rule-of-five constructors.
+        // This class is mainly used polymorphic-ally, so deleting these
+        // constructors saved some LoC so potential bugs.
         VertexPainterRandom(const VertexPainterRandom& other) = delete;
         VertexPainterRandom(VertexPainterRandom&& other) = delete;
         VertexPainterRandom& operator=(const VertexPainterRandom& other) = delete;
@@ -32,9 +33,10 @@ namespace colors
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 
-    private:
         // Implements the deep-copy cloning.
-        virtual std::shared_ptr<VertexPainter> clone_impl() const override;
+        virtual std::shared_ptr<VertexPainter> clone() const override;
+
+    private:
 
         // The number of consecutive vertices to paint the same color.
         // Invariant: must be strictly positive
