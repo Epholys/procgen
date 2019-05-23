@@ -41,7 +41,11 @@ namespace colors
 
         for (auto i=0u; i<vertices_iteration.size(); ++i)
         {
+#ifdef VERTEX_PAINTER_ITERATION_BUGGY
             sf::Color color = generator->get((vertices_iteration.at(i)-1) / (float(max_iteration)-1));
+#else
+            sf::Color color = generator->get((vertices_iteration.at(i)) / (float(max_iteration)));
+#endif
             sf::Vertex& v = vertices.at(i);
             if (v.color != sf::Color::Transparent)
             {
