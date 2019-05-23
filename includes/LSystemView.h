@@ -47,7 +47,7 @@ namespace procgui
         using OParams = Observer<drawing::DrawingParameters>;
         using OPainter = Observer<colors::VertexPainterWrapper>;
 
-        // Too many moving pieces to serenely let a default constructor
+        // Too many moving pieces to serenely have a default constructor.
         LSystemView() = delete;
         virtual ~LSystemView();
         LSystemView(const std::string& name,

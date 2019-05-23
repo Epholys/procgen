@@ -59,6 +59,9 @@ namespace procgui
     {
         // Arbitrary default LSystem.
         update_callbacks();
+
+        compute_vertices();
+        paint_vertices();
     }
 
     LSystemView::LSystemView(const LSystemView& other)
