@@ -98,3 +98,54 @@ TEST(VertexPainter, Iteration)
          ASSERT_EQ(colors[i/size], grid[i].color);
     }
 }
+
+TEST(VertexPainter, Linear)
+{
+    std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Green};
+    auto colors_gen =
+        std::make_shared<ColorGeneratorWrapper>(
+            std::make_shared<DiscreteGradient>(
+                DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2}})));
+    VertexPainterLinear painter (colors_gen);
+    painter.set_center({1/3., 2/3.});
+    painter.set_angle(45);
+    std::vector<sf::Vertex> grid = vertices.grid;
+    painter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+ 
+    std::vector<sf::Color> expected_colors =
+        { sf::Color::Blue, sf::Color::Red , sf::Color::Red  , sf::Color::Red,
+          sf::Color::Red , sf::Color::Red , sf::Color::Red  , sf::Color::Blue,
+          sf::Color::Red , sf::Color::Red , sf::Color::Blue , sf::Color::Green,
+          sf::Color::Red , sf::Color::Blue, sf::Color::Green, sf::Color::Green };
+    int size = vertices.grid_size;
+    int size_2 = size * size;
+    for (int i=0; i<size_2; ++i)
+    {        
+        ASSERT_EQ(expected_colors[i], grid[i].color);
+    }
+}
+
+TEST(VertexPainter, Radial)
+{
+    std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Green};
+    auto colors_gen =
+        std::make_shared<ColorGeneratorWrapper>(
+            std::make_shared<DiscreteGradient>(
+                DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2}})));
+    VertexPainterRadial painter (colors_gen);
+    painter.set_center({1/3., 2/3.});
+    std::vector<sf::Vertex> grid = vertices.grid;
+    painter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+ 
+    std::vector<sf::Color> expected_colors =
+        { sf::Color::Blue , sf::Color::Blue , sf::Color::Blue , sf::Color::Green,
+          sf::Color::Blue , sf::Color::Red  , sf::Color::Blue , sf::Color::Green,
+          sf::Color::Blue , sf::Color::Blue , sf::Color::Blue , sf::Color::Green,
+          sf::Color::Green, sf::Color::Green, sf::Color::Green, sf::Color::Green };
+    int size = vertices.grid_size;
+    int size_2 = size * size;
+    for (int i=0; i<size_2; ++i)
+    {        
+        ASSERT_EQ(expected_colors[i], grid[i].color);
+    }
+}
