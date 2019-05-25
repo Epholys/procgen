@@ -13,6 +13,7 @@ namespace colors
     public:
         VertexPainterLinear(); // Create a default generator
         explicit VertexPainterLinear(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        virtual ~VertexPainterLinear() {}
         // This class is mainly used polymorphic-ally, so deleting these
         // constructors saved some LoC so potential bugs.
         VertexPainterLinear(const VertexPainterLinear& other) = delete;

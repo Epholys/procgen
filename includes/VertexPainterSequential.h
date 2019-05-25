@@ -11,6 +11,7 @@ namespace colors
     public:
         VertexPainterSequential(); // Create a default generator
         explicit VertexPainterSequential(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        virtual ~VertexPainterSequential() {}
         // This class is mainly used polymorphic-ally, so deleting these
         // constructors saved some LoC so potential bugs.
         VertexPainterSequential(const VertexPainterSequential& other) = delete;

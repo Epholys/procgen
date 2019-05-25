@@ -12,6 +12,7 @@ namespace colors
     public:
         VertexPainterRadial(); // Create a default generator
         explicit VertexPainterRadial(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        virtual ~VertexPainterRadial() {}
         // This class is mainly used polymorphic-ally, so deleting these
         // constructors saved some LoC so potential bugs.
         VertexPainterRadial(const VertexPainterRadial& other) = delete;

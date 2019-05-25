@@ -11,6 +11,7 @@ namespace colors
     public:
         VertexPainterIteration(); // Create a default generator
         explicit VertexPainterIteration(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        virtual ~VertexPainterIteration() {}
         // This class is mainly used polymorphic-ally, so deleting these
         // constructors saved some LoC so potential bugs.
         VertexPainterIteration(const VertexPainterIteration& other) = delete;

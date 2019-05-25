@@ -12,6 +12,7 @@ namespace colors
     public:
         VertexPainterRandom(); // Create a default generator
         explicit VertexPainterRandom(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        virtual ~VertexPainterRandom() {}
         // This class is mainly used polymorphic-ally, so deleting these
         // constructors saved some LoC so potential bugs.
         VertexPainterRandom(const VertexPainterRandom& other) = delete;

@@ -107,6 +107,7 @@ namespace colors
     public:
         VertexPainterComposite(); // Create a default generator
         explicit VertexPainterComposite(const std::shared_ptr<ColorGeneratorWrapper>); // TODO DOC no wrap
+        virtual ~VertexPainterComposite() {}
         // This class is mainly used polymorphic-ally, so deleting these
         // constructors saved some LoC so potential bugs.
         VertexPainterComposite(const VertexPainterComposite& other) = delete;;

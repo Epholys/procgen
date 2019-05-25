@@ -11,6 +11,7 @@ namespace colors
     public:
         VertexPainterConstant(); // Create a default generator
         explicit VertexPainterConstant(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        virtual ~VertexPainterConstant() {}
         // This class is mainly used polymorphic-ally, so deleting these
         // constructors saved some LoC so potential bugs.
         VertexPainterConstant(const VertexPainterConstant& other) = delete;
