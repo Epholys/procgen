@@ -1118,7 +1118,7 @@ namespace
             
             ImGui::SameLine();
             ext::ImGui::PushStyleRedButton();
-            if (ImGui::Button("-"))
+            if (keys.size() > 2 && ImGui::Button("-"))
             {
                 will_remove = true;
                 to_remove = it;
@@ -1264,7 +1264,7 @@ namespace
                 }
             }
             else
-            { 
+            {
                 keys.erase(to_remove);
             }
         }
