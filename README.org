@@ -13,40 +13,47 @@
    - Dynamic GUIs to interact with the parameters
    - Basic and necessary user interactions (mouse dragging, adding, removing, copy-pasting)
    - Saving and loading LSystems to and from files
-   - Stub of colors
+   - Complete system of colors
 
 ** Main Roadmap
-   1. Make the generated vertices pretty (colors and growth) (example in dev.color and dev.time)
-      * Painting the vertices by height, order of recursion, ...
-      * Composite painting (e.g. i-th recursion brown, j-th recursion shade of greens)
-      * Growth as the turtle order, recursion order, ...
-      * Rectangle of different widths for recursion
-      * Shaders ?
-   2. RELEASE
-   3. Add automation:
+   1. Polish before the first release
+      * Remove all the windowing/GUI bugs
+      * Polish the imgui interface
+      * Remove frictions and limitations of the save/load GUI
+      * Add low-hanging fruits optimization
+      * Reinforce the save files parsingx
+      * Remove a maximum of code smells
+   2. Add automation:
       * Loading file from command-line
       * Generating image(s) from command-line
-      * Adding a second layer to generate save files without hacking the polymorphism
-   4. Add genetic algorithm or constraint-based algorithm for new LSystem generation
-   5. Extend the L-System and turtle interpretation
+      * Adding a second/alternative layer to generate save files without hacking the polymorphism
+   3. Make the generated vertices pretty (growth, visual effects) (example in dev.time and dev.width)
+      * Growth as the turtle order, recursion order, ...
+      * Rectangle of different widths for recursion
+      * Shaders
+   4. Extend the turtle interpretation
+      * Angle jitter
+      * Color Palette
+      * Invisible lines
+   5. Add genetic algorithm or constraint-based algorithm for new LSystem generation
+   6. Extend the L-System
       * Parametric L-System
       * Context-sensitive L-System
       * Stochastic L-System
       * Parameters for each interpretation order (step for go_forward, delta_angle for turn_*)
 
 ** Known Bugs
-   - double precision is not enough when dealing with big geometric L-systems
-   - the GUI sometimes become irresponsive
+   - The GUI sometimes become irresponsive
    - Correct zoom level and drag behaviour when resizing window (in Gnome)
 
 ** Development framework
    - *Environment:* debian sid chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=
    - *Dependencies:*
-     - SFML / 2.5 / [[https://www.sfml-dev.org/][Website]] / installed from packages / 
-     - googletest / 1.8.0-10.1 / [[https://github.com/google/googletest][Github Repository]] / installed from packages
-     - dear imgui, / 2018-05-21 / [[https://github.com/ocornut/imgui][Github Repository]] / cloned from the repository / included in the repo
-     - imgui-sfml / 2018-05-21 / [[https://github.com/eliasdaler/imgui-sfml][Github Repository]] / installed via the instructions from the README.org of the repository / included in the repo
-     - GSL (Guidelines Support Library) / 2017-06-27 / [[https://github.com/Microsoft/GSL][Github Repository]] / cloned from the repository / included in the repo
+     - SFML / 2.5.1 / [[https://www.sfml-dev.org/][Website]] / installed from packages / 
+     - googletest / 1.8.1-3 / [[https://github.com/google/googletest][Github Repository]] / installed from packages
+     - dear imgui, / 2018-11-23 / [[https://github.com/ocornut/imgui][Github Repository]] / cloned from the repository / included in the repo
+     - imgui-sfml / 2018-11-23 / [[https://github.com/eliasdaler/imgui-sfml][Github Repository]] / installed via the instructions from the README.org of the repository / included in the repo
+     - GSL (Guidelines Support Library) / 2018-05-21 / [[https://github.com/Microsoft/GSL][Github Repository]] / cloned from the repository / included in the repo
      - cereal / 1.2.2 / [[https://uscilab.github.io/cereal/index.html][Website]] / downloaded from the website / included in the repo
    - *Coding rule:* [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]] with GSL
      - Difference: [[https://en.wikipedia.org/wiki/Indentation_style#Allman_style][Allman indentation Style]]
@@ -67,24 +74,6 @@
    - Formal documentation (Doxygen?)
    - Automatic cross-compiling?
    - Automatic on-screen serialization?
-
-** Thoughts dump
-  - Huge literature on the subject and extremely developed existing software. What does this project bring?
-*** Memory allocation with Valgrind (2017-09-17)
-    =valgrind --tool\=massif --time-unit\=B --peak-inaccuracy=0.1=
-
-    Memory usage is directly linked to the size of the L-Systems calculated. These sizes grow exponentialy, so does the memory. As an example, with a simple L-System and 16 iterations, the resulting string is composed of tens of million of symbols. Saving these symbols and the 20-bytes-long vertices associated takes at least hundreds of MB in memory.
-    Moreover, during the execution of =logo::computes_vertices=, we use a =std::vector= as data structure. Its allocation strategy (in g++ and MSVC) is to multiply the capacity by a number. As a consequence, this vector is at most "factor" times too large. In our case of hundreds of MB, it can be a serious toll. Fortunately, this vector is truncated when returned by the function.
-    
-    I don't see an *obvious* way to reduce memory consumption. Symbols and vertices are already very small. We could reduce the size of the aforementioned vector by reserving just enough bytes for the vertices. But that means we would have to approximate a small upper-bound of the result of the L-System and also how much of its symbols will produce a new vertex. A whole mathematical problem.
-
-    For now, I'll do nothing: I see no reasonable case to computes and display so much iterations of a L-System. I'll concentrate on optimizing execution time (with memory consumption in mind).
-
-*** Optimization ideas
-    - Use raw OpenGL vertices instead of SFML's sf::Vertex to reduce their size (no texcoord for example)
-    - Use `sqrt` instead of `cos` and `sin` for angles to calculate vertex's position
-
-
 
 ** (Res)sources
 [[http://blog.rabidgremlin.com/2014/12/09/procedural-content-generation-l-systems/][Procedural content generation: L-Systems (by Rabidgremlin)]]
