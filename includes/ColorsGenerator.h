@@ -249,7 +249,8 @@ namespace colors
 
     // Contains a set of keys defining a discrete gradient.
     // Invariant:
-    // - 'keys_' is always sorted with at least a first element of index '0'.
+    // - 'keys_' is always sorted with at least a two element.
+    // - The first element has index 0.
     // - 'colors_' always correspond to the 'keys_'.
     class DiscreteGradient : public ColorGenerator
     {
@@ -291,7 +292,6 @@ namespace colors
     private:
         // Generate 'colors_' from 'keys_'.
         // The invariant are assumed respected.
-        // TODO DOC PRECOND
         void generate_colors();
 
         // Clone 'this' and returns it as a 'shared_ptr'.

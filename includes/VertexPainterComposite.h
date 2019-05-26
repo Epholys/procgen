@@ -29,13 +29,13 @@ namespace colors
         //
         // As such, this is an object exclusively created for the slave painter,
         // and it is managed by 'VertexPainterComposite' and linked to it by a
-        // reference. 
+        // pointer. 
         class ColorGeneratorComposite : public ColorGenerator
         {
         public:
             ColorGeneratorComposite();
             explicit ColorGeneratorComposite(VertexPainterComposite* painter);
-            
+            virtual ~ColorGeneratorComposite() {}
             ColorGeneratorComposite(const ColorGeneratorComposite&) = delete;
             ColorGeneratorComposite(ColorGeneratorComposite&&) = delete;
             ColorGeneratorComposite& operator=(const ColorGeneratorComposite&) = delete;
@@ -56,8 +56,8 @@ namespace colors
             // Deep-copy cloning method.
             std::shared_ptr<ColorGenerator> clone() const override;
 
-            //TODO DOCUMENT WARNING WARNING WARNING
-            // Reference to the linked VertexPainterComposite
+            // Pointer to the linked VertexPainterComposite.
+            // Dangerous, but allows nullptr. 
             VertexPainterComposite* painter_;
             
             // The global 'index_' of the vertex array. Incremented at each
@@ -82,7 +82,6 @@ namespace colors
             VertexPainterWrapperObserver() = delete;
             explicit VertexPainterWrapperObserver(std::shared_ptr<VertexPainterWrapper> painter_wrapper,
                                                  VertexPainterComposite* painter_composite);
-            // TODO remove? Shallow rule-of-five constructors.
             VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other) = delete;
             VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other) = delete;
             VertexPainterWrapperObserver& operator=(const VertexPainterWrapperObserver& other) = delete;
@@ -94,7 +93,7 @@ namespace colors
             void set_composite_painter(VertexPainterComposite* painter);
             
         private:
-            // TODO doc Reference to the linked VertexPainterComposite
+            // Pointer to the linked VertexPainterComposite
             VertexPainterComposite* painter_;
         };
     }
@@ -106,7 +105,9 @@ namespace colors
     {
     public:
         VertexPainterComposite(); // Create a default generator
-        explicit VertexPainterComposite(const std::shared_ptr<ColorGeneratorWrapper>); // TODO DOC no wrap
+        // Useless constructor: only calls the default constructor. Defined to
+        // have a common interface with the other painters.
+        explicit VertexPainterComposite(const std::shared_ptr<ColorGeneratorWrapper>);
         virtual ~VertexPainterComposite() {}
         // This class is mainly used polymorphic-ally, so deleting these
         // constructors saved some LoC so potential bugs.

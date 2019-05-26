@@ -56,9 +56,6 @@ namespace colors
         
         std::shared_ptr<ColorGenerator> ColorGeneratorComposite::clone() const
         {
-            // Should never happen.
-            // Expects(painter_);
-            // return painter_->color_distributor_;
             return std::make_shared<ColorGeneratorComposite>();
         }
 
@@ -79,6 +76,7 @@ namespace colors
         }
         void VertexPainterWrapperObserver::set_painter_wrapper(std::shared_ptr<VertexPainterWrapper> painter_wrapper)
         {
+            Expects(painter_);
             set_target(painter_wrapper);
             add_callback([this](){painter_->notify();});
             painter_->notify();
