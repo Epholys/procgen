@@ -2,7 +2,6 @@
 #define DRAWING_INTERPRETATION_H
 
 #include <functional>
-#include <unordered_map>
 
 #include "cereal/cereal.hpp"
 #include "cereal/types/unordered_map.hpp"
@@ -100,9 +99,13 @@ namespace drawing
     public:
         // Constructors simply redirecting to RuleMap<Order> constructors.
         InterpretationMap() = default;
+        virtual ~InterpretationMap() = default;
         explicit InterpretationMap(const rule_map& rules);
         InterpretationMap(std::initializer_list<typename rule_map::value_type> init);
-        virtual ~InterpretationMap() {}
+        InterpretationMap(const InterpretationMap& other) = default;
+        InterpretationMap& operator=(const InterpretationMap& other) = default;
+        InterpretationMap(InterpretationMap&& other) = default;
+        InterpretationMap& operator=(InterpretationMap&& other) = default;
 
     private:
         // Serialization

@@ -3,7 +3,6 @@
 
 
 #include "VertexPainter.h"
-#include "VertexPainterLinear.h"
 
 namespace colors
 {
@@ -12,7 +11,7 @@ namespace colors
     // will notify() all Observers. It will also notify the Observers if the
     // VertexPainter is modified.
     class VertexPainterWrapper : public Observable
-                              , public Observer<VertexPainter>
+                               , public Observer<VertexPainter>
     {
     public:
         using OPainter = Observer<VertexPainter>;
@@ -20,13 +19,12 @@ namespace colors
         // Default constructor, construct an empy VertexPainter.
         VertexPainterWrapper();
         explicit VertexPainterWrapper(std::shared_ptr<VertexPainter> painter);
-        // Rule-of-five shallow copy.
+        virtual ~VertexPainterWrapper() {}
+        // Rule-of-five deep copy.
         VertexPainterWrapper(const VertexPainterWrapper& other);
         VertexPainterWrapper(VertexPainterWrapper&& other);
         VertexPainterWrapper& operator=(const VertexPainterWrapper& other);
         VertexPainterWrapper& operator=(VertexPainterWrapper&& other);
-
-        VertexPainterWrapper clone() const;
 
         // Getter
         std::shared_ptr<VertexPainter> unwrap() const;

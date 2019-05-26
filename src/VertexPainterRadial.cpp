@@ -1,5 +1,4 @@
 #include "geometry.h"
-#include "helper_math.h"
 #include "VertexPainterRadial.h"
 
 namespace colors
@@ -10,47 +9,18 @@ namespace colors
     {
     }
 
-    VertexPainterRadial::VertexPainterRadial(const std::shared_ptr<ColorGenerator> gen)
-        : VertexPainter{gen}
+    VertexPainterRadial::VertexPainterRadial(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+        : VertexPainter{wrapper}
         , center_{.5,.5}
     {
     }
     
-    VertexPainterRadial::VertexPainterRadial(const VertexPainterRadial& other)
-        : VertexPainter{other}
-        , center_ {other.center_}
+    std::shared_ptr<VertexPainter> VertexPainterRadial::clone() const
     {
-    }
-
-    VertexPainterRadial::VertexPainterRadial(VertexPainterRadial&& other)
-        : VertexPainter{std::move(other)}
-        , center_ {other.center_}
-    {
-    }
-
-    VertexPainterRadial& VertexPainterRadial::operator=(const VertexPainterRadial& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-            center_ = other.center_;
-        }
-        return *this;
-    }
-
-    VertexPainterRadial& VertexPainterRadial::operator=(VertexPainterRadial&& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-            center_ = other.center_;
-        }
-        return *this;
-    }
-
-    std::shared_ptr<VertexPainter> VertexPainterRadial::clone_impl() const
-    {
-        return std::make_shared<VertexPainterRadial>(get_target()->unwrap()->clone());
+        auto clone = std::make_shared<VertexPainterRadial>();
+        clone->center_ = center_;
+        clone->set_target(std::make_shared<ColorGeneratorWrapper>(*get_target()));
+        return clone;
     }
     
     sf::Vector2f VertexPainterRadial::get_center() const
@@ -105,8 +75,10 @@ namespace colors
         {
             float lerp = geometry::distance(v.position, relative_center) / greatest_distance;
             sf::Color color = generator->get(lerp);
-            color.a = v.color.a;
-            v.color = color;
+            if (v.color != sf::Color::Transparent)
+            {
+                v.color = color;
+            }
         }
 
         // // DEBUG
@@ -119,3 +91,6 @@ namespace colors
         // vertices.push_back({{relative_center.x - 5, relative_center.y - 5}, sf::Color::Magenta});
     }
 }
+
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterRadial, "VertexPainterRadial");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterRadial)

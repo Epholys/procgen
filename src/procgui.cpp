@@ -1,12 +1,12 @@
 #include <cctype>
 #include <cstring>
-#include <tuple>
-#include <chrono>
 #include "procgui.h"
+#include "imgui/imgui_internal.h"
 #include "helper_string.h"
-#include "WindowController.h"
 #include "RenderWindow.h"
+#include "WindowController.h"
 #include "VertexPainterRadial.h"
+#include "VertexPainterLinear.h"
 #include "VertexPainterRandom.h"
 #include "VertexPainterSequential.h"
 #include "VertexPainterIteration.h"
@@ -288,7 +288,10 @@ namespace procgui
         int n_iter = parameters.get_n_iter();
         if(ImGui::SliderInt("Iterations", &n_iter, 0, n_iter_max))
         {
-            parameters.set_n_iter(n_iter);
+            if (n_iter >= 0)
+            {
+                parameters.set_n_iter(n_iter);
+            }
         }
         ImGui::SameLine(); ext::ImGui::ShowHelpMarker("CTRL+click and click to directly input values. Higher values will use all of your memory and CPU");
 
@@ -382,13 +385,10 @@ namespace procgui
 }
 namespace
 {
-    void interact_with(colors::VertexPainterConstant& painter, bool from_composite=false)
+    void interact_with(colors::VertexPainterConstant& painter)
     {
-        if (!from_composite)
-        {
-            ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
-                                     ::procgui::color_wrapper_mode::CONSTANT);
-        }
+        ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
+                                 ::procgui::color_wrapper_mode::CONSTANT);
     }
     void interact_with(colors::VertexPainterLinear& painter, bool from_composite=false)
     {
@@ -398,6 +398,17 @@ namespace
                               1.f, 0.f, 360.f, "%.lf") )
         {
             painter.set_angle(angle);
+        }
+        // --- Center ---
+        float center[2] = {painter.get_center().x, painter.get_center().y};
+        if (ImGui::DragFloat2("Gradient Circle Center", center,
+                              0.001f, 0.f, 1.f, "%.2f") )
+        {
+            if (center[0] >= 0 && center[0] <=1 &&
+                center[1] >= 0 && center[1] <=1)
+            {                
+                painter.set_center(sf::Vector2f(center[0], center[1]));
+            }
         }
 
         if (!from_composite)
@@ -412,9 +423,13 @@ namespace
         // --- Center ---
         float center[2] = {painter.get_center().x, painter.get_center().y};
         if (ImGui::DragFloat2("Circle Center", center,
-                              0.01f, 0.f, 1.f, "%.2f") )
+                              0.001f, 0.f, 1.f, "%.2f") )
         {
-            painter.set_center(sf::Vector2f(center[0], center[1]));
+            if (center[0] >= 0 && center[0] <=1 &&
+                center[1] >= 0 && center[1] <=1)
+            {                
+                painter.set_center(sf::Vector2f(center[0], center[1]));
+            }
         }
         
         if (!from_composite)
@@ -429,7 +444,10 @@ namespace
         int block_size = painter.get_block_size();
         if (ImGui::DragInt("Block size", &block_size, 1, 1, std::numeric_limits<int>::max()))
         {
-            painter.set_block_size(block_size);
+            if (block_size > 0)
+            {
+                painter.set_block_size(block_size);
+            }
         }
 
         ext::ImGui::PushStyleGreenButton();
@@ -448,12 +466,15 @@ namespace
     
     void interact_with(colors::VertexPainterSequential& painter, bool from_composite=false)
     {
-        float angle = painter.get_factor();
+        float factor = painter.get_factor();
         
-        if (ImGui::DragFloat("Repetition factor", &angle,
+        if (ImGui::DragFloat("Repetition factor", &factor,
                              0.01f, 0.f, std::numeric_limits<float>::max(), "%.2f") )
         {
-            painter.set_factor(angle);
+            if (factor >= 0)
+            {
+                painter.set_factor(factor);
+            }
         }
             
         if (!from_composite)
@@ -531,7 +552,7 @@ namespace
             ImGui::PopStyleColor(3);
 
             // Button to remove the previous painter.
-            if (it != begin(child_painters))
+            if (child_painters.size() > 1)
             {
                 ImGui::SameLine();                
                 ::ext::ImGui::PushStyleRedButton();
@@ -594,44 +615,46 @@ namespace
                                    int index,
                                    int old_index)
     {
-        std::shared_ptr<colors::ColorGenerator> generator;
+        std::shared_ptr<colors::ColorGeneratorWrapper> next_generator;
         if (index == 0)
         {
-            generator = std::make_shared<colors::ConstantColor>();
+            auto default_generator = std::make_shared<colors::ConstantColor>();
+            next_generator = std::make_shared<colors::ColorGeneratorWrapper>(default_generator);
         }
         else if (index != 0 && old_index == 0)
         {
-            generator = std::make_shared<colors::LinearGradient>();
+            auto default_generator = std::make_shared<colors::LinearGradient>();
+            next_generator = std::make_shared<colors::ColorGeneratorWrapper>(default_generator);
         }
         else
         {
-            generator = painter->get_generator_wrapper()->unwrap()->clone();
+            next_generator = painter->get_generator_wrapper();
         }
 
         switch(index)
         {   
         case 0:
-            painter = std::make_shared<colors::VertexPainterConstant>(generator);
+            painter = std::make_shared<colors::VertexPainterConstant>(next_generator);
             break;
             
         case 1:
-            painter = std::make_shared<colors::VertexPainterLinear>(generator);
+            painter = std::make_shared<colors::VertexPainterLinear>(next_generator);
             break;
             
         case 2:
-            painter = std::make_shared<colors::VertexPainterRadial>(generator);
+            painter = std::make_shared<colors::VertexPainterRadial>(next_generator);
             break;
 
         case 3:
-            painter = std::make_shared<colors::VertexPainterRandom>(generator);
+            painter = std::make_shared<colors::VertexPainterRandom>(next_generator);
             break;
 
         case 4:
-            painter = std::make_shared<colors::VertexPainterSequential>(generator);
+            painter = std::make_shared<colors::VertexPainterSequential>(next_generator);
             break;
 
         case 5:
-            painter = std::make_shared<colors::VertexPainterIteration>(generator);
+            painter = std::make_shared<colors::VertexPainterIteration>(next_generator);
             break;
 
         default:
@@ -715,11 +738,11 @@ namespace procgui
         int index = -1; // Index defining the type of 'painter'. Values are
                         // defined in 'vertex_painter_list()'.
         
-        const auto& info = typeid(*painter).hash_code();
+        auto info = typeid(*painter).hash_code();
         bool is_composite = info == typeid(colors::VertexPainterComposite).hash_code();
         if (is_composite)
         {
-            // If 'painter' is a composite, it will now be accesses through
+            // If 'painter' is a composite, it will now be accessed through
             // 'composite'. 'painter' now refers to the main painter of
             // 'composite'.
             composite = std::dynamic_pointer_cast<colors::VertexPainterComposite>(painter);
@@ -734,24 +757,39 @@ namespace procgui
             painter = painter_wrapper.unwrap();
         }
 
-        // Checkbox to choose if the VertexPainter is composite.
-        bool checked = ImGui::Checkbox("Composite", &is_composite);
-        bool create_new_composite = checked && is_composite;
-        bool remove_composite = checked && (!is_composite);
 
-        if (create_new_composite)
+        // Check if the new/main painter is a VertexPainterConstant
+        bool is_constant = index == 0;
+        
+        // If not, composite features are shown
+        if (!is_constant)
         {
-            // A new VertexPainterComposite is created and refered by
-            // 'composite'. 'painter' is now the main painter of 'composite'.
-            composite = std::make_shared<colors::VertexPainterComposite>();
-            composite->set_main_painter(std::make_shared<colors::VertexPainterWrapper>(painter));
-            painter_wrapper.wrap(composite);
+            // Checkbox to choose if the VertexPainter is composite.
+            bool checked = ImGui::Checkbox("Composite", &is_composite);
+            bool create_new_composite = checked && is_composite;
+            bool remove_composite = checked && (!is_composite);
+
+            if (create_new_composite)
+            {
+                // A new VertexPainterComposite is created and refered by
+                // 'composite'. 'painter' is now the main painter of 'composite'.
+                composite = std::make_shared<colors::VertexPainterComposite>();
+                composite->set_main_painter(std::make_shared<colors::VertexPainterWrapper>(painter));
+                painter_wrapper.wrap(composite);
+            }
+            if (remove_composite)
+            {
+                // The main painter of 'composite' is promoted as the real painter.
+                auto default_generator = std::make_shared<colors::LinearGradient>();
+                painter->set_generator_wrapper(std::make_shared<colors::ColorGeneratorWrapper>(default_generator));
+                painter_wrapper.wrap(painter);
+                composite.reset();
+            }
         }
-        if (remove_composite)
+        // Special case if we switch from a composite to a constant
+        else if (is_composite)
         {
-            // The main painter of 'composite' is promoted as the real painter.
-            painter = composite->get_main_painter()->unwrap();
-            painter->set_generator_wrapper(std::make_shared<colors::ColorGeneratorWrapper>());
+            is_composite = false;
             painter_wrapper.wrap(painter);
             composite.reset();
         }
@@ -761,10 +799,9 @@ namespace procgui
         switch (index)
         {
         case 0:
-
         {
             auto constant = std::dynamic_pointer_cast<colors::VertexPainterConstant>(painter);
-            ::interact_with(*constant, is_composite);
+            ::interact_with(*constant);
             break;
         }
             
@@ -807,7 +844,7 @@ namespace procgui
         {
             ::interact_with(*composite);
         }
-        
+
         ImGui::Unindent();
         conclude();
     }
@@ -820,7 +857,11 @@ namespace
         ImVec4 imcolor = constant.get_color();
         if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
         {
-            constant.set_color(imcolor);
+            sf::Color color = imcolor;
+            if (color != sf::Color::Transparent)
+            {
+                constant.set_color(imcolor);
+            }
         }
 
         // Display the ConstantColor preview.
@@ -830,6 +871,12 @@ namespace
         float space_until_border = ImGui::GetWindowWidth() - window_pos.x  - 10.f;
         float xsize = (space_until_border < 400) ? space_until_border : 400;
         ImVec2 size {xsize, 30.};
+        float checker_box_size = 10.f;
+        ImGui::RenderColorRectWithAlphaCheckerboard(ImVec2(screen_pos.x, screen_pos.y),
+                                                    ImVec2(screen_pos.x+size.x, screen_pos.y+size.y),
+                                                    IM_COL32(0, 0, 0, 0),
+                                                    checker_box_size,
+                                                    ImVec2(0, 0));
         draw_list->AddRectFilled(ImVec2(screen_pos.x, screen_pos.y),
                                  ImVec2(screen_pos.x+size.x, screen_pos.y+size.y),
                                  ImGui::ColorConvertFloat4ToU32(imcolor));
@@ -838,76 +885,191 @@ namespace
 
     void interact_with(colors::LinearGradient& gen)
     {
+        // Two flags to check if the user just stopped to modify the gradient.
+        static bool was_focusing_previous_frame = false;
+        bool is_focusing_this_frame = false;
+        // Persistent keys to freely modify them here without perverting the
+        // pure ones of LinearGradient. 
+        static colors::LinearGradient::keys keys_buffer;
+        // Hacky pointer to make 'keys_buffer' and 'was_focusing_previous_frame'
+        // exclusive to one generator. This function is called for each existing
+        // LinearGradient, so all the static variables are shared... but we only
+        // want the keys buffer behavior for one generator, hence this pointer.
+        static colors::LinearGradient* generator_address = nullptr;
+
         bool is_modified = false;
         
-        auto keys = gen.get_raw_keys();
-
-        // Modify 'gen''s keys: colors and position
-        for (unsigned i=0; i<keys.size(); ++i)
+        colors::LinearGradient::keys keys;
+        if (generator_address &&
+            generator_address == &gen &&
+            was_focusing_previous_frame)
         {
-            ImGui::PushID(i);
+            // Correct generator && user is interacting with the keys.
+            keys = keys_buffer;
+        }
+        else
+        {
+            keys = gen.get_keys();
+        }
+
+        // Insertion flag and positions
+        bool will_insert = false;
+        auto to_insert = begin(keys);
+        // Deletion flag and positions
+        bool will_remove = false;
+        auto to_remove = begin(keys);
+        // Used as ID for ImGui
+        int index = 0;
+        
+        // Modify 'gen''s keys: colors and position
+        for (auto it = begin(keys); it != end(keys); ++it)
+        {
+            ImGui::PushID(index);
+
+            // Button '+' to add a key.
+            ext::ImGui::PushStyleGreenButton();
+            if (ImGui::Button("+"))
+            {
+                will_insert = true;
+                to_insert = it;
+            }
+            ImGui::PopStyleColor(3);
+            ImGui::SameLine();
+
+            // Button '-' to remove a key.
+            ext::ImGui::PushStyleRedButton();
+            if (keys.size() > 2 && ImGui::Button("-"))
+            {
+                will_remove = true;
+                to_remove = it;
+            }
+            ImGui::PopStyleColor(3);
+            ImGui::SameLine();
+
+
             ImGui::BeginGroup();
 
             // Color
-            auto& sfcolor = keys.at(i).first;
+            auto& sfcolor = it->color;
             ImVec4 imcolor = sfcolor;
             if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
             {
                 is_modified = true;
             }
-            sfcolor = imcolor;
+            if (sf::Color(imcolor) != sf::Color::Transparent)
+            {
+                sfcolor = imcolor;
+            }
 
-            // Position
+            // Key's Position
             ImGui::PushItemWidth(50);
-            if(ImGui::DragFloat("", &keys.at(i).second, 0.01, 0., 1., "%.2f"))
+            if(ImGui::DragFloat("", &it->position, 0.01, 0., 1., "%.2f"))
             {
                 is_modified = true;
+            }
+            if (ImGui::IsItemActive())
+            {
+                is_focusing_this_frame = true;
             }
             ImGui::PopItemWidth();
 
             ImGui::EndGroup();
+            
             ImGui::PopID();
             ImGui::SameLine();
+
+            ++index;
         }
 
-        // Button '+' to add a key.
+        // Button '+' to add a key at the end.
         ext::ImGui::PushStyleGreenButton();
         if (ImGui::Button("+"))
         {
-            is_modified = true;
-            keys.push_back({sf::Color::White, 1.f});
+            will_insert = true;
+            to_insert = end(keys);
         }
         ImGui::PopStyleColor(3);
 
-        // Button '-' to remove a key
-        ext::ImGui::PushStyleRedButton();
-        if (keys.size() > 2 && (ImGui::SameLine(), ImGui::Button("-")))
+        // Insertion at 'will_insert'
+        if (will_insert)
         {
             is_modified = true;
-            keys.pop_back();
+            if (to_insert == begin(keys))
+            {
+                auto first_it = begin(keys);
+                auto second_it = next(first_it);
+                first_it->position = second_it->position / 2.;
+                keys.insert(to_insert, {sf::Color::White, 0.f});
+            }
+            else if (to_insert == end(keys))
+            {
+                auto ultimate_it = prev(end(keys));
+                auto penultimate_it = prev(ultimate_it);
+                ultimate_it->position = (1 + penultimate_it->position) / 2.;
+                keys.push_back({sf::Color::White, 1.f});                
+            }
+            else
+            {
+                keys.insert(to_insert,
+                            {sf::Color::White,
+                                    (to_insert->position + prev(to_insert)->position) / 2.f});
+            }
         }
-        ImGui::PopStyleColor(3);
-        
+        // Deletion at 'will_remove'
+        else if (will_remove)
+        {
+            is_modified = true;
+            if (to_remove == begin(keys))
+            {
+                next(to_remove)->position = 0.;
+            }
+            keys.erase(to_remove);
+        }
+
         if (is_modified)
         {
             gen.set_keys(keys);
         }
 
+        if (is_focusing_this_frame)
+        {
+            // The user started key modification
+            was_focusing_previous_frame = true;
+            keys_buffer = keys;
+            generator_address = &gen;
+        }
+        else if (generator_address &&
+                 generator_address == &gen &&
+                 !is_focusing_this_frame &&
+                 was_focusing_previous_frame)
+        {
+            // The user stopped key modification for the concerned generator.
+            was_focusing_previous_frame = false;
+            generator_address = nullptr;
+        }
+
+        
         // Preview the color gradient
-        auto k = gen.get_sanitized_keys();
+        auto k = gen.get_keys();
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 screen_pos = ImGui::GetCursorScreenPos();
         ImVec2 window_pos = ImGui::GetCursorPos();
         float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 10.f;
         float xsize = (space_until_border < 400) ? space_until_border : 400;
         ImVec2 size {xsize, 30.};
+        float checker_box_size = 10.f;
+        ImGui::RenderColorRectWithAlphaCheckerboard(ImVec2(screen_pos.x, screen_pos.y),
+                                                    ImVec2(screen_pos.x+size.x, screen_pos.y+size.y),
+                                                    IM_COL32(0, 0, 0, 0),
+                                                    checker_box_size,
+                                                    ImVec2(0, 0));
         float x = screen_pos.x;
         double ratio = 0.f;
         for (unsigned i=0; i<k.size()-1; ++i)
         {
-            const auto& col1 = k.at(i).first;
-            const auto& col2 = k.at(i+1).first;
-            const auto& f = k.at(i+1).second;
+            const auto& col1 = k.at(i).color;
+            const auto& col2 = k.at(i+1).color;
+            const auto& f = k.at(i+1).position;
             draw_list->AddRectFilledMultiColor({x, screen_pos.y}, ImVec2(x+size.x*(f-ratio), screen_pos.y+size.y),
                                                IM_COL32(col1.r, col1.g, col1.b, col1.a),
                                                IM_COL32(col2.r, col2.g, col2.b, col2.a),
@@ -925,6 +1087,11 @@ namespace
         bool is_modified = false;
         
         auto keys = gen.get_keys();
+        bool will_insert = false;
+        bool insert_before = false;
+        auto to_insert = begin(keys);
+        bool will_remove = false;
+        auto to_remove = begin(keys);
 
         // Modify 'gen''s keys: key's color and transitional colors between
         // these keys.
@@ -933,56 +1100,110 @@ namespace
         // next keys' position. 'modifier' conserve the offset's value.
         // The last color is managed at the end, to not add the transitional
         // colors part.
+        int index = 0;
         int modifier = 0;
-        for (unsigned i=0; i<keys.size()-1; ++i)
+        for (auto it = begin(keys); it != prev(end(keys)); ++it, ++index)
         {
-            ImGui::PushID(i);
+            ImGui::PushID(index);
 
+            ImGui::PushID(0);
+            ext::ImGui::PushStyleGreenButton();
+            if (ImGui::Button("+"))
+            {
+                will_insert = true;
+                insert_before = true;
+                to_insert = it;
+            }
+            ImGui::PopStyleColor(3);
+            
+            ImGui::SameLine();
+            ext::ImGui::PushStyleRedButton();
+            if (keys.size() > 2 && ImGui::Button("-"))
+            {
+                will_remove = true;
+                to_remove = it;
+            }
+            ImGui::PopStyleColor(3);
+            ImGui::SameLine();
+            ImGui::PopID();
+            
             // Key Color
-            auto& sfcolor = keys.at(i).first;
+            auto& sfcolor = it->color;
             ImVec4 imcolor = sfcolor;
             if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
             {
                 is_modified = true;
             }
-            sfcolor = imcolor;
+            if (sf::Color(imcolor) != sf::Color::Transparent)
+            {
+                sfcolor = imcolor;
+            }
 
+            ImGui::PushID(1);
             ImGui::SameLine();
-            ImGui::BeginGroup();
-
-            // Number of transitional colors.
-            int diff = keys.at(i+1).second - keys.at(i).second - 1;
-            ImGui::Text(std::to_string(diff).c_str());
-
-            // '+' button to add a transitional color.
             ext::ImGui::PushStyleGreenButton();
             if (ImGui::Button("+"))
             {
-                is_modified = true;
-                ++modifier;
+                will_insert = true;
+                insert_before = false;
+                to_insert = it;
             }
             ImGui::PopStyleColor(3);
+            ImGui::PopID();
+
             ImGui::SameLine();
-            // '-' button to remove a transitional color
-            ext::ImGui::PushStyleRedButton();
-            if (diff > 0 && ImGui::Button("-"))
+            ImGui::BeginGroup();
+            ImGui::Text("");
+            
+            // Number of transitional colors.
+            int diff = next(it)->index - it->index - 1;
+            int diff_copy = diff;
+
+            ImGui::PushItemWidth(75.f);
+            if (ImGui::InputInt("", &diff, 1, 1) && diff >= 0)
             {
                 is_modified = true;
-                --modifier;
+                modifier += diff - diff_copy; 
             }
-            ImGui::PopStyleColor(3);
+            ImGui::PopItemWidth();
 
             // Offset the current key.
-            keys.at(i+1).second += modifier;
+            next(it)->index += modifier;
 
             ImGui::EndGroup();
             ImGui::PopID();
             ImGui::SameLine();
         }
 
+        ImGui::SameLine();
+        // Button '+' to add a key.
+        ext::ImGui::PushStyleGreenButton();
+        if (ImGui::Button("+"))
+        {
+            will_insert = true;
+            insert_before = true;
+            to_insert = prev(end(keys));
+            // is_modified = true;
+            // keys.push_back({sf::Color::White, keys.back().second+1});
+        }
+        ImGui::PopStyleColor(3);
+
+        ImGui::SameLine();
+        // Button '-' to remove a key
+        ext::ImGui::PushStyleRedButton();
+        if (keys.size() > 2 && (ImGui::SameLine(), ImGui::Button("-")))
+        {
+            will_remove = true;
+            to_remove = prev(end(keys));
+            // is_modified = true;
+            // keys.pop_back();
+        }
+        ImGui::PopStyleColor(3);
+
+        ImGui::SameLine();
         // Last color widget.
         ImGui::PushID(keys.size());
-        auto& sfcolor = keys.back().first;
+        auto& sfcolor = keys.back().color;
         ImVec4 imcolor = sfcolor;
         if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
         {
@@ -991,24 +1212,63 @@ namespace
         sfcolor = imcolor;
         ImGui::PopID();
 
+        ImGui::PushID(keys.size());
         ImGui::SameLine();
         // Button '+' to add a key.
         ext::ImGui::PushStyleGreenButton();
         if (ImGui::Button("+"))
         {
             is_modified = true;
-            keys.push_back({sf::Color::White, keys.back().second+1});
+            keys.push_back({sf::Color::White, keys.back().index+1});
         }
         ImGui::PopStyleColor(3);
+        ImGui::PopID();
 
-        // Button '-' to remove a key
-        ext::ImGui::PushStyleRedButton();
-        if (keys.size() > 1 && (ImGui::SameLine(), ImGui::Button("-")))
+        
+        if (will_insert && insert_before)
         {
             is_modified = true;
-            keys.pop_back();
+            auto inserted = begin(keys);
+            if (to_insert == begin(keys))
+            {
+                inserted = keys.insert(to_insert, {sf::Color::White, 0});
+            }
+            else
+            {
+                inserted = keys.insert(to_insert, {sf::Color::White, to_insert->index});
+            }
+            for (auto it = next(inserted); it != end(keys); ++it)
+            {
+                it->index += 1;
+            }
         }
-        ImGui::PopStyleColor(3);
+        else if (will_insert && !insert_before)
+        {
+            is_modified = true;
+            auto inserted = keys.insert(next(to_insert), {sf::Color::White, to_insert->index + 1});
+            for (auto it = next(inserted); it != end(keys); ++it)
+            {
+                it->index += 1;
+            }
+        }
+        else if (will_remove)
+        {
+            is_modified = true;
+            if (to_remove == begin(keys))
+            {
+                keys.erase(to_remove);
+                int first_key_index = begin(keys)->index;
+                for (auto it = begin(keys); it != end(keys); ++it)
+                {
+                    it->index -= first_key_index;
+                }
+            }
+            else
+            {
+                keys.erase(to_remove);
+            }
+        }
+        
         
         // Preview the color gradient
         std::vector<sf::Color> colors = gen.get_colors();
@@ -1018,6 +1278,12 @@ namespace
         float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 10.f;
         float xsize = (space_until_border < 400) ? space_until_border : 400;
         ImVec2 size {xsize, 30.};
+        float checker_box_size = 10.f;
+        ImGui::RenderColorRectWithAlphaCheckerboard(ImVec2(screen_pos.x, screen_pos.y),
+                                                    ImVec2(screen_pos.x+size.x, screen_pos.y+size.y),
+                                                    IM_COL32(0, 0, 0, 0),
+                                                    checker_box_size,
+                                                    ImVec2(0, 0));
         float x = screen_pos.x;
         double width = size.x / colors.size();
         for (const auto& color : colors)
@@ -1136,6 +1402,29 @@ namespace procgui
         }
     }
 
+    void interact_with_graphics_parameters(bool& box_is_visible)
+    {
+        const std::string name = "Application parameters";
+        if (!set_up(name))
+        {
+            return;
+        }
+
+        // Select background color.
+        ImVec4 imcolor = window::background_color;
+        if(ImGui::ColorEdit4("Background Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+        {
+            window::background_color = imcolor;
+        }
+        ImGui::SameLine();
+        ImGui::Text("Background Color");
+
+        ImGui::Checkbox("LSystem's box visibility", &box_is_visible);
+
+        conclude();
+    }
+
+    
     void interact_with(LSystemView& lsys_view, const std::string& name, bool* open)
     {
         if (open && !(*open))
@@ -1170,13 +1459,20 @@ namespace procgui
             if (pos.x + 500 > windowX)
             {
                 auto absolute_left_side = controller::WindowController::absolute_mouse_position({bounding_box.left,0});
-                pos.x = absolute_left_side.x - 550;                
+                pos.x = absolute_left_side.x - 550;
+
+                // If the window is still out of screen, shift it to the border.
+                if (pos.x < 0)
+                {
+                    pos.x = 0;
+                }
             }
             pos.y -= 150;
 
             // If the window is too far up or down, shift it down or up.
             pos.y = pos.y < 0 ? 0 : pos.y;
             pos.y = pos.y + 450 > windowY ? windowY-450 : pos.y;
+            
             ImGui::SetNextWindowPos(sf::Vector2i{pos.x,pos.y}, ImGuiSetCond_Appearing);
             ImGui::SetNextWindowSize({500,450}, ImGuiSetCond_Appearing);
 
@@ -1204,6 +1500,10 @@ namespace procgui
         interact_with(lsys_view.ref_lsystem_buffer(), "LSystem"+ss.str());
         interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map"+ss.str());
         interact_with(lsys_view.ref_vertex_painter_wrapper(), "Painter");
+
+        bool bounding_box_visibility = lsys_view.box_is_visible();
+        interact_with_graphics_parameters(bounding_box_visibility);
+        lsys_view.set_box_visibility(bounding_box_visibility);
         pop_embedded();
 
         conclude();

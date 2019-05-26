@@ -1,5 +1,4 @@
-#include "geometry.h"
-#include "helper_math.h"
+#include <cmath>
 #include "VertexPainterSequential.h"
 
 namespace colors
@@ -10,47 +9,18 @@ namespace colors
     {
     }
 
-    VertexPainterSequential::VertexPainterSequential(const std::shared_ptr<ColorGenerator> gen)
-        : VertexPainter{gen}
+    VertexPainterSequential::VertexPainterSequential(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+        : VertexPainter{wrapper}
         , factor_{1}
     {
     }
-    
-    VertexPainterSequential::VertexPainterSequential(const VertexPainterSequential& other)
-        : VertexPainter{other}
-        , factor_ {other.factor_}
-    {
-    }
 
-    VertexPainterSequential::VertexPainterSequential(VertexPainterSequential&& other)
-        : VertexPainter{std::move(other)}
-        , factor_ {other.factor_}
+    std::shared_ptr<VertexPainter> VertexPainterSequential::clone() const
     {
-    }
-
-    VertexPainterSequential& VertexPainterSequential::operator=(const VertexPainterSequential& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-            factor_ = other.factor_;
-        }
-        return *this;
-    }
-
-    VertexPainterSequential& VertexPainterSequential::operator=(VertexPainterSequential&& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-            factor_ = other.factor_;
-        }
-        return *this;
-    }
-
-    std::shared_ptr<VertexPainter> VertexPainterSequential::clone_impl() const
-    {
-        return std::make_shared<VertexPainterSequential>(get_target()->unwrap()->clone());
+        auto clone = std::make_shared<VertexPainterSequential>();
+        clone->factor_ = factor_;
+        clone->set_target(std::make_shared<ColorGeneratorWrapper>(*get_target()));
+        return clone;
     }
     
     float VertexPainterSequential::get_factor() const
@@ -82,8 +52,13 @@ namespace colors
             float integral;
             float lerp = std::modf((i * factor_) / size, &integral);
             sf::Color color = generator->get(lerp);
-            color.a = vertices[i].color.a;
-            vertices[i].color = color;
+            if (vertices[i].color != sf::Color::Transparent)
+            {
+                vertices[i].color = color;
+            }
         }
     }
 }
+
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterSequential, "VertexPainterSequential");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterSequential)

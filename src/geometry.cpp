@@ -32,6 +32,7 @@ namespace geometry
 
     float angle_from_vector(const sf::Vector2f vec)
     {
+        // TODO: use atan2!
          // y axis is downward
         if (vec.x == 0 && vec.y <= 0)
         {
@@ -59,6 +60,20 @@ namespace geometry
         }
     }
 
+    sf::Vector2f project(sf::Vector2f A, sf::Vector2f B, sf::Vector2f P)
+    {
+        sf::Vector2f AB = B - A;
+        float AB_squared = AB.x*AB.x + AB.y*AB.y;
+        if (AB_squared == 0)
+        {
+            return A;
+        }
+
+        sf::Vector2f AP = P - A;
+        float t = (AP.x*AB.x + AP.y*AB.y) / AB_squared;
+        sf::Vector2f projection = A + t*AB;
+        return projection;
+    }
     sf::Vector2f project_and_clamp(sf::Vector2f A, sf::Vector2f B, sf::Vector2f P)
     {
         sf::Vector2f AB = B - A;

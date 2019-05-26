@@ -1,6 +1,7 @@
 #include "procgui.h"
 #include "LSystemView.h"
 #include "helper_math.h"
+#include "WindowController.h"
 
 namespace procgui
 {
@@ -39,6 +40,7 @@ namespace procgui
         , bounding_box_ {}
         , sub_boxes_ {}
         , is_selected_ {false}
+        , bounding_box_is_visible_{true}
     {
         // Invariant respected: cohesion between the LSystem/InterpretationMap
         // and the vertices.             
@@ -48,42 +50,47 @@ namespace procgui
         paint_vertices();
     }
 
-    LSystemView::LSystemView(const ext::sf::Vector2d& position)
+    LSystemView::LSystemView(const ext::sf::Vector2d& position, double step)
         : LSystemView(
             "",
             std::make_shared<LSystem>(LSystem("F+F+F+F", {}, "")),
             std::make_shared<InterpretationMap>(default_interpretation_map),
-            std::make_shared<DrawingParameters>(position))
+            std::make_shared<DrawingParameters>(position, step))
     {
         // Arbitrary default LSystem.
+        update_callbacks();
+
+        compute_vertices();
+        paint_vertices();
     }
 
     LSystemView::LSystemView(const LSystemView& other)
-        : OLSys {other.OLSys::get_target()}
-        , OMap {other.OMap::get_target()}
-        , OParams {other.OParams::get_target()}
-        , OPainter {other.OPainter::get_target()}
+        : OLSys {std::make_shared<LSystem>(*other.OLSys::get_target())}
+        , OMap {std::make_shared<InterpretationMap>(*other.OMap::get_target())}
+        , OParams {std::make_shared<DrawingParameters>(*other.OParams::get_target())}
+        , OPainter {std::make_shared<VertexPainterWrapper>(*other.OPainter::get_target())}
         , id_{unique_ids_.get_id()}
         , color_id_{unique_colors_.get_color(id_)}
         , name_ {other.name_}
-        , lsys_buff_ {other.lsys_buff_}
-        , interpretation_buff_ {other.interpretation_buff_}
+        , lsys_buff_ {other.lsys_buff_, OLSys::get_target()}
+        , interpretation_buff_ {other.interpretation_buff_, OMap::get_target()}
         , vertices_ {other.vertices_}
         , iteration_of_vertices_ {other.iteration_of_vertices_}
         , max_iteration_ {other.max_iteration_}
         , bounding_box_ {other.bounding_box_}
         , sub_boxes_ {other.sub_boxes_}
-        , is_selected_ {other.is_selected_}
+        , is_selected_ {false}
+        , bounding_box_is_visible_{true}
     {
         // Manually managing Observer<> callbacks.
         update_callbacks();
     }
 
     LSystemView::LSystemView(LSystemView&& other)
-        : OLSys {std::move(other.OLSys::get_target())}
-        , OMap {std::move(other.OMap::get_target())}
-        , OParams {std::move(other.OParams::get_target())}
-        , OPainter {std::move(other.OPainter::get_target())}
+        : OLSys {other.OLSys::get_target()} // with std::move, clang warning
+        , OMap {other.OMap::get_target()}
+        , OParams {other.OParams::get_target()}
+        , OPainter {other.OPainter::get_target()}
         , id_ {other.id_}
         , color_id_{std::move(other.color_id_)}
         , name_ {std::move(other.name_)}
@@ -94,7 +101,8 @@ namespace procgui
         , max_iteration_ {other.max_iteration_}
         , bounding_box_ {std::move(other.bounding_box_)}
         , sub_boxes_ {std::move(other.sub_boxes_)}
-        , is_selected_ {other.is_selected_}
+        , is_selected_ {false}
+        , bounding_box_is_visible_{true}
     {
         // Manually managing Observer<> callbacks.
         update_callbacks();
@@ -116,22 +124,24 @@ namespace procgui
     {
         if (this != &other)
         {
-            OLSys::set_target(other.OLSys::get_target());
-            OMap::set_target(other.OMap::get_target());
-            OParams::set_target(other.OParams::get_target());
-            OPainter::set_target(other.OPainter::get_target());
+            OLSys::set_target(std::make_shared<LSystem>(*other.OLSys::get_target()));
+            OMap::set_target(std::make_shared<InterpretationMap>(*other.OMap::get_target()));
+            OParams::set_target(std::make_shared<DrawingParameters>(*other.OParams::get_target()));
+            OPainter::set_target(std::make_shared<VertexPainterWrapper>(*other.OPainter::get_target()));
             id_ = unique_ids_.get_id();
             color_id_ = unique_colors_.get_color(id_);
-            name_ = {other.name_};
-            lsys_buff_ = {other.lsys_buff_};
-            interpretation_buff_ = {other.interpretation_buff_};
-            vertices_ = {other.vertices_};
-            iteration_of_vertices_ = {other.iteration_of_vertices_};
-            max_iteration_ = {other.max_iteration_};
-            bounding_box_ = {other.bounding_box_};
-            sub_boxes_ = {other.sub_boxes_};
-            is_selected_ = {other.is_selected_};
+            name_ = other.name_;
+            lsys_buff_ = LSystemBuffer(other.lsys_buff_, OLSys::get_target());
+            interpretation_buff_ = InterpretationMapBuffer(other.interpretation_buff_, OMap::get_target());
+            vertices_ = other.vertices_;
+            iteration_of_vertices_ = other.iteration_of_vertices_;
+            max_iteration_ = other.max_iteration_;
+            bounding_box_ = other.bounding_box_;
+            sub_boxes_ = other.sub_boxes_;
+            is_selected_ = false;
+            bounding_box_is_visible_ = true;
 
+            
             update_callbacks();
         }
 
@@ -142,21 +152,22 @@ namespace procgui
     {
         if (this != &other)
         {
-            OLSys::set_target(std::move(other.OLSys::get_target()));
-            OMap::set_target(std::move(other.OMap::get_target()));
-            OParams::set_target(std::move(other.OParams::get_target()));
-            OPainter::set_target(std::move(other.OPainter::get_target()));
+            OLSys::set_target(other.OLSys::get_target());
+            OMap::set_target(other.OMap::get_target());
+            OParams::set_target(other.OParams::get_target());
+            OPainter::set_target(other.OPainter::get_target());
             id_ = other.id_;
             color_id_ = other.color_id_;
-            name_ = {std::move(other.name_)};
-            lsys_buff_ = {std::move(other.lsys_buff_)};
-            interpretation_buff_ = {std::move(other.interpretation_buff_)};
-            vertices_ = {std::move(other.vertices_)};
-            iteration_of_vertices_ = {std::move(other.iteration_of_vertices_)};
-            max_iteration_ = {other.max_iteration_};
-            bounding_box_ = {std::move(other.bounding_box_)};
-            sub_boxes_ = {std::move(other.sub_boxes_)};
-            is_selected_ = {other.is_selected_};
+            name_ = std::move(other.name_);
+            lsys_buff_ = std::move(other.lsys_buff_);
+            interpretation_buff_ = std::move(other.interpretation_buff_);
+            vertices_ = std::move(other.vertices_);
+            iteration_of_vertices_ = std::move(other.iteration_of_vertices_);
+            max_iteration_ = other.max_iteration_;
+            bounding_box_ = std::move(other.bounding_box_);
+            sub_boxes_ = std::move(other.sub_boxes_);
+            is_selected_ = false;
+            bounding_box_is_visible_ = true;
 
             // Manually managing Observer<> callbacks.
             update_callbacks();
@@ -185,33 +196,9 @@ namespace procgui
         {
             unique_ids_.free_id(id_);
         }
-    }
+    }    
 
-
-    LSystemView LSystemView::clone() const
-    {        
-        // Deep copy.
-        return LSystemView(
-            name_,
-            std::make_shared<LSystem>(*OLSys::get_target()),
-            std::make_shared<InterpretationMap>(*OMap::get_target()),
-            std::make_shared<DrawingParameters>(*OParams::get_target()),
-            std::make_shared<VertexPainterWrapper>(OPainter::get_target()->clone())
-                );
-    }
-
-    LSystemView LSystemView::duplicate() const
-    {
-        return LSystemView(
-            name_,
-            lsys_buff_.get_target(),
-            interpretation_buff_.get_target(),
-            std::make_shared<DrawingParameters>(*OParams::get_target()),
-            OPainter::get_target());
-    }
-    
-
-    drawing::DrawingParameters& LSystemView::ref_parameters()
+    DrawingParameters& LSystemView::ref_parameters()
     {
         return *OParams::get_target();
     }
@@ -223,7 +210,7 @@ namespace procgui
     {
         return interpretation_buff_;
     }
-    colors::VertexPainterWrapper& LSystemView::ref_vertex_painter_wrapper()
+    VertexPainterWrapper& LSystemView::ref_vertex_painter_wrapper()
     {
         return *OPainter::get_target();
     }
@@ -231,7 +218,7 @@ namespace procgui
     {
         return get_transform().transformRect(bounding_box_);
     }
-    const drawing::DrawingParameters& LSystemView::get_parameters() const
+    const DrawingParameters& LSystemView::get_parameters() const
     {
         return *OParams::get_target();
     }
@@ -243,7 +230,7 @@ namespace procgui
     {
         return interpretation_buff_;
     }
-    const colors::VertexPainterWrapper& LSystemView::get_vertex_painter_wrapper() const
+    const VertexPainterWrapper& LSystemView::get_vertex_painter_wrapper() const
     {
         return *OPainter::get_target();
     }
@@ -273,7 +260,7 @@ namespace procgui
                                       *OParams::get_target());
         bounding_box_ = geometry::bounding_box(vertices_);
         sub_boxes_ = geometry::sub_boxes(vertices_, MAX_SUB_BOXES);
-        geometry::expand_boxes(sub_boxes_);
+        geometry::expand_boxes(sub_boxes_); // Add some margin
         paint_vertices();
     }
 
@@ -301,16 +288,21 @@ namespace procgui
         // Draw the vertices.
         target.draw(vertices_.data(), vertices_.size(), sf::LineStrip, get_transform());
 
-        if (is_selected_)
+        if (is_selected_ && bounding_box_is_visible_)
         {
             auto box = get_transform().transformRect(bounding_box_);
-            // Draw the global bounding boxes with the unique color.
+            auto margin = (box.width*.05f > box.height*.05f) ? box.height*.05f : box.width*.05f;
+            float zoom = controller::WindowController::get_zoom_level();
+            margin = margin > 7.5*zoom ? margin : 7.5*zoom;
+            
+            // Draw the global bounding boxes (with a little scaled margin) with
+            // the unique color.
             std::array<sf::Vertex, 5> rect =
-                {{ {{ box.left, box.top}, color_id_},
-                   {{ box.left, box.top + box.height}, color_id_},
-                   {{ box.left + box.width, box.top + box.height}, color_id_},
-                   {{ box.left + box.width, box.top}, color_id_},
-                   {{ box.left, box.top}, color_id_}}};
+                {{ {{ box.left-margin, box.top-margin}, color_id_},
+                   {{ box.left-margin, box.top + box.height + margin}, color_id_},
+                   {{ box.left + box.width + margin, box.top + box.height + margin}, color_id_},
+                   {{ box.left + box.width + margin, box.top - margin}, color_id_},
+                   {{ box.left - margin, box.top - margin}, color_id_}}};
             target.draw(rect.data(), rect.size(), sf::LineStrip);
         }
 
@@ -352,5 +344,14 @@ namespace procgui
     void LSystemView::select()
     {
         is_selected_ = true;
+    }
+
+    bool LSystemView::box_is_visible() const
+    {
+        return bounding_box_is_visible_;
+    }
+    void LSystemView::set_box_visibility(bool is_visible)
+    {
+        bounding_box_is_visible_ = is_visible;
     }
 }

@@ -42,6 +42,9 @@ namespace controller
         
         // Get the absolute mouse position
         static sf::Vector2i get_mouse_position();
+
+        // Getter for the zoom level
+        static float get_zoom_level();
         
         // Public flag to message WindowController to start the save menu. It is
         // also used to let the window open between frames.
@@ -54,8 +57,7 @@ namespace controller
         // 'lsys_views'. 
         static void paste_view(std::list<procgui::LSystemView>& lsys_views,
                                const std::optional<procgui::LSystemView>& view,
-                               const sf::Vector2f& position,
-                               bool is_loaded_from_disk = false);
+                               const sf::Vector2f& position);
 
         // The right-click menu managing everything between
         // creation/copy-pasting of LSystemViews, saving and loading.
@@ -82,7 +84,9 @@ namespace controller
 
         // The zoom level in the window.
         static float zoom_level_;
-
+        // Default step size at default zoom level
+        static const double default_step_;
+        
         // Current mouse position
         static sf::Vector2i mouse_position_;
 

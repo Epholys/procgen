@@ -2,8 +2,6 @@
 #define DRAWING_PARAMETERS_H
 
 
-
-#include <cmath>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
@@ -24,13 +22,18 @@ namespace drawing
     {
     public:
         DrawingParameters() = default;
-        DrawingParameters(const ext::sf::Vector2d& starting_position);
+        virtual ~DrawingParameters() = default;
+        // Special-case constructor when creating a default LSystem
+        DrawingParameters(const ext::sf::Vector2d& starting_position, double step);
         DrawingParameters(const ext::sf::Vector2d& starting_position,
                           double starting_angle,
                           double delta_angle,
                           double step,
                           int n_iter);
         DrawingParameters(const DrawingParameters& params) = default;
+        DrawingParameters(DrawingParameters&& params) = default;
+        DrawingParameters& operator=(const DrawingParameters& params) = default;
+        DrawingParameters& operator=(DrawingParameters&& params) = default;
 
         // Getters
         ext::sf::Vector2d get_starting_position() const;

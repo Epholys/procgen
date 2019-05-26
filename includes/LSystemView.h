@@ -47,25 +47,25 @@ namespace procgui
         using OParams = Observer<drawing::DrawingParameters>;
         using OPainter = Observer<colors::VertexPainterWrapper>;
 
+        // Too many moving pieces to serenely have a default constructor.
+        LSystemView() = delete;
+        virtual ~LSystemView();
         LSystemView(const std::string& name,
                     std::shared_ptr<LSystem> lsys,
                     std::shared_ptr<drawing::InterpretationMap> map,
                     std::shared_ptr<drawing::DrawingParameters> params,
                     std::shared_ptr<colors::VertexPainterWrapper> painter = std::make_shared<colors::VertexPainterWrapper>());
-        explicit LSystemView(const ext::sf::Vector2d& position);
-        // Shallow copy: LSystem, DrawingParameters and VertexPainterWrapper
-        // are shared from 'other'. Use 'clone()' for a deep copy.
+        // Special-case constructor when creating a default LSystem
+        LSystemView(const ext::sf::Vector2d& position, double step);
+        // Deep copy;
+        //   - All Observers' pointers are cloned or moved
+        //   - These pointers are set to the RuleMapBuffers (LSys and Map)
+        //   - Id and colors are created or moved
+        //   - Selection is reset
         LSystemView(const LSystemView& other);
         LSystemView(LSystemView&& other);
         LSystemView& operator=(const LSystemView& other);
         LSystemView& operator=(LSystemView&& other);
-        ~LSystemView();
-        
-        // Clone the LSystemView into an independant other view: deep copy.
-        LSystemView clone() const;
-
-        // Shallow-copy 'this'.
-        LSystemView duplicate() const;
         
         // Reference Getters
         drawing::DrawingParameters& ref_parameters();
@@ -81,9 +81,24 @@ namespace procgui
         const colors::VertexPainterWrapper& get_vertex_painter_wrapper() const;
         int get_id() const;
         sf::Color get_color() const;
+
         // Translation transform to correct screen-space position of the
         // LSystem. 
         sf::Transform get_transform() const;
+
+        // Getter to is_selected_.
+        bool is_selected() const;
+        // Select the view.
+        void select();
+
+        // Getter and Setter to bounding_box_is_displayed;
+        bool box_is_visible() const;
+        void set_box_visibility(bool is_visible);
+
+        // Check if 'click' is inside one of the correctly translated
+        // 'bounding_box_'. 
+        bool is_inside(const sf::Vector2f& click) const;
+
 
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();
@@ -92,20 +107,10 @@ namespace procgui
         // Draw the vertices.
         void draw(sf::RenderTarget &target);
 
-        // Getter to is_selected_.
-        bool is_selected() const;
-
-        // Check if 'click' is inside one of the correctly translated
-        // 'bounding_box_'. 
-        bool is_inside(const sf::Vector2f& click) const;
-
-        // Select the view.
-        void select();
-
                 
     private:
         void update_callbacks();
-        
+
         // The managers of unique identifiers and colors for each instance of
         // LSystemView. 
         static UniqueId unique_ids_;
@@ -144,6 +149,8 @@ namespace procgui
 
         // True if the window is selected.
         bool is_selected_;
+        // True if the bounding box must be visible
+        bool bounding_box_is_visible_;
 
         // Serialization
         friend class cereal::access;
@@ -152,9 +159,10 @@ namespace procgui
         void save (Archive& ar, const std::uint32_t) const
             {
                 ar(cereal::make_nvp("name", name_),
-                   cereal::make_nvp("LSystem", *Observer<LSystem>::get_target()),
-                   cereal::make_nvp("DrawingParameters", *Observer<drawing::DrawingParameters>::get_target()),
-                   cereal::make_nvp("Interpretation Map", *Observer<drawing::InterpretationMap>::get_target()));
+                   cereal::make_nvp("LSystem", *OLSys::get_target()),
+                   cereal::make_nvp("DrawingParameters", *OParams::get_target()),
+                   cereal::make_nvp("Interpretation Map", *OMap::get_target()),
+                   cereal::make_nvp("VertexPainter", OPainter::get_target()->unwrap()));
             }
 
         template<class Archive>
@@ -164,16 +172,20 @@ namespace procgui
                 LSystem lsys;
                 drawing::DrawingParameters params;
                 drawing::InterpretationMap map;
-
+                std::shared_ptr<colors::VertexPainter> painter;                
+                
                 ar(name,
                    cereal::make_nvp("LSystem", lsys),
                    cereal::make_nvp("DrawingParameters", params),
-                   cereal::make_nvp("Interpretation Map", map));
+                   cereal::make_nvp("Interpretation Map", map),
+                   cereal::make_nvp("VertexPainter", painter));
 
+                
                 *this = LSystemView(name,
                                     std::make_shared<LSystem>(lsys),
                                     std::make_shared<drawing::InterpretationMap>(map),
-                                    std::make_shared<drawing::DrawingParameters>(params));
+                                    std::make_shared<drawing::DrawingParameters>(params),
+                                    std::make_shared<colors::VertexPainterWrapper>(painter));
 
             }
     };

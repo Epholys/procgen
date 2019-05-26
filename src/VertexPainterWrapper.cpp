@@ -18,7 +18,7 @@ namespace colors
     
     VertexPainterWrapper::VertexPainterWrapper(const VertexPainterWrapper& other)
         : Observable{}
-        , OPainter{other.get_target()}
+        , OPainter{other.get_target()->clone()}
     {
         add_callback([this](){notify();});
     }
@@ -35,7 +35,7 @@ namespace colors
     {
         if (this != &other)
         {
-            set_target(other.get_target());
+            set_target(other.get_target()->clone());
             add_callback([this](){notify();});
         }
         return *this;
@@ -50,11 +50,6 @@ namespace colors
             other.set_target(nullptr);
         }
         return *this;
-    }
-
-    VertexPainterWrapper VertexPainterWrapper::clone() const
-    {
-        return VertexPainterWrapper(get_target()->clone());
     }
     
     std::shared_ptr<VertexPainter> VertexPainterWrapper::unwrap() const

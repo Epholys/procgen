@@ -8,10 +8,14 @@
 
 #include "SFML/Graphics.hpp"
 
-#include "LSystemView.h"
+namespace procgui
+{
+        class LSystemView;
+}
 
 namespace controller
 {
+    
     // LSystemController manages the behaviour of the LSystemViews beyond the
     // GUI: selection, dragging and riglt-click for example.
     //
@@ -39,7 +43,6 @@ namespace controller
         // Getters
         static const std::optional<procgui::LSystemView>& saved_view();
         static const procgui::LSystemView* under_mouse();
-        static bool is_clone();
 
     private:
         // Delete the LSystemView with identifier 'id' in 'views'
@@ -59,10 +62,6 @@ namespace controller
         static const std::chrono::duration<unsigned long long, std::milli> double_click_time_;
         // Previous left-click timestamp.
         static std::chrono::time_point<std::chrono::steady_clock> click_time_;
-
-        // True if saved 'save_view_' is to be cloned. False if it is to be
-        // duplicated.
-        static bool is_clone_;
     };
 }
 

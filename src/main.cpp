@@ -1,20 +1,8 @@
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-
 #include <SFML/Graphics.hpp>
 
-#include "imgui/imgui.h"
 #include "imgui/imgui-SFML.h"
-#include "cereal/archives/json.hpp"
-#include "cereal/types/vector.hpp"
 
 #include "LSystem.h"
-#include "RuleMapBuffer.h"
-#include "InterpretationMapBuffer.h"
-#include "Turtle.h"
-#include "helper_math.h"
-#include "procgui.h"
 #include "WindowController.h"
 #include "RenderWindow.h"
 
@@ -22,6 +10,7 @@ using namespace drawing;
 using namespace math;
 using namespace procgui;
 using namespace controller;
+using namespace colors;
 
 int main()
 {
@@ -68,7 +57,7 @@ int main()
     sf::Clock delta_clock;
     while (window.isOpen())
     {
-        window.clear();
+        window.clear(window::background_color);
 
         std::vector<sf::Event> events;
         sf::Event event;
@@ -76,7 +65,7 @@ int main()
         // The events are then redistributed in the rest of the application.
         while(window.pollEvent(event))
         {
-            events.push_back(event);
+            events.push_back(event); 
             ImGui::SFML::ProcessEvent(event);
         }
         

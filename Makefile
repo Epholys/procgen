@@ -16,7 +16,7 @@ SRC_DIR = src
 CXXFLAGS   += -std=c++17 -g -O0 -Wall -Wextra -pthread
 MACROFLAGS += -DGSL_THROW_ON_CONTRACT_VIOLATION
 LFLAGS     += -lsfml-system -lsfml-window -lsfml-graphics -lGL -lstdc++fs
-IFLAGS     += -I. -I$(INCLUDE_DIR)
+IFLAGS     += -isystem . -I$(INCLUDE_DIR)
 
 # Special optimization flags for release and profiling
 release : CXXFLAGS = -std=c++17 -O3 -ffast-math -Wall -Wextra -pthread

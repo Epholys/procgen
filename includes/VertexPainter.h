@@ -4,10 +4,12 @@
 
 #include <memory>
 #include <SFML/Graphics.hpp>
+#include "cereal/cereal.hpp"
+#include "cereal/types/polymorphic.hpp"
 #include "Observable.h"
 #include "Observer.h"
-#include "ColorsGenerator.h"
 #include "ColorsGeneratorWrapper.h"
+
 
 namespace colors
 {
@@ -25,22 +27,22 @@ namespace colors
 
         VertexPainter(); // Create a default generator
         virtual ~VertexPainter() {};
-        explicit VertexPainter(const std::shared_ptr<ColorGenerator> gen);
-        // Rule-of-five shallow copy
-        VertexPainter(const VertexPainter& other);
-        VertexPainter(VertexPainter&& other);
-        VertexPainter& operator=(const VertexPainter& other);
-        VertexPainter& operator=(VertexPainter&& other);
+        explicit VertexPainter(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        // Delete the copy/move constructors to avoid slicing
+        VertexPainter(const VertexPainter&) = delete;
+        VertexPainter(VertexPainter&&) = delete;
+        VertexPainter& operator=(const VertexPainter&) = delete;
+        VertexPainter& operator=(VertexPainter&&) = delete;
 
         // Clone method to do a deep copy of the 'this' object with the correct
-        // child class. Calls 'clone_impl()' internally, so the child class can
-        // copy itself into a polymorphic pointer.
-        std::shared_ptr<VertexPainter> clone() const;
+        // child wrapped in this polymorphic pointer.
+        virtual std::shared_ptr<VertexPainter> clone() const = 0;
         
         // Getters/Setters
         std::shared_ptr<ColorGeneratorWrapper> get_generator_wrapper() const;
         void set_generator_wrapper(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper);
-
+        void set_target(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper);
+        
         // Paint 'vertices' with the informations of 'bounding_box' and
         // 'iteration_of_vertices' according to a rule with the colors from
         // 'ColorGeneratorWrapper::ColorGenerator'.
@@ -48,14 +50,7 @@ namespace colors
                                     const std::vector<int>& iteration_of_vertices,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) = 0;
-
-    private:
-        // Clone implementation.
-        virtual std::shared_ptr<VertexPainter> clone_impl() const = 0;
     };
 }
 
-
 #endif // VERTEX_PAINTER_H
-
-

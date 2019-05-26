@@ -2,7 +2,9 @@
 #define LSYSTEM_BUFFER_H
 
 
+#include "LSystem.h"
 #include "RuleMapBuffer.h"
+
 
 namespace procgui
 {

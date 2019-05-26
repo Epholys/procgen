@@ -1,5 +1,5 @@
 template<typename Target>
-RuleMapBuffer<Target>::RuleMapBuffer(const std::shared_ptr<Target>& target)
+RuleMapBuffer<Target>::RuleMapBuffer(std::shared_ptr<Target> target)
     : Observer<Target>(target)
     , buffer_ {}
     , instruction_ {nullptr}
@@ -18,6 +18,15 @@ RuleMapBuffer<Target>::RuleMapBuffer(const std::shared_ptr<Target>& target)
 template<typename Target>
 RuleMapBuffer<Target>::RuleMapBuffer(const RuleMapBuffer& other)
     : Observer<Target>(other.Observer<Target>::get_target())
+    , buffer_ {other.buffer_}
+    , instruction_ {nullptr}
+{
+    Observer<Target>::add_callback([this](){sync();});
+}
+
+template<typename Target>
+RuleMapBuffer<Target>::RuleMapBuffer(const RuleMapBuffer& other, std::shared_ptr<Target> target)
+    : Observer<Target>(target)
     , buffer_ {other.buffer_}
     , instruction_ {nullptr}
 {

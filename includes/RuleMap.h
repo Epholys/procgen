@@ -24,9 +24,13 @@ public:
     using rule_map = std::unordered_map<char, Successor>;
     
     RuleMap() = default;
+    virtual ~RuleMap() {}
     explicit RuleMap(const rule_map& rules);
     RuleMap(std::initializer_list<typename rule_map::value_type> init);
-    virtual ~RuleMap() {}
+    RuleMap(const RuleMap& other) = default;
+    RuleMap(RuleMap&& other) = default;
+    RuleMap& operator=(const RuleMap& other) = default;
+    RuleMap& operator=(RuleMap&& other) = default;
 
     // --- Getters and setters ---
     // Check if 'predecessor' exists in the rules.

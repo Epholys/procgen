@@ -1,4 +1,3 @@
-#include "geometry.h"
 #include "VertexPainterRandom.h"
 
 namespace colors
@@ -11,55 +10,22 @@ namespace colors
     {
     }
 
-    VertexPainterRandom::VertexPainterRandom(const std::shared_ptr<ColorGenerator> gen)
-        : VertexPainter{gen}
+    VertexPainterRandom::VertexPainterRandom(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+        : VertexPainter{wrapper}
         , block_size_{1}
         , random_seed_(math::random_dev())
         , random_generator_(random_seed_)
     {
     }
     
-    VertexPainterRandom::VertexPainterRandom(const VertexPainterRandom& other)
-        : VertexPainter{other}
-        , block_size_{other.block_size_}
-        , random_seed_{other.random_seed_}
-        , random_generator_(random_seed_) 
+    std::shared_ptr<VertexPainter> VertexPainterRandom::clone() const
     {
-    }
-
-    VertexPainterRandom::VertexPainterRandom(VertexPainterRandom&& other)
-        : VertexPainter{std::move(other)}
-        , block_size_{other.block_size_}
-        , random_seed_{other.random_seed_}
-        , random_generator_(random_seed_) 
-    {
-    }
-
-    VertexPainterRandom& VertexPainterRandom::operator=(const VertexPainterRandom& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-            block_size_ = other.block_size_;
-            random_seed_ = other.random_seed_;
-            random_generator_.seed(random_seed_); 
-        }
-        return *this;
-    }
-
-    VertexPainterRandom& VertexPainterRandom::operator=(VertexPainterRandom&& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-            random_seed_ = other.random_seed_;
-        }
-        return *this;
-    }
-
-    std::shared_ptr<VertexPainter> VertexPainterRandom::clone_impl() const
-    {
-        return std::make_shared<VertexPainterRandom>(get_target()->unwrap()->clone());
+        auto clone = std::make_shared<VertexPainterRandom>();
+        clone->block_size_ = block_size_;
+        clone->random_seed_ = random_seed_;
+        clone->random_generator_ = random_generator_;
+        clone->set_target(std::make_shared<ColorGeneratorWrapper>(*get_target()));
+        return clone;
     }
 
     void VertexPainterRandom::randomize()
@@ -77,6 +43,7 @@ namespace colors
     
     void VertexPainterRandom::set_block_size(int block_size)
     {
+        Expects(block_size > 0);
         block_size_ = block_size;
         notify();
     }
@@ -107,9 +74,14 @@ namespace colors
             // We call 'get()' each time because we must interact nicely with
             // 'VertexPainterComposite'. 
             sf::Color color = generator->get(rand);
-            color.a = v.color.a;
-            v.color = color;
+            if (v.color != sf::Color::Transparent)
+            {
+                v.color = color;
+            }
             ++block_index;
         }
     }
 }
+
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterRandom, "VertexPainterRandom");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterRandom)

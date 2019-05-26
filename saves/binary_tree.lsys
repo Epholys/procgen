@@ -1,13 +1,13 @@
 {
     "LSystemView": {
         "cereal_class_version": 0,
-        "name": "binary_tree",
+        "name": "Plant",
         "LSystem": {
             "cereal_class_version": 0,
             "axiom": "X",
             "production_rules": {
-                "X": "F[-X]+X",
-                "F": "FF"
+                "F": "FF",
+                "X": "F[-X][+X]"
             },
             "iteration_predecessor": "X"
         },
@@ -20,11 +20,32 @@
         },
         "Interpretation Map": {
             "cereal_class_version": 0,
-            "-": "Turn right",
             "]": "Load position",
-            "+": "Turn left",
-            "F": "Go forward",
-            "[": "Save Position"
+            "+": "Turn right",
+            "-": "Turn left",
+            "[": "Save Position",
+            "F": "Go forward"
+        },
+        "VertexPainter": {
+            "polymorphic_id": 2147483649,
+            "polymorphic_name": "VertexPainterConstant",
+            "ptr_wrapper": {
+                "id": 2147483649,
+                "data": {
+                        "cereal_class_version": 0,
+                        "ColorGenerator": {
+                        "polymorphic_id": 2147483650,
+                        "polymorphic_name": "ConstantColor",
+                        "ptr_wrapper": {
+                            "id": 2147483650,
+                            "data": {
+                                "cereal_class_version": 0,
+                                "Color": "#FFFFFFFF"
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

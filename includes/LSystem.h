@@ -4,8 +4,6 @@
 
 #include <string>
 #include <unordered_map>
-#include <iostream>
-#include <algorithm>
 
 #include "cereal/cereal.hpp"
 #include "cereal/types/unordered_map.hpp"
@@ -96,7 +94,12 @@ public:
         
     // Constructors
     LSystem() = default;
+    virtual ~LSystem() = default;
     LSystem(const std::string& axiom, const production_rules& prod, const std::string& preds);
+    LSystem(const LSystem& other) = default;
+    LSystem& operator=(const LSystem& other) = default;
+    LSystem(LSystem&& other) = default;
+    LSystem& operator=(LSystem&& other) = default;
 
     // Getters and setters
     std::string get_axiom() const;

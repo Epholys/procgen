@@ -1,7 +1,6 @@
 #include <fstream>
 
 #include "imgui/imgui.h"
-#include "imgui/imgui-SFML.h"
 #include "cereal/archives/json.hpp"
 
 #include "helper_string.h"
@@ -26,6 +25,9 @@ namespace controller
     bool WindowController::save_menu_open_ {false};
     bool WindowController::load_menu_open_ {false};
 
+    const double WindowController::default_step_ {25.f}; 
+
+    
     fs::path WindowController::save_dir_ = fs::u8path(u8"saves");
     
     sf::Vector2f WindowController::real_mouse_position(sf::Vector2i mouse_click)
@@ -54,11 +56,14 @@ namespace controller
         return mouse_position_;
     }
 
+    float WindowController::get_zoom_level()
+    {
+        return zoom_level_;
+    }
 
     void WindowController::paste_view(std::list<procgui::LSystemView>& lsys_views,
                                       const std::optional<procgui::LSystemView>& view,
-                                      const sf::Vector2f& position,
-                                      bool is_loaded_from_disk)
+                                      const sf::Vector2f& position)
     {
         if (!view)
         {
@@ -67,23 +72,13 @@ namespace controller
 
         // Before adding the view to the vector<>, update
         // 'starting_position' to the new location.
-        const auto& pasted_view = *view;
+        auto pasted_view = *view;
         auto box = pasted_view.get_bounding_box();
         ext::sf::Vector2d pos {position};
         ext::sf::Vector2d middle = {box.left + box.width/2, box.top + box.height/2};
         middle = pasted_view.get_parameters().get_starting_position() - middle;
-        if (!is_loaded_from_disk && LSystemController::is_clone())
-        {
-            auto cloned_view = pasted_view.clone();
-            cloned_view.ref_parameters().set_starting_position(pos + middle);
-            lsys_views.emplace_front(cloned_view);
-        }
-        else
-        {
-            auto duplicated_view = pasted_view.duplicate();
-            duplicated_view.ref_parameters().set_starting_position(pos + middle);
-            lsys_views.emplace_front(duplicated_view);
-        }
+        pasted_view.ref_parameters().set_starting_position(pos + middle);
+        lsys_views.emplace_front(pasted_view);
     }
     
     void WindowController::right_click_menu(sf::RenderWindow& window, std::list<procgui::LSystemView>& lsys_views)
@@ -92,7 +87,8 @@ namespace controller
         {
             if (ImGui::MenuItem("New LSystem", "Ctrl+N"))
             {
-                lsys_views.emplace_front(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))));
+                lsys_views.emplace_front(procgui::LSystemView(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))),
+                                                              default_step_ * zoom_level_));
             }
             if (ImGui::MenuItem("Load LSystem", "Ctrl+O"))
             {
@@ -330,7 +326,7 @@ namespace controller
                 else
                 {
                     // Create a default LSystemView.
-                    procgui::LSystemView loaded_view({0,0});
+                    procgui::LSystemView loaded_view({0,0}, default_step_ * zoom_level_);
                     try
                     {
                         // Load it from the file.
@@ -347,7 +343,7 @@ namespace controller
                     {
                         // Paste the new LSystemView at the correct position.
                         auto tmp = std::make_optional(loaded_view);
-                        paste_view(lsys_views, tmp, mouse_position_to_load_, true);
+                        paste_view(lsys_views, tmp, mouse_position_to_load_);
                         load_menu_open_ = false;
                     }
                 }
@@ -407,7 +403,8 @@ namespace controller
                 }
                 else if (event.key.code == sf::Keyboard::N)
                 {
-                    lsys_views.emplace_front(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))));
+                    lsys_views.emplace_front(procgui::LSystemView(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))),
+                                                                  default_step_ * zoom_level_));
                 }
                 else if (event.key.code == sf::Keyboard::O)
                 {

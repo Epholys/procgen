@@ -49,6 +49,11 @@ namespace sf
     }
 }
 
+// Some InterpretationMap's constructors are defaulted, we assume the
+// implementation is correct.
+// The other constructors are dead-simple by calling the parent class.
+
+
 // Test the go_forward order.
 TEST_F(DrawingTest, go_forward)
 {
@@ -100,7 +105,8 @@ TEST_F(DrawingTest, stack_test)
     ASSERT_EQ(saved_state.position, turtle.state.position);
     ASSERT_EQ(saved_state.direction, turtle.state.direction);
 
-    std::vector<int> expected_iter {1,1,1,1};
+    // 1 at creation, 1 at go_forward, 3 at load_position_fn
+    std::vector<int> expected_iter {1,1,1,1,1};
     ASSERT_EQ(turtle.iteration_of_vertices, expected_iter);
 }
 
@@ -117,19 +123,19 @@ TEST_F(DrawingTest, compute_paths)
 
     std::vector<sf::Vertex> norm { turtle.vertices.at(0),
                                    turtle.vertices.at(1),
-                                   turtle.vertices.at(2),
-                                   turtle.vertices.at(3) };
+                                   turtle.vertices.at(2) };
 
     parameters.set_n_iter(1);
     auto [str, iter, _] = compute_vertices(lsys, interpretation, parameters);
 
     ASSERT_EQ(str, norm);
 
-    
-    std::vector<int> expected_iter {1,1,1,1};
+    // 1 at creation, 1 at first go_forward, 1 at second go_forward
+    std::vector<int> expected_iter {1,1,1};
     ASSERT_EQ(iter, expected_iter);
 }
 
+// Also test 'Order' save/load
 TEST_F(DrawingTest, serialization)
 {
     InterpretationMap imap;
@@ -146,3 +152,4 @@ TEST_F(DrawingTest, serialization)
 
     ASSERT_EQ(interpretation.get_rules(), imap.get_rules());
 }
+

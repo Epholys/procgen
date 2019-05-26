@@ -29,12 +29,18 @@ namespace colors
         //
         // As such, this is an object exclusively created for the slave painter,
         // and it is managed by 'VertexPainterComposite' and linked to it by a
-        // reference. 
+        // pointer. 
         class ColorGeneratorComposite : public ColorGenerator
         {
         public:
-            explicit ColorGeneratorComposite(VertexPainterComposite& painter);
-
+            ColorGeneratorComposite();
+            explicit ColorGeneratorComposite(VertexPainterComposite* painter);
+            virtual ~ColorGeneratorComposite() {}
+            ColorGeneratorComposite(const ColorGeneratorComposite&) = delete;
+            ColorGeneratorComposite(ColorGeneratorComposite&&) = delete;
+            ColorGeneratorComposite& operator=(const ColorGeneratorComposite&) = delete;
+            ColorGeneratorComposite& operator=(ColorGeneratorComposite&&) = delete;
+            
             // Returns a dummy sf::Color::Transparent but as a side-effect fills
             // 'vertex_indices_pools_' of VertexPainterComposite.
             //
@@ -48,14 +54,20 @@ namespace colors
             
         private:
             // Deep-copy cloning method.
-            std::shared_ptr<ColorGenerator> clone_impl() const override;
+            std::shared_ptr<ColorGenerator> clone() const override;
 
-            // Reference to the linked VertexPainterComposite
-            VertexPainterComposite& painter_;
+            // Pointer to the linked VertexPainterComposite.
+            // Dangerous, but allows nullptr. 
+            VertexPainterComposite* painter_;
             
             // The global 'index_' of the vertex array. Incremented at each
             // 'get()' call.
             std::size_t global_index_;
+
+            friend class cereal::access;
+            template<class Archive>
+            void serialize(Archive&)
+                { }
         };
 
         // A utility class to manipulate an Observer of a
@@ -67,19 +79,22 @@ namespace colors
         public:
             using OWrapper = Observer<VertexPainterWrapper>;
             
+            VertexPainterWrapperObserver() = delete;
             explicit VertexPainterWrapperObserver(std::shared_ptr<VertexPainterWrapper> painter_wrapper,
-                                                 VertexPainterComposite& painter_composite);
-            // Shallow rule-of-five constructors.
-            VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other);
-            VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other);
-            VertexPainterWrapperObserver& operator=(const VertexPainterWrapperObserver& other);
-            VertexPainterWrapperObserver& operator=(VertexPainterWrapperObserver&& other);
+                                                 VertexPainterComposite* painter_composite);
+            VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other) = delete;
+            VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other) = delete;
+            VertexPainterWrapperObserver& operator=(const VertexPainterWrapperObserver& other) = delete;
+            VertexPainterWrapperObserver& operator=(VertexPainterWrapperObserver&& other) = delete;
 
             std::shared_ptr<VertexPainterWrapper> get_painter_wrapper() const;
             void set_painter_wrapper(std::shared_ptr<VertexPainterWrapper> painter_buff);
+
+            void set_composite_painter(VertexPainterComposite* painter);
             
         private:
-            VertexPainterComposite& painter_;
+            // Pointer to the linked VertexPainterComposite
+            VertexPainterComposite* painter_;
         };
     }
     
@@ -90,12 +105,16 @@ namespace colors
     {
     public:
         VertexPainterComposite(); // Create a default generator
-        explicit VertexPainterComposite(const std::shared_ptr<ColorGenerator> gen);
-        // Shallow rule-of-five constructors.
-        VertexPainterComposite(const VertexPainterComposite& other);
-        VertexPainterComposite(VertexPainterComposite&& other);
-        VertexPainterComposite& operator=(const VertexPainterComposite& other);
-        VertexPainterComposite& operator=(VertexPainterComposite&& other);
+        // Useless constructor: only calls the default constructor. Defined to
+        // have a common interface with the other painters.
+        explicit VertexPainterComposite(const std::shared_ptr<ColorGeneratorWrapper>);
+        virtual ~VertexPainterComposite() {}
+        // This class is mainly used polymorphic-ally, so deleting these
+        // constructors saved some LoC so potential bugs.
+        VertexPainterComposite(const VertexPainterComposite& other) = delete;;
+        VertexPainterComposite(VertexPainterComposite&& other) = delete;;
+        VertexPainterComposite& operator=(const VertexPainterComposite& other) = delete;;
+        VertexPainterComposite& operator=(VertexPainterComposite&& other) = delete;;
 
         // Getters/Setters
         std::list<std::shared_ptr<VertexPainterWrapper>> get_child_painters() const;
@@ -113,9 +132,9 @@ namespace colors
         static std::shared_ptr<VertexPainter> get_copied_painter();
         static void save_painter(std::shared_ptr<VertexPainter> painter);
 
-    private:
         // Implements the deep-copy cloning.
-        virtual std::shared_ptr<VertexPainter> clone_impl() const override;
+        virtual std::shared_ptr<VertexPainter> clone() const override;
+    private:
 
         // The copied painter
         static std::shared_ptr<VertexPainter> copied_painter_;
@@ -137,6 +156,41 @@ namespace colors
         std::list<std::vector<std::size_t>> vertex_indices_pools_;
 
         std::list<impl::VertexPainterWrapperObserver> child_painters_observers_;
+
+        friend class cereal::access;
+        template<class Archive>
+        void save(Archive& ar, const std::uint32_t) const
+            {
+                std::shared_ptr<VertexPainter> main_painter = main_painter_observer_.get_painter_wrapper()->unwrap();
+                std::vector<std::shared_ptr<VertexPainter>> child_painters;
+                for(const auto& child : child_painters_observers_)
+                {
+                    child_painters.push_back(child.get_painter_wrapper()->unwrap());
+                }
+                ar(cereal::make_nvp("main_painter", main_painter),
+                   cereal::make_nvp("child_painters", child_painters));
+            }
+        template<class Archive>
+        void load(Archive& ar, const std::uint32_t)
+            {
+                std::shared_ptr<VertexPainter> main_painter;
+                std::vector<std::shared_ptr<VertexPainter>> child_painters;
+                ar(cereal::make_nvp("main_painter", main_painter),
+                   cereal::make_nvp("child_painters", child_painters));
+
+                std::shared_ptr<VertexPainterWrapper> main_wrapper = std::make_shared<VertexPainterWrapper>();
+                main_wrapper->wrap(main_painter);
+                set_main_painter(main_wrapper);
+                
+                std::list<std::shared_ptr<VertexPainterWrapper>> child_wrappers;
+                for(auto painter : child_painters)
+                {
+                    std::shared_ptr<VertexPainterWrapper> wrapper = std::make_shared<VertexPainterWrapper>();;
+                    wrapper->wrap(painter);
+                    child_wrappers.push_back(wrapper);
+                }
+                set_child_painters(child_wrappers);
+            }
     };
 }
 

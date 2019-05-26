@@ -11,21 +11,23 @@ namespace colors
     // LinearGradient), it will 'notify()' all Observers. It will also notify if
     // the generator is modified.
     class ColorGeneratorWrapper : public Observable
-                               , public Observer<ColorGenerator>
+                                , public Observer<ColorGenerator>
     {
     public:
         using OGen = Observer<ColorGenerator>;
         
         // Construct this object with a white ConstantColor.
         ColorGeneratorWrapper();
+        virtual ~ColorGeneratorWrapper() {};
         // Construct initializing 'generator_' with 'gen'
         explicit ColorGeneratorWrapper(std::shared_ptr<ColorGenerator> gen);
-        // Rule-of-five shallow copy.
+        // Rule-of-five depp copy.
         ColorGeneratorWrapper(const ColorGeneratorWrapper& other);
         ColorGeneratorWrapper(ColorGeneratorWrapper&& other);
         ColorGeneratorWrapper& operator=(const ColorGeneratorWrapper& other);
         ColorGeneratorWrapper& operator=(ColorGeneratorWrapper&& other);
 
+        
         // Getter
         std::shared_ptr<ColorGenerator> unwrap() const;
 

@@ -7,42 +7,15 @@ namespace colors
     {
     }
 
-    VertexPainterConstant::VertexPainterConstant(const std::shared_ptr<ColorGenerator> gen)
-        : VertexPainter{gen}
+    VertexPainterConstant::VertexPainterConstant(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+        : VertexPainter{wrapper}
     {
     }
     
-    VertexPainterConstant::VertexPainterConstant(const VertexPainterConstant& other)
-        : VertexPainter{other}
+    std::shared_ptr<VertexPainter> VertexPainterConstant::clone() const
     {
-    }
-
-    VertexPainterConstant::VertexPainterConstant(VertexPainterConstant&& other)
-        : VertexPainter{std::move(other)}
-    {
-    }
-
-    VertexPainterConstant& VertexPainterConstant::operator=(const VertexPainterConstant& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-        }
-        return *this;
-    }
-
-    VertexPainterConstant& VertexPainterConstant::operator=(VertexPainterConstant&& other)
-    {
-        if (this != &other)
-        {
-            VertexPainter::operator=(other);
-        }
-        return *this;
-    }
-
-    std::shared_ptr<VertexPainter> VertexPainterConstant::clone_impl() const
-    {
-        return std::make_shared<VertexPainterConstant>(get_target()->unwrap()->clone());
+        auto color_wrapper = std::make_shared<ColorGeneratorWrapper>(*get_target());
+        return std::make_shared<VertexPainterConstant>(color_wrapper);
     }
     
     void VertexPainterConstant::paint_vertices(std::vector<sf::Vertex>& vertices,
@@ -61,8 +34,14 @@ namespace colors
         for (auto& v : vertices)
         {
             sf::Color color = generator->get(.5);
-            color.a = v.color.a;
-            v.color = color;
+            if (v.color != sf::Color::Transparent)
+            {
+                v.color = color;
+            }
         }
     }
 }
+
+
+CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterConstant, "VertexPainterConstant");
+CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterConstant)

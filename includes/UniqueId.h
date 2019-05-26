@@ -29,15 +29,15 @@ public:
     void free_id(int id);
 
 private:
+    struct Entry
+    {
+        int id {-1};
+        bool is_free {true};
+    };
+    
     // All the existing identifiers. The first element of the tuple is the id,
     // and the second element is a boolean indicating if this id is free.
-    std::vector<std::tuple<int, bool>> map_ {};
-    // Definitions to ease the use of std::get<> for the map_'s tuples.
-    enum TupleElement
-    {
-        Id = 0,
-        IsFree
-    };
+    std::vector<Entry> map_ {};
 
     // The next new identifier.
     int next_id_ {0};

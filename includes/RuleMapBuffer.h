@@ -2,12 +2,13 @@
 #define RULE_MAP_BUFFER_H
 
 
-#include <list>
-#include <tuple>
+// TODO remove
+#include <iostream>
 
-#include "RuleMap.h"
+#include <list>
+
 #include "Observer.h"
-#include "LSystem.h"
+#include "RuleMap.h"
 #include "helper_algorithm.h"
 
 namespace procgui
@@ -81,12 +82,13 @@ namespace procgui
         using const_iterator = typename buffer::const_iterator;
 
         // Constructor
-        explicit RuleMapBuffer(const std::shared_ptr<Target>& target_);
+        explicit RuleMapBuffer(std::shared_ptr<Target> target_);
 
         // The copy constructor and the assignment operator are needed because
         // we need to register a callback for the new object to
         // 'Observer<Target>'
         RuleMapBuffer(const RuleMapBuffer& other);
+        RuleMapBuffer(const RuleMapBuffer& other, std::shared_ptr<Target> target);
         RuleMapBuffer(RuleMapBuffer&& other);
         RuleMapBuffer& operator=(const RuleMapBuffer& other);
         RuleMapBuffer& operator=(RuleMapBuffer&& other);

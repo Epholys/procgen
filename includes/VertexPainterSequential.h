@@ -10,12 +10,14 @@ namespace colors
     {
     public:
         VertexPainterSequential(); // Create a default generator
-        explicit VertexPainterSequential(const std::shared_ptr<ColorGenerator> gen);
-        // Shallow rule-of-five constructors.
-        VertexPainterSequential(const VertexPainterSequential& other);
-        VertexPainterSequential(VertexPainterSequential&& other);
-        VertexPainterSequential& operator=(const VertexPainterSequential& other);
-        VertexPainterSequential& operator=(VertexPainterSequential&& other);
+        explicit VertexPainterSequential(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        virtual ~VertexPainterSequential() {}
+        // This class is mainly used polymorphic-ally, so deleting these
+        // constructors saved some LoC so potential bugs.
+        VertexPainterSequential(const VertexPainterSequential& other) = delete;
+        VertexPainterSequential(VertexPainterSequential&& other) = delete;
+        VertexPainterSequential& operator=(const VertexPainterSequential& other) = delete;
+        VertexPainterSequential& operator=(VertexPainterSequential&& other) = delete;
         
         // Getters
         float get_factor() const;
@@ -31,10 +33,25 @@ namespace colors
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 
+        // Implements the deep-copy cloning.
+        virtual std::shared_ptr<VertexPainter> clone() const override;
 
     private:
-        // Implements the deep-copy cloning.
-        virtual std::shared_ptr<VertexPainter> clone_impl() const override;
+        friend class cereal::access;
+        template<class Archive>
+        void save(Archive& ar, const std::uint32_t) const
+            {
+                ar(cereal::make_nvp("repetition_factor", factor_),
+                   cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
+            }
+        template<class Archive>
+        void load(Archive& ar, const std::uint32_t)
+            {
+                std::shared_ptr<ColorGenerator> generator;
+                ar(cereal::make_nvp("repetition_factor", factor_));
+                ar(cereal::make_nvp("ColorGenerator", generator));
+                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(generator));
+            }
 
         float factor_ {0};
     };

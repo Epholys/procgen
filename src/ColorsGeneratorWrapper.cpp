@@ -18,13 +18,13 @@ namespace colors
 
     ColorGeneratorWrapper::ColorGeneratorWrapper(const ColorGeneratorWrapper& other)
         : Observable{}
-        , OGen{other.get_target()}
+        , OGen{other.get_target()->clone()}
     {
         add_callback([this](){notify();});
     }
     ColorGeneratorWrapper::ColorGeneratorWrapper(ColorGeneratorWrapper&& other)
         : Observable{}
-        , OGen{std::move(other.get_target())}
+        , OGen{other.get_target()}
     {
         add_callback([this](){notify();});
         other.set_target(nullptr);
@@ -33,7 +33,7 @@ namespace colors
     {
         if (this != &other)
         {
-            set_target(other.get_target());
+            set_target(other.get_target()->clone());
             add_callback([this](){notify();});
         }
         return *this;
@@ -42,13 +42,13 @@ namespace colors
     {
         if (this != &other)
         {
-            set_target(std::move(other.get_target()));
+            set_target(other.get_target());
             add_callback([this](){notify();});
             other.set_target(nullptr);
         }
         return *this;
     }
-
+    
     std::shared_ptr<ColorGenerator> ColorGeneratorWrapper::unwrap() const
     {
         return get_target();

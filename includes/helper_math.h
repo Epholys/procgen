@@ -1,9 +1,9 @@
 #ifndef HELPER_MATH_H
 #define HELPER_MATH_H
-#include<random>
 
+#include <random>
 #include <cmath>
-#include<SFML/System.hpp>
+#include <SFML/System.hpp>
 
 // This namespace defines commonly used function and constants missing in <cmath>.
 namespace math
