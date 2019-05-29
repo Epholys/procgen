@@ -450,6 +450,12 @@ namespace controller
                     mouse_position_ = sf::Mouse::getPosition(window);
                     view_can_move_ = true;
                 }
+
+                else if (event.type == sf::Event::MouseButtonReleased &&
+                         event.mouseButton.button == sf::Mouse::Left)
+                {
+                    view_can_move_ = false;
+                }
             }
             
             LSystemController::handle_input(lsys_views, event);
