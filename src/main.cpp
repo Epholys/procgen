@@ -11,11 +11,11 @@ using namespace math;
 using namespace procgui;
 using namespace controller;
 using namespace colors;
+using sfml_window::window;
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(window::window_size.x, window::window_size.y), "Procgen");
-    window.setVerticalSyncEnabled(true);
+    sfml_window::init_window();
     ImGui::SFML::Init(window);
 
     // auto serpinski = std::make_shared<LSystem>(LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
@@ -57,7 +57,7 @@ int main()
     sf::Clock delta_clock;
     while (window.isOpen())
     {
-        window.clear(window::background_color);
+        window.clear(sfml_window::background_color);
 
         std::vector<sf::Event> events;
         sf::Event event;

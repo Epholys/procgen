@@ -3,7 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 
-namespace window
+namespace sfml_window
 {
     static constexpr struct WindowSize
     {
@@ -12,6 +12,9 @@ namespace window
     } window_size;
 
     extern sf::Color background_color;
+
+    void init_window();
+    extern sf::RenderWindow window;
 }
 
 #endif // RENDER_WINDOW_H

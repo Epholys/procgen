@@ -1411,10 +1411,10 @@ namespace procgui
         }
 
         // Select background color.
-        ImVec4 imcolor = window::background_color;
+        ImVec4 imcolor = sfml_window::background_color;
         if(ImGui::ColorEdit4("Background Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
         {
-            window::background_color = imcolor;
+            sfml_window::background_color = imcolor;
         }
         ImGui::SameLine();
         ImGui::Text("Background Color");
@@ -1445,9 +1445,10 @@ namespace procgui
             // correct size.
             // Warning: lots of arbitrary values.
             // Shift the window next to the LSystemView and shift it again for
-            // the window position always appearing on-screen in its entirety. 
-            int windowX = window::window_size.x;
-            int windowY = window::window_size.y;
+            // the window position always appearing on-screen in its entirety.
+            // TODO WRONG : get real window size
+            int windowX = sfml_window::window_size.x;
+            int windowY = sfml_window::window_size.y;
             sf::Vector2i pos = controller::WindowController::get_mouse_position();
             auto bounding_box = lsys_view.get_bounding_box();
 
