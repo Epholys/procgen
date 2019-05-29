@@ -366,7 +366,6 @@ namespace controller
     }
     
     void WindowController::handle_input(std::vector<sf::Event> events,
-                                        sf::RenderWindow &window,
                                         std::list<procgui::LSystemView>& lsys_views)
     {
         ImGuiIO& imgui_io = ImGui::GetIO();

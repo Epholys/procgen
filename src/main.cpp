@@ -68,11 +68,11 @@ int main()
             events.push_back(event); 
             ImGui::SFML::ProcessEvent(event);
         }
-        
-        // procgui::new_frame();
+
+        // TODO remove 'window'
         ImGui::SFML::Update(window, delta_clock.restart());
         
-        WindowController::handle_input(events, window, views);
+        WindowController::handle_input(events, views);
  
         for (auto& v : views)
         {
