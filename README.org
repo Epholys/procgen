@@ -51,8 +51,8 @@
    - *Dependencies:*
      - SFML / 2.5.1 / [[https://www.sfml-dev.org/][Website]] / installed from packages / 
      - googletest / 1.8.1-3 / [[https://github.com/google/googletest][Github Repository]] / installed from packages
-     - dear imgui, / 2018-11-23 / [[https://github.com/ocornut/imgui][Github Repository]] / cloned from the repository / included in the repo
-     - imgui-sfml / 2018-11-23 / [[https://github.com/eliasdaler/imgui-sfml][Github Repository]] / installed via the instructions from the README.org of the repository / included in the repo
+     - dear imgui, / 1.70 / [[https://github.com/ocornut/imgui][Github Repository]] / installed from repo's release / included in the repo
+     - imgui-sfml / 2.0.2 / [[https://github.com/eliasdaler/imgui-sfml][Github Repository]] / installed via the instructions from the README.org of the repository / included in the repo
      - GSL (Guidelines Support Library) / 2018-05-21 / [[https://github.com/Microsoft/GSL][Github Repository]] / cloned from the repository / included in the repo
      - cereal / 1.2.2 / [[https://uscilab.github.io/cereal/index.html][Website]] / downloaded from the website / included in the repo
    - *Coding rule:* [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]] with GSL
