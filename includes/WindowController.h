@@ -27,7 +27,6 @@ namespace controller
         // Hub of all the input of the application, manages locally the 'sf::View'
         // of the 'window'.
         static void handle_input(std::vector<sf::Event> events,
-                                 sf::RenderWindow& window,
                                  std::list<procgui::LSystemView>& lsys_views);
 
         // The 'sf::Mouse::getPosition()' give the absolute position in a
@@ -87,7 +86,7 @@ namespace controller
         // Default step size at default zoom level
         static const double default_step_;
         
-        // Current mouse position
+        // Current mouse position TODO doc : buffer to delta
         static sf::Vector2i mouse_position_;
 
         // Does the window have the focus?
