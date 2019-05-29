@@ -419,10 +419,7 @@ namespace controller
             }
             else if (event.type == sf::Event::Resized)
             {
-                view_.setSize(event.size.width, event.size.height);
-                //                 sf::FloatRect visible_area (0.f, 0.f, event.size.width, event.size.height);
-                // view_ = sf::View(visible_area);
-
+                view_.setSize(event.size.width*zoom_level_, event.size.height*zoom_level_);
             }
 
             else if (has_focus_)
