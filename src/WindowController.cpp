@@ -3,10 +3,13 @@
 #include "imgui/imgui.h"
 #include "cereal/archives/json.hpp"
 
+#include "RenderWindow.h"
 #include "helper_string.h"
 #include "WindowController.h"
 #include "LSystemController.h"
 
+
+using sfml_window::window;
 namespace fs = std::experimental::filesystem;
 
 namespace controller
@@ -32,22 +35,12 @@ namespace controller
     
     sf::Vector2f WindowController::real_mouse_position(sf::Vector2i mouse_click)
     {
-        auto size = view_.getSize();
-        auto center = view_.getCenter();
-        sf::Vector2f upright {center.x - size.x/2, center.y - size.y/2};
-        sf::Vector2f position {mouse_click.x*zoom_level_ + upright.x,
-                               mouse_click.y*zoom_level_ + upright.y};
-        return position;
+        return window.mapPixelToCoords(mouse_click);
     }
 
     sf::Vector2i WindowController::absolute_mouse_position(sf::Vector2f mouse_click)
     {
-        auto size = view_.getSize();
-        auto center = view_.getCenter();
-        sf::Vector2f upright {center.x - size.x/2, center.y - size.y/2};
-        sf::Vector2i position((mouse_click.x - upright.x) / zoom_level_,
-                              (mouse_click.y - upright.y) * zoom_level_);
-        return position;
+        return window.mapCoordsToPixel(mouse_click);
     }
 
     
@@ -427,6 +420,9 @@ namespace controller
             else if (event.type == sf::Event::Resized)
             {
                 view_.setSize(event.size.width, event.size.height);
+                //                 sf::FloatRect visible_area (0.f, 0.f, event.size.width, event.size.height);
+                // view_ = sf::View(visible_area);
+
             }
 
             else if (has_focus_)
