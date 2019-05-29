@@ -855,7 +855,7 @@ namespace
     {
         // Color selection widget.
         ImVec4 imcolor = constant.get_color();
-        if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+        if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar))
         {
             sf::Color color = imcolor;
             if (color != sf::Color::Transparent)
@@ -952,7 +952,7 @@ namespace
             // Color
             auto& sfcolor = it->color;
             ImVec4 imcolor = sfcolor;
-            if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+            if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar))
             {
                 is_modified = true;
             }
@@ -1130,7 +1130,7 @@ namespace
             // Key Color
             auto& sfcolor = it->color;
             ImVec4 imcolor = sfcolor;
-            if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+            if(ImGui::ColorEdit4("Color", (float*)&imcolor,ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar))
             {
                 is_modified = true;
             }
@@ -1205,7 +1205,7 @@ namespace
         ImGui::PushID(keys.size());
         auto& sfcolor = keys.back().color;
         ImVec4 imcolor = sfcolor;
-        if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+        if(ImGui::ColorEdit4("Color", (float*)&imcolor,ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar))
         {
             is_modified = true;
         }
@@ -1412,7 +1412,7 @@ namespace procgui
 
         // Select background color.
         ImVec4 imcolor = sfml_window::background_color;
-        if(ImGui::ColorEdit4("Background Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+        if(ImGui::ColorEdit4("Background Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar))
         {
             sfml_window::background_color = imcolor;
         }
