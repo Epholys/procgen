@@ -920,10 +920,13 @@ namespace
         auto to_remove = begin(keys);
         // Used as ID for ImGui
         int index = 0;
-        
+
+        float block_pos = 0.f;
         // Modify 'gen''s keys: colors and position
         for (auto it = begin(keys); it != end(keys); ++it)
         {
+            const auto& style = ImGui::GetStyle();
+            float block_size = 0.f;
             ImGui::PushID(index);
 
             // Button '+' to add a key.
@@ -932,6 +935,8 @@ namespace
             {
                 will_insert = true;
                 to_insert = it;
+
+                block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x; // *2 for the last '+' button
             }
             ImGui::PopStyleColor(3);
             ImGui::SameLine();
@@ -942,6 +947,8 @@ namespace
             {
                 will_remove = true;
                 to_remove = it;
+
+                block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
             }
             ImGui::PopStyleColor(3);
             ImGui::SameLine();
@@ -974,9 +981,20 @@ namespace
             ImGui::PopItemWidth();
 
             ImGui::EndGroup();
+            block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
             
             ImGui::PopID();
-            ImGui::SameLine();
+
+            block_size *= 2; // ??? but works
+            block_pos += block_size;
+            if (block_pos + block_size < ImGui::GetWindowContentRegionMax().x)
+            {
+                ImGui::SameLine();
+            }
+            else
+            {
+                block_pos = 0.f;
+            }
 
             ++index;
         }
