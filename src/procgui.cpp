@@ -868,7 +868,7 @@ namespace
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 screen_pos = ImGui::GetCursorScreenPos();
         ImVec2 window_pos = ImGui::GetCursorPos();
-        float space_until_border = ImGui::GetWindowWidth() - window_pos.x  - 10.f;
+        float space_until_border = ImGui::GetWindowWidth() - window_pos.x  - 30.f;
         float xsize = (space_until_border < 400) ? space_until_border : 400;
         ImVec2 size {xsize, 30.};
         float checker_box_size = 10.f;
@@ -1054,7 +1054,7 @@ namespace
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 screen_pos = ImGui::GetCursorScreenPos();
         ImVec2 window_pos = ImGui::GetCursorPos();
-        float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 10.f;
+        float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 30.f;
         float xsize = (space_until_border < 400) ? space_until_border : 400;
         ImVec2 size {xsize, 30.};
         float checker_box_size = 10.f;
@@ -1275,7 +1275,7 @@ namespace
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 screen_pos = ImGui::GetCursorScreenPos();
         ImVec2 window_pos = ImGui::GetCursorPos();
-        float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 10.f;
+        float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 30.f;
         float xsize = (space_until_border < 400) ? space_until_border : 400;
         ImVec2 size {xsize, 30.};
         float checker_box_size = 10.f;
