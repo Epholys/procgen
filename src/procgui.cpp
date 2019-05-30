@@ -1183,7 +1183,7 @@ namespace
 
             ImGui::SameLine();
             ImGui::BeginGroup();
-            ImGui::Text(""); // '\n'
+            ImGui::Text(" "); // '\n'
             
             // Number of transitional colors.
             int diff = next(it)->index - it->index - 1;
@@ -1483,21 +1483,27 @@ namespace procgui
             // Warning: lots of arbitrary values.
             // Shift the window next to the LSystemView and shift it again for
             // the window position always appearing on-screen in its entirety.
-            // TODO WRONG : get real window size
-            int windowX = sfml_window::window_size.x;
-            int windowY = sfml_window::window_size.y;
+            auto sfml_window_size = sfml_window::window.getSize();
+            int sfml_windowX = sfml_window_size.x;
+            int sfml_windowY = sfml_window_size.y;
+            sf::Vector2f next_window_size {500, 600};
+            next_window_size.x = next_window_size.x > sfml_window_size.x ? sfml_window_size.x : next_window_size.x;
+            next_window_size.y = next_window_size.y > sfml_window_size.y ? sfml_window_size.y : next_window_size.y;
+            ImGui::SetNextWindowSize(next_window_size, ImGuiSetCond_Appearing);
+
+
             sf::Vector2i pos = controller::WindowController::get_mouse_position();
             auto bounding_box = lsys_view.get_bounding_box();
-
+            
             // Shift the window to the right.
             auto absolute_right_side = controller::WindowController::absolute_mouse_position({bounding_box.left + bounding_box.width,0});
             pos.x = absolute_right_side.x + 50;
 
             // If the window would be out of the current screen, shift it to the left.
-            if (pos.x + 500 > windowX)
+            if (pos.x + next_window_size.x > sfml_windowX)
             {
                 auto absolute_left_side = controller::WindowController::absolute_mouse_position({bounding_box.left,0});
-                pos.x = absolute_left_side.x - 550;
+                pos.x = absolute_left_side.x - next_window_size.x - 50;
 
                 // If the window is still out of screen, shift it to the border.
                 if (pos.x < 0)
@@ -1509,10 +1515,9 @@ namespace procgui
 
             // If the window is too far up or down, shift it down or up.
             pos.y = pos.y < 0 ? 0 : pos.y;
-            pos.y = pos.y + 450 > windowY ? windowY-450 : pos.y;
+            pos.y = pos.y + next_window_size.y > sfml_windowY ? sfml_windowY-next_window_size.y : pos.y;
             
             ImGui::SetNextWindowPos(sf::Vector2i{pos.x,pos.y}, ImGuiSetCond_Appearing);
-            ImGui::SetNextWindowSize({500,450}, ImGuiSetCond_Appearing);
 
             // The window's title background is set to the unique color
             // associated with the 'lsys_view_'.
