@@ -7,7 +7,7 @@ namespace sfml_window
     
     void init_window()
     {
-        window.create(sf::VideoMode(window_size.x, window_size.y), "Procgen");
+        window.create(sf::VideoMode(default_window_size.x, default_window_size.y), "Procgen");
         window.setVerticalSyncEnabled(true);
     }
 }

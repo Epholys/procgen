@@ -9,7 +9,7 @@ namespace sfml_window
     {
         int x {1600};
         int y {900};
-    } window_size;
+    } default_window_size;
 
     extern sf::Color background_color;
 
