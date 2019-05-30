@@ -28,7 +28,7 @@ void interact_with_buffer(Buffer& buffer,
 
         ImGui::PopItemWidth(); ImGui::SameLine(); ImGui::Text("->"); ImGui::SameLine();
 
-        ImGui::PushItemWidth(200);
+//        ImGui::PushItemWidth(200);
 
         successor_fn(it);
         
