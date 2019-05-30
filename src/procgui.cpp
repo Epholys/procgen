@@ -921,11 +921,11 @@ namespace
         // Used as ID for ImGui
         int index = 0;
 
+        const auto& style = ImGui::GetStyle();
         float block_pos = 0.f;
         // Modify 'gen''s keys: colors and position
         for (auto it = begin(keys); it != end(keys); ++it)
         {
-            const auto& style = ImGui::GetStyle();
             float block_size = 0.f;
             ImGui::PushID(index);
 
@@ -936,7 +936,7 @@ namespace
                 will_insert = true;
                 to_insert = it;
 
-                block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x; // *2 for the last '+' button
+                block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
             }
             ImGui::PopStyleColor(3);
             ImGui::SameLine();
@@ -1120,8 +1120,12 @@ namespace
         // colors part.
         int index = 0;
         int modifier = 0;
+
+        const auto& style = ImGui::GetStyle();
+        float block_pos = 0.f;
         for (auto it = begin(keys); it != prev(end(keys)); ++it, ++index)
         {
+            float block_size = 0.f;
             ImGui::PushID(index);
 
             ImGui::PushID(0);
@@ -1131,15 +1135,19 @@ namespace
                 will_insert = true;
                 insert_before = true;
                 to_insert = it;
+
+                block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
             }
             ImGui::PopStyleColor(3);
-            
+
             ImGui::SameLine();
             ext::ImGui::PushStyleRedButton();
             if (keys.size() > 2 && ImGui::Button("-"))
             {
                 will_remove = true;
                 to_remove = it;
+
+                block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
             }
             ImGui::PopStyleColor(3);
             ImGui::SameLine();
@@ -1151,6 +1159,8 @@ namespace
             if(ImGui::ColorEdit4("Color", (float*)&imcolor,ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar))
             {
                 is_modified = true;
+
+                block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
             }
             if (sf::Color(imcolor) != sf::Color::Transparent)
             {
@@ -1165,13 +1175,15 @@ namespace
                 will_insert = true;
                 insert_before = false;
                 to_insert = it;
+
+                block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
             }
             ImGui::PopStyleColor(3);
             ImGui::PopID();
 
             ImGui::SameLine();
             ImGui::BeginGroup();
-            ImGui::Text("");
+            ImGui::Text(""); // '\n'
             
             // Number of transitional colors.
             int diff = next(it)->index - it->index - 1;
@@ -1189,11 +1201,22 @@ namespace
             next(it)->index += modifier;
 
             ImGui::EndGroup();
+            block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
+
             ImGui::PopID();
-            ImGui::SameLine();
+
+            block_size *= 2.3; // Everything is fine
+            block_pos += block_size;
+            if (block_pos + block_size < ImGui::GetWindowContentRegionMax().x)
+            {
+                ImGui::SameLine();
+            }
+            else
+            {
+                block_pos = 0.f;
+            }
         }
 
-        ImGui::SameLine();
         // Button '+' to add a key.
         ext::ImGui::PushStyleGreenButton();
         if (ImGui::Button("+"))
@@ -1201,8 +1224,6 @@ namespace
             will_insert = true;
             insert_before = true;
             to_insert = prev(end(keys));
-            // is_modified = true;
-            // keys.push_back({sf::Color::White, keys.back().second+1});
         }
         ImGui::PopStyleColor(3);
 
@@ -1213,8 +1234,6 @@ namespace
         {
             will_remove = true;
             to_remove = prev(end(keys));
-            // is_modified = true;
-            // keys.pop_back();
         }
         ImGui::PopStyleColor(3);
 
