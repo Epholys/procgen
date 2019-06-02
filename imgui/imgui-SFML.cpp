@@ -339,6 +339,7 @@ void ProcessEvent(const sf::Event& event) {
     switch (event.type) {
         case sf::Event::LostFocus:
             s_windowHasFocus = false;
+            ImGui::GetIO().KeysDown[sf::Keyboard::LAlt] = false; // Temporary fix
             break;
         case sf::Event::GainedFocus:
             s_windowHasFocus = true;
