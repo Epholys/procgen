@@ -9,7 +9,7 @@
 #include "cereal/types/vector.hpp"
 #include "cereal/archives/json.hpp"
 #include "Observable.h"
-
+#include "PolymorphicSerializer.h"
 
 namespace cereal
 {
@@ -127,6 +127,8 @@ namespace colors
         // when copying or copy-constructing an object havino a 'ColorGenerator'
         // as an attribute.
         virtual std::shared_ptr<ColorGenerator> clone() const = 0;
+
+        POLYMORPHIC_SERIALIZE_INIT();
     };
 
     
@@ -160,10 +162,17 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void serialize(Archive& ar, std::uint32_t)
+        void save(Archive& ar, const std::uint32_t) const
             {
                 ar(cereal::make_nvp("Color", color_));
             }
+        template<class Archive>
+        void load(Archive& ar, const std::uint32_t)
+            {
+                ar(cereal::make_nvp("Color", color_));
+            }
+
+        POLYMORPHIC_SERIALIZER(ColorGenerator, ConstantColor)
         
         // The unique color returned.
         sf::Color color_ {sf::Color::White};
