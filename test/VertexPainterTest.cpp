@@ -228,3 +228,4 @@ TEST(VertexPainter, Composite)
     }
 }
 
+// TODO serialization

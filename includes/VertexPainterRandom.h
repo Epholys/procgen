@@ -4,6 +4,7 @@
 
 #include "VertexPainter.h"
 #include "helper_math.h"
+#include "ColorsGeneratorSerializer.h"
 
 namespace colors
 {
@@ -50,8 +51,13 @@ namespace colors
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const
             {
-                ar(cereal::make_nvp("block_size", block_size_),
-                   cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
+                // ar(cereal::make_nvp("block_size", block_size_),
+                //    cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
+                ar(cereal::make_nvp("block_size", block_size_));
+
+                auto color_generator = get_generator_wrapper()->unwrap();
+                auto serializer = ColorGeneratorSerializer<Archive>(color_generator);
+                ar(cereal::make_nvp("ColorGenerator", serializer));
             }
         template<class Archive>
         void load(Archive& ar, const std::uint32_t)

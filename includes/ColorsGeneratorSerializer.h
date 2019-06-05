@@ -1,5 +1,5 @@
-#ifndef POLYMORPHIC_SERIALIZER_H
-#define POLYMORPHIC_SERIALIZER_H
+#ifndef COLOR_GENERATOR_SERIALIZER_H
+#define COLOR_GENERATOR_SERIALIZER_H
 
 
 #include <memory>
@@ -89,4 +89,4 @@ namespace colors
     };
 }
 
-#endif // POLYMORPHIC_SERIALIZER_H
+#endif // COLOR_GENERATOR_SERIALIZER_H

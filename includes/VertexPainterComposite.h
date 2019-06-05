@@ -108,7 +108,12 @@ namespace colors
             VertexPainterComposite* painter_;
         };
     }
-    
+}
+
+#include "ColorsGeneratorSerializer.h"
+
+namespace colors
+{
     // The main class.
     // Also manages a painter which can be copied and pasted everywhere (as it
     // is static).

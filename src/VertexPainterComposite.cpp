@@ -61,7 +61,7 @@ namespace colors
 
         std::string ColorGeneratorComposite::type_name() const
         {
-            return "VertexPainterComposite";
+            return "ColorGeneratorComposite";
         }
         
 
