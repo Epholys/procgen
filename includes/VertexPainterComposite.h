@@ -7,6 +7,9 @@
 
 namespace colors
 {
+    template<class Archive>
+    class ColorGeneratorSerializer;
+    
     // The VertexPainterComposite is a class allowing to compose other
     // VertexPainters. For example, for a VertexPainterLinear, one side of the
     // LSystemView could be managed with a VertexPainterRadial and the other by
@@ -52,6 +55,9 @@ namespace colors
             // 0. 
             void reset_index();
             
+            template<class Archive> friend class ::colors::ColorGeneratorSerializer;
+            virtual std::string type_name() const override;
+
         private:
             // Deep-copy cloning method.
             std::shared_ptr<ColorGenerator> clone() const override;
@@ -66,8 +72,13 @@ namespace colors
 
             friend class cereal::access;
             template<class Archive>
-            void serialize(Archive&)
-                { }
+            void save(Archive&, const std::uint32_t) const
+                {
+                }
+            template<class Archive>
+            void load(Archive&, const std::uint32_t)
+                {
+                }
         };
 
         // A utility class to manipulate an Observer of a

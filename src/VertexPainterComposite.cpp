@@ -59,6 +59,12 @@ namespace colors
             return std::make_shared<ColorGeneratorComposite>();
         }
 
+        std::string ColorGeneratorComposite::type_name() const
+        {
+            return "VertexPainterComposite";
+        }
+        
+
         //------------------------------------------------------------
 
         VertexPainterWrapperObserver::VertexPainterWrapperObserver(std::shared_ptr<VertexPainterWrapper> painter_wrapper,

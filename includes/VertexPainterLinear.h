@@ -3,6 +3,7 @@
 
 #include "VertexPainter.h"
 #include "helper_cereal.hpp"
+#include "PolymorphicSerializer.h"
 
 namespace colors
 {
@@ -51,17 +52,21 @@ namespace colors
         void save(Archive& ar, const std::uint32_t) const
             {
                 ar(cereal::make_nvp("angle", angle_),
-                   cereal::make_nvp("center", center_),
-                   cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
+                   cereal::make_nvp("center", center_));
+                
+                auto color_generator = get_generator_wrapper()->unwrap();
+                auto serializer = ColorGeneratorSerializer<Archive>(color_generator);
+                ar(cereal::make_nvp("ColorGenerator", serializer));
             }
         template<class Archive>
         void load(Archive& ar, const std::uint32_t)
             {
-                std::shared_ptr<ColorGenerator> generator;
                 ar(cereal::make_nvp("angle", angle_));
                 ar(cereal::make_nvp("center", center_));
-                ar(cereal::make_nvp("ColorGenerator", generator));
-                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(generator));
+
+                auto serializer = ColorGeneratorSerializer<Archive>();
+                ar(cereal::make_nvp("ColorGenerator", serializer));                
+                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));
             }
     };
 }

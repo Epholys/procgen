@@ -32,6 +32,11 @@ namespace colors
         return std::make_shared<ConstantColor>(*this);
     }
 
+    std::string ConstantColor::type_name() const
+    {
+        return "ConstantColor";
+    }
+
     //------------------------------------------------------------
     
     LinearGradient::LinearGradient()
@@ -116,6 +121,10 @@ namespace colors
         return std::make_shared<LinearGradient>(*this);
     }
 
+    std::string LinearGradient::type_name() const
+    {
+        return "LinearGradient";
+    }
     //------------------------------------------------------------
 
     DiscreteGradient::DiscreteGradient()
@@ -207,6 +216,11 @@ namespace colors
     std::shared_ptr<ColorGenerator> DiscreteGradient::clone() const
     {
         return std::make_shared<DiscreteGradient>(*this);
+    }
+
+    std::string DiscreteGradient::type_name() const
+    {
+        return "DiscreteGradient";
     }
 }
 

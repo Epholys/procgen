@@ -9,7 +9,6 @@
 #include "cereal/types/vector.hpp"
 #include "cereal/archives/json.hpp"
 #include "Observable.h"
-#include "PolymorphicSerializer.h"
 
 namespace cereal
 {
@@ -127,9 +126,8 @@ namespace colors
         // when copying or copy-constructing an object havino a 'ColorGenerator'
         // as an attribute.
         virtual std::shared_ptr<ColorGenerator> clone() const = 0;
-
-    protected:
-        POLYMORPHIC_SERIALIZER_INIT(ColorGenerator) 
+        
+        virtual std::string type_name() const = 0;
     };
 
     
@@ -157,6 +155,9 @@ namespace colors
         const sf::Color& get_color() const;
         void set_color(const sf::Color& color);
         
+        template<class Archive> friend class ColorGeneratorSerializer;
+        virtual std::string type_name() const override;        
+
     private:
         // Clone 'this' and returns it as a 'shared_ptr'.
         std::shared_ptr<ColorGenerator> clone() const override;
@@ -173,8 +174,6 @@ namespace colors
                 ar(cereal::make_nvp("Color", color_));
             }
 
-        POLYMORPHIC_SERIALIZER(ColorGenerator, ConstantColor)
-        
         // The unique color returned.
         sf::Color color_ {sf::Color::White};
     };
@@ -223,6 +222,9 @@ namespace colors
         const keys& get_keys() const;
         void set_keys(const keys& keys);
 
+        template<class Archive> friend class ColorGeneratorSerializer;
+        virtual std::string type_name() const override;        
+
     private:
         // Clone 'this' and returns it as a 'shared_ptr'.
         std::shared_ptr<ColorGenerator> clone() const override;
@@ -238,7 +240,7 @@ namespace colors
                 }
                 ar(cereal::make_nvp("color_keys", keys));
             }
-        friend class cereal::access;
+
         template<class Archive>
         void load(Archive& ar, std::uint32_t)
             {
@@ -299,6 +301,9 @@ namespace colors
         // Precondition: 'keys' respect the invariants.
         void set_keys(keys keys);
         
+        template<class Archive> friend class ColorGeneratorSerializer;
+        virtual std::string type_name() const override;        
+
     private:
         // Generate 'colors_' from 'keys_'.
         // The invariant are assumed respected.
@@ -318,7 +323,7 @@ namespace colors
                 }
                 ar(cereal::make_nvp("color_keys", keys));
             }
-        friend class cereal::access;
+
         template<class Archive>
         void load(Archive& ar, std::uint32_t)
             {
