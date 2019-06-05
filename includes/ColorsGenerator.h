@@ -128,7 +128,8 @@ namespace colors
         // as an attribute.
         virtual std::shared_ptr<ColorGenerator> clone() const = 0;
 
-        POLYMORPHIC_SERIALIZE_INIT();
+    protected:
+        POLYMORPHIC_SERIALIZER_INIT(ColorGenerator) 
     };
 
     
