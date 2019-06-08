@@ -1,5 +1,5 @@
-#ifndef COLOR_GENERATOR_SERIALIZER_H
-#define COLOR_GENERATOR_SERIALIZER_H
+#ifndef VERTEX_PAINTER_SERIALIZER_H
+#define VERTEX_PAINTER_SERIALIZER_H
 
 
 #include <memory>
@@ -9,18 +9,26 @@
 
 #include "helper_cereal.hpp"
 
-#include "ColorsGenerator.h"
+#include "VertexPainter.h"
+#include "VertexPainterConstant.h"
+#include "VertexPainterIteration.h"
+#include "VertexPainterLinear.h"
+#include "VertexPainterRadial.h"
+#include "VertexPainterRandom.h"
+#include "VertexPainterSequential.h"
 #include "VertexPainterComposite.h"
 
 namespace colors
 {
-    class ColorGeneratorSerializer
+    class VertexPainterComposite;
+    
+    class VertexPainterSerializer
     {
     public:
-        ColorGeneratorSerializer();
-        explicit ColorGeneratorSerializer(std::shared_ptr<ColorGenerator> to_serialize);
+        VertexPainterSerializer();
+        explicit VertexPainterSerializer(std::shared_ptr<VertexPainter> to_serialize);
 
-        std::shared_ptr<ColorGenerator> get_serialized() const;
+        std::shared_ptr<VertexPainter> get_serialized() const;
         
     private:
         friend class cereal::access;
@@ -34,7 +42,7 @@ namespace colors
                 std::string type = serialized_->type_name();
                 ar(cereal::make_nvp("type", type));
 
-#define SERIALIZE_COLORGEN_CHILD(Child)                                 \
+#define SERIALIZE_PAINTER_CHILD(Child)                                 \
                 do {                                                    \
                     if (type == #Child)                                 \
                     {                                                   \
@@ -46,10 +54,14 @@ namespace colors
                 }                                                       \
                 while(false)
 
-                SERIALIZE_COLORGEN_CHILD(ConstantColor);
-                SERIALIZE_COLORGEN_CHILD(LinearGradient);
-                SERIALIZE_COLORGEN_CHILD(DiscreteGradient);
-                SERIALIZE_COLORGEN_CHILD(impl::ColorGeneratorComposite);
+                SERIALIZE_PAINTER_CHILD(VertexPainterConstant);
+                SERIALIZE_PAINTER_CHILD(VertexPainterIteration);
+                SERIALIZE_PAINTER_CHILD(VertexPainterLinear);
+                SERIALIZE_PAINTER_CHILD(VertexPainterRadial);
+                SERIALIZE_PAINTER_CHILD(VertexPainterRandom);
+                SERIALIZE_PAINTER_CHILD(VertexPainterSequential);
+
+                SERIALIZE_PAINTER_CHILD(VertexPainterComposite);
             }
     
         template<class Archive>
@@ -60,25 +72,29 @@ namespace colors
                 std::string type;
                 ar(cereal::make_nvp("type", type));
             
-#define DESERIALIZE_COLORGEN_CHILD(Child)                               \
+#define DESERIALIZE_PAINTER_CHILD(Child)                               \
                 do {                                                    \
                     if (type == #Child)                                 \
                     {                                                   \
                         Child* ptr = new Child();                       \
                         ptr->load(ar, version);                         \
-                        serialized_ = std::shared_ptr<ColorGenerator>(ptr); \
+                        serialized_ = std::shared_ptr<VertexPainter>(ptr); \
                     }                                                   \
                 }                                                       \
                 while(false)
             
-                DESERIALIZE_COLORGEN_CHILD(ConstantColor);
-                DESERIALIZE_COLORGEN_CHILD(LinearGradient);
-                DESERIALIZE_COLORGEN_CHILD(DiscreteGradient);
-                DESERIALIZE_COLORGEN_CHILD(impl::ColorGeneratorComposite);
+                DESERIALIZE_PAINTER_CHILD(VertexPainterConstant);
+                DESERIALIZE_PAINTER_CHILD(VertexPainterIteration);
+                DESERIALIZE_PAINTER_CHILD(VertexPainterLinear);
+                DESERIALIZE_PAINTER_CHILD(VertexPainterRadial);
+                DESERIALIZE_PAINTER_CHILD(VertexPainterRandom);
+                DESERIALIZE_PAINTER_CHILD(VertexPainterSequential);
+
+                DESERIALIZE_PAINTER_CHILD(VertexPainterComposite);
             }
 
-        std::shared_ptr<ColorGenerator> serialized_;
+        std::shared_ptr<VertexPainter> serialized_;
     };
 }
 
-#endif // COLOR_GENERATOR_SERIALIZER_H
+#endif // VERTEX_PAINTER_SERIALIZER_H

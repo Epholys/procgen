@@ -90,6 +90,11 @@ namespace colors
         // vertices.push_back({{relative_center.x - 5, relative_center.y + 5}, sf::Color::Magenta});
         // vertices.push_back({{relative_center.x - 5, relative_center.y - 5}, sf::Color::Magenta});
     }
+
+    std::string VertexPainterRadial::type_name() const
+    {
+        return "VertexPainterRadial";
+    }
 }
 
 CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterRadial, "VertexPainterRadial");

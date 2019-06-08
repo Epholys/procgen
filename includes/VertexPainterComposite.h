@@ -109,10 +109,10 @@ namespace colors
     }
 }
 
-#include "ColorsGeneratorSerializer.h"
-
 namespace colors
 {
+    class VertexPainterSerializer;
+    
     // The main class.
     // Also manages a painter which can be copied and pasted everywhere (as it
     // is static).
@@ -149,6 +149,10 @@ namespace colors
 
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone() const override;
+
+        friend class VertexPainterSerializer;
+        virtual std::string type_name() const override;        
+
     private:
 
         // The copied painter
@@ -172,18 +176,27 @@ namespace colors
 
         std::list<impl::VertexPainterWrapperObserver> child_painters_observers_;
 
+        template<class Archive, class Serializer>
+        void save_impl(Archive& ar, const std::uint32_t) const
+            {
+                static_assert(std::is_same<Serializer, VertexPainterSerializer>::value);
+                
+                auto main_painter = Serializer(main_painter_observer_.get_painter_wrapper()->unwrap());
+                std::vector<Serializer> child_painters;
+                for(const auto& child : child_painters_observers_)
+                {
+                    child_painters.push_back(Serializer(child.get_painter_wrapper()->unwrap()));
+                }
+                ar(cereal::make_nvp("main_painter", main_painter),
+                   cereal::make_nvp("child_painters", child_painters));
+            }
+        
         friend class cereal::access;
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const
             {
-                std::shared_ptr<VertexPainter> main_painter = main_painter_observer_.get_painter_wrapper()->unwrap();
-                std::vector<std::shared_ptr<VertexPainter>> child_painters;
-                for(const auto& child : child_painters_observers_)
-                {
-                    child_painters.push_back(child.get_painter_wrapper()->unwrap());
-                }
-                ar(cereal::make_nvp("main_painter", main_painter),
-                   cereal::make_nvp("child_painters", child_painters));
+                std::uint32_t unused = 0;
+                save_impl<Archive, VertexPainterSerializer>(ar, unused);
             }
         template<class Archive>
         void load(Archive& ar, const std::uint32_t)

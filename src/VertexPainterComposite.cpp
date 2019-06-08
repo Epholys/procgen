@@ -1,6 +1,7 @@
 #include <cmath>
 #include "VertexPainterComposite.h"
 #include "VertexPainterLinear.h"
+#include "VertexPainterSerializer.h"
 
 namespace colors
 {
@@ -281,6 +282,11 @@ namespace colors
     void VertexPainterComposite::save_painter(std::shared_ptr<VertexPainter> painter)
     {
         copied_painter_ = painter->clone();
+    }
+
+    std::string VertexPainterComposite::type_name() const
+    {
+        return "VertexPainterComposite";
     }
 }
 

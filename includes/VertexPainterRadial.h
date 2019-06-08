@@ -39,6 +39,9 @@ namespace colors
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone() const override;
 
+        friend class VertexPainterSerializer;
+        virtual std::string type_name() const override;        
+
     private:
         // [0, 1] center: 0 is the left/up of the bounding_box and 1 the right/down.
         sf::Vector2f center_ {0, 0};

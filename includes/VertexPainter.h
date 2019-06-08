@@ -50,6 +50,8 @@ namespace colors
                                     const std::vector<int>& iteration_of_vertices,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) = 0;
+
+        virtual std::string type_name() const = 0;
     };
 }
 

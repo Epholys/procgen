@@ -152,8 +152,12 @@ namespace colors
     //     first_debug = false;
     // }
     }
+
+    std::string VertexPainterLinear::type_name() const
+    {
+        return "VertexPainterLinear";
+    }
 }
 
 CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterLinear, "VertexPainterLinear");
 CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterLinear)
-

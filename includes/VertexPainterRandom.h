@@ -38,6 +38,9 @@ namespace colors
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone() const override;
 
+        friend class VertexPainterSerializer;
+        virtual std::string type_name() const override;        
+
     private:
 
         // The number of consecutive vertices to paint the same color.

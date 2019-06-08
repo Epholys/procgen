@@ -12,6 +12,7 @@
 #include "UniqueColor.h"
 #include "UniqueId.h"
 #include "VertexPainterWrapper.h"
+#include "VertexPainterSerializer.h"
 
 namespace procgui
 {
@@ -161,8 +162,10 @@ namespace procgui
                 ar(cereal::make_nvp("name", name_),
                    cereal::make_nvp("LSystem", *OLSys::get_target()),
                    cereal::make_nvp("DrawingParameters", *OParams::get_target()),
-                   cereal::make_nvp("Interpretation Map", *OMap::get_target()),
-                   cereal::make_nvp("VertexPainter", OPainter::get_target()->unwrap()));
+                   cereal::make_nvp("Interpretation Map", *OMap::get_target()));
+
+                auto painter_serializer  = colors::VertexPainterSerializer(OPainter::get_target()->unwrap());
+                ar(cereal::make_nvp("VertexPainter", painter_serializer));
             }
 
         template<class Archive>
@@ -172,7 +175,7 @@ namespace procgui
                 LSystem lsys;
                 drawing::DrawingParameters params;
                 drawing::InterpretationMap map;
-                std::shared_ptr<colors::VertexPainter> painter;                
+                std::shared_ptr<colors::VertexPainter> painter;
                 
                 ar(name,
                    cereal::make_nvp("LSystem", lsys),
