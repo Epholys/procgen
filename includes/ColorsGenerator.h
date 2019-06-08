@@ -155,7 +155,7 @@ namespace colors
         const sf::Color& get_color() const;
         void set_color(const sf::Color& color);
         
-        template<class Archive> friend class ColorGeneratorSerializer;
+        friend class ColorGeneratorSerializer;
         virtual std::string type_name() const override;        
 
     private:
@@ -222,7 +222,7 @@ namespace colors
         const keys& get_keys() const;
         void set_keys(const keys& keys);
 
-        template<class Archive> friend class ColorGeneratorSerializer;
+        friend class ColorGeneratorSerializer;
         virtual std::string type_name() const override;        
 
     private:
@@ -301,7 +301,7 @@ namespace colors
         // Precondition: 'keys' respect the invariants.
         void set_keys(keys keys);
         
-        template<class Archive> friend class ColorGeneratorSerializer;
+        friend class ColorGeneratorSerializer;
         virtual std::string type_name() const override;        
 
     private:

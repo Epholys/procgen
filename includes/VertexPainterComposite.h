@@ -7,7 +7,6 @@
 
 namespace colors
 {
-    template<class Archive>
     class ColorGeneratorSerializer;
     
     // The VertexPainterComposite is a class allowing to compose other
@@ -55,7 +54,7 @@ namespace colors
             // 0. 
             void reset_index();
             
-            template<class Archive> friend class ::colors::ColorGeneratorSerializer;
+            friend class ::colors::ColorGeneratorSerializer;
             virtual std::string type_name() const override;
 
         private:

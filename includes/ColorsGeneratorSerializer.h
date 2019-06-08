@@ -14,7 +14,6 @@
 
 namespace colors
 {
-    template<class Archive>
     class ColorGeneratorSerializer
     {
     public:
@@ -36,8 +35,11 @@ namespace colors
             }
     private:
         friend class cereal::access;
+        template<class Archive>
         void save(Archive& ar, const std::uint32_t) const
             {
+                Expects(serialized_);
+
                 std::uint32_t version = 0; // ignored
                 
                 std::string type = serialized_->type_name();
@@ -61,6 +63,7 @@ namespace colors
                 SERIALIZE_COLORGEN_CHILD(impl::ColorGeneratorComposite);
             }
     
+        template<class Archive>
         void load(Archive& ar, const std::uint32_t)
             {
                 std::uint32_t version = 0; // ignored

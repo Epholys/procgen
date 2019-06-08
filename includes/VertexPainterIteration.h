@@ -37,7 +37,7 @@ namespace colors
         void save(Archive& ar, const std::uint32_t) const
             {
                 auto color_generator = get_generator_wrapper()->unwrap();
-                auto serializer = ColorGeneratorSerializer<Archive>(color_generator);
+                auto serializer = ColorGeneratorSerializer(color_generator);
                 ar(cereal::make_nvp("ColorGenerator", serializer));
 //                ar(cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
             }
