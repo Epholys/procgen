@@ -149,7 +149,7 @@ private:
         {
             ar(cereal::make_nvp("axiom", production_cache_.at(0)),
                cereal::make_nvp("production_rules", rules_),
-               cereal::make_nvp("iteration_predecessor", iteration_predecessors_));
+               cereal::make_nvp("iteration_predecessors", iteration_predecessors_));
         }
     
     template <class Archive>
@@ -157,7 +157,7 @@ private:
         {
             ar(cereal::make_nvp("axiom", production_cache_[0]),
                cereal::make_nvp("production_rules", rules_),
-               cereal::make_nvp("iteration_predecessor", iteration_predecessors_));
+               cereal::make_nvp("iteration_predecessor", iteration_predecessors_)); // TODO iteration predecessorS
             iteration_count_cache_[0] = {std::vector<int>(production_cache_.at(0).size(), 0), 0};
         }
 

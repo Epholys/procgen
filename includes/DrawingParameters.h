@@ -76,10 +76,10 @@ namespace drawing
         template <class Archive>
         void save (Archive& ar, const std::uint32_t) const
             {
-                ar(cereal::make_nvp("starting_angle", std::round(math::rad_to_degree(starting_angle_)*1000)/1000),
-                   cereal::make_nvp("delta_angle", std::round(math::rad_to_degree(delta_angle_)*1000)/1000),
-                   CEREAL_NVP(step_),
-                   CEREAL_NVP(n_iter_));
+                ar(cereal::make_nvp("starting_angle", math::rad_to_degree(starting_angle_)),
+                   cereal::make_nvp("delta_angle", math::rad_to_degree(delta_angle_)),
+                   cereal::make_nvp("step", step_),
+                   cereal::make_nvp("n_iter", n_iter_));
             }
         
         template <class Archive>
@@ -88,7 +88,7 @@ namespace drawing
                 ar(starting_angle_, delta_angle_, step_, n_iter_);
                 starting_angle_ = math::degree_to_rad(starting_angle_);
                 delta_angle_ = math::degree_to_rad(delta_angle_);
-                
+                // TODO remove '_' at the end of members
             }
 
     };

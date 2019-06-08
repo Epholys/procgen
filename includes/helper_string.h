@@ -41,9 +41,11 @@ std::string array_to_string(const std::array<char, N>& arr)
 }
 
 
-std::string& ltrim(std::string& str);
-std::string& rtrim(std::string& str);
-std::string& trim(std::string& str);
+std::string ltrim(std::string str);
+std::string rtrim( std::string str);
+std::string trim(std::string str);
+
+std::string to_camel_case(std::string str);
 
 
 #endif // HELPER_STRING_H

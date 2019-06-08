@@ -8,7 +8,7 @@
 
 #include "DrawingParameters.h"
 #include "RuleMap.h"
-
+#include "helper_string.h"
 
 // Main explanation of drawing in Turtle.h
 namespace drawing
@@ -60,7 +60,7 @@ namespace drawing
     const Order go_forward    { OrderID::GO_FORWARD,    go_forward_fn, "Go forward" };
     const Order turn_right    { OrderID::TURN_RIGHT,    turn_right_fn, "Turn right" };
     const Order turn_left     { OrderID::TURN_LEFT,     turn_left_fn, "Turn left"  };
-    const Order save_position { OrderID::SAVE_POSITION, save_position_fn, "Save Position" };
+    const Order save_position { OrderID::SAVE_POSITION, save_position_fn, "Save Position" }; // TODO lowercase 'p'
     const Order load_position { OrderID::LOAD_POSITION, load_position_fn, "Load position" };
         
     // All the orders available.
@@ -74,12 +74,20 @@ namespace drawing
                   v.push_back(o.name.c_str());
               return v; }();
 
+    const std::vector<std::string> all_orders_json_name =
+        [](){ std::vector<std::string> v;
+              for(const auto& o : all_orders)
+                  v.push_back(to_camel_case(o.name));
+              return v; }();
+
+
+
     // Minimal serialization for Orders: we save and load only the associated
     // name.
     template<class Archive>
     std::string save_minimal (Archive&, const Order& order)
     {
-        return order.name;
+        return to_camel_case(order.name);
     }
 
     template<class Archive>
@@ -89,6 +97,11 @@ namespace drawing
                                [str](const auto& o){return o.name == str;});
         Expects(it != end(all_orders));
         order = *it;
+
+        // auto it = std::find_if(begin(all_orders_json_name), end(all_orders_json_name),
+        //                        [str](const auto& o){return o.name == str;});
+        // Expects(it != end(all_orders));
+        // order = begin(all_orders) + std::distance(begin(all_orders_json_name), *it);
     }
 
     // 'InterpretationMap' is a map linking a symbol of the vocabulary of a

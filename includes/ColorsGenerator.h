@@ -166,12 +166,12 @@ namespace colors
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const
             {
-                ar(cereal::make_nvp("Color", color_));
+                ar(cereal::make_nvp("color", color_));
             }
         template<class Archive>
         void load(Archive& ar, const std::uint32_t)
             {
-                ar(cereal::make_nvp("Color", color_));
+                ar(cereal::make_nvp("Color", color_)); // TODO lowercase 'c'
             }
 
         // The unique color returned.
