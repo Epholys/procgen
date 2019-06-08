@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "ColorsGenerator.h"
 #include "ColorsGeneratorWrapper.h"
+#include "ColorsGeneratorSerializer.h"
 
 using namespace colors;
 
@@ -376,19 +377,31 @@ TEST(ColorGeneratorTest, polymorphic_serialization)
         cereal::JSONOutputArchive oarchive_linear (ss_linear);
         cereal::JSONOutputArchive oarchive_gradient (ss_discrete);
         
-        oarchive_constant(oconstant);
-        oarchive_linear(olinear);
-        oarchive_gradient(odiscrete);        
+        ColorGeneratorSerializer serializer_constant (oconstant);
+        ColorGeneratorSerializer serializer_linear (olinear);
+        ColorGeneratorSerializer serializer_discrete (odiscrete);
+
+        oarchive_constant(serializer_constant);
+        oarchive_linear(serializer_linear);
+        oarchive_gradient(serializer_discrete);
     }
+
+
+    ColorGeneratorSerializer serializer_constant;
+    ColorGeneratorSerializer serializer_linear;
+    ColorGeneratorSerializer serializer_discrete;
     {
         cereal::JSONInputArchive iarchive_constant (ss_constant);
         cereal::JSONInputArchive iarchive_linear (ss_linear);
         cereal::JSONInputArchive iarchive_gradient (ss_discrete);
 
-        iarchive_constant(iconstant);
-        iarchive_linear(ilinear);
-        iarchive_gradient(idiscrete);        
+        iarchive_constant(serializer_constant);
+        iarchive_linear(serializer_linear);
+        iarchive_gradient(serializer_discrete);
     }
+    iconstant = serializer_constant.get_serialized();
+    ilinear = serializer_linear.get_serialized();
+    idiscrete = serializer_discrete.get_serialized();
 
     ASSERT_TRUE(std::dynamic_pointer_cast<ConstantColor>(iconstant));
     ASSERT_TRUE(std::dynamic_pointer_cast<LinearGradient>(ilinear));
