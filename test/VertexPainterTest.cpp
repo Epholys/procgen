@@ -163,10 +163,21 @@ TEST(VertexPainter, IterationSerialization)
         std::make_shared<ColorGeneratorWrapper>(
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2},{colors[3], 3}})));
-    VertexPainterIteration painter (colors_gen);
+    VertexPainterIteration opainter (colors_gen);
+    VertexPainterIteration ipainter;
+
+    std::stringstream ss;
+    {
+        cereal::JSONOutputArchive ar (ss);
+        ar(opainter);
+    }
+    {
+        cereal::JSONInputArchive ar (ss);
+        ar(ipainter);
+    }
+
     std::vector<sf::Vertex> grid = vertices.grid;
-    painter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
- 
+    ipainter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
     int size = vertices.grid_size;
     int size_2 = size * size;
     for (int i=0; i<size_2; ++i)

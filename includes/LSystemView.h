@@ -175,20 +175,20 @@ namespace procgui
                 LSystem lsys;
                 drawing::DrawingParameters params;
                 drawing::InterpretationMap map;
-                std::shared_ptr<colors::VertexPainter> painter;
+                colors::VertexPainterSerializer painter_serializer;
                 
                 ar(name,
                    cereal::make_nvp("LSystem", lsys),
                    cereal::make_nvp("DrawingParameters", params),
                    cereal::make_nvp("Interpretation Map", map),
-                   cereal::make_nvp("VertexPainter", painter));
+                   cereal::make_nvp("VertexPainter", painter_serializer));
 
                 
                 *this = LSystemView(name,
                                     std::make_shared<LSystem>(lsys),
                                     std::make_shared<drawing::InterpretationMap>(map),
                                     std::make_shared<drawing::DrawingParameters>(params),
-                                    std::make_shared<colors::VertexPainterWrapper>(painter));
+                                    std::make_shared<colors::VertexPainterWrapper>(painter_serializer.get_serialized()));
 
             }
     };

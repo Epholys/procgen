@@ -67,12 +67,9 @@ namespace colors
                 ar(cereal::make_nvp("angle", angle_));
                 ar(cereal::make_nvp("center", center_));
 
-                std::shared_ptr<ColorGenerator> generator;
-                ar(cereal::make_nvp("ColorGenerator", generator));
-                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(generator));
-                // auto serializer = ColorGeneratorSerializer<Archive>();
-                // ar(cereal::make_nvp("ColorGenerator", serializer));                
-                // set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));
+                ColorGeneratorSerializer serializer;
+                ar(cereal::make_nvp("ColorGenerator", serializer));
+                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));
             }
     };
 }

@@ -45,8 +45,6 @@ namespace colors
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const
             {
-                // ar(cereal::make_nvp("repetition_factor", factor_),
-                //    cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
                 ar(cereal::make_nvp("repetition_factor", factor_));
 
                 auto color_generator = get_generator_wrapper()->unwrap();
@@ -57,10 +55,11 @@ namespace colors
         template<class Archive>
         void load(Archive& ar, const std::uint32_t)
             {
-                std::shared_ptr<ColorGenerator> generator;
                 ar(cereal::make_nvp("repetition_factor", factor_));
-                ar(cereal::make_nvp("ColorGenerator", generator));
-                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(generator));
+
+                ColorGeneratorSerializer serializer;
+                ar(cereal::make_nvp("ColorGenerator", serializer));
+                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));
             }
 
         float factor_ {0};

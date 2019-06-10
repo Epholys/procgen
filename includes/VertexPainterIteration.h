@@ -42,14 +42,13 @@ namespace colors
                 auto color_generator = get_generator_wrapper()->unwrap();
                 auto serializer = ColorGeneratorSerializer(color_generator);
                 ar(cereal::make_nvp("ColorGenerator", serializer));
-//                ar(cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
             }
         template<class Archive>
         void load(Archive& ar, const std::uint32_t)
             {
-                std::shared_ptr<ColorGenerator> generator;
-                ar(cereal::make_nvp("ColorGenerator", generator));
-                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(generator));
+                ColorGeneratorSerializer serializer;
+                ar(cereal::make_nvp("ColorGenerator", serializer));
+                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));
             }
     };
 }

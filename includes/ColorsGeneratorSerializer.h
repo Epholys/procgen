@@ -14,6 +14,8 @@
 
 namespace colors
 {
+    using namespace colors::impl;
+    
     class ColorGeneratorSerializer
     {
     public:
@@ -49,14 +51,14 @@ namespace colors
                 SERIALIZE_COLORGEN_CHILD(ConstantColor);
                 SERIALIZE_COLORGEN_CHILD(LinearGradient);
                 SERIALIZE_COLORGEN_CHILD(DiscreteGradient);
-                SERIALIZE_COLORGEN_CHILD(impl::ColorGeneratorComposite);
+                SERIALIZE_COLORGEN_CHILD(ColorGeneratorComposite);
             }
     
         template<class Archive>
         void load(Archive& ar, const std::uint32_t)
             {
                 std::uint32_t version = 0; // ignored
-
+            
                 std::string type;
                 ar(cereal::make_nvp("type", type));
             
@@ -74,7 +76,8 @@ namespace colors
                 DESERIALIZE_COLORGEN_CHILD(ConstantColor);
                 DESERIALIZE_COLORGEN_CHILD(LinearGradient);
                 DESERIALIZE_COLORGEN_CHILD(DiscreteGradient);
-                DESERIALIZE_COLORGEN_CHILD(impl::ColorGeneratorComposite);
+                DESERIALIZE_COLORGEN_CHILD(ColorGeneratorComposite);
+                Expects(serialized_);
             }
 
         std::shared_ptr<ColorGenerator> serialized_;

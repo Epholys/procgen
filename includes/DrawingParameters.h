@@ -88,7 +88,6 @@ namespace drawing
                 ar(starting_angle_, delta_angle_, step_, n_iter_);
                 starting_angle_ = math::degree_to_rad(starting_angle_);
                 delta_angle_ = math::degree_to_rad(delta_angle_);
-                // TODO remove '_' at the end of members
             }
 
     };

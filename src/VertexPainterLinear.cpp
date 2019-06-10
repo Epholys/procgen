@@ -158,6 +158,3 @@ namespace colors
         return "VertexPainterLinear";
     }
 }
-
-CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterLinear, "VertexPainterLinear");
-CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterLinear)

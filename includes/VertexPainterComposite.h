@@ -190,6 +190,29 @@ namespace colors
                 ar(cereal::make_nvp("main_painter", main_painter),
                    cereal::make_nvp("child_painters", child_painters));
             }
+        template<class Archive, class Serializer>
+        void load_impl(Archive& ar, const std::uint32_t)
+            {
+                static_assert(std::is_same<Serializer, VertexPainterSerializer>::value);
+                
+                auto main_painter_serializer = Serializer();
+                std::vector<Serializer> child_painters_serializers;
+                ar(cereal::make_nvp("main_painter", main_painter_serializer),
+                   cereal::make_nvp("child_painters", child_painters_serializers));
+
+                std::shared_ptr<VertexPainterWrapper> main_wrapper = std::make_shared<VertexPainterWrapper>();
+                main_wrapper->wrap(main_painter_serializer.get_serialized());
+                set_main_painter(main_wrapper);
+                
+                std::list<std::shared_ptr<VertexPainterWrapper>> child_wrappers;
+                for(const auto& painter_serializer : child_painters_serializers)
+                {
+                    std::shared_ptr<VertexPainterWrapper> wrapper = std::make_shared<VertexPainterWrapper>();;
+                    wrapper->wrap(painter_serializer.get_serialized());
+                    child_wrappers.push_back(wrapper);
+                }
+                set_child_painters(child_wrappers);
+            }
         
         friend class cereal::access;
         template<class Archive>
@@ -201,23 +224,8 @@ namespace colors
         template<class Archive>
         void load(Archive& ar, const std::uint32_t)
             {
-                std::shared_ptr<VertexPainter> main_painter;
-                std::vector<std::shared_ptr<VertexPainter>> child_painters;
-                ar(cereal::make_nvp("main_painter", main_painter),
-                   cereal::make_nvp("child_painters", child_painters));
-
-                std::shared_ptr<VertexPainterWrapper> main_wrapper = std::make_shared<VertexPainterWrapper>();
-                main_wrapper->wrap(main_painter);
-                set_main_painter(main_wrapper);
-                
-                std::list<std::shared_ptr<VertexPainterWrapper>> child_wrappers;
-                for(auto painter : child_painters)
-                {
-                    std::shared_ptr<VertexPainterWrapper> wrapper = std::make_shared<VertexPainterWrapper>();;
-                    wrapper->wrap(painter);
-                    child_wrappers.push_back(wrapper);
-                }
-                set_child_painters(child_wrappers);
+                std::uint32_t unused = 0;
+                load_impl<Archive, VertexPainterSerializer>(ar, unused);
             }
     };
 }

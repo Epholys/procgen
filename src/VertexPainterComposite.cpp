@@ -289,8 +289,3 @@ namespace colors
         return "VertexPainterComposite";
     }
 }
-
-CEREAL_REGISTER_TYPE_WITH_NAME(colors::impl::ColorGeneratorComposite, "ColorGeneratorComposite");
-CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::ColorGenerator, colors::impl::ColorGeneratorComposite)
-CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterComposite, "VertexPainterComposite");
-CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterComposite)

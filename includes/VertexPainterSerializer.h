@@ -91,6 +91,7 @@ namespace colors
                 DESERIALIZE_PAINTER_CHILD(VertexPainterSequential);
 
                 DESERIALIZE_PAINTER_CHILD(VertexPainterComposite);
+                Expects(serialized_);
             }
 
         std::shared_ptr<VertexPainter> serialized_;

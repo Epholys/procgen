@@ -93,15 +93,13 @@ namespace drawing
     template<class Archive>
     void load_minimal (Archive&, Order& order, const std::string& str)
     {
-        auto it = std::find_if(begin(all_orders), end(all_orders),
-                               [str](const auto& o){return o.name == str;});
-        Expects(it != end(all_orders));
-        order = *it;
-
-        // auto it = std::find_if(begin(all_orders_json_name), end(all_orders_json_name),
-        //                        [str](const auto& o){return o.name == str;});
-        // Expects(it != end(all_orders));
-        // order = begin(all_orders) + std::distance(begin(all_orders_json_name), *it);
+        auto it = std::find_if(begin(all_orders_json_name), end(all_orders_json_name),
+                               [str](const auto& o){return o == str;});
+        Expects(it != end(all_orders_json_name));
+        int index = std::distance(begin(all_orders_json_name), it);
+        Expects(index >= 0);
+        Expects(static_cast<decltype(all_orders)::size_type>(index) < all_orders.size());
+        order = *(begin(all_orders) + index);
     }
 
     // 'InterpretationMap' is a map linking a symbol of the vocabulary of a
