@@ -194,7 +194,7 @@ namespace controller
                 else
                 {
                     // Save the LSystemView in the file.
-                    cereal::JSONOutputArchive archive (ofs);
+                    cereal::JSONOutputArchive archive (ofs, cereal::JSONOutputArchive::Options(4));
                     if (LSystemController::under_mouse()) // Virtually useless check.
                     {
                         archive(cereal::make_nvp("LSystemView", *LSystemController::under_mouse()));
