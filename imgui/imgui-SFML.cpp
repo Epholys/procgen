@@ -306,7 +306,13 @@ void ProcessEvent(const sf::Event& event) {
                 }
             } break;
             case sf::Event::MouseWheelScrolled:
-                io.MouseWheel += event.mouseWheelScroll.delta;
+                if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel ||
+                    (event.mouseWheelScroll.wheel == sf::Mouse::HorizontalWheel &&
+                    io.KeyShift)) {
+                    io.MouseWheel += event.mouseWheelScroll.delta;
+                } else if (event.mouseWheelScroll.wheel == sf::Mouse::HorizontalWheel) {
+                    io.MouseWheelH += event.mouseWheelScroll.delta;
+                }
                 break;
             case sf::Event::KeyPressed:  // fall-through
             case sf::Event::KeyReleased:
@@ -314,10 +320,11 @@ void ProcessEvent(const sf::Event& event) {
                     (event.type == sf::Event::KeyPressed);
                 break;
             case sf::Event::TextEntered:
-                if (event.text.unicode > 0 && event.text.unicode < 0x10000) {
-                    io.AddInputCharacter(
-                        static_cast<ImWchar>(event.text.unicode));
+                // Don't handle the event for unprintable characters
+                if (event.text.unicode < ' ' || event.text.unicode == 127) {
+                    break;
                 }
+                io.AddInputCharacter(event.text.unicode);
                 break;
             case sf::Event::JoystickConnected:
                 if (s_joystickId == NULL_JOYSTICK_ID) {
@@ -396,13 +403,15 @@ void Update(const sf::Vector2i& mousePos, const sf::Vector2f& displaySize,
         }
     }
 
-    // Update Ctrl, Shift, Alt state
+    // Update Ctrl, Shift, Alt, Super state
     io.KeyCtrl = io.KeysDown[sf::Keyboard::LControl] ||
                  io.KeysDown[sf::Keyboard::RControl];
     io.KeyAlt =
         io.KeysDown[sf::Keyboard::LAlt] || io.KeysDown[sf::Keyboard::RAlt];
     io.KeyShift =
         io.KeysDown[sf::Keyboard::LShift] || io.KeysDown[sf::Keyboard::RShift];
+    io.KeySuper = io.KeysDown[sf::Keyboard::LSystem] ||
+                  io.KeysDown[sf::Keyboard::RSystem];
 
 #ifdef ANDROID
 #ifdef USE_JNI
@@ -877,11 +886,12 @@ void updateJoystickLStickState(ImGuiIO& io) {
 }
 
 void setClipboardText(void* /*userData*/, const char* text) {
-    sf::Clipboard::setString(text);
+    sf::Clipboard::setString(sf::String::fromUtf8(text, text + std::strlen(text)));
 }
 
 const char* getClipboadText(void* /*userData*/) {
-    s_clipboardText = sf::Clipboard::getString().toAnsiString();
+    std::basic_string<sf::Uint8> tmp = sf::Clipboard::getString().toUtf8();
+    s_clipboardText = std::string(tmp.begin(), tmp.end());
     return s_clipboardText.c_str();
 }
 
