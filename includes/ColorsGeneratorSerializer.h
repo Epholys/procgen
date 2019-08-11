@@ -52,6 +52,7 @@ namespace colors
                 SERIALIZE_COLORGEN_CHILD(LinearGradient);
                 SERIALIZE_COLORGEN_CHILD(DiscreteGradient);
                 SERIALIZE_COLORGEN_CHILD(ColorGeneratorComposite);
+#undef SERIALIZE_COLORGEN_CHILD
             }
     
         template<class Archive>
@@ -78,6 +79,7 @@ namespace colors
                 DESERIALIZE_COLORGEN_CHILD(DiscreteGradient);
                 DESERIALIZE_COLORGEN_CHILD(ColorGeneratorComposite);
                 Expects(serialized_);
+#undef DESERIALIZE_COLORGEN_CHILD
             }
 
         std::shared_ptr<ColorGenerator> serialized_;
