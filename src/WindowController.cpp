@@ -334,6 +334,28 @@ namespace controller
                     }
                     if (!file_error_popup)
                     {
+                        // Redimension the L-System to take 2/3 of the lowest
+                        // screen. Double the load time, but it should be okay
+                        // except for huge L-Systems.
+                        const double target_ratio = 2. / 3.;
+                        double step {0};
+                        
+                        auto box = loaded_view.get_bounding_box();
+                        auto window_size = sfml_window::window.getSize();
+                        if(window_size.x < window_size.y)
+                        {
+                            double target_size = target_ratio * window_size.x;
+                            double diff_ratio = box.width != 0 ? target_size / box.width : target_size;
+                            step = loaded_view.get_parameters().get_step() * diff_ratio * zoom_level_;
+                        }
+                        else
+                        {
+                            double target_size = target_ratio * window_size.y;
+                            double diff_ratio = box.height != 0 ? target_size / box.height : target_size;
+                            step = loaded_view.get_parameters().get_step() * diff_ratio * zoom_level_;
+                        }
+                        loaded_view.ref_parameters().set_step(step);
+                                                
                         // Paste the new LSystemView at the correct position.
                         auto tmp = std::make_optional(loaded_view);
                         paste_view(lsys_views, tmp, mouse_position_to_load_);
