@@ -705,7 +705,7 @@ namespace
         int old_index = index;
         const char* generators[6] = {"Constant", "Linear", "Radial",
                                      "Random", "Sequential", "Iterative"};
-        bool new_generator = ImGui::ListBox("Vertex Painter", &index, generators, 6);
+        bool new_generator = ImGui::ListBox("Vertex Painter", &index, generators, 6) && index != old_index;
         
         // Create a new VertexPainter
         if (new_generator)
@@ -1365,22 +1365,23 @@ namespace procgui
         }
 
         bool new_generator = false;
+        int old_index = index;
         if (mode == color_wrapper_mode::CONSTANT)
         {
             const char* generators[1] = {"Constant"};
-            new_generator = ImGui::ListBox("Color Generator", &index, generators, 1);
+            new_generator = ImGui::ListBox("Color Generator", &index, generators, 1) && index != old_index;;
         }
         else if (mode == color_wrapper_mode::GRADIENTS)
         {
-            --index;
+            --index; --old_index; // Change index to match the ListBox.
             const char* generators[2] = {"Linear Gradient", "Discrete Gradient"};
-            new_generator = ImGui::ListBox("Color Generator", &index, generators, 2);
-            ++index;
+            new_generator = ImGui::ListBox("Color Generator", &index, generators, 2)  && index != old_index;;
+            ++index; // Change index to match the typeid indices.
         }
         else if (mode == color_wrapper_mode::ALL)
         {
             const char* generators[3] = {"Constant", "Linear Gradient", "Discrete Gradient"};
-            new_generator = ImGui::ListBox("Color Generator", &index, generators, 3);
+            new_generator = ImGui::ListBox("Color Generator", &index, generators, 3)  && index != old_index;;
         }
         else
         {
