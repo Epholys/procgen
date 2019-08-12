@@ -854,13 +854,12 @@ namespace
     void interact_with(colors::ConstantColor& constant)
     {
         // Color selection widget.
-        ImVec4 imcolor = constant.get_color();
+        ImVec4 imcolor = constant.get_imcolor();
         if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar))
         {
-            sf::Color color = imcolor;
-            if (color != sf::Color::Transparent)
+            if (!colors::is_transparent(imcolor))
             {
-                constant.set_color(imcolor);
+                constant.set_imcolor(imcolor);
             }
         }
 
@@ -957,15 +956,12 @@ namespace
             ImGui::BeginGroup();
 
             // Color
-            auto& sfcolor = it->color;
-            ImVec4 imcolor = sfcolor;
-            if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar))
+            ImVec4 imcolor = it->imcolor;
+            if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar) &&
+               !colors::is_transparent(imcolor))
             {
                 is_modified = true;
-            }
-            if (sf::Color(imcolor) != sf::Color::Transparent)
-            {
-                sfcolor = imcolor;
+                it->imcolor = imcolor;
             }
 
             // Key's Position
@@ -1085,14 +1081,15 @@ namespace
         double ratio = 0.f;
         for (unsigned i=0; i<k.size()-1; ++i)
         {
-            const auto& col1 = k.at(i).color;
-            const auto& col2 = k.at(i+1).color;
+            const auto& col1 = k.at(i).imcolor;
+            const auto& col2 = k.at(i+1).imcolor;
             const auto& f = k.at(i+1).position;
             draw_list->AddRectFilledMultiColor({x, screen_pos.y}, ImVec2(x+size.x*(f-ratio), screen_pos.y+size.y),
-                                               IM_COL32(col1.r, col1.g, col1.b, col1.a),
-                                               IM_COL32(col2.r, col2.g, col2.b, col2.a),
-                                               IM_COL32(col2.r, col2.g, col2.b, col2.a),
-                                               IM_COL32(col1.r, col1.g, col1.b, col1.a));
+                                               ImGui::ColorConvertFloat4ToU32(col1),
+                                               ImGui::ColorConvertFloat4ToU32(col2),
+                                               ImGui::ColorConvertFloat4ToU32(col2),
+                                               ImGui::ColorConvertFloat4ToU32(col1));
+
             ratio = f;
             x = screen_pos.x + size.x*f;
         }
@@ -1154,17 +1151,16 @@ namespace
             ImGui::PopID();
             
             // Key Color
-            auto& sfcolor = it->color;
-            ImVec4 imcolor = sfcolor;
+            ImVec4 imcolor = it->imcolor;
             if(ImGui::ColorEdit4("Color", (float*)&imcolor,ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar))
             {
-                is_modified = true;
+                if (!colors::is_transparent(imcolor))
+                {
+                    is_modified = true;
+                    it->imcolor = imcolor;
+                }
 
                 block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
-            }
-            if (sf::Color(imcolor) != sf::Color::Transparent)
-            {
-                sfcolor = imcolor;
             }
 
             ImGui::PushID(1);
@@ -1240,13 +1236,13 @@ namespace
         ImGui::SameLine();
         // Last color widget.
         ImGui::PushID(keys.size());
-        auto& sfcolor = keys.back().color;
-        ImVec4 imcolor = sfcolor;
-        if(ImGui::ColorEdit4("Color", (float*)&imcolor,ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar))
+        ImVec4 imcolor = keys.back().imcolor;
+        if(ImGui::ColorEdit4("Color", (float*)&imcolor,ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar) &&
+           !colors::is_transparent(imcolor))
         {
             is_modified = true;
+            keys.back().imcolor = imcolor;
         }
-        sfcolor = imcolor;
         ImGui::PopID();
 
         ImGui::PushID(keys.size());

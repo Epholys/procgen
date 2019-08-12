@@ -101,7 +101,7 @@ TEST(ColorGeneratorTest, constant_moved)
 TEST(ColorGeneratorTest, constant_setter)
 {
     ConstantColor c;
-    c.set_color(sf::Color::Blue);
+    c.set_imcolor(sf::Color::Blue);
     ASSERT_EQ(sf::Color::Blue, c.get_color());
 }
 
@@ -143,7 +143,7 @@ namespace colors
 {
     inline bool operator== (const LinearGradient::Key left, const LinearGradient::Key right)
     {
-        return left.color == right.color && left.position == right.position;
+        return sf::Color(left.imcolor) == sf::Color(right.imcolor) && left.position == right.position;
     }
 }
 
@@ -250,7 +250,7 @@ namespace colors
 {
     inline bool operator== (const DiscreteGradient::Key left, const DiscreteGradient::Key right)
     {
-        return left.color == right.color && left.index == right.index;
+        return sf::Color(left.imcolor) == sf::Color(right.imcolor) && left.index == right.index;
     }
 }
 

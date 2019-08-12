@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <vector>
 #include <SFML/Graphics.hpp>
+#include "imgui/imgui.h"
 #include "cereal/types/polymorphic.hpp"
 #include "cereal/cereal.hpp"
 #include "cereal/types/vector.hpp"
@@ -58,6 +59,23 @@ namespace cereal
         color.r = color_number & 0xff;
     }
 
+    template <class Archive,
+              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
+    std::string save_minimal(const Archive& ar, ImVec4 imcolor)
+    {
+        return save_minimal(ar, static_cast<sf::Color>(imcolor));
+    }
+
+    template <class Archive,
+              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
+    void load_minimal(const Archive& ar, ImVec4& imcolor, const std::string& data)
+    {
+        sf::Color color;
+        load_minimal(ar, color, data);
+        imcolor = color;
+    }
+
+    
     template<class Archive, class N,
              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
     void save(Archive& ar, const std::pair<sf::Color, N>& pair)
@@ -107,6 +125,11 @@ namespace cereal
 
 namespace colors
 {
+    static const ImVec4 imwhite {1, 1, 1, 1};
+    
+    bool is_transparent(ImVec4 imcolor);
+
+    
     // ColorGenerator is an simple abstract class.
     // From a single float between 0 and 1, returns a color.
     // As a polymorphic class, it is generally used as a
@@ -152,8 +175,9 @@ namespace colors
         sf::Color get(float f) override;
 
         // Getter and setter
-        const sf::Color& get_color() const;
-        void set_color(const sf::Color& color);
+        sf::Color get_color() const;            // sf::Color getter for the painters
+        const ImVec4& get_imcolor() const;      // ImVec4 getter for the GUI
+        void set_imcolor(const ImVec4& color);
         
         friend class ColorGeneratorSerializer;
         virtual std::string type_name() const override;        
@@ -174,8 +198,9 @@ namespace colors
                 ar(cereal::make_nvp("color", color_));
             }
 
-        // The unique color returned.
-        sf::Color color_ {sf::Color::White};
+        // The unique color returned, in ImVec4 format (for ease of use with the
+        // GUI).
+        ImVec4 color_ {imwhite};
     };
 
 
@@ -193,7 +218,7 @@ namespace colors
     public:
         struct Key
         {
-            sf::Color color {sf::Color::White};
+            ImVec4 imcolor {imwhite};
             float position {0.f};
         };
         
@@ -236,7 +261,7 @@ namespace colors
                 std::vector<std::pair<sf::Color, float>> keys;
                 for (const auto& k : keys_)
                 {
-                    keys.push_back({k.color, k.position});
+                    keys.push_back({k.imcolor, k.position});
                 }
                 ar(cereal::make_nvp("color_keys", keys));
             }
@@ -269,7 +294,7 @@ namespace colors
     public:
         struct Key
         {
-            sf::Color color {sf::Color::White};
+            ImVec4 imcolor {imwhite};
             float index {0};
         };
 
@@ -319,7 +344,7 @@ namespace colors
                 std::vector<std::pair<sf::Color, float>> keys;
                 for (const auto& k : keys_)
                 {
-                    keys.push_back({k.color, k.index});
+                    keys.push_back({k.imcolor, k.index});
                 }
                 ar(cereal::make_nvp("color_keys", keys));
             }

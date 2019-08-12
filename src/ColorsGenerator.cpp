@@ -4,6 +4,13 @@
 
 namespace colors
 {
+    bool is_transparent(ImVec4 imcolor)
+    {
+        return imcolor.x == 0 && imcolor.y == 0 && imcolor.z == 0 && imcolor.w == 0;
+    }
+
+
+    
     ConstantColor::ConstantColor(const sf::Color& color)
         : ColorGenerator()
         , color_{color}
@@ -15,12 +22,17 @@ namespace colors
         return color_;
     }
 
-    const sf::Color& ConstantColor::get_color() const
+    sf::Color ConstantColor::get_color() const
+    {
+        return color_;
+    }
+
+    const ImVec4& ConstantColor::get_imcolor() const
     {
         return color_;
     }
     
-    void ConstantColor::set_color(const sf::Color& color)
+    void ConstantColor::set_imcolor(const ImVec4& color)
     {
         color_ = color;
         notify();
@@ -40,7 +52,7 @@ namespace colors
     //------------------------------------------------------------
     
     LinearGradient::LinearGradient()
-        : LinearGradient({{sf::Color::White, 0.},{sf::Color::White, 1.}})
+        : LinearGradient({{imwhite, 0.},{imwhite, 1.}})
     {
     }
 
@@ -107,12 +119,12 @@ namespace colors
         }
 
         // Interpolate.
-        sf::Color color;
-        color.r = inferior.color.r * (1-factor) + superior.color.r * factor;
-        color.g = inferior.color.g * (1-factor) + superior.color.g * factor;
-        color.b = inferior.color.b * (1-factor) + superior.color.b * factor;
-        color.a = inferior.color.a * (1-factor) + superior.color.a * factor;
-        return color;
+        ImVec4 imcolor;
+        imcolor.x = inferior.imcolor.x * (1-factor) + superior.imcolor.x * factor;
+        imcolor.y = inferior.imcolor.y * (1-factor) + superior.imcolor.y * factor;
+        imcolor.z = inferior.imcolor.z * (1-factor) + superior.imcolor.z * factor;
+        imcolor.w = inferior.imcolor.w * (1-factor) + superior.imcolor.w * factor;
+        return imcolor;  // Implicit conversion here, seems wasteful but optimized out in the end.
     }
 
     // Return a copy of this as a shared_ptr for polymorphic purpose.
@@ -195,12 +207,12 @@ namespace colors
         {
             // Interpolate
             float factor = (static_cast<float>(i) - inferior->index) / (superior->index - inferior->index);
-            sf::Color color;
-            color.r = inferior->color.r * (1-factor) + superior->color.r * factor;
-            color.g = inferior->color.g * (1-factor) + superior->color.g * factor;
-            color.b = inferior->color.b * (1-factor) + superior->color.b * factor;
-            color.a = inferior->color.a * (1-factor) + superior->color.a * factor;
-            colors_.push_back(color);
+            ImVec4 imcolor;
+            imcolor.x = inferior->imcolor.x * (1-factor) + superior->imcolor.x * factor;
+            imcolor.y = inferior->imcolor.y * (1-factor) + superior->imcolor.y * factor;
+            imcolor.z = inferior->imcolor.z * (1-factor) + superior->imcolor.z * factor;
+            imcolor.w = inferior->imcolor.w * (1-factor) + superior->imcolor.w * factor;
+            colors_.push_back(imcolor);
 
             ++i;
             if (i > superior->index)

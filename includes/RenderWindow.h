@@ -3,6 +3,8 @@
 
 #include <SFML/Graphics.hpp>
 
+struct ImVec4;
+
 namespace sfml_window
 {
     static constexpr struct WindowSize
@@ -11,7 +13,7 @@ namespace sfml_window
         int y {900};
     } default_window_size;
 
-    extern sf::Color background_color;
+    extern ImVec4 background_color;
 
     void init_window();
     extern sf::RenderWindow window;

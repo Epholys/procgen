@@ -1,8 +1,9 @@
+#include "imgui/imgui.h"
 #include "RenderWindow.h"
 
 namespace sfml_window
 {
-    sf::Color background_color = sf::Color::Black;
+    ImVec4 background_color = {0, 0, 0, 1};
     sf::RenderWindow window {};
     
     void init_window()
