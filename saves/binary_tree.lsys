@@ -1,30 +1,29 @@
 {
-    "LSystemView": {
+    "value0": {
         "cereal_class_version": 0,
         "name": "Plant",
         "LSystem": {
             "cereal_class_version": 0,
             "axiom": "X",
             "production_rules": {
-                "X": "F[-X][+X]",
-                "F": "FF"
+                "F": "FF",
+                "X": "F[-X][+X]"
             },
             "iteration_predecessors": "X"
         },
         "DrawingParameters": {
             "cereal_class_version": 0,
             "starting_angle": 90.0,
-            "delta_angle": 29.9999,
-            "step": 20.0,
+            "delta_angle": 29.999899999999998,
             "n_iter": 5
         },
         "Interpretation Map": {
             "cereal_class_version": 0,
-            "F": "go_forward",
-            "[": "save_position",
-            "-": "turn_left",
+            "+": "turn_right",
             "]": "load_position",
-            "+": "turn_right"
+            "-": "turn_left",
+            "F": "go_forward",
+            "[": "save_position"
         },
         "VertexPainter": {
             "cereal_class_version": 0,

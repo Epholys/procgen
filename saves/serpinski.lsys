@@ -15,7 +15,6 @@
             "cereal_class_version": 0,
             "starting_angle": 180.0,
             "delta_angle": 59.9999,
-            "step": 7.0,
             "n_iter": 6
         },
         "Interpretation Map": {
