@@ -8,7 +8,11 @@
 #include <SFML/Graphics.hpp>
 
 #include "imgui/imgui.h"
-#include "LSystemView.h"
+
+namespace procgui
+{
+    class LSystemView;
+}
 
 namespace controller
 {
@@ -44,6 +48,8 @@ namespace controller
 
         // Getter for the zoom level
         static float get_zoom_level();
+
+        static void add_loading_error_message(const std::string& message);
         
         // Public flag to message WindowController to start the save menu. It is
         // also used to let the window open between frames.
@@ -100,6 +106,8 @@ namespace controller
         
         // The fixed save directory of the application
         static std::experimental::filesystem::path save_dir_;
+
+        static std::vector<std::string> error_messages;
     };
 }
 

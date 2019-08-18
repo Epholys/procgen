@@ -2,8 +2,7 @@
 
 #include "imgui/imgui-SFML.h"
 
-#include "LSystem.h"
-#include "WindowController.h"
+#include "LSystemView.h"
 #include "RenderWindow.h"
 
 using namespace drawing;

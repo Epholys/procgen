@@ -1,6 +1,7 @@
 #include "LSystemController.h"
 #include "WindowController.h"
 #include "imgui/imgui.h"
+#include "LSystemView.h"
 
 
 namespace controller

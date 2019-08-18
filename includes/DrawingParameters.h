@@ -9,6 +9,7 @@
 
 #include "helper_math.h"
 #include "Observable.h"
+#include "WindowController.h"
 
 // Main explanation of drawing in Turtle.h
 namespace drawing
@@ -87,6 +88,10 @@ namespace drawing
                 ar(starting_angle_, delta_angle_, n_iter_);
                 starting_angle_ = math::degree_to_rad(starting_angle_);
                 delta_angle_ = math::degree_to_rad(delta_angle_);
+                if (starting_angle_ > 2*math::pi)
+                {
+                    controller::WindowController::add_loading_error_message("starting_angle > 2PI, mods");
+                }
             }
 
     };
