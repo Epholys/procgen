@@ -5,6 +5,7 @@
 #include "VertexPainter.h"
 #include "helper_cereal.hpp"
 #include "ColorsGeneratorSerializer.h"
+#include "WindowController.h"
 
 namespace colors
 {
@@ -61,6 +62,14 @@ namespace colors
         void load(Archive& ar, const std::uint32_t)
             {
                 ar(cereal::make_nvp("center", center_));             
+
+                if (center_.x < 0. || center_.x > 1. ||
+                    center_.y < 0. || center_.y > 1.)
+                {
+                    center_.x = std::clamp(center_.x, 0.f, 1.f);
+                    center_.y = std::clamp(center_.y, 0.f, 1.f);
+                    controller::WindowController::add_loading_error_message("VertexPainterRadial's center's coordinates weren't in the [0,1] range, so they are clamped.");
+                }
 
                 ColorGeneratorSerializer serializer;
                 ar(cereal::make_nvp("ColorGenerator", serializer));

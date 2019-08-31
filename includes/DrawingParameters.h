@@ -86,16 +86,20 @@ namespace drawing
         void load (Archive& ar, const std::uint32_t)
             {
                 ar(starting_angle_, delta_angle_, n_iter_);
+                if (starting_angle_ < 0 || starting_angle_ > 360)
+                {
+                    starting_angle_ = math::clamp_angle(starting_angle_);
+                    controller::WindowController::add_loading_error_message("DrawingParameters' starting_angle wasn't in the [0,360] range, so it is clamped.");
+                }
+                if (delta_angle_ < 0 || delta_angle_ > 360)
+                {
+                    delta_angle_ = math::clamp_angle(delta_angle_);
+                    controller::WindowController::add_loading_error_message("DrawingParameters' delta_angle wasn't in the [0,360] range, so it is clamped.");
+                }
                 starting_angle_ = math::degree_to_rad(starting_angle_);
                 delta_angle_ = math::degree_to_rad(delta_angle_);
-                if (starting_angle_ > 2*math::pi)
-                {
-                    controller::WindowController::add_loading_error_message("starting_angle > 2PI, mods");
-                }
             }
-
     };
-    
 }
 
 #endif

@@ -183,14 +183,40 @@ namespace colors
     void DiscreteGradient::set_keys(keys keys)
     {
         // Verify the invariant
-        Expects(keys.size() > 1);
-        Expects(keys.at(0).index == 0);
-        Expects(std::is_sorted(begin(keys), end(keys),
-                               [](const auto& a, const auto& b)
-                               {return a.index < b.index;}));
+        Expects(keys.size() >= 2);
         keys_ = keys;
+
+        for (auto& p : keys_)
+        {
+            if (p.index < 0)
+            {
+                p.index = 0;
+            }
+        }
+
+        std::sort(begin(keys_), end(keys_),
+                  [](const auto& p1, const auto& p2){return p1.index < p2.index;});
+
+        keys_.front().index = 0;
+
+        int gap = 0;
+        for (auto it = next(begin(keys_)); it != end(keys_); ++it)
+        {
+            it->index += gap;
+            if (it->index == prev(it)-> index)
+            {
+                ++it->index;
+                ++gap;
+            }
+        }
+
         generate_colors();
         notify();
+
+        Ensures(keys_.at(0).index == 0);
+        Ensures(std::is_sorted(begin(keys_), end(keys_),
+                               [](const auto& a, const auto& b)
+                               {return a.index < b.index;}));      
     }
 
     void DiscreteGradient::generate_colors()
@@ -202,7 +228,7 @@ namespace colors
         auto inferior = keys_.begin();
         auto superior = ++keys_.begin();
 
-        size_t i = 0;
+        int i = 0;
         while(i <= keys_.back().index)
         {
             // Interpolate

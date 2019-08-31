@@ -10,6 +10,7 @@
 #include "cereal/types/vector.hpp"
 #include "cereal/archives/json.hpp"
 #include "Observable.h"
+#include "WindowController.h"
 
 namespace cereal
 {
@@ -272,10 +273,28 @@ namespace colors
                 std::vector<std::pair<sf::Color, float>> loaded_keys;
                 std::vector<Key> keys;
                 ar(cereal::make_nvp("color_keys", loaded_keys));
+
+                if (loaded_keys.size() < 2)
+                {
+                    loaded_keys = {{sf::Color::White, 0} , {sf::Color::White, 1.}};
+                    controller::WindowController::add_loading_error_message("There was less than 2 keys in LinearGradient, so it is set to a default state.");
+                }
+
+                bool out_of_bound = false;
                 for (const auto& k : loaded_keys)
                 {
+                    if (k.second < 0 || k.second > 1)
+                    {
+                        out_of_bound = true;
+                    }
                     keys.push_back({k.first, k.second});
                 }
+
+                if (out_of_bound)
+                {
+                    controller::WindowController::add_loading_error_message("One or more key in LinearGradient were out of bound, so they are clamped.");
+                }
+                
                 set_keys(keys);
             }
 
@@ -295,7 +314,7 @@ namespace colors
         struct Key
         {
             ImVec4 imcolor {imwhite};
-            float index {0};
+            int index {0};
         };
 
         // A key is a pair of a Color and an integer. The integer is the index
@@ -323,7 +342,6 @@ namespace colors
 
         // Setter
         // Set 'keys_' to 'keys' and generate the 'colors_'.
-        // Precondition: 'keys' respect the invariants.
         void set_keys(keys keys);
         
         friend class ColorGeneratorSerializer;
@@ -352,13 +370,43 @@ namespace colors
         template<class Archive>
         void load(Archive& ar, std::uint32_t)
             {
-                std::vector<std::pair<sf::Color, float>> loaded_keys;
+                std::vector<std::pair<sf::Color, int>> loaded_keys;
                 std::vector<Key> keys;
                 ar(cereal::make_nvp("color_keys", loaded_keys));
+
+                if (loaded_keys.size() < 2)
+                {
+                    loaded_keys = {{sf::Color::White, 0} , {sf::Color::White, 1}};
+                    controller::WindowController::add_loading_error_message("There was less than 2 keys in DiscreteGradient, so it is set to a default state.");
+                }
+
+                bool out_of_bound = false;
                 for (const auto& k : loaded_keys)
                 {
+                    if (k.second < 0)
+                    {
+                        out_of_bound = true;
+                    }
                     keys.push_back({k.first, k.second});
                 }
+
+                if (out_of_bound)
+                {
+                    controller::WindowController::add_loading_error_message("One or more key in DiscreteGradient were negative, so they are clamped.");
+                }
+
+                if (!std::is_sorted(begin(keys), end(keys),
+                                   [](const auto& a, const auto& b)
+                                    {return a.index < b.index;}))
+                {
+                    controller::WindowController::add_loading_error_message("DiscreteGradient's keys were not sorted, so they are now.");
+                }
+
+                if (keys_.front().index != 0)
+                {
+                    controller::WindowController::add_loading_error_message("DiscreteGradient's keys didn't have a first element, so one is designated now.");
+                }
+
                 set_keys(keys);
             }
         

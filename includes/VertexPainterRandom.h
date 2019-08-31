@@ -5,6 +5,7 @@
 #include "VertexPainter.h"
 #include "helper_math.h"
 #include "ColorsGeneratorSerializer.h"
+#include "WindowController.h"
 
 namespace colors
 {
@@ -66,6 +67,12 @@ namespace colors
         void load(Archive& ar, const std::uint32_t)
             {
                 ar(cereal::make_nvp("block_size", block_size_));
+
+                if (block_size_ < 1)
+                {
+                    block_size_ = 1;
+                    controller::WindowController::add_loading_error_message("VertexPainterRandom's block_size was smaller than 1, so it is set to 1.");
+                }
                 
                 ColorGeneratorSerializer serializer;
                 ar(cereal::make_nvp("ColorGenerator", serializer));

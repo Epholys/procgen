@@ -14,10 +14,11 @@
 #include "VertexPainterConstant.h"
 
 using namespace math;
+using std::clamp;
 
 namespace
 {
-    // At value 0, 'set_up()' will open a new window. Otherwise, it creates a
+     // At value 0, 'set_up()' will open a new window. Otherwise, it creates a
     // CollapsingHeader. 'push/pop_embedded()' is called before and after
     // calling 'interact_with()' to create a tree of embedded content.
     int embedded_level = 0;
@@ -125,13 +126,13 @@ namespace ext::ImGui
     auto PushStylePurpleButton = PushStyleColoredButton<5>;
     auto PushStylePinkButton = PushStyleColoredButton<6>;
 
-    bool DragDouble(const char* label, double* v, double v_speed = 1.0f, double v_min = 0.0f, double v_max = 0.0f, const char* format = "%.3f", double power = 1.0f)
+    bool DragDouble(const char* label, double* v, double v_speed = 1.0, double v_min = 0.0, double v_max = double_max_limit, const char* format = "%.3f", double power = 1.0)
     {
         double* min = &v_min;
         double* max = &v_max;
         return ::ImGui::DragScalarN(label, ::ImGuiDataType_Double, v, 1, v_speed, min, max, format, power);
     }
-    bool DragDouble2(const char* label, double v[2], double v_speed = 1.0f, double v_min = 0.0f, double v_max = 0.0f, const char* format = "%.3f", double power = 1.0f)
+    bool DragDouble2(const char* label, double v[2], double v_speed = 1.0, double v_min = 0.0, double v_max = double_max_limit, const char* format = "%.3f", double power = 1.0)
     {
         double* min = &v_min;
         double* max = &v_max;
@@ -245,7 +246,7 @@ namespace procgui
         {
             return;
         }
-    
+
         // --- Starting position ---
         double pos[2] = { parameters.get_starting_position().x,
                          parameters.get_starting_position().y };
@@ -262,6 +263,7 @@ namespace procgui
         if (ext::ImGui::DragDouble("Starting Angle", &starting_angle_deg,
                               1.f, 0.f, 360.f, "%.lf") )
         {
+            starting_angle_deg = clamp_angle(starting_angle_deg);
             parameters.set_starting_angle(math::degree_to_rad(starting_angle_deg));
         }
 
@@ -270,13 +272,15 @@ namespace procgui
         if (ext::ImGui::DragDouble("Angle Delta", &delta_angle_deg,
                               1.f, 0.f, 360.f, "%.lf") )
         {
+            delta_angle_deg = clamp_angle(delta_angle_deg);
             parameters.set_delta_angle(math::degree_to_rad(delta_angle_deg));
         }
 
         // --- Step ---
         double step = parameters.get_step();
-        if(ext::ImGui::DragDouble("Step", &step, 0.2f, 0.f, 0.f, "%#.1lf"))
+        if(ext::ImGui::DragDouble("Step", &step, 0.2f, 0, double_max_limit, "%#.1lf"))
         {
+            step = clamp(step, 0., double_max_limit);
             parameters.set_step(step);
         }
 
@@ -393,10 +397,11 @@ namespace
     void interact_with(colors::VertexPainterLinear& painter, bool from_composite=false)
     {
         // --- Gradient angle ---
-        double angle = painter.get_angle();
-        if (ext::ImGui::DragDouble("Gradient Angle", &angle,
+        float angle = painter.get_angle();
+        if (ImGui::DragFloat("Gradient Angle", &angle,
                               1.f, 0.f, 360.f, "%.lf") )
         {
+            angle = clamp_angle(angle);
             painter.set_angle(angle);
         }
         // --- Center ---
@@ -404,11 +409,9 @@ namespace
         if (ImGui::DragFloat2("Gradient Circle Center", center,
                               0.001f, 0.f, 1.f, "%.2f") )
         {
-            if (center[0] >= 0 && center[0] <=1 &&
-                center[1] >= 0 && center[1] <=1)
-            {                
-                painter.set_center(sf::Vector2f(center[0], center[1]));
-            }
+            center[0] = clamp(center[0], 0.f, 1.f);
+            center[1] = clamp(center[1], 0.f, 1.f);
+            painter.set_center(sf::Vector2f(center[0], center[1]));
         }
 
         if (!from_composite)
@@ -425,11 +428,9 @@ namespace
         if (ImGui::DragFloat2("Circle Center", center,
                               0.001f, 0.f, 1.f, "%.2f") )
         {
-            if (center[0] >= 0 && center[0] <=1 &&
-                center[1] >= 0 && center[1] <=1)
-            {                
-                painter.set_center(sf::Vector2f(center[0], center[1]));
-            }
+            center[0] = clamp(center[0], 0.f, 1.f);
+            center[1] = clamp(center[1], 0.f, 1.f);
+            painter.set_center(sf::Vector2f(center[0], center[1]));
         }
         
         if (!from_composite)
@@ -469,12 +470,10 @@ namespace
         float factor = painter.get_factor();
         
         if (ImGui::DragFloat("Repetition factor", &factor,
-                             0.01f, 0.f, std::numeric_limits<float>::max(), "%.2f") )
+                             0.01f, 0.f, double_max_limit, "%.2f") )
         {
-            if (factor >= 0)
-            {
-                painter.set_factor(factor);
-            }
+            factor = clamp(factor, 0.f, float(double_max_limit));
+            painter.set_factor(factor);
         }
             
         if (!from_composite)

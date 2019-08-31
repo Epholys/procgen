@@ -4,6 +4,8 @@
 #include "VertexPainter.h"
 #include "helper_cereal.hpp"
 #include "ColorsGeneratorSerializer.h"
+#include "helper_math.h"
+#include "WindowController.h"
 
 namespace colors
 {
@@ -67,6 +69,19 @@ namespace colors
                 ar(cereal::make_nvp("angle", angle_));
                 ar(cereal::make_nvp("center", center_));
 
+                if (angle_ < 0. || angle_ > 360)
+                {
+                    angle_ = math::clamp_angle(angle_);
+                    controller::WindowController::add_loading_error_message("VertexPainterLinear's angle wasn't in the [0,360] range, so it is clamped.");
+                }
+                if (center_.x < 0. || center_.x > 1. ||
+                    center_.y < 0. || center_.y > 1.)
+                {
+                    center_.x = std::clamp(center_.x, 0.f, 1.f);
+                    center_.y = std::clamp(center_.y, 0.f, 1.f);
+                    controller::WindowController::add_loading_error_message("VertexPainterLinear's center's coordinates weren't in the [0,1] range, so they are clamped.");
+                }
+                
                 ColorGeneratorSerializer serializer;
                 ar(cereal::make_nvp("ColorGenerator", serializer));
                 set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));

@@ -4,6 +4,8 @@
 
 #include "VertexPainter.h"
 #include "ColorsGeneratorSerializer.h"
+#include "helper_math.h"
+#include "WindowController.h"
 
 namespace colors
 {
@@ -41,6 +43,8 @@ namespace colors
         virtual std::string type_name() const override;        
 
     private:
+        float factor_ {0};
+
         friend class cereal::access;
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const
@@ -57,12 +61,17 @@ namespace colors
             {
                 ar(cereal::make_nvp("repetition_factor", factor_));
 
+                if (factor_ < 0 || factor_ > math::double_max_limit)
+                {
+                    factor_ = std::clamp(factor_, 0.f, float(math::double_max_limit));
+                    controller::WindowController::add_loading_error_message("VertexPainterSequential's repetition_factor was negative or too big, so it is clamped.");
+                }
+                                
+                
                 ColorGeneratorSerializer serializer;
                 ar(cereal::make_nvp("ColorGenerator", serializer));
                 set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));
             }
-
-        float factor_ {0};
     };
 }
 
