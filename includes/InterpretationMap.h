@@ -9,6 +9,7 @@
 #include "DrawingParameters.h"
 #include "RuleMap.h"
 #include "helper_string.h"
+#include "WindowController.h"
 
 // Main explanation of drawing in Turtle.h
 namespace drawing
@@ -95,8 +96,16 @@ namespace drawing
     {
         auto it = std::find_if(begin(all_orders_json_name), end(all_orders_json_name),
                                [str](const auto& o){return o == str;});
-        Expects(it != end(all_orders_json_name));
-        int index = std::distance(begin(all_orders_json_name), it);
+
+        int index = 0;
+        if (it == end(all_orders_json_name))
+        {
+            controller::WindowController::add_loading_error_message("One InterpretationMap's order does not exist, it is now set to go_forward");
+        }
+        else
+        {
+            index = std::distance(begin(all_orders_json_name), it);
+        }
         Expects(index >= 0);
         Expects(static_cast<decltype(all_orders)::size_type>(index) < all_orders.size());
         order = *(begin(all_orders) + index);
@@ -138,6 +147,8 @@ namespace drawing
                 // way.
                 rules_.clear();
 
+                bool key_too_big = false;
+                bool void_key = false;
                 auto hint = rules_.begin();
                 while(true)
                 {
@@ -146,9 +157,31 @@ namespace drawing
                     if(!namePtr)
                         break;
 
-                    std::string key = namePtr;
+                    std::string loaded_key = namePtr;
                     Order value; ar(value);
-                    hint = rules_.emplace_hint(hint, key.at(0), std::move(value));
+                    char key = ' ';
+                    if (loaded_key.size() != 0)
+                    {
+                        if (loaded_key.size() > 1)
+                        {
+                            key_too_big = true;
+                        }
+                        key = loaded_key.at(0);
+                        hint = rules_.emplace_hint(hint, key, std::move(value));
+                    }
+                    else
+                    {
+                        void_key = true;
+                    }
+                }
+
+                if (key_too_big)
+                {
+                    controller::WindowController::add_loading_error_message("One or more InterpretationMap's key was too big, it is now cropped.");
+                }
+                if (void_key)
+                {
+                    controller::WindowController::add_loading_error_message("One or more InterpretationMap's key was empty, so it was ignored.");
                 }
             }
     };

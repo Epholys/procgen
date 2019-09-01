@@ -313,6 +313,17 @@ TEST(ColorGeneratorTest, discrete_setter)
     ASSERT_EQ(colors, d.get_colors());
 }
 
+TEST(ColorGeneratorTest, discrete_setter_resistance)
+{
+    DiscreteGradient::keys wrong_keys {{sf::Color::Green, 1}, {sf::Color::Red, -1}, {sf::Color::Blue, 1}, {sf::Color::Yellow, 0}};
+    DiscreteGradient::keys fixed_keys {{sf::Color::Red, 0}, {sf::Color::Yellow, 1}, {sf::Color::Green, 2}, {sf::Color::Blue, 3}};
+    DiscreteGradient d {};
+    d.set_keys(wrong_keys);
+
+    ASSERT_EQ(fixed_keys, d.get_keys());
+}
+
+
 TEST(ColorGeneratorTest, discrete_get)
 {
     DiscreteGradient::keys keys {{sf::Color::Red, 0}, {sf::Color::Green, 1}, {sf::Color::Blue, 3}};

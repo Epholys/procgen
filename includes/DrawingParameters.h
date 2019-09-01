@@ -96,6 +96,11 @@ namespace drawing
                     delta_angle_ = math::clamp_angle(delta_angle_);
                     controller::WindowController::add_loading_error_message("DrawingParameters' delta_angle wasn't in the [0,360] range, so it is clamped.");
                 }
+                if (n_iter_ < 0)
+                {
+                    n_iter_ = 0;
+                    controller::WindowController::add_loading_error_message("DrawingParameters' n_iter was negative, so it is now set to 0.");
+                }
                 starting_angle_ = math::degree_to_rad(starting_angle_);
                 delta_angle_ = math::degree_to_rad(delta_angle_);
             }

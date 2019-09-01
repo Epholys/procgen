@@ -10,7 +10,7 @@
 
 #include "Observable.h"
 #include "RuleMap.h"
-
+#include "WindowController.h"
 
 namespace cereal
 {
@@ -31,6 +31,8 @@ namespace cereal
     {
         map.clear();
 
+        bool key_too_big = false;
+        bool void_key = false;
         auto hint = map.begin();
         while(true)
         {
@@ -38,11 +40,34 @@ namespace cereal
 
             if(!namePtr)
                 break;
-
-            std::string key = namePtr;
+            
+            std::string loaded_key = namePtr;
             std::string value; ar(value);
-            hint = map.emplace_hint(hint, key.at(0), std::move (value));
+            char key = ' ';
+            if (loaded_key.size() != 0)
+            {
+                if (loaded_key.size() > 1)
+                {
+                    key_too_big = true;
+                }
+                key = loaded_key.at(0);
+                hint = map.emplace_hint(hint, key, std::move(value));
+            }
+            else
+            {
+                void_key = true;
+            }
         }
+        
+        if (key_too_big)
+        {
+            controller::WindowController::add_loading_error_message("One or more LSystem's key was too big, it is now cropped.");
+        }
+        if (void_key)
+        {
+            controller::WindowController::add_loading_error_message("One or more LSystem's key was empty, so it was ignored.");
+        }
+
     }
 }
 

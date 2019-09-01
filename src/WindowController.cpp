@@ -405,7 +405,7 @@ namespace controller
                 ImGui::OpenPopup("Error");
                 if (ImGui::BeginPopupModal("Error", &format_error_popup))
                 {
-                    std::string message = "Error: file '" + array_to_string(filename) + "' isn't a valid JSON L-System file.";
+                    std::string message = "Error: file '" + array_to_string(filename) + "' isn't a valid or complete JSON L-System file.";
                     ImGui::Text(message.c_str());
                     ImGui::EndPopup();
                 }
