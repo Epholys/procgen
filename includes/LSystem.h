@@ -167,6 +167,22 @@ public:
        
 private:
 
+    // The predecessors indicating than, at their next derivation, the iteration
+    // counter will be incremented by one.
+    std::string iteration_predecessors_ = {};
+
+    // The cache of all computed iterations and the axiom.
+    // It contains all the iterations up to the highest iteration
+    // calculated. It is clearly not optimized for memory
+    // usage. However, this project emphasizes interactivity so
+    // quickly swapping between different iterations of the same
+    // L-System.
+    std::unordered_map<int, std::string> production_cache_ = {};
+    // The cache of all computed iteration values. The second element in the pair
+    // is the maximum number of iteration for this iteration.
+    std::unordered_map<int, std::pair<std::vector<int>, int>> iteration_count_cache_ = {};
+
+    
     friend class cereal::access;
     
     template <class Archive>
@@ -185,21 +201,6 @@ private:
                cereal::make_nvp("iteration_predecessors", iteration_predecessors_));
             iteration_count_cache_[0] = {std::vector<int>(production_cache_.at(0).size(), 0), 0};
         }
-
-    // The predecessors indicating than, at their next derivation, the iteration
-    // counter will be incremented by one.
-    std::string iteration_predecessors_ = {};
-
-    // The cache of all computed iterations and the axiom.
-    // It contains all the iterations up to the highest iteration
-    // calculated. It is clearly not optimized for memory
-    // usage. However, this project emphasizes interactivity so
-    // quickly swapping between different iterations of the same
-    // L-System.
-    std::unordered_map<int, std::string> production_cache_ = {};
-    // The cache of all computed iteration values. The second element in the pair
-    // is the maximum number of iteration for this iteration.
-    std::unordered_map<int, std::pair<std::vector<int>, int>> iteration_count_cache_ = {};
 };
 
 #endif

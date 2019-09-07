@@ -187,6 +187,10 @@ namespace colors
         // Clone 'this' and returns it as a 'shared_ptr'.
         std::shared_ptr<ColorGenerator> clone() const override;
 
+        // The unique color returned, in ImVec4 format (for ease of use with the
+        // GUI).
+        ImVec4 color_ {imwhite};
+
         friend class cereal::access;
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const
@@ -198,10 +202,6 @@ namespace colors
             {
                 ar(cereal::make_nvp("color", color_));
             }
-
-        // The unique color returned, in ImVec4 format (for ease of use with the
-        // GUI).
-        ImVec4 color_ {imwhite};
     };
 
 
@@ -255,6 +255,10 @@ namespace colors
         // Clone 'this' and returns it as a 'shared_ptr'.
         std::shared_ptr<ColorGenerator> clone() const override;
 
+        // Keys
+        keys keys_;
+
+
         friend class cereal::access;
         template<class Archive>
         void save(Archive& ar, std::uint32_t) const
@@ -297,9 +301,6 @@ namespace colors
                 
                 set_keys(keys);
             }
-
-        // Keys
-        keys keys_;
     };
 
 
@@ -355,6 +356,13 @@ namespace colors
         // Clone 'this' and returns it as a 'shared_ptr'.
         std::shared_ptr<ColorGenerator> clone() const override;
 
+        
+        // The keys. Always respect the relevant invariant.
+        keys keys_;
+        // The colors. Always respect the relevant invariant.
+        std::vector<sf::Color> colors_;
+
+
         friend class cereal::access;
         template<class Archive>
         void save(Archive& ar, std::uint32_t) const
@@ -409,11 +417,6 @@ namespace colors
 
                 set_keys(keys);
             }
-        
-        // The keys. Always respect the relevant invariant.
-        keys keys_;
-        // The colors. Always respect the relevant invariant.
-        std::vector<sf::Color> colors_;
     };
 }
 
