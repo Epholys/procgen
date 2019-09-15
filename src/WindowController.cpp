@@ -350,23 +350,21 @@ namespace controller
                         // except for huge L-Systems.
                         const double target_ratio = 2. / 3.;
                         double step {0};
-                        
                         auto box = loaded_view.get_bounding_box();
                         auto window_size = sfml_window::window.getSize();
-                        // TODO : wrong
-                        if(window_size.x < window_size.y)
+                        float xratio = window_size.x / box.width;
+                        float yratio = window_size.y / box.height;
+                        if(xratio < yratio)
                         {
 
                             double target_size = target_ratio * window_size.x;
                             double diff_ratio = box.width != 0 ? target_size / box.width : target_size;
-                            std::cout << box.width << "     " << diff_ratio << std::endl;
                             step = loaded_view.get_parameters().get_step() * diff_ratio * zoom_level_;
                         }
                         else
                         {
                             double target_size = target_ratio * window_size.y;
                             double diff_ratio = box.height != 0 ? target_size / box.height : target_size;
-                            std::cout << box.height << "     " << diff_ratio << std::endl;
                             step = loaded_view.get_parameters().get_step() * diff_ratio * zoom_level_;
                         }
                         loaded_view.ref_parameters().set_step(step);
