@@ -1305,25 +1305,33 @@ namespace
         // Preview the color gradient
         std::vector<sf::Color> colors = gen.get_colors();
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        ImVec2 screen_pos = ImGui::GetCursorScreenPos();
-        ImVec2 window_pos = ImGui::GetCursorPos();
-        float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 30.f;
-        float xsize = (space_until_border < 400) ? space_until_border : 400;
-        ImVec2 size {xsize, 30.};
-        float checker_box_size = 10.f;
-        ImGui::RenderColorRectWithAlphaCheckerboard(ImVec2(screen_pos.x, screen_pos.y),
-                                                    ImVec2(screen_pos.x+size.x, screen_pos.y+size.y),
-                                                    IM_COL32(0, 0, 0, 0),
-                                                    checker_box_size,
-                                                    ImVec2(0, 0));
-        float x = screen_pos.x;
-        double width = size.x / colors.size();
-        for (const auto& color : colors)
+        constexpr int max_draw_calls = 10000;
+        if (draw_list->VtxBuffer.Size + colors.size() > max_draw_calls)
         {
-            draw_list->AddRectFilled({x, screen_pos.y}, ImVec2(x+width, screen_pos.y+size.y), IM_COL32(color.r, color.g, color.b, color.a));
-            x += width;
+            ImGui::TextColored(ImVec4(1.f,0.f,0.f,1.f), "Can't display preview: too many colors");
         }
-        ImGui::Dummy(size);
+        else
+        {
+            ImVec2 screen_pos = ImGui::GetCursorScreenPos();
+            ImVec2 window_pos = ImGui::GetCursorPos();
+            float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 30.f;
+            float xsize = (space_until_border < 400) ? space_until_border : 400;
+            ImVec2 size {xsize, 30.};
+            float checker_box_size = 10.f;
+            ImGui::RenderColorRectWithAlphaCheckerboard(ImVec2(screen_pos.x, screen_pos.y),
+                                                        ImVec2(screen_pos.x+size.x, screen_pos.y+size.y),
+                                                        IM_COL32(0, 0, 0, 0),
+                                                        checker_box_size,
+                                                        ImVec2(0, 0));
+            float x = screen_pos.x;
+            double width = size.x / colors.size();
+            for (const auto& color : colors)
+            {
+                draw_list->AddRectFilled({x, screen_pos.y}, ImVec2(x+width, screen_pos.y+size.y), IM_COL32(color.r, color.g, color.b, color.a));
+                x += width;
+            }
+            ImGui::Dummy(size);
+        }
 
         if (is_modified)
         {
