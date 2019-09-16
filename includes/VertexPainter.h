@@ -43,6 +43,8 @@ namespace colors
         void set_generator_wrapper(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper);
         void set_target(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper);
         
+        virtual void supplementary_drawing(sf::FloatRect bounding_box) const;
+        
         // Paint 'vertices' with the informations of 'bounding_box' and
         // 'iteration_of_vertices' according to a rule with the colors from
         // 'ColorGeneratorWrapper::ColorGenerator'.

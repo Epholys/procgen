@@ -27,6 +27,8 @@ namespace colors
 
         // Setter
         void set_center(sf::Vector2f center);
+
+        virtual void supplementary_drawing(sf::FloatRect bounding_box) const override;
         
         // Paint 'vertices' in a 'center_' centered distance-bases radial
         // fashion with the informations of 'bounding_box' according to the rule
@@ -42,7 +44,7 @@ namespace colors
 
         friend class VertexPainterSerializer;
         virtual std::string type_name() const override;        
-
+        
     private:
         // [0, 1] center: 0 is the left/up of the bounding_box and 1 the right/down.
         sf::Vector2f center_ {0, 0};

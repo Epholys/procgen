@@ -269,6 +269,15 @@ namespace colors
         vertices = vertices_copy;
     }
 
+    void VertexPainterComposite::supplementary_drawing(sf::FloatRect bounding_box) const
+    {
+        main_painter_observer_.get_target()->unwrap()->supplementary_drawing(bounding_box);
+        for (const auto& painter : child_painters_observers_)
+        {
+            painter.get_target()->unwrap()->supplementary_drawing(bounding_box);
+        }
+    }
+    
 
     bool VertexPainterComposite::has_copied_painter()
     {

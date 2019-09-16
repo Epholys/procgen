@@ -1,7 +1,10 @@
+#include "VertexPainterLinear.h"
 #include <array>
 #include "geometry.h"
 #include "helper_math.h"
-#include "VertexPainterLinear.h"
+#include "helper_color.h"
+#include "RenderWindow.h"
+#include "SupplementaryRendering.h"
 
 namespace colors
 {
@@ -47,9 +50,8 @@ namespace colors
         }
 
         sf::Vector2f direction = {std::cos(math::degree_to_rad(angle_)), -std::sin(math::degree_to_rad(angle_))};
-        sf::Vector2f center {bounding_box.left + bounding_box.width/2,
-
-                                      bounding_box.top + bounding_box.height/2}; 
+        sf::Vector2f center = {bounding_box.left + bounding_box.width/2,
+                               bounding_box.top + bounding_box.height/2}; 
        const auto axis_intersections = geometry::intersection_with_bounding_box({center, direction}, bounding_box);
         
         sf::Vector2f axis_intersection = axis_intersections.first;
@@ -81,6 +83,21 @@ namespace colors
         }
     }
 
+    void VertexPainterLinear::supplementary_drawing(sf::FloatRect bounding_box) const
+    {
+        sf::Vector2f normal_direction = {-std::sin(math::degree_to_rad(angle_)), -std::cos(math::degree_to_rad(angle_))};
+        sf::Vector2f center = {bounding_box.left + bounding_box.width/2,
+                               bounding_box.top + bounding_box.height/2}; 
+       const auto axis_intersections = geometry::intersection_with_bounding_box({center, normal_direction}, bounding_box);
+       sf::Color indicator_color = colors::bw_contrast_color(sfml_window::background_color);
+
+       std::vector<sf::Vertex> indicator =
+           {{axis_intersections.first, indicator_color},
+            {axis_intersections.second, indicator_color}};
+
+       procgui::SupplementaryRendering::add_draw_call({indicator});
+    }
+    
     std::string VertexPainterLinear::type_name() const
     {
         return "VertexPainterLinear";

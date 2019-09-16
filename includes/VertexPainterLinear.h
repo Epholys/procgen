@@ -45,8 +45,10 @@ namespace colors
         friend class VertexPainterSerializer;
         virtual std::string type_name() const override;       
  
-    private:
+        virtual void supplementary_drawing(sf::FloatRect bounding_box) const override;
 
+    private:
+        
         float angle_ {0};
         sf::Vector2f center_ {0.5,0.5};
         

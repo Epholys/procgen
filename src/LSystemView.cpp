@@ -1,5 +1,6 @@
-#include "procgui.h"
 #include "LSystemView.h"
+#include "procgui.h"
+#include "helper_color.h"
 #include "helper_math.h"
 #include "WindowController.h"
 #include "RenderWindow.h"
@@ -293,6 +294,7 @@ namespace procgui
         {
             // Draw the vertices.
             target.draw(vertices_.data(), vertices_.size(), sf::LineStrip, get_transform());
+            OPainter::get_target()->unwrap()->supplementary_drawing(visible_bounding_box);
         }
 
         if (is_selected_ && bounding_box_is_visible_)
@@ -320,17 +322,9 @@ namespace procgui
         const auto& top = placeholder_box.top;
         const auto& width = placeholder_box.width;
         const auto& height = placeholder_box.height;
-        // https://gamedev.stackexchange.com/questions/38536/given-a-rgb-color-x-how-to-find-the-most-contrasting-color-y
-        const ImVec4& background_color = sfml_window::background_color;
-        ImVec4 background_color_linear (std::pow(background_color.x, 2.2),
-                                        std::pow(background_color.y, 2.2),
-                                        std::pow(background_color.z, 2.2),
-                                        1.);
-        float luminance = 0.2126 * background_color_linear.x +
-            0.7152 * background_color_linear.y +
-            0.0722 * background_color_linear.z;
-            
-        sf::Color placeholder_color = luminance < 0.5 ? sf::Color::White : sf::Color::Black;
+
+        sf::Color placeholder_color = bw_contrast_color(sfml_window::background_color);
+        
         std::vector<sf::Vertex> vertices =
             { {{left, top}, placeholder_color},
               {{left+width, top}, placeholder_color},

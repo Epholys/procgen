@@ -142,6 +142,8 @@ namespace colors
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 
+        virtual void supplementary_drawing(sf::FloatRect bounding_box) const override;
+        
         // Static methods to manage the copy of the VertexPainter.
         static bool has_copied_painter();
         static std::shared_ptr<VertexPainter> get_copied_painter();
