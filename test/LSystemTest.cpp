@@ -156,6 +156,21 @@ TEST(LSystemTest, wild_derivation)
     ASSERT_EQ(max5, 5);
 }
 
+
+TEST(LSystemTest, corner_iteration)
+{
+    LSystem lsys { "FG", { { 'F', "FG" } }, "G" };
+
+    std::string prod_iter_3 = "FGGGG";
+
+    std::vector<int> rec_iter_3 {0, 0, 1, 2, 3};
+
+    auto [prod3, rec3, max3] = lsys.produce(3);
+
+    ASSERT_EQ(rec_iter_3, rec3);
+    ASSERT_EQ(3, max3);
+}
+
 TEST(LSystemTest, disjoint_derivation)
 {
     LSystem lsys { "F", { { 'F', "F+G" }, { 'G', "G-F" } }, "F" };
