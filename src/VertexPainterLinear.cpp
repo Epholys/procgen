@@ -49,16 +49,18 @@ namespace colors
             return;
         }
 
+        // Find the two points on the bounding boxes that intersect the axis.
         sf::Vector2f direction = {std::cos(math::degree_to_rad(angle_)), -std::sin(math::degree_to_rad(angle_))};
         sf::Vector2f center = {bounding_box.left + bounding_box.width/2,
                                bounding_box.top + bounding_box.height/2}; 
        const auto axis_intersections = geometry::intersection_with_bounding_box({center, direction}, bounding_box);
-        
         sf::Vector2f axis_intersection = axis_intersections.first;
         sf::Vector2f axis_opposite_intersection = axis_intersections.second;
+
+        
+        // Creates the two lines between each the lerping factor will be computed.
         float normal_angle = angle_+90;
         sf::Vector2f normal_direction = {std::cos(math::degree_to_rad(normal_angle)), -std::sin(math::degree_to_rad(normal_angle))};
-
         std::pair<sf::Vector2f, sf::Vector2f> intersection_line {axis_intersection, axis_intersection+normal_direction};
         std::pair<sf::Vector2f, sf::Vector2f> opposite_intersection_line {axis_opposite_intersection, axis_opposite_intersection+normal_direction};
 

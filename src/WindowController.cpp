@@ -434,12 +434,13 @@ namespace controller
                     if (error_messages.size() > 1)
                     {
                         ImGui::Text("These issues have been automatically corrected.\n");
+                        ImGui::Text("Don't forget to save this L-System if you want to save these corrections.");
                     }
                     else
                     {
                         ImGui::Text("This issue has been automatically corrected.\n");
+                        ImGui::Text("Don't forget to save this L-System if you want to save this correction.");
                     }
-                    ImGui::Text("Don't forget to save this L-System if you want to save this correction.");
                     
                     ImGui::EndPopup();
                 }

@@ -283,16 +283,18 @@ namespace procgui
         interact_with(*this, name_, &is_selected_);
 
         sf::FloatRect visible_bounding_box = get_transform().transformRect(bounding_box_);
+
+        // Draw a placeholder if the LSystem does not have enough vertices or
+        // does not have any size. 
         if (vertices_.size() < 2 ||
-            (std::abs(bounding_box_.width) < std::numeric_limits<float>::epsilon() &&
-             std::abs(bounding_box_.height) < std::numeric_limits<float>::epsilon()))
+            (bounding_box_.width < std::numeric_limits<float>::epsilon() &&
+             bounding_box_.height < std::numeric_limits<float>::epsilon()))
         {
             draw_missing_placeholder();
             visible_bounding_box = compute_placeholder_box();
         }
-        else
+        else // Draw the vertices.
         {
-            // Draw the vertices.
             target.draw(vertices_.data(), vertices_.size(), sf::LineStrip, get_transform());
             OPainter::get_target()->unwrap()->supplementary_drawing(visible_bounding_box);
         }
@@ -372,9 +374,13 @@ namespace procgui
 
     bool LSystemView::is_inside(const sf::Vector2f& click) const
     {
-        decltype(sub_boxes_) subs;
-        if (vertices_.size() > 1)
+        //  If no placeholder is necessary, checks if 'click' is inside one of
+        //  the sub-boxes.
+        if (vertices_.size() > 1 ||
+            (bounding_box_.width  < std::numeric_limits<float>::epsilon() &&
+             bounding_box_.height < std::numeric_limits<float>::epsilon()))
         {
+            decltype(sub_boxes_) subs;
             for (const auto& box : sub_boxes_)
             {
                 subs.push_back(get_transform().transformRect(box));
@@ -388,7 +394,7 @@ namespace procgui
             }
             return false;
         }
-        else
+        else // checks if 'click' is inside the placeholder box.
         {
             return compute_placeholder_box().contains(sf::Vector2f(click));
         }

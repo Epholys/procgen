@@ -112,9 +112,14 @@ namespace procgui
     private:
         void update_callbacks();
 
+        // Draw a placeholder box if the LSystem does not have enough vertices
+        // or does not have any size. 
         void draw_missing_placeholder() const;
-        void draw_select_box(sf::RenderTarget& target, const sf::FloatRect& bounding_box) const;
+        // Create the placeholder box.
         sf::FloatRect compute_placeholder_box() const;
+
+        // Draw the box when a LSystemView is selected.
+        void draw_select_box(sf::RenderTarget& target, const sf::FloatRect& bounding_box) const;
         
         // The managers of unique identifiers and colors for each instance of
         // LSystemView. 

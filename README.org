@@ -17,11 +17,9 @@
 
 ** Main Roadmap
    1. Polish before the first release
-      * Remove all the windowing/GUI bugs
       * Polish the imgui interface
       * Remove frictions and limitations of the save/load GUI
       * Add low-hanging fruits optimization
-      * Reinforce the save files parsingx
       * Remove a maximum of code smells
    2. Add automation:
       * Loading file from command-line
@@ -41,10 +39,6 @@
       * Context-sensitive L-System
       * Stochastic L-System
       * Parameters for each interpretation order (step for go_forward, delta_angle for turn_*)
-
-** Known Bugs
-   - The GUI sometimes become irresponsive
-   - Correct zoom level and drag behaviour when resizing window (in Gnome)
 
 ** Development framework
    - *Environment:* debian sid chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=

@@ -186,6 +186,7 @@ namespace colors
         Expects(keys.size() >= 2);
         keys_ = keys;
 
+        // Correct all negative indices to 0.
         for (auto& p : keys_)
         {
             if (p.index < 0)
@@ -194,11 +195,15 @@ namespace colors
             }
         }
 
+        // Sort the indices.
         std::sort(begin(keys_), end(keys_),
                   [](const auto& p1, const auto& p2){return p1.index < p2.index;});
 
+        // Make sure the first index is 0.
         keys_.front().index = 0;
 
+        // If two indices are the same, increment one of them and propagate this
+        // change to all next indices. 
         int gap = 0;
         for (auto it = next(begin(keys_)); it != end(keys_); ++it)
         {

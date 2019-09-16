@@ -28,8 +28,6 @@ void interact_with_buffer(Buffer& buffer,
 
         ImGui::PopItemWidth(); ImGui::SameLine(); ImGui::Text("->"); ImGui::SameLine();
 
-//        ImGui::PushItemWidth(200);
-
         successor_fn(it);
         
         // The [-] button. If clicked, the current iterator is saved as the

@@ -911,11 +911,13 @@ namespace
         int index = 0;
 
         const auto& style = ImGui::GetStyle();
-        float block_pos = 0.f;
+        float block_pos = 0.f;  // The position in the window
         // Modify 'gen''s keys: colors and position
         for (auto it = begin(keys); it != end(keys); ++it)
         {
-            float block_size = 0.f;
+            float block_size = 0.f; // The size of the current color block
+                                    // [+][-] [COL] [+]
+                                    //        [0.5]
             ImGui::PushID(index);
 
             // Button '+' to add a key.
@@ -971,14 +973,17 @@ namespace
             
             ImGui::PopID();
 
-            block_size *= 2; // ??? but works
+            block_size *= 2; // I'm bad with the imgui layout system, so here's
+                             // an arbitrary constant to have the desired effect.
             block_pos += block_size;
             if (block_pos + block_size < ImGui::GetWindowContentRegionMax().x)
             {
+                // There is enough space, continue on this line.
                 ImGui::SameLine();
             }
             else
             {
+                // Not enough space, go to the next line and reset the position.
                 block_pos = 0.f;
             }
 
@@ -1109,10 +1114,12 @@ namespace
         int modifier = 0;
 
         const auto& style = ImGui::GetStyle();
-        float block_pos = 0.f;
+        float block_pos = 0.f; // The position in the window
         for (auto it = begin(keys); it != prev(end(keys)); ++it, ++index)
         {
-            float block_size = 0.f;
+            float block_size = 0.f; // The size of the block
+                                    // [+][-][COL][+]
+                                    //               [INT][-][+]
             ImGui::PushID(index);
 
             ImGui::PushID(0);
@@ -1191,14 +1198,17 @@ namespace
 
             ImGui::PopID();
 
-            block_size *= 2.3; // Everything is fine
+            block_size *= 2.3;  // I'm bad with the imgui layout system, so here's
+                                // an arbitrary constant to have the desired effect.
             block_pos += block_size;
             if (block_pos + block_size < ImGui::GetWindowContentRegionMax().x)
             {
+                // There is enough space, continue on this line.
                 ImGui::SameLine();
             }
             else
             {
+                // Not enough space, go to the next line and reset the position.
                 block_pos = 0.f;
             }
         }

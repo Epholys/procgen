@@ -61,7 +61,7 @@ namespace drawing
     const Order go_forward    { OrderID::GO_FORWARD,    go_forward_fn, "Go forward" };
     const Order turn_right    { OrderID::TURN_RIGHT,    turn_right_fn, "Turn right" };
     const Order turn_left     { OrderID::TURN_LEFT,     turn_left_fn, "Turn left"  };
-    const Order save_position { OrderID::SAVE_POSITION, save_position_fn, "Save Position" }; // TODO lowercase 'p'
+    const Order save_position { OrderID::SAVE_POSITION, save_position_fn, "Save position" };
     const Order load_position { OrderID::LOAD_POSITION, load_position_fn, "Load position" };
         
     // All the orders available.

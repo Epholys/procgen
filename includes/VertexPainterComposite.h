@@ -142,6 +142,7 @@ namespace colors
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 
+        // Draw all the supplementary_drawing from the main and children painters.
         virtual void supplementary_drawing(sf::FloatRect bounding_box) const override;
         
         // Static methods to manage the copy of the VertexPainter.
@@ -178,6 +179,10 @@ namespace colors
 
         std::list<impl::VertexPainterWrapperObserver> child_painters_observers_;
 
+        // Hack to avoid circular dependency between VertexPainterSerializer and
+        // VertexPainterComposite. The VertexPainterSerializer is never included
+        // in this file, but is used as a template parameter that will be
+        // compiled later.
         template<class Archive, class Serializer>
         void save_impl(Archive& ar, const std::uint32_t) const
             {

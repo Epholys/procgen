@@ -157,6 +157,7 @@ TEST(LSystemTest, wild_derivation)
 }
 
 
+// Test if a default rule is correctly iterated
 TEST(LSystemTest, corner_iteration)
 {
     LSystem lsys { "FG", { { 'F', "FG" } }, "G" };

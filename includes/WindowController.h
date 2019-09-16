@@ -22,6 +22,9 @@ namespace controller
     // (imgui, *Views) are called in this class but managed elsewhere.
     //
     // WindowController is a singleton implemented as a static class.
+    //
+    // TODO: this class is becoming a little too big, managing not only inputs
+    // but saving and loading windows. That should put elsewhere.
     class WindowController
     {
     public:
@@ -49,6 +52,9 @@ namespace controller
         // Getter for the zoom level
         static float get_zoom_level();
 
+        // Add a error message to be displayed at loading time.
+        // This function should be called when an error occurs when
+        // deserializing a LSystemView.
         static void add_loading_error_message(const std::string& message);
         
         // Public flag to message WindowController to start the save menu. It is
@@ -92,7 +98,7 @@ namespace controller
         // Default step size at default zoom level
         static const double default_step_;
         
-        // Current mouse position TODO doc : buffer to delta
+        // Current mouse position
         static sf::Vector2i mouse_position_;
 
         // Does the window have the focus?
@@ -107,6 +113,7 @@ namespace controller
         // The fixed save directory of the application
         static std::experimental::filesystem::path save_dir_;
 
+        // Error messages to be displayed if necessary at loading time.
         static std::vector<std::string> error_messages;
     };
 }

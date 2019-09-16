@@ -15,13 +15,43 @@
 namespace colors
 {
     using namespace colors::impl;
-    
+
+    // Helper class to serialize polymorphic classes ColorGenerators.
+    // cereal can handle the case of serializing and deserializing polymorphic
+    // calsses. However, the end result is not "pretty", meaning that generating
+    // save files becomes complicated. As such, this class implements (in a dirty way)
+    // the following format:
+    // 
+    // ColorGenerator": {
+    //     "cereal_class_version": 0,
+    //     "type": "ConstantColor",
+    //     "color": "#FFFFFFFF"
+    // }
+    //
+    // Where 'type' is the type of the ColorGenerator.
+    // This is not very pretty: each class must have a 'type_name()' method that
+    // returns its class name. With this, it is possible to generator code with
+    // macros, who automatically add to "type" the corresponding class name.
+    //
+    // The usage of this class is simple:
+    // - to serialize, construct a Serializer with a shared_ptr of the
+    //   ColorGenerator and save it.
+    // - to deserialize, construct a empty serializer, load it and call
+    //   'get_serialized()' to obtain the deserialized ColorGenerator
     class ColorGeneratorSerializer
     {
     public:
+        // Create a ColorGeneratorSerializer with a nullptr.
         ColorGeneratorSerializer();
+        // Create a ColorGeneratorSerializer with 'to_serialize'.
         explicit ColorGeneratorSerializer(std::shared_ptr<ColorGenerator> to_serialize);
+        ~ColorGeneratorSerializer() = default;
+        ColorGeneratorSerializer(const ColorGeneratorSerializer& other) = default;
+        ColorGeneratorSerializer(ColorGeneratorSerializer&& other) = default;
+        ColorGeneratorSerializer& operator=(const ColorGeneratorSerializer& other) = default;
+        ColorGeneratorSerializer& operator=(ColorGeneratorSerializer&& other) = default;
 
+        // Getter
         std::shared_ptr<ColorGenerator> get_serialized() const;
         
     private:
@@ -82,7 +112,8 @@ namespace colors
 #undef DESERIALIZE_COLORGEN_CHILD
             }
 
-        std::shared_ptr<ColorGenerator> serialized_;
+        // The ColorGenerator to serialize and deserialize.
+        std::shared_ptr<ColorGenerator> serialized_ {nullptr};
     };
 }
 

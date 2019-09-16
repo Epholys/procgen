@@ -40,11 +40,16 @@ std::string array_to_string(const std::array<char, N>& arr)
             std::find(arr.begin(), arr.end(), '\0')};
 }
 
-
+// Trim whitespace on the left
 std::string ltrim(std::string str);
+// Trim whitespace on the right
 std::string rtrim( std::string str);
+// Trim whitespace both side
 std::string trim(std::string str);
 
+// camel-cases 'str':
+// - All space chars become '_'
+// - All uppercase chars become lowercase
 std::string to_camel_case(std::string str);
 
 

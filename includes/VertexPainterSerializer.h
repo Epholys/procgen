@@ -22,12 +22,42 @@ namespace colors
 {
     class VertexPainterComposite;
     
+    // Helper class to serialize polymorphic classes VertexPainters.
+    // cereal can handle the case of serializing and deserializing polymorphic
+    // calsses. However, the end result is not "pretty", meaning that generating
+    // save files becomes complicated. As such, this class implements (in a dirty way)
+    // the following format:
+    // 
+    // VertexPainter": {
+    //     "cereal_class_version": 0,
+    //     "type": "ConstantColor",
+    //     "color": "#FFFFFFFF"
+    // }
+    //
+    // Where 'type' is the type of the VertexPainter.
+    // This is not very pretty: each class must have a 'type_name()' method that
+    // returns its class name. With this, it is possible to generator code with
+    // macros, who automatically add to "type" the corresponding class name.
+    //
+    // The usage of this class is simple:
+    // - to serialize, construct a Serializer with a shared_ptr of the
+    //   VertexPainter and save it.
+    // - to deserialize, construct a empty serializer, load it and call
+    //   'get_serialized()' to obtain the deserialized VertexPainter
     class VertexPainterSerializer
     {
     public:
+        // Create a VertexPainterSerializer with a nullptr.
         VertexPainterSerializer();
+        // Create a VertexPainterSerializer with 'to_serialize'.
         explicit VertexPainterSerializer(std::shared_ptr<VertexPainter> to_serialize);
-
+        ~VertexPainterSerializer() = default;
+        VertexPainterSerializer(const VertexPainterSerializer& other) = default;
+        VertexPainterSerializer(VertexPainterSerializer&& other) = default;
+        VertexPainterSerializer& operator=(const VertexPainterSerializer& other) = default;
+        VertexPainterSerializer& operator=(VertexPainterSerializer&& other) = default;
+        
+        // Getter
         std::shared_ptr<VertexPainter> get_serialized() const;
         
     private:
