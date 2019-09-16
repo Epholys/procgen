@@ -1444,7 +1444,7 @@ namespace procgui
 
         // Select background color.
         ImVec4 imcolor = sfml_window::background_color;
-        if(ImGui::ColorEdit4("Background Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar))
+        if(ImGui::ColorEdit4("Background Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoAlpha))
         {
             sfml_window::background_color = imcolor;
         }

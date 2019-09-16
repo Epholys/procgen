@@ -2,6 +2,8 @@
 #include "LSystemView.h"
 #include "helper_math.h"
 #include "WindowController.h"
+#include "RenderWindow.h"
+#include "SupplementaryRendering.h"
 
 namespace procgui
 {
@@ -279,31 +281,23 @@ namespace procgui
         // Interact with the models.
         interact_with(*this, name_, &is_selected_);
 
-        // Early out if there are no vertices.
-        if (vertices_.size() == 0)
+        sf::FloatRect visible_bounding_box = get_transform().transformRect(bounding_box_);
+        if (vertices_.size() < 2 ||
+            (std::abs(bounding_box_.width) < std::numeric_limits<float>::epsilon() &&
+             std::abs(bounding_box_.height) < std::numeric_limits<float>::epsilon()))
         {
-            return;
+            draw_missing_placeholder();
+            visible_bounding_box = compute_placeholder_box();
         }
-
-        // Draw the vertices.
-        target.draw(vertices_.data(), vertices_.size(), sf::LineStrip, get_transform());
+        else
+        {
+            // Draw the vertices.
+            target.draw(vertices_.data(), vertices_.size(), sf::LineStrip, get_transform());
+        }
 
         if (is_selected_ && bounding_box_is_visible_)
         {
-            auto box = get_transform().transformRect(bounding_box_);
-            auto margin = (box.width*.05f > box.height*.05f) ? box.height*.05f : box.width*.05f;
-            float zoom = controller::WindowController::get_zoom_level();
-            margin = margin > 7.5*zoom ? margin : 7.5*zoom;
-            
-            // Draw the global bounding boxes (with a little scaled margin) with
-            // the unique color.
-            std::array<sf::Vertex, 5> rect =
-                {{ {{ box.left-margin, box.top-margin}, color_id_},
-                   {{ box.left-margin, box.top + box.height + margin}, color_id_},
-                   {{ box.left + box.width + margin, box.top + box.height + margin}, color_id_},
-                   {{ box.left + box.width + margin, box.top - margin}, color_id_},
-                   {{ box.left - margin, box.top - margin}, color_id_}}};
-            target.draw(rect.data(), rect.size(), sf::LineStrip);
+            draw_select_box(target, visible_bounding_box);
         }
 
         // // DEBUG
@@ -319,6 +313,64 @@ namespace procgui
         // } 
     }
 
+    void LSystemView::draw_missing_placeholder() const
+    {
+        auto placeholder_box = compute_placeholder_box();
+        const auto& left = placeholder_box.left;
+        const auto& top = placeholder_box.top;
+        const auto& width = placeholder_box.width;
+        const auto& height = placeholder_box.height;
+        // https://gamedev.stackexchange.com/questions/38536/given-a-rgb-color-x-how-to-find-the-most-contrasting-color-y
+        const ImVec4& background_color = sfml_window::background_color;
+        ImVec4 background_color_linear (std::pow(background_color.x, 2.2),
+                                        std::pow(background_color.y, 2.2),
+                                        std::pow(background_color.z, 2.2),
+                                        1.);
+        float luminance = 0.2126 * background_color_linear.x +
+            0.7152 * background_color_linear.y +
+            0.0722 * background_color_linear.z;
+            
+        sf::Color placeholder_color = luminance < 0.5 ? sf::Color::White : sf::Color::Black;
+        std::vector<sf::Vertex> vertices =
+            { {{left, top}, placeholder_color},
+              {{left+width, top}, placeholder_color},
+              {{left+width, top+height}, placeholder_color},
+              {{left, top+height}, placeholder_color},
+              {{left, top}, placeholder_color},
+              {{left+width, top+height}, placeholder_color}};
+
+        SupplementaryRendering::add_draw_call({vertices, sf::LineStrip});
+    }
+
+    sf::FloatRect LSystemView::compute_placeholder_box() const
+    {
+        sf::FloatRect placeholder_box = get_transform().transformRect(bounding_box_);
+        const float ratio = 1/16.f;
+        sf::Vector2f window_size = sf::Vector2f(sfml_window::window.getSize()) * controller::WindowController::get_zoom_level();
+        float placeholder_size = window_size.x < window_size.y ? window_size.x*ratio : window_size.y*ratio;
+        placeholder_box.width = placeholder_size;
+        placeholder_box.height = placeholder_size;
+        return placeholder_box;
+    }
+    
+    void LSystemView::draw_select_box(sf::RenderTarget& target, const sf::FloatRect& bounding_box) const
+    {
+        auto box = bounding_box;
+        auto margin = (box.width*.05f > box.height*.05f) ? box.height*.05f : box.width*.05f;
+        float zoom = controller::WindowController::get_zoom_level();
+        margin = margin > 7.5*zoom ? margin : 7.5*zoom;
+            
+        // Draw the global bounding boxes (with a little scaled margin) with
+        // the unique color.
+        std::array<sf::Vertex, 5> rect =
+            {{ {{ box.left-margin, box.top-margin}, color_id_},
+               {{ box.left-margin, box.top + box.height + margin}, color_id_},
+               {{ box.left + box.width + margin, box.top + box.height + margin}, color_id_},
+               {{ box.left + box.width + margin, box.top - margin}, color_id_},
+               {{ box.left - margin, box.top - margin}, color_id_}}};
+        target.draw(rect.data(), rect.size(), sf::LineStrip);
+    }
+    
     bool LSystemView::is_selected() const
     {
         return is_selected_;
@@ -327,18 +379,25 @@ namespace procgui
     bool LSystemView::is_inside(const sf::Vector2f& click) const
     {
         decltype(sub_boxes_) subs;
-        for (const auto& box : sub_boxes_)
+        if (vertices_.size() > 1)
         {
-            subs.push_back(get_transform().transformRect(box));
-        }
-        for (const auto& rect : subs)
-        {
-            if (rect.contains(sf::Vector2f(click)))
+            for (const auto& box : sub_boxes_)
             {
-                return true;
+                subs.push_back(get_transform().transformRect(box));
             }
+            for (const auto& rect : subs)
+            {
+                if (rect.contains(sf::Vector2f(click)))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
-        return false;
+        else
+        {
+            return compute_placeholder_box().contains(sf::Vector2f(click));
+        }
     }
     
     void LSystemView::select()

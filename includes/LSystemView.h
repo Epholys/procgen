@@ -112,6 +112,10 @@ namespace procgui
     private:
         void update_callbacks();
 
+        void draw_missing_placeholder() const;
+        void draw_select_box(sf::RenderTarget& target, const sf::FloatRect& bounding_box) const;
+        sf::FloatRect compute_placeholder_box() const;
+        
         // The managers of unique identifiers and colors for each instance of
         // LSystemView. 
         static UniqueId unique_ids_;

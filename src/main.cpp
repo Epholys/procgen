@@ -4,6 +4,7 @@
 
 #include "LSystemView.h"
 #include "RenderWindow.h"
+#include "SupplementaryRendering.h"
 
 using namespace drawing;
 using namespace math;
@@ -57,6 +58,7 @@ int main()
     while (window.isOpen())
     {
         window.clear(sfml_window::background_color);
+        SupplementaryRendering::clear_draw_calls();
 
         std::vector<sf::Event> events;
         sf::Event event;
@@ -77,7 +79,7 @@ int main()
         {
             v.draw(window);
         }
-        
+        SupplementaryRendering::draw(window);
 
         ImGui::SFML::Render(window);
         window.display();
