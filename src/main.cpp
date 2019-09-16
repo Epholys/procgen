@@ -18,8 +18,8 @@ int main()
     ImGui::SFML::Init(window);
 
     // auto serpinski = std::make_shared<LSystem>(LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
-    auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } }, "X" });
-    // auto fract = std::make_shared<LSystem>(LSystem { "F", { { 'F', "FF+F" } } });
+    auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[+X][X]F[+X]-FX" }, { 'F', "FF" } }, "X" });
+    // auto fract = std::make_shared<LSystem>(LSystem { "F", { { 'F', "FF-F" } } });
     auto map = std::make_shared<InterpretationMap>(default_interpretation_map);
 
     // auto serpinski_param = std::make_shared<DrawingParameters>();

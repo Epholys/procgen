@@ -7,7 +7,7 @@
             "axiom": "X",
             "production_rules": {
                 "F": "FF",
-                "X": "F[-X][+X]"
+                "X": "F[+X][-X]"
             },
             "iteration_predecessors": "X"
         },
@@ -19,9 +19,9 @@
         },
         "Interpretation Map": {
             "cereal_class_version": 0,
-            "+": "turn_right",
-            "]": "load_position",
             "-": "turn_left",
+            "]": "load_position",
+            "+": "turn_right",
             "F": "go_forward",
             "[": "save_position"
         },

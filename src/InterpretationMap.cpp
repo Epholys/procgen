@@ -15,7 +15,7 @@ namespace drawing
         turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
     }
 
-    void turn_right_fn(Turtle& turtle)
+    void turn_left_fn(Turtle& turtle)
     {
         // Updates the direction vector.
         ext::sf::Vector2d v
@@ -24,7 +24,7 @@ namespace drawing
         turtle.state.direction = v;
     }
 
-    void turn_left_fn(Turtle& turtle)
+    void turn_right_fn(Turtle& turtle)
     {
         // Updates the direction vector.
         ext::sf::Vector2d v

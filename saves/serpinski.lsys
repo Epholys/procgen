@@ -6,8 +6,8 @@
             "cereal_class_version": 0,
             "axiom": "F",
             "production_rules": {
-                "F": "G-F-G",
-                "G": "F+G+F"
+                "F": "G+F+G",
+                "G": "F-G-F"
             },
             "iteration_predecessors": "FG"
         },
@@ -21,9 +21,9 @@
             "cereal_class_version": 0,
             "F": "go_forward",
             "[": "save_position",
-            "-": "turn_right",
-            "]": "load_position",
             "+": "turn_left",
+            "]": "load_position",
+            "-": "turn_right",
             "G": "go_forward"
         },
         "VertexPainter": {
