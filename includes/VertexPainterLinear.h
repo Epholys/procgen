@@ -3,6 +3,9 @@
 
 #include "VertexPainter.h"
 #include "helper_cereal.hpp"
+#include "ColorsGeneratorSerializer.h"
+#include "helper_math.h"
+#include "WindowController.h"
 
 namespace colors
 {
@@ -23,11 +26,9 @@ namespace colors
         
         // Getters
         float get_angle() const;
-        sf::Vector2f get_center() const;
         
         // Setter
         void set_angle(float angle);
-        void set_center(sf::Vector2f center);
         
         // Paint 'vertices' following a line passing through the center at a
         // certain 'angle_' according to the informations of 'bounding_box'
@@ -41,8 +42,13 @@ namespace colors
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone() const override;
 
-    private:
+        friend class VertexPainterSerializer;
+        virtual std::string type_name() const override;       
+ 
+        virtual void supplementary_drawing(sf::FloatRect bounding_box) const override;
 
+    private:
+        
         float angle_ {0};
         sf::Vector2f center_ {0.5,0.5};
         
@@ -50,18 +56,26 @@ namespace colors
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const
             {
-                ar(cereal::make_nvp("angle", angle_),
-                   cereal::make_nvp("center", center_),
-                   cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
+                ar(cereal::make_nvp("angle", angle_));
+                
+                auto color_generator = get_generator_wrapper()->unwrap();
+                auto serializer = ColorGeneratorSerializer(color_generator);
+                ar(cereal::make_nvp("ColorGenerator", serializer));
             }
         template<class Archive>
         void load(Archive& ar, const std::uint32_t)
             {
-                std::shared_ptr<ColorGenerator> generator;
                 ar(cereal::make_nvp("angle", angle_));
-                ar(cereal::make_nvp("center", center_));
-                ar(cereal::make_nvp("ColorGenerator", generator));
-                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(generator));
+
+                if (angle_ < 0. || angle_ > 360)
+                {
+                    angle_ = math::clamp_angle(angle_);
+                    controller::WindowController::add_loading_error_message("VertexPainterLinear's angle wasn't in the [0,360] range, so it is clamped.");
+                }
+                
+                ColorGeneratorSerializer serializer;
+                ar(cereal::make_nvp("ColorGenerator", serializer));
+                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));
             }
     };
 }

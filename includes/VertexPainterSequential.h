@@ -3,6 +3,9 @@
 
 
 #include "VertexPainter.h"
+#include "ColorsGeneratorSerializer.h"
+#include "helper_math.h"
+#include "WindowController.h"
 
 namespace colors
 {
@@ -36,24 +39,39 @@ namespace colors
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone() const override;
 
+        friend class VertexPainterSerializer;
+        virtual std::string type_name() const override;        
+
     private:
+        float factor_ {0};
+
         friend class cereal::access;
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const
             {
-                ar(cereal::make_nvp("repetition_factor", factor_),
-                   cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
+                ar(cereal::make_nvp("repetition_factor", factor_));
+
+                auto color_generator = get_generator_wrapper()->unwrap();
+                auto serializer = ColorGeneratorSerializer(color_generator);
+                ar(cereal::make_nvp("ColorGenerator", serializer));
+
             }
         template<class Archive>
         void load(Archive& ar, const std::uint32_t)
             {
-                std::shared_ptr<ColorGenerator> generator;
                 ar(cereal::make_nvp("repetition_factor", factor_));
-                ar(cereal::make_nvp("ColorGenerator", generator));
-                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(generator));
-            }
 
-        float factor_ {0};
+                if (factor_ < 0 || factor_ > math::double_max_limit)
+                {
+                    factor_ = std::clamp(factor_, 0.f, float(math::double_max_limit));
+                    controller::WindowController::add_loading_error_message("VertexPainterSequential's repetition_factor was negative or too big, so it is clamped.");
+                }
+                                
+                
+                ColorGeneratorSerializer serializer;
+                ar(cereal::make_nvp("ColorGenerator", serializer));
+                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));
+            }
     };
 }
 

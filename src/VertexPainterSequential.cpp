@@ -58,7 +58,10 @@ namespace colors
             }
         }
     }
+
+    std::string VertexPainterSequential::type_name() const
+    {
+        return "VertexPainterSequential";
+    }
 }
 
-CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterSequential, "VertexPainterSequential");
-CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterSequential)

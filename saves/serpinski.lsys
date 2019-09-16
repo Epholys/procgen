@@ -1,0 +1,39 @@
+{
+    "LSystemView": {
+        "cereal_class_version": 0,
+        "name": "Plant",
+        "LSystem": {
+            "cereal_class_version": 0,
+            "axiom": "F",
+            "production_rules": {
+                "F": "G+F+G",
+                "G": "F-G-F"
+            },
+            "iteration_predecessors": "FG"
+        },
+        "DrawingParameters": {
+            "cereal_class_version": 0,
+            "starting_angle": 180.0,
+            "delta_angle": 59.9999,
+            "n_iter": 6
+        },
+        "Interpretation Map": {
+            "cereal_class_version": 0,
+            "F": "go_forward",
+            "[": "save_position",
+            "+": "turn_left",
+            "]": "load_position",
+            "-": "turn_right",
+            "G": "go_forward"
+        },
+        "VertexPainter": {
+            "cereal_class_version": 0,
+            "type": "VertexPainterConstant",
+            "ColorGenerator": {
+                "cereal_class_version": 0,
+                "type": "ConstantColor",
+                "color": "#FFFFFFFF"
+            }
+        }
+    }
+}

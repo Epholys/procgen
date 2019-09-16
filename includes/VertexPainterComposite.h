@@ -7,6 +7,8 @@
 
 namespace colors
 {
+    class ColorGeneratorSerializer;
+    
     // The VertexPainterComposite is a class allowing to compose other
     // VertexPainters. For example, for a VertexPainterLinear, one side of the
     // LSystemView could be managed with a VertexPainterRadial and the other by
@@ -52,6 +54,9 @@ namespace colors
             // 0. 
             void reset_index();
             
+            friend class ::colors::ColorGeneratorSerializer;
+            virtual std::string type_name() const override;
+
         private:
             // Deep-copy cloning method.
             std::shared_ptr<ColorGenerator> clone() const override;
@@ -66,8 +71,13 @@ namespace colors
 
             friend class cereal::access;
             template<class Archive>
-            void serialize(Archive&)
-                { }
+            void save(Archive&, const std::uint32_t) const
+                {
+                }
+            template<class Archive>
+            void load(Archive&, const std::uint32_t)
+                {
+                }
         };
 
         // A utility class to manipulate an Observer of a
@@ -97,6 +107,11 @@ namespace colors
             VertexPainterComposite* painter_;
         };
     }
+}
+
+namespace colors
+{
+    class VertexPainterSerializer;
     
     // The main class.
     // Also manages a painter which can be copied and pasted everywhere (as it
@@ -127,6 +142,9 @@ namespace colors
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 
+        // Draw all the supplementary_drawing from the main and children painters.
+        virtual void supplementary_drawing(sf::FloatRect bounding_box) const override;
+        
         // Static methods to manage the copy of the VertexPainter.
         static bool has_copied_painter();
         static std::shared_ptr<VertexPainter> get_copied_painter();
@@ -134,6 +152,10 @@ namespace colors
 
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone() const override;
+
+        friend class VertexPainterSerializer;
+        virtual std::string type_name() const override;        
+
     private:
 
         // The copied painter
@@ -157,39 +179,60 @@ namespace colors
 
         std::list<impl::VertexPainterWrapperObserver> child_painters_observers_;
 
-        friend class cereal::access;
-        template<class Archive>
-        void save(Archive& ar, const std::uint32_t) const
+        // Hack to avoid circular dependency between VertexPainterSerializer and
+        // VertexPainterComposite. The VertexPainterSerializer is never included
+        // in this file, but is used as a template parameter that will be
+        // compiled later.
+        template<class Archive, class Serializer>
+        void save_impl(Archive& ar, const std::uint32_t) const
             {
-                std::shared_ptr<VertexPainter> main_painter = main_painter_observer_.get_painter_wrapper()->unwrap();
-                std::vector<std::shared_ptr<VertexPainter>> child_painters;
+                static_assert(std::is_same<Serializer, VertexPainterSerializer>::value);
+                
+                auto main_painter = Serializer(main_painter_observer_.get_painter_wrapper()->unwrap());
+                std::vector<Serializer> child_painters;
                 for(const auto& child : child_painters_observers_)
                 {
-                    child_painters.push_back(child.get_painter_wrapper()->unwrap());
+                    child_painters.push_back(Serializer(child.get_painter_wrapper()->unwrap()));
                 }
                 ar(cereal::make_nvp("main_painter", main_painter),
                    cereal::make_nvp("child_painters", child_painters));
             }
-        template<class Archive>
-        void load(Archive& ar, const std::uint32_t)
+        template<class Archive, class Serializer>
+        void load_impl(Archive& ar, const std::uint32_t)
             {
-                std::shared_ptr<VertexPainter> main_painter;
-                std::vector<std::shared_ptr<VertexPainter>> child_painters;
-                ar(cereal::make_nvp("main_painter", main_painter),
-                   cereal::make_nvp("child_painters", child_painters));
+                static_assert(std::is_same<Serializer, VertexPainterSerializer>::value);
+                
+                auto main_painter_serializer = Serializer();
+                std::vector<Serializer> child_painters_serializers;
+                ar(cereal::make_nvp("main_painter", main_painter_serializer),
+                   cereal::make_nvp("child_painters", child_painters_serializers));
 
                 std::shared_ptr<VertexPainterWrapper> main_wrapper = std::make_shared<VertexPainterWrapper>();
-                main_wrapper->wrap(main_painter);
+                main_wrapper->wrap(main_painter_serializer.get_serialized());
                 set_main_painter(main_wrapper);
                 
                 std::list<std::shared_ptr<VertexPainterWrapper>> child_wrappers;
-                for(auto painter : child_painters)
+                for(const auto& painter_serializer : child_painters_serializers)
                 {
                     std::shared_ptr<VertexPainterWrapper> wrapper = std::make_shared<VertexPainterWrapper>();;
-                    wrapper->wrap(painter);
+                    wrapper->wrap(painter_serializer.get_serialized());
                     child_wrappers.push_back(wrapper);
                 }
                 set_child_painters(child_wrappers);
+            }
+        
+        friend class cereal::access;
+        template<class Archive>
+        void save(Archive& ar, const std::uint32_t) const
+            {
+                std::uint32_t unused = 0;
+                save_impl<Archive, VertexPainterSerializer>(ar, unused);
+            }
+        template<class Archive>
+        void load(Archive& ar, const std::uint32_t)
+            {
+                std::uint32_t unused = 0;
+                load_impl<Archive, VertexPainterSerializer>(ar, unused);
             }
     };
 }

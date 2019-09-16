@@ -31,4 +31,7 @@ namespace colors
         set_generator_wrapper(color_generator_wrapper);
     }
 
+    void VertexPainter::supplementary_drawing(sf::FloatRect) const
+    {
+    }
 }

@@ -128,11 +128,11 @@ TEST(DrawingParametersTest, serialization)
         iarchive(iparams);
     }
 
-    // The line below is not necessary: starting_position is not saved.
+    // The lines below are not necessary: starting_position and step are not saved.
     // ASSERT_EQ(oparams.get_starting_position(), iparams.get_starting_position());
-    // The "0.001" is from the rounding of save()/load() in DrawingParameters.h
-    ASSERT_NEAR(oparams.get_starting_angle(), iparams.get_starting_angle(), 0.001);
-    ASSERT_NEAR(oparams.get_delta_angle(), iparams.get_delta_angle(), 0.001);
-    ASSERT_NEAR(oparams.get_step(), iparams.get_step(), 0.001);
+    // ASSERT_FLOAT_EQ(oparams.get_delta_angle(), iparams.get_delta_angle());
+
+    ASSERT_FLOAT_EQ(oparams.get_starting_angle(), iparams.get_starting_angle());
+    ASSERT_FLOAT_EQ(oparams.get_delta_angle(), iparams.get_delta_angle());
     ASSERT_EQ(oparams.get_n_iter(), iparams.get_n_iter());
 }

@@ -76,7 +76,7 @@ TEST_F(DrawingTest, turn_right)
 {
     turn_right_fn(turtle);
 
-    ext::sf::Vector2d direction { 0, 1 };
+    ext::sf::Vector2d direction { 0, -1 };
     ASSERT_NEAR(turtle.state.direction.x, direction.x, 1e-10);
     ASSERT_NEAR(turtle.state.direction.y, direction.y, 1e-10);
 }
@@ -86,7 +86,7 @@ TEST_F(DrawingTest, turn_left)
 {
     turn_left_fn(turtle);
     
-    ext::sf::Vector2d direction { 0, -1 };
+    ext::sf::Vector2d direction { 0, 1 };
     ASSERT_NEAR(turtle.state.direction.x, direction.x, 1e-10);
     ASSERT_NEAR(turtle.state.direction.y, direction.y, 1e-10);
 }

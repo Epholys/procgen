@@ -8,7 +8,8 @@
 
 #include "DrawingParameters.h"
 #include "RuleMap.h"
-
+#include "helper_string.h"
+#include "WindowController.h"
 
 // Main explanation of drawing in Turtle.h
 namespace drawing
@@ -60,7 +61,7 @@ namespace drawing
     const Order go_forward    { OrderID::GO_FORWARD,    go_forward_fn, "Go forward" };
     const Order turn_right    { OrderID::TURN_RIGHT,    turn_right_fn, "Turn right" };
     const Order turn_left     { OrderID::TURN_LEFT,     turn_left_fn, "Turn left"  };
-    const Order save_position { OrderID::SAVE_POSITION, save_position_fn, "Save Position" };
+    const Order save_position { OrderID::SAVE_POSITION, save_position_fn, "Save position" };
     const Order load_position { OrderID::LOAD_POSITION, load_position_fn, "Load position" };
         
     // All the orders available.
@@ -74,21 +75,40 @@ namespace drawing
                   v.push_back(o.name.c_str());
               return v; }();
 
+    const std::vector<std::string> all_orders_json_name =
+        [](){ std::vector<std::string> v;
+              for(const auto& o : all_orders)
+                  v.push_back(to_camel_case(o.name));
+              return v; }();
+
+
+
     // Minimal serialization for Orders: we save and load only the associated
     // name.
     template<class Archive>
     std::string save_minimal (Archive&, const Order& order)
     {
-        return order.name;
+        return to_camel_case(order.name);
     }
 
     template<class Archive>
     void load_minimal (Archive&, Order& order, const std::string& str)
     {
-        auto it = std::find_if(begin(all_orders), end(all_orders),
-                               [str](const auto& o){return o.name == str;});
-        Expects(it != end(all_orders));
-        order = *it;
+        auto it = std::find_if(begin(all_orders_json_name), end(all_orders_json_name),
+                               [str](const auto& o){return o == str;});
+
+        int index = 0;
+        if (it == end(all_orders_json_name))
+        {
+            controller::WindowController::add_loading_error_message("One InterpretationMap's order does not exist, it is now set to go_forward");
+        }
+        else
+        {
+            index = std::distance(begin(all_orders_json_name), it);
+        }
+        Expects(index >= 0);
+        Expects(static_cast<decltype(all_orders)::size_type>(index) < all_orders.size());
+        order = *(begin(all_orders) + index);
     }
 
     // 'InterpretationMap' is a map linking a symbol of the vocabulary of a
@@ -127,6 +147,8 @@ namespace drawing
                 // way.
                 rules_.clear();
 
+                bool key_too_big = false;
+                bool void_key = false;
                 auto hint = rules_.begin();
                 while(true)
                 {
@@ -135,9 +157,31 @@ namespace drawing
                     if(!namePtr)
                         break;
 
-                    std::string key = namePtr;
+                    std::string loaded_key = namePtr;
                     Order value; ar(value);
-                    hint = rules_.emplace_hint(hint, key.at(0), std::move(value));
+                    char key = ' ';
+                    if (loaded_key.size() != 0)
+                    {
+                        if (loaded_key.size() > 1)
+                        {
+                            key_too_big = true;
+                        }
+                        key = loaded_key.at(0);
+                        hint = rules_.emplace_hint(hint, key, std::move(value));
+                    }
+                    else
+                    {
+                        void_key = true;
+                    }
+                }
+
+                if (key_too_big)
+                {
+                    controller::WindowController::add_loading_error_message("One or more InterpretationMap's key was too big, it is now cropped.");
+                }
+                if (void_key)
+                {
+                    controller::WindowController::add_loading_error_message("One or more InterpretationMap's key was empty, so it was ignored.");
                 }
             }
     };

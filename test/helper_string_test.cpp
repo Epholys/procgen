@@ -34,3 +34,9 @@ TEST(helper_string_test, trim)
     ASSERT_EQ("\tTEST", rtrim(word2));
     ASSERT_EQ("TEST", trim(word3));
 }
+
+TEST(helper_string_test, to_camel_case)
+{
+    std::string word = "THiS is nOt A pIPe";
+    ASSERT_EQ("this_is_not_a_pipe", to_camel_case(word));
+}

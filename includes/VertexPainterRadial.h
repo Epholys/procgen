@@ -4,6 +4,8 @@
 
 #include "VertexPainter.h"
 #include "helper_cereal.hpp"
+#include "ColorsGeneratorSerializer.h"
+#include "WindowController.h"
 
 namespace colors
 {
@@ -25,6 +27,8 @@ namespace colors
 
         // Setter
         void set_center(sf::Vector2f center);
+
+        virtual void supplementary_drawing(sf::FloatRect bounding_box) const override;
         
         // Paint 'vertices' in a 'center_' centered distance-bases radial
         // fashion with the informations of 'bounding_box' according to the rule
@@ -38,6 +42,9 @@ namespace colors
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone() const override;
 
+        friend class VertexPainterSerializer;
+        virtual std::string type_name() const override;        
+        
     private:
         // [0, 1] center: 0 is the left/up of the bounding_box and 1 the right/down.
         sf::Vector2f center_ {0, 0};
@@ -46,16 +53,29 @@ namespace colors
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const
             {
-                ar(cereal::make_nvp("center", center_),
-                   cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
+                // ar(cereal::make_nvp("center", center_),
+                //    cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
+                ar(cereal::make_nvp("center", center_));
+                auto color_generator = get_generator_wrapper()->unwrap();
+                auto serializer = ColorGeneratorSerializer(color_generator);
+                ar(cereal::make_nvp("ColorGenerator", serializer));
             }
         template<class Archive>
         void load(Archive& ar, const std::uint32_t)
             {
-                std::shared_ptr<ColorGenerator> generator;
-                ar(cereal::make_nvp("center", center_));
-                ar(cereal::make_nvp("ColorGenerator", generator));
-                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(generator));
+                ar(cereal::make_nvp("center", center_));             
+
+                if (center_.x < 0. || center_.x > 1. ||
+                    center_.y < 0. || center_.y > 1.)
+                {
+                    center_.x = std::clamp(center_.x, 0.f, 1.f);
+                    center_.y = std::clamp(center_.y, 0.f, 1.f);
+                    controller::WindowController::add_loading_error_message("VertexPainterRadial's center's coordinates weren't in the [0,1] range, so they are clamped.");
+                }
+
+                ColorGeneratorSerializer serializer;
+                ar(cereal::make_nvp("ColorGenerator", serializer));
+                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));
             }
     };
 }

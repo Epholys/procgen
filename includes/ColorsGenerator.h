@@ -4,12 +4,13 @@
 #include <cstdio>
 #include <vector>
 #include <SFML/Graphics.hpp>
+#include "imgui/imgui.h"
 #include "cereal/types/polymorphic.hpp"
 #include "cereal/cereal.hpp"
 #include "cereal/types/vector.hpp"
 #include "cereal/archives/json.hpp"
 #include "Observable.h"
-
+#include "WindowController.h"
 
 namespace cereal
 {
@@ -59,6 +60,23 @@ namespace cereal
         color.r = color_number & 0xff;
     }
 
+    template <class Archive,
+              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
+    std::string save_minimal(const Archive& ar, ImVec4 imcolor)
+    {
+        return save_minimal(ar, static_cast<sf::Color>(imcolor));
+    }
+
+    template <class Archive,
+              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
+    void load_minimal(const Archive& ar, ImVec4& imcolor, const std::string& data)
+    {
+        sf::Color color;
+        load_minimal(ar, color, data);
+        imcolor = color;
+    }
+
+    
     template<class Archive, class N,
              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
     void save(Archive& ar, const std::pair<sf::Color, N>& pair)
@@ -108,6 +126,11 @@ namespace cereal
 
 namespace colors
 {
+    static const ImVec4 imwhite {1, 1, 1, 1};
+    
+    bool is_transparent(ImVec4 imcolor);
+
+    
     // ColorGenerator is an simple abstract class.
     // From a single float between 0 and 1, returns a color.
     // As a polymorphic class, it is generally used as a
@@ -127,6 +150,8 @@ namespace colors
         // when copying or copy-constructing an object havino a 'ColorGenerator'
         // as an attribute.
         virtual std::shared_ptr<ColorGenerator> clone() const = 0;
+        
+        virtual std::string type_name() const = 0;
     };
 
     
@@ -151,22 +176,32 @@ namespace colors
         sf::Color get(float f) override;
 
         // Getter and setter
-        const sf::Color& get_color() const;
-        void set_color(const sf::Color& color);
+        sf::Color get_color() const;            // sf::Color getter for the painters
+        const ImVec4& get_imcolor() const;      // ImVec4 getter for the GUI
+        void set_imcolor(const ImVec4& color);
         
+        friend class ColorGeneratorSerializer;
+        virtual std::string type_name() const override;        
+
     private:
         // Clone 'this' and returns it as a 'shared_ptr'.
         std::shared_ptr<ColorGenerator> clone() const override;
 
+        // The unique color returned, in ImVec4 format (for ease of use with the
+        // GUI).
+        ImVec4 color_ {imwhite};
+
         friend class cereal::access;
         template<class Archive>
-        void serialize(Archive& ar, std::uint32_t)
+        void save(Archive& ar, const std::uint32_t) const
             {
-                ar(cereal::make_nvp("Color", color_));
+                ar(cereal::make_nvp("color", color_));
             }
-        
-        // The unique color returned.
-        sf::Color color_ {sf::Color::White};
+        template<class Archive>
+        void load(Archive& ar, const std::uint32_t)
+            {
+                ar(cereal::make_nvp("color", color_));
+            }
     };
 
 
@@ -184,7 +219,7 @@ namespace colors
     public:
         struct Key
         {
-            sf::Color color {sf::Color::White};
+            ImVec4 imcolor {imwhite};
             float position {0.f};
         };
         
@@ -213,9 +248,16 @@ namespace colors
         const keys& get_keys() const;
         void set_keys(const keys& keys);
 
+        friend class ColorGeneratorSerializer;
+        virtual std::string type_name() const override;        
+
     private:
         // Clone 'this' and returns it as a 'shared_ptr'.
         std::shared_ptr<ColorGenerator> clone() const override;
+
+        // Keys
+        keys keys_;
+
 
         friend class cereal::access;
         template<class Archive>
@@ -224,26 +266,41 @@ namespace colors
                 std::vector<std::pair<sf::Color, float>> keys;
                 for (const auto& k : keys_)
                 {
-                    keys.push_back({k.color, k.position});
+                    keys.push_back({k.imcolor, k.position});
                 }
                 ar(cereal::make_nvp("color_keys", keys));
             }
-        friend class cereal::access;
+
         template<class Archive>
         void load(Archive& ar, std::uint32_t)
             {
                 std::vector<std::pair<sf::Color, float>> loaded_keys;
                 std::vector<Key> keys;
                 ar(cereal::make_nvp("color_keys", loaded_keys));
+
+                if (loaded_keys.size() < 2)
+                {
+                    loaded_keys = {{sf::Color::White, 0} , {sf::Color::White, 1.}};
+                    controller::WindowController::add_loading_error_message("There was less than 2 keys in LinearGradient, so it is set to a default state.");
+                }
+
+                bool out_of_bound = false;
                 for (const auto& k : loaded_keys)
                 {
+                    if (k.second < 0 || k.second > 1)
+                    {
+                        out_of_bound = true;
+                    }
                     keys.push_back({k.first, k.second});
                 }
+
+                if (out_of_bound)
+                {
+                    controller::WindowController::add_loading_error_message("One or more key in LinearGradient were out of bound, so they are clamped.");
+                }
+                
                 set_keys(keys);
             }
-
-        // Keys
-        keys keys_;
     };
 
 
@@ -257,8 +314,8 @@ namespace colors
     public:
         struct Key
         {
-            sf::Color color {sf::Color::White};
-            float index {0};
+            ImVec4 imcolor {imwhite};
+            int index {0};
         };
 
         // A key is a pair of a Color and an integer. The integer is the index
@@ -286,9 +343,11 @@ namespace colors
 
         // Setter
         // Set 'keys_' to 'keys' and generate the 'colors_'.
-        // Precondition: 'keys' respect the invariants.
         void set_keys(keys keys);
         
+        friend class ColorGeneratorSerializer;
+        virtual std::string type_name() const override;        
+
     private:
         // Generate 'colors_' from 'keys_'.
         // The invariant are assumed respected.
@@ -297,6 +356,13 @@ namespace colors
         // Clone 'this' and returns it as a 'shared_ptr'.
         std::shared_ptr<ColorGenerator> clone() const override;
 
+        
+        // The keys. Always respect the relevant invariant.
+        keys keys_;
+        // The colors. Always respect the relevant invariant.
+        std::vector<sf::Color> colors_;
+
+
         friend class cereal::access;
         template<class Archive>
         void save(Archive& ar, std::uint32_t) const
@@ -304,28 +370,53 @@ namespace colors
                 std::vector<std::pair<sf::Color, float>> keys;
                 for (const auto& k : keys_)
                 {
-                    keys.push_back({k.color, k.index});
+                    keys.push_back({k.imcolor, k.index});
                 }
                 ar(cereal::make_nvp("color_keys", keys));
             }
-        friend class cereal::access;
+
         template<class Archive>
         void load(Archive& ar, std::uint32_t)
             {
-                std::vector<std::pair<sf::Color, float>> loaded_keys;
+                std::vector<std::pair<sf::Color, int>> loaded_keys;
                 std::vector<Key> keys;
                 ar(cereal::make_nvp("color_keys", loaded_keys));
+
+                if (loaded_keys.size() < 2)
+                {
+                    loaded_keys = {{sf::Color::White, 0} , {sf::Color::White, 1}};
+                    controller::WindowController::add_loading_error_message("There was less than 2 keys in DiscreteGradient, so it is set to a default state.");
+                }
+
+                bool out_of_bound = false;
                 for (const auto& k : loaded_keys)
                 {
+                    if (k.second < 0)
+                    {
+                        out_of_bound = true;
+                    }
                     keys.push_back({k.first, k.second});
                 }
+
+                if (out_of_bound)
+                {
+                    controller::WindowController::add_loading_error_message("One or more key in DiscreteGradient were negative, so they are clamped.");
+                }
+
+                if (!std::is_sorted(begin(keys), end(keys),
+                                   [](const auto& a, const auto& b)
+                                    {return a.index < b.index;}))
+                {
+                    controller::WindowController::add_loading_error_message("DiscreteGradient's keys were not sorted, so they are now.");
+                }
+
+                if (keys_.front().index != 0)
+                {
+                    controller::WindowController::add_loading_error_message("DiscreteGradient's keys didn't have a first element, so one is designated now.");
+                }
+
                 set_keys(keys);
             }
-        
-        // The keys. Always respect the relevant invariant.
-        keys keys_;
-        // The colors. Always respect the relevant invariant.
-        std::vector<sf::Color> colors_;
     };
 }
 

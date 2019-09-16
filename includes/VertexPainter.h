@@ -42,6 +42,11 @@ namespace colors
         std::shared_ptr<ColorGeneratorWrapper> get_generator_wrapper() const;
         void set_generator_wrapper(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper);
         void set_target(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper);
+
+        // Method to be called every frame to draw some helper visuals.
+        // 'bounding_box' is the only necessary information for now, but all
+        // other parameters of 'paint_vertices()' could be used in the future.
+        virtual void supplementary_drawing(sf::FloatRect bounding_box) const;
         
         // Paint 'vertices' with the informations of 'bounding_box' and
         // 'iteration_of_vertices' according to a rule with the colors from
@@ -50,6 +55,8 @@ namespace colors
                                     const std::vector<int>& iteration_of_vertices,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) = 0;
+
+        virtual std::string type_name() const = 0;
     };
 }
 

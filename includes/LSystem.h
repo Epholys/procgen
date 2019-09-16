@@ -10,7 +10,7 @@
 
 #include "Observable.h"
 #include "RuleMap.h"
-
+#include "WindowController.h"
 
 namespace cereal
 {
@@ -31,6 +31,8 @@ namespace cereal
     {
         map.clear();
 
+        bool key_too_big = false;
+        bool void_key = false;
         auto hint = map.begin();
         while(true)
         {
@@ -38,11 +40,34 @@ namespace cereal
 
             if(!namePtr)
                 break;
-
-            std::string key = namePtr;
+            
+            std::string loaded_key = namePtr;
             std::string value; ar(value);
-            hint = map.emplace_hint(hint, key.at(0), std::move (value));
+            char key = ' ';
+            if (loaded_key.size() != 0)
+            {
+                if (loaded_key.size() > 1)
+                {
+                    key_too_big = true;
+                }
+                key = loaded_key.at(0);
+                hint = map.emplace_hint(hint, key, std::move(value));
+            }
+            else
+            {
+                void_key = true;
+            }
         }
+        
+        if (key_too_big)
+        {
+            controller::WindowController::add_loading_error_message("One or more LSystem's key was too big, it is now cropped.");
+        }
+        if (void_key)
+        {
+            controller::WindowController::add_loading_error_message("One or more LSystem's key was empty, so it was ignored.");
+        }
+
     }
 }
 
@@ -142,25 +167,6 @@ public:
        
 private:
 
-    friend class cereal::access;
-    
-    template <class Archive>
-    void save (Archive& ar, const std::uint32_t) const
-        {
-            ar(cereal::make_nvp("axiom", production_cache_.at(0)),
-               cereal::make_nvp("production_rules", rules_),
-               cereal::make_nvp("iteration_predecessor", iteration_predecessors_));
-        }
-    
-    template <class Archive>
-    void load (Archive& ar, const std::uint32_t)
-        {
-            ar(cereal::make_nvp("axiom", production_cache_[0]),
-               cereal::make_nvp("production_rules", rules_),
-               cereal::make_nvp("iteration_predecessor", iteration_predecessors_));
-            iteration_count_cache_[0] = {std::vector<int>(production_cache_.at(0).size(), 0), 0};
-        }
-
     // The predecessors indicating than, at their next derivation, the iteration
     // counter will be incremented by one.
     std::string iteration_predecessors_ = {};
@@ -175,6 +181,26 @@ private:
     // The cache of all computed iteration values. The second element in the pair
     // is the maximum number of iteration for this iteration.
     std::unordered_map<int, std::pair<std::vector<int>, int>> iteration_count_cache_ = {};
+
+    
+    friend class cereal::access;
+    
+    template <class Archive>
+    void save (Archive& ar, const std::uint32_t) const
+        {
+            ar(cereal::make_nvp("axiom", production_cache_.at(0)),
+               cereal::make_nvp("production_rules", rules_),
+               cereal::make_nvp("iteration_predecessors", iteration_predecessors_));
+        }
+    
+    template <class Archive>
+    void load (Archive& ar, const std::uint32_t)
+        {
+            ar(cereal::make_nvp("axiom", production_cache_[0]),
+               cereal::make_nvp("production_rules", rules_),
+               cereal::make_nvp("iteration_predecessors", iteration_predecessors_));
+            iteration_count_cache_[0] = {std::vector<int>(production_cache_.at(0).size(), 0), 0};
+        }
 };
 
 #endif

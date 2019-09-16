@@ -4,6 +4,8 @@
 
 #include "VertexPainter.h"
 #include "helper_math.h"
+#include "ColorsGeneratorSerializer.h"
+#include "WindowController.h"
 
 namespace colors
 {
@@ -37,6 +39,9 @@ namespace colors
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone() const override;
 
+        friend class VertexPainterSerializer;
+        virtual std::string type_name() const override;        
+
     private:
 
         // The number of consecutive vertices to paint the same color.
@@ -50,16 +55,28 @@ namespace colors
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const
             {
-                ar(cereal::make_nvp("block_size", block_size_),
-                   cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
+                // ar(cereal::make_nvp("block_size", block_size_),
+                //    cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
+                ar(cereal::make_nvp("block_size", block_size_));
+
+                auto color_generator = get_generator_wrapper()->unwrap();
+                auto serializer = ColorGeneratorSerializer(color_generator);
+                ar(cereal::make_nvp("ColorGenerator", serializer));
             }
         template<class Archive>
         void load(Archive& ar, const std::uint32_t)
             {
-                std::shared_ptr<ColorGenerator> generator;
                 ar(cereal::make_nvp("block_size", block_size_));
-                ar(cereal::make_nvp("ColorGenerator", generator));
-                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(generator));
+
+                if (block_size_ < 1)
+                {
+                    block_size_ = 1;
+                    controller::WindowController::add_loading_error_message("VertexPainterRandom's block_size was smaller than 1, so it is set to 1.");
+                }
+                
+                ColorGeneratorSerializer serializer;
+                ar(cereal::make_nvp("ColorGenerator", serializer));
+                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));
             }
     };
 }

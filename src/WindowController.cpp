@@ -3,10 +3,14 @@
 #include "imgui/imgui.h"
 #include "cereal/archives/json.hpp"
 
+#include "RenderWindow.h"
 #include "helper_string.h"
 #include "WindowController.h"
 #include "LSystemController.h"
+#include "LSystemView.h"
 
+
+using sfml_window::window;
 namespace fs = std::experimental::filesystem;
 
 namespace controller
@@ -26,28 +30,19 @@ namespace controller
     bool WindowController::load_menu_open_ {false};
 
     const double WindowController::default_step_ {25.f}; 
-
     
     fs::path WindowController::save_dir_ = fs::u8path(u8"saves");
+
+    std::vector<std::string> WindowController::error_messages {};
     
     sf::Vector2f WindowController::real_mouse_position(sf::Vector2i mouse_click)
     {
-        auto size = view_.getSize();
-        auto center = view_.getCenter();
-        sf::Vector2f upright {center.x - size.x/2, center.y - size.y/2};
-        sf::Vector2f position {mouse_click.x*zoom_level_ + upright.x,
-                               mouse_click.y*zoom_level_ + upright.y};
-        return position;
+        return window.mapPixelToCoords(mouse_click);
     }
 
     sf::Vector2i WindowController::absolute_mouse_position(sf::Vector2f mouse_click)
     {
-        auto size = view_.getSize();
-        auto center = view_.getCenter();
-        sf::Vector2f upright {center.x - size.x/2, center.y - size.y/2};
-        sf::Vector2i position((mouse_click.x - upright.x) / zoom_level_,
-                              (mouse_click.y - upright.y) * zoom_level_);
-        return position;
+        return window.mapCoordsToPixel(mouse_click);
     }
 
     
@@ -221,7 +216,7 @@ namespace controller
                     ImGui::EndPopup();
                 }
             }
-
+            
             // Fast close the save menu
             ImGui::SameLine();
             if (ImGui::Button("Cancel"))
@@ -233,6 +228,11 @@ namespace controller
         }
     }
 
+    void WindowController::add_loading_error_message(const std::string& message)
+    {
+        error_messages.push_back(message);
+    }
+
     void WindowController::load_menu(std::list<procgui::LSystemView>& lsys_views)
     {
         // The file name in which will be save the LSystem.
@@ -241,6 +241,10 @@ namespace controller
         static bool dir_error_popup = false;
         // Flag to let the file error popup open between frames.
         static bool file_error_popup = false;
+
+        static bool format_error_popup = false;
+
+        static bool error_message_popup = false;
 
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Load LSystem from file", &load_menu_open_, ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
@@ -336,16 +340,48 @@ namespace controller
                     catch (const cereal::RapidJSONException& e)
                     {
                         // If the file is not in the correct format, open the
-                        // error popup. 
-                        file_error_popup = true;
+                        // format error popup. 
+                        format_error_popup = true;
                     }
-                    if (!file_error_popup)
+                    if (!file_error_popup && !format_error_popup)
                     {
+                        // Redimension the L-System to take 2/3 of the lowest
+                        // screen. Double the load time, but it should be okay
+                        // except for huge L-Systems.
+                        const double target_ratio = 2. / 3.;
+                        double step {0};
+                        auto box = loaded_view.get_bounding_box();
+                        auto window_size = sfml_window::window.getSize();
+                        float xratio = window_size.x / box.width;
+                        float yratio = window_size.y / box.height;
+                        if(xratio < yratio)
+                        {
+
+                            double target_size = target_ratio * window_size.x;
+                            double diff_ratio = box.width != 0 ? target_size / box.width : target_size;
+                            step = loaded_view.get_parameters().get_step() * diff_ratio * zoom_level_;
+                        }
+                        else
+                        {
+                            double target_size = target_ratio * window_size.y;
+                            double diff_ratio = box.height != 0 ? target_size / box.height : target_size;
+                            step = loaded_view.get_parameters().get_step() * diff_ratio * zoom_level_;
+                        }
+                        loaded_view.ref_parameters().set_step(step);
+                                                
                         // Paste the new LSystemView at the correct position.
                         auto tmp = std::make_optional(loaded_view);
                         paste_view(lsys_views, tmp, mouse_position_to_load_);
+
                         load_menu_open_ = false;
                     }
+
+                    if (!error_messages.empty())
+                    {
+                        error_message_popup = true;
+                        load_menu_open_ = true;
+                    }
+            
                 }
             }
 
@@ -356,12 +392,66 @@ namespace controller
                 ImGui::OpenPopup("Error");
                 if (ImGui::BeginPopupModal("Error", &file_error_popup))
                 {
-                    std::string message = "Error: can't open file: '" + array_to_string(filename) + "' (or wrong format)";
+                    std::string message = "Error: can't open file: '" + array_to_string(filename) + "'";
                     ImGui::Text(message.c_str());
                     ImGui::EndPopup();
                 }
             }
 
+            if (format_error_popup)
+            {
+                ImGui::OpenPopup("Error");
+                if (ImGui::BeginPopupModal("Error", &format_error_popup))
+                {
+                    std::string message = "Error: file '" + array_to_string(filename) + "' isn't a valid or complete JSON L-System file.";
+                    ImGui::Text(message.c_str());
+                    ImGui::EndPopup();
+                }
+            }
+
+            if (error_message_popup)
+            {
+                ImGui::OpenPopup("Warning");
+                if (ImGui::BeginPopupModal("Warning", &error_message_popup))
+                {
+                    std::string message;
+                    if (error_messages.size() > 1)
+                    {
+                        message = "Warning: file '" + array_to_string(filename) + "' has some issues:\n";
+                    }
+                    else
+                    {
+                        message = "Warning: file '" + array_to_string(filename) + "' has one issue:\n";
+                    }
+                    ImGui::Text(message.c_str());
+
+                    for (const auto& error_message : error_messages)
+                    {
+                        std::string message = "\t- "+ error_message + "\n";
+                        ImGui::Text(message.c_str());
+                    }
+
+                    if (error_messages.size() > 1)
+                    {
+                        ImGui::Text("These issues have been automatically corrected.\n");
+                        ImGui::Text("Don't forget to save this L-System if you want to save these corrections.");
+                    }
+                    else
+                    {
+                        ImGui::Text("This issue has been automatically corrected.\n");
+                        ImGui::Text("Don't forget to save this L-System if you want to save this correction.");
+                    }
+                    
+                    ImGui::EndPopup();
+                }
+                else
+                {
+                    error_message_popup = false;
+                    error_messages.clear();
+                    load_menu_open_ = false;
+                }
+            }
+            
             ImGui::SameLine();
             if (ImGui::Button("Cancel"))
             {
@@ -373,7 +463,6 @@ namespace controller
     }
     
     void WindowController::handle_input(std::vector<sf::Event> events,
-                                        sf::RenderWindow &window,
                                         std::list<procgui::LSystemView>& lsys_views)
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
@@ -426,7 +515,7 @@ namespace controller
             }
             else if (event.type == sf::Event::Resized)
             {
-                view_.setSize(event.size.width, event.size.height);
+                view_.setSize(event.size.width*zoom_level_, event.size.height*zoom_level_);
             }
 
             else if (has_focus_)
@@ -457,6 +546,12 @@ namespace controller
                     // the drawing, so real_mouse_position() is not necessary.
                     mouse_position_ = sf::Mouse::getPosition(window);
                     view_can_move_ = true;
+                }
+
+                else if (event.type == sf::Event::MouseButtonReleased &&
+                         event.mouseButton.button == sf::Mouse::Left)
+                {
+                    view_can_move_ = false;
                 }
             }
             

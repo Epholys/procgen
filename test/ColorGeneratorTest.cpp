@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "ColorsGenerator.h"
 #include "ColorsGeneratorWrapper.h"
+#include "ColorsGeneratorSerializer.h"
 
 using namespace colors;
 
@@ -100,7 +101,7 @@ TEST(ColorGeneratorTest, constant_moved)
 TEST(ColorGeneratorTest, constant_setter)
 {
     ConstantColor c;
-    c.set_color(sf::Color::Blue);
+    c.set_imcolor(sf::Color::Blue);
     ASSERT_EQ(sf::Color::Blue, c.get_color());
 }
 
@@ -142,7 +143,7 @@ namespace colors
 {
     inline bool operator== (const LinearGradient::Key left, const LinearGradient::Key right)
     {
-        return left.color == right.color && left.position == right.position;
+        return sf::Color(left.imcolor) == sf::Color(right.imcolor) && left.position == right.position;
     }
 }
 
@@ -249,7 +250,7 @@ namespace colors
 {
     inline bool operator== (const DiscreteGradient::Key left, const DiscreteGradient::Key right)
     {
-        return left.color == right.color && left.index == right.index;
+        return sf::Color(left.imcolor) == sf::Color(right.imcolor) && left.index == right.index;
     }
 }
 
@@ -311,6 +312,17 @@ TEST(ColorGeneratorTest, discrete_setter)
     ASSERT_EQ(keys, d.get_keys());
     ASSERT_EQ(colors, d.get_colors());
 }
+
+TEST(ColorGeneratorTest, discrete_setter_resistance)
+{
+    DiscreteGradient::keys wrong_keys {{sf::Color::Green, 1}, {sf::Color::Red, -1}, {sf::Color::Blue, 1}, {sf::Color::Yellow, 0}};
+    DiscreteGradient::keys fixed_keys {{sf::Color::Red, 0}, {sf::Color::Yellow, 1}, {sf::Color::Green, 2}, {sf::Color::Blue, 3}};
+    DiscreteGradient d {};
+    d.set_keys(wrong_keys);
+
+    ASSERT_EQ(fixed_keys, d.get_keys());
+}
+
 
 TEST(ColorGeneratorTest, discrete_get)
 {
@@ -376,19 +388,31 @@ TEST(ColorGeneratorTest, polymorphic_serialization)
         cereal::JSONOutputArchive oarchive_linear (ss_linear);
         cereal::JSONOutputArchive oarchive_gradient (ss_discrete);
         
-        oarchive_constant(oconstant);
-        oarchive_linear(olinear);
-        oarchive_gradient(odiscrete);        
+        ColorGeneratorSerializer serializer_constant (oconstant);
+        ColorGeneratorSerializer serializer_linear (olinear);
+        ColorGeneratorSerializer serializer_discrete (odiscrete);
+
+        oarchive_constant(serializer_constant);
+        oarchive_linear(serializer_linear);
+        oarchive_gradient(serializer_discrete);
     }
+
+
+    ColorGeneratorSerializer serializer_constant;
+    ColorGeneratorSerializer serializer_linear;
+    ColorGeneratorSerializer serializer_discrete;
     {
         cereal::JSONInputArchive iarchive_constant (ss_constant);
         cereal::JSONInputArchive iarchive_linear (ss_linear);
         cereal::JSONInputArchive iarchive_gradient (ss_discrete);
 
-        iarchive_constant(iconstant);
-        iarchive_linear(ilinear);
-        iarchive_gradient(idiscrete);        
+        iarchive_constant(serializer_constant);
+        iarchive_linear(serializer_linear);
+        iarchive_gradient(serializer_discrete);
     }
+    iconstant = serializer_constant.get_serialized();
+    ilinear = serializer_linear.get_serialized();
+    idiscrete = serializer_discrete.get_serialized();
 
     ASSERT_TRUE(std::dynamic_pointer_cast<ConstantColor>(iconstant));
     ASSERT_TRUE(std::dynamic_pointer_cast<LinearGradient>(ilinear));

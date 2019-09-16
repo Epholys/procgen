@@ -12,6 +12,7 @@
 #include "UniqueColor.h"
 #include "UniqueId.h"
 #include "VertexPainterWrapper.h"
+#include "VertexPainterSerializer.h"
 
 namespace procgui
 {
@@ -111,6 +112,15 @@ namespace procgui
     private:
         void update_callbacks();
 
+        // Draw a placeholder box if the LSystem does not have enough vertices
+        // or does not have any size. 
+        void draw_missing_placeholder() const;
+        // Create the placeholder box.
+        sf::FloatRect compute_placeholder_box() const;
+
+        // Draw the box when a LSystemView is selected.
+        void draw_select_box(sf::RenderTarget& target, const sf::FloatRect& bounding_box) const;
+        
         // The managers of unique identifiers and colors for each instance of
         // LSystemView. 
         static UniqueId unique_ids_;
@@ -161,8 +171,10 @@ namespace procgui
                 ar(cereal::make_nvp("name", name_),
                    cereal::make_nvp("LSystem", *OLSys::get_target()),
                    cereal::make_nvp("DrawingParameters", *OParams::get_target()),
-                   cereal::make_nvp("Interpretation Map", *OMap::get_target()),
-                   cereal::make_nvp("VertexPainter", OPainter::get_target()->unwrap()));
+                   cereal::make_nvp("Interpretation Map", *OMap::get_target()));
+
+                auto painter_serializer  = colors::VertexPainterSerializer(OPainter::get_target()->unwrap());
+                ar(cereal::make_nvp("VertexPainter", painter_serializer));
             }
 
         template<class Archive>
@@ -172,20 +184,20 @@ namespace procgui
                 LSystem lsys;
                 drawing::DrawingParameters params;
                 drawing::InterpretationMap map;
-                std::shared_ptr<colors::VertexPainter> painter;                
+                colors::VertexPainterSerializer painter_serializer;
                 
                 ar(name,
                    cereal::make_nvp("LSystem", lsys),
                    cereal::make_nvp("DrawingParameters", params),
                    cereal::make_nvp("Interpretation Map", map),
-                   cereal::make_nvp("VertexPainter", painter));
+                   cereal::make_nvp("VertexPainter", painter_serializer));
 
                 
                 *this = LSystemView(name,
                                     std::make_shared<LSystem>(lsys),
                                     std::make_shared<drawing::InterpretationMap>(map),
                                     std::make_shared<drawing::DrawingParameters>(params),
-                                    std::make_shared<colors::VertexPainterWrapper>(painter));
+                                    std::make_shared<colors::VertexPainterWrapper>(painter_serializer.get_serialized()));
 
             }
     };

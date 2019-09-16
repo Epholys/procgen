@@ -2,8 +2,6 @@
 #define HELPER_ALGORITHM
 
 
-// TODO: when 'RuleMapBuffer' will be removed, removes these too.
-
 // Find a duplicate of 'model' between [first, last)
 template<typename ForwardIt>
 ForwardIt find_duplicate(ForwardIt model, ForwardIt first, ForwardIt last)

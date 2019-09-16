@@ -14,10 +14,11 @@
 #include "VertexPainterConstant.h"
 
 using namespace math;
+using std::clamp;
 
 namespace
 {
-    // At value 0, 'set_up()' will open a new window. Otherwise, it creates a
+     // At value 0, 'set_up()' will open a new window. Otherwise, it creates a
     // CollapsingHeader. 'push/pop_embedded()' is called before and after
     // calling 'interact_with()' to create a tree of embedded content.
     int embedded_level = 0;
@@ -125,13 +126,13 @@ namespace ext::ImGui
     auto PushStylePurpleButton = PushStyleColoredButton<5>;
     auto PushStylePinkButton = PushStyleColoredButton<6>;
 
-    bool DragDouble(const char* label, double* v, double v_speed = 1.0f, double v_min = 0.0f, double v_max = 0.0f, const char* format = "%.3f", double power = 1.0f)
+    bool DragDouble(const char* label, double* v, double v_speed = 1.0, double v_min = 0.0, double v_max = double_max_limit, const char* format = "%.3f", double power = 1.0)
     {
         double* min = &v_min;
         double* max = &v_max;
         return ::ImGui::DragScalarN(label, ::ImGuiDataType_Double, v, 1, v_speed, min, max, format, power);
     }
-    bool DragDouble2(const char* label, double v[2], double v_speed = 1.0f, double v_min = 0.0f, double v_max = 0.0f, const char* format = "%.3f", double power = 1.0f)
+    bool DragDouble2(const char* label, double v[2], double v_speed = 1.0, double v_min = 0.0, double v_max = double_max_limit, const char* format = "%.3f", double power = 1.0)
     {
         double* min = &v_min;
         double* max = &v_max;
@@ -245,7 +246,7 @@ namespace procgui
         {
             return;
         }
-    
+
         // --- Starting position ---
         double pos[2] = { parameters.get_starting_position().x,
                          parameters.get_starting_position().y };
@@ -262,6 +263,7 @@ namespace procgui
         if (ext::ImGui::DragDouble("Starting Angle", &starting_angle_deg,
                               1.f, 0.f, 360.f, "%.lf") )
         {
+            starting_angle_deg = clamp_angle(starting_angle_deg);
             parameters.set_starting_angle(math::degree_to_rad(starting_angle_deg));
         }
 
@@ -270,13 +272,15 @@ namespace procgui
         if (ext::ImGui::DragDouble("Angle Delta", &delta_angle_deg,
                               1.f, 0.f, 360.f, "%.lf") )
         {
+            delta_angle_deg = clamp_angle(delta_angle_deg);
             parameters.set_delta_angle(math::degree_to_rad(delta_angle_deg));
         }
 
         // --- Step ---
         double step = parameters.get_step();
-        if(ext::ImGui::DragDouble("Step", &step, 0.2f, 0.f, 0.f, "%#.1lf"))
+        if(ext::ImGui::DragDouble("Step", &step, 0.2f, 0, double_max_limit, "%#.1lf"))
         {
+            step = clamp(step, 0., double_max_limit);
             parameters.set_step(step);
         }
 
@@ -393,22 +397,12 @@ namespace
     void interact_with(colors::VertexPainterLinear& painter, bool from_composite=false)
     {
         // --- Gradient angle ---
-        double angle = painter.get_angle();
-        if (ext::ImGui::DragDouble("Gradient Angle", &angle,
+        float angle = painter.get_angle();
+        if (ImGui::DragFloat("Gradient Angle", &angle,
                               1.f, 0.f, 360.f, "%.lf") )
         {
+            angle = clamp_angle(angle);
             painter.set_angle(angle);
-        }
-        // --- Center ---
-        float center[2] = {painter.get_center().x, painter.get_center().y};
-        if (ImGui::DragFloat2("Gradient Circle Center", center,
-                              0.001f, 0.f, 1.f, "%.2f") )
-        {
-            if (center[0] >= 0 && center[0] <=1 &&
-                center[1] >= 0 && center[1] <=1)
-            {                
-                painter.set_center(sf::Vector2f(center[0], center[1]));
-            }
         }
 
         if (!from_composite)
@@ -425,11 +419,9 @@ namespace
         if (ImGui::DragFloat2("Circle Center", center,
                               0.001f, 0.f, 1.f, "%.2f") )
         {
-            if (center[0] >= 0 && center[0] <=1 &&
-                center[1] >= 0 && center[1] <=1)
-            {                
-                painter.set_center(sf::Vector2f(center[0], center[1]));
-            }
+            center[0] = clamp(center[0], 0.f, 1.f);
+            center[1] = clamp(center[1], 0.f, 1.f);
+            painter.set_center(sf::Vector2f(center[0], center[1]));
         }
         
         if (!from_composite)
@@ -469,12 +461,10 @@ namespace
         float factor = painter.get_factor();
         
         if (ImGui::DragFloat("Repetition factor", &factor,
-                             0.01f, 0.f, std::numeric_limits<float>::max(), "%.2f") )
+                             0.01f, 0.f, double_max_limit, "%.2f") )
         {
-            if (factor >= 0)
-            {
-                painter.set_factor(factor);
-            }
+            factor = clamp(factor, 0.f, float(double_max_limit));
+            painter.set_factor(factor);
         }
             
         if (!from_composite)
@@ -705,7 +695,7 @@ namespace
         int old_index = index;
         const char* generators[6] = {"Constant", "Linear", "Radial",
                                      "Random", "Sequential", "Iterative"};
-        bool new_generator = ImGui::ListBox("Vertex Painter", &index, generators, 6);
+        bool new_generator = ImGui::ListBox("Vertex Painter", &index, generators, 6) && index != old_index;
         
         // Create a new VertexPainter
         if (new_generator)
@@ -854,13 +844,12 @@ namespace
     void interact_with(colors::ConstantColor& constant)
     {
         // Color selection widget.
-        ImVec4 imcolor = constant.get_color();
-        if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+        ImVec4 imcolor = constant.get_imcolor();
+        if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar))
         {
-            sf::Color color = imcolor;
-            if (color != sf::Color::Transparent)
+            if (!colors::is_transparent(imcolor))
             {
-                constant.set_color(imcolor);
+                constant.set_imcolor(imcolor);
             }
         }
 
@@ -868,7 +857,7 @@ namespace
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 screen_pos = ImGui::GetCursorScreenPos();
         ImVec2 window_pos = ImGui::GetCursorPos();
-        float space_until_border = ImGui::GetWindowWidth() - window_pos.x  - 10.f;
+        float space_until_border = ImGui::GetWindowWidth() - window_pos.x  - 30.f;
         float xsize = (space_until_border < 400) ? space_until_border : 400;
         ImVec2 size {xsize, 30.};
         float checker_box_size = 10.f;
@@ -920,10 +909,15 @@ namespace
         auto to_remove = begin(keys);
         // Used as ID for ImGui
         int index = 0;
-        
+
+        const auto& style = ImGui::GetStyle();
+        float block_pos = 0.f;  // The position in the window
         // Modify 'gen''s keys: colors and position
         for (auto it = begin(keys); it != end(keys); ++it)
         {
+            float block_size = 0.f; // The size of the current color block
+                                    // [+][-] [COL] [+]
+                                    //        [0.5]
             ImGui::PushID(index);
 
             // Button '+' to add a key.
@@ -932,6 +926,8 @@ namespace
             {
                 will_insert = true;
                 to_insert = it;
+
+                block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
             }
             ImGui::PopStyleColor(3);
             ImGui::SameLine();
@@ -942,6 +938,8 @@ namespace
             {
                 will_remove = true;
                 to_remove = it;
+
+                block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
             }
             ImGui::PopStyleColor(3);
             ImGui::SameLine();
@@ -950,15 +948,12 @@ namespace
             ImGui::BeginGroup();
 
             // Color
-            auto& sfcolor = it->color;
-            ImVec4 imcolor = sfcolor;
-            if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+            ImVec4 imcolor = it->imcolor;
+            if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar) &&
+               !colors::is_transparent(imcolor))
             {
                 is_modified = true;
-            }
-            if (sf::Color(imcolor) != sf::Color::Transparent)
-            {
-                sfcolor = imcolor;
+                it->imcolor = imcolor;
             }
 
             // Key's Position
@@ -974,9 +969,23 @@ namespace
             ImGui::PopItemWidth();
 
             ImGui::EndGroup();
+            block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
             
             ImGui::PopID();
-            ImGui::SameLine();
+
+            block_size *= 2; // I'm bad with the imgui layout system, so here's
+                             // an arbitrary constant to have the desired effect.
+            block_pos += block_size;
+            if (block_pos + block_size < ImGui::GetWindowContentRegionMax().x)
+            {
+                // There is enough space, continue on this line.
+                ImGui::SameLine();
+            }
+            else
+            {
+                // Not enough space, go to the next line and reset the position.
+                block_pos = 0.f;
+            }
 
             ++index;
         }
@@ -1054,7 +1063,7 @@ namespace
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 screen_pos = ImGui::GetCursorScreenPos();
         ImVec2 window_pos = ImGui::GetCursorPos();
-        float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 10.f;
+        float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 30.f;
         float xsize = (space_until_border < 400) ? space_until_border : 400;
         ImVec2 size {xsize, 30.};
         float checker_box_size = 10.f;
@@ -1067,14 +1076,15 @@ namespace
         double ratio = 0.f;
         for (unsigned i=0; i<k.size()-1; ++i)
         {
-            const auto& col1 = k.at(i).color;
-            const auto& col2 = k.at(i+1).color;
+            const auto& col1 = k.at(i).imcolor;
+            const auto& col2 = k.at(i+1).imcolor;
             const auto& f = k.at(i+1).position;
             draw_list->AddRectFilledMultiColor({x, screen_pos.y}, ImVec2(x+size.x*(f-ratio), screen_pos.y+size.y),
-                                               IM_COL32(col1.r, col1.g, col1.b, col1.a),
-                                               IM_COL32(col2.r, col2.g, col2.b, col2.a),
-                                               IM_COL32(col2.r, col2.g, col2.b, col2.a),
-                                               IM_COL32(col1.r, col1.g, col1.b, col1.a));
+                                               ImGui::ColorConvertFloat4ToU32(col1),
+                                               ImGui::ColorConvertFloat4ToU32(col2),
+                                               ImGui::ColorConvertFloat4ToU32(col2),
+                                               ImGui::ColorConvertFloat4ToU32(col1));
+
             ratio = f;
             x = screen_pos.x + size.x*f;
         }
@@ -1102,8 +1112,14 @@ namespace
         // colors part.
         int index = 0;
         int modifier = 0;
+
+        const auto& style = ImGui::GetStyle();
+        float block_pos = 0.f; // The position in the window
         for (auto it = begin(keys); it != prev(end(keys)); ++it, ++index)
         {
+            float block_size = 0.f; // The size of the block
+                                    // [+][-][COL][+]
+                                    //               [INT][-][+]
             ImGui::PushID(index);
 
             ImGui::PushID(0);
@@ -1113,30 +1129,35 @@ namespace
                 will_insert = true;
                 insert_before = true;
                 to_insert = it;
+
+                block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
             }
             ImGui::PopStyleColor(3);
-            
+
             ImGui::SameLine();
             ext::ImGui::PushStyleRedButton();
             if (keys.size() > 2 && ImGui::Button("-"))
             {
                 will_remove = true;
                 to_remove = it;
+
+                block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
             }
             ImGui::PopStyleColor(3);
             ImGui::SameLine();
             ImGui::PopID();
             
             // Key Color
-            auto& sfcolor = it->color;
-            ImVec4 imcolor = sfcolor;
-            if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+            ImVec4 imcolor = it->imcolor;
+            if(ImGui::ColorEdit4("Color", (float*)&imcolor,ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar))
             {
-                is_modified = true;
-            }
-            if (sf::Color(imcolor) != sf::Color::Transparent)
-            {
-                sfcolor = imcolor;
+                if (!colors::is_transparent(imcolor))
+                {
+                    is_modified = true;
+                    it->imcolor = imcolor;
+                }
+
+                block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
             }
 
             ImGui::PushID(1);
@@ -1147,13 +1168,15 @@ namespace
                 will_insert = true;
                 insert_before = false;
                 to_insert = it;
+
+                block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
             }
             ImGui::PopStyleColor(3);
             ImGui::PopID();
 
             ImGui::SameLine();
             ImGui::BeginGroup();
-            ImGui::Text("");
+            ImGui::Text(" "); // '\n'
             
             // Number of transitional colors.
             int diff = next(it)->index - it->index - 1;
@@ -1171,11 +1194,25 @@ namespace
             next(it)->index += modifier;
 
             ImGui::EndGroup();
+            block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
+
             ImGui::PopID();
-            ImGui::SameLine();
+
+            block_size *= 2.3;  // I'm bad with the imgui layout system, so here's
+                                // an arbitrary constant to have the desired effect.
+            block_pos += block_size;
+            if (block_pos + block_size < ImGui::GetWindowContentRegionMax().x)
+            {
+                // There is enough space, continue on this line.
+                ImGui::SameLine();
+            }
+            else
+            {
+                // Not enough space, go to the next line and reset the position.
+                block_pos = 0.f;
+            }
         }
 
-        ImGui::SameLine();
         // Button '+' to add a key.
         ext::ImGui::PushStyleGreenButton();
         if (ImGui::Button("+"))
@@ -1183,8 +1220,6 @@ namespace
             will_insert = true;
             insert_before = true;
             to_insert = prev(end(keys));
-            // is_modified = true;
-            // keys.push_back({sf::Color::White, keys.back().second+1});
         }
         ImGui::PopStyleColor(3);
 
@@ -1195,21 +1230,19 @@ namespace
         {
             will_remove = true;
             to_remove = prev(end(keys));
-            // is_modified = true;
-            // keys.pop_back();
         }
         ImGui::PopStyleColor(3);
 
         ImGui::SameLine();
         // Last color widget.
         ImGui::PushID(keys.size());
-        auto& sfcolor = keys.back().color;
-        ImVec4 imcolor = sfcolor;
-        if(ImGui::ColorEdit4("Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+        ImVec4 imcolor = keys.back().imcolor;
+        if(ImGui::ColorEdit4("Color", (float*)&imcolor,ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar) &&
+           !colors::is_transparent(imcolor))
         {
             is_modified = true;
+            keys.back().imcolor = imcolor;
         }
-        sfcolor = imcolor;
         ImGui::PopID();
 
         ImGui::PushID(keys.size());
@@ -1273,25 +1306,33 @@ namespace
         // Preview the color gradient
         std::vector<sf::Color> colors = gen.get_colors();
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        ImVec2 screen_pos = ImGui::GetCursorScreenPos();
-        ImVec2 window_pos = ImGui::GetCursorPos();
-        float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 10.f;
-        float xsize = (space_until_border < 400) ? space_until_border : 400;
-        ImVec2 size {xsize, 30.};
-        float checker_box_size = 10.f;
-        ImGui::RenderColorRectWithAlphaCheckerboard(ImVec2(screen_pos.x, screen_pos.y),
-                                                    ImVec2(screen_pos.x+size.x, screen_pos.y+size.y),
-                                                    IM_COL32(0, 0, 0, 0),
-                                                    checker_box_size,
-                                                    ImVec2(0, 0));
-        float x = screen_pos.x;
-        double width = size.x / colors.size();
-        for (const auto& color : colors)
+        constexpr int max_draw_calls = 10000;
+        if (draw_list->VtxBuffer.Size + colors.size() > max_draw_calls)
         {
-            draw_list->AddRectFilled({x, screen_pos.y}, ImVec2(x+width, screen_pos.y+size.y), IM_COL32(color.r, color.g, color.b, color.a));
-            x += width;
+            ImGui::TextColored(ImVec4(1.f,0.f,0.f,1.f), "Can't display preview: too many colors");
         }
-        ImGui::Dummy(size);
+        else
+        {
+            ImVec2 screen_pos = ImGui::GetCursorScreenPos();
+            ImVec2 window_pos = ImGui::GetCursorPos();
+            float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 30.f;
+            float xsize = (space_until_border < 400) ? space_until_border : 400;
+            ImVec2 size {xsize, 30.};
+            float checker_box_size = 10.f;
+            ImGui::RenderColorRectWithAlphaCheckerboard(ImVec2(screen_pos.x, screen_pos.y),
+                                                        ImVec2(screen_pos.x+size.x, screen_pos.y+size.y),
+                                                        IM_COL32(0, 0, 0, 0),
+                                                        checker_box_size,
+                                                        ImVec2(0, 0));
+            float x = screen_pos.x;
+            double width = size.x / colors.size();
+            for (const auto& color : colors)
+            {
+                draw_list->AddRectFilled({x, screen_pos.y}, ImVec2(x+width, screen_pos.y+size.y), IM_COL32(color.r, color.g, color.b, color.a));
+                x += width;
+            }
+            ImGui::Dummy(size);
+        }
 
         if (is_modified)
         {
@@ -1332,22 +1373,23 @@ namespace procgui
         }
 
         bool new_generator = false;
+        int old_index = index;
         if (mode == color_wrapper_mode::CONSTANT)
         {
             const char* generators[1] = {"Constant"};
-            new_generator = ImGui::ListBox("Color Generator", &index, generators, 1);
+            new_generator = ImGui::ListBox("Color Generator", &index, generators, 1) && index != old_index;;
         }
         else if (mode == color_wrapper_mode::GRADIENTS)
         {
-            --index;
+            --index; --old_index; // Change index to match the ListBox.
             const char* generators[2] = {"Linear Gradient", "Discrete Gradient"};
-            new_generator = ImGui::ListBox("Color Generator", &index, generators, 2);
-            ++index;
+            new_generator = ImGui::ListBox("Color Generator", &index, generators, 2)  && index != old_index;;
+            ++index; // Change index to match the typeid indices.
         }
         else if (mode == color_wrapper_mode::ALL)
         {
             const char* generators[3] = {"Constant", "Linear Gradient", "Discrete Gradient"};
-            new_generator = ImGui::ListBox("Color Generator", &index, generators, 3);
+            new_generator = ImGui::ListBox("Color Generator", &index, generators, 3)  && index != old_index;;
         }
         else
         {
@@ -1411,10 +1453,10 @@ namespace procgui
         }
 
         // Select background color.
-        ImVec4 imcolor = window::background_color;
-        if(ImGui::ColorEdit4("Background Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf))
+        ImVec4 imcolor = sfml_window::background_color;
+        if(ImGui::ColorEdit4("Background Color", (float*)&imcolor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoAlpha))
         {
-            window::background_color = imcolor;
+            sfml_window::background_color = imcolor;
         }
         ImGui::SameLine();
         ImGui::Text("Background Color");
@@ -1445,21 +1487,28 @@ namespace procgui
             // correct size.
             // Warning: lots of arbitrary values.
             // Shift the window next to the LSystemView and shift it again for
-            // the window position always appearing on-screen in its entirety. 
-            int windowX = window::window_size.x;
-            int windowY = window::window_size.y;
+            // the window position always appearing on-screen in its entirety.
+            auto sfml_window_size = sfml_window::window.getSize();
+            int sfml_windowX = sfml_window_size.x;
+            int sfml_windowY = sfml_window_size.y;
+            sf::Vector2f next_window_size {500, 600};
+            next_window_size.x = next_window_size.x > sfml_window_size.x ? sfml_window_size.x : next_window_size.x;
+            next_window_size.y = next_window_size.y > sfml_window_size.y ? sfml_window_size.y : next_window_size.y;
+            ImGui::SetNextWindowSize(next_window_size, ImGuiSetCond_Appearing);
+
+
             sf::Vector2i pos = controller::WindowController::get_mouse_position();
             auto bounding_box = lsys_view.get_bounding_box();
-
+            
             // Shift the window to the right.
             auto absolute_right_side = controller::WindowController::absolute_mouse_position({bounding_box.left + bounding_box.width,0});
             pos.x = absolute_right_side.x + 50;
 
             // If the window would be out of the current screen, shift it to the left.
-            if (pos.x + 500 > windowX)
+            if (pos.x + next_window_size.x > sfml_windowX)
             {
                 auto absolute_left_side = controller::WindowController::absolute_mouse_position({bounding_box.left,0});
-                pos.x = absolute_left_side.x - 550;
+                pos.x = absolute_left_side.x - next_window_size.x - 50;
 
                 // If the window is still out of screen, shift it to the border.
                 if (pos.x < 0)
@@ -1471,10 +1520,9 @@ namespace procgui
 
             // If the window is too far up or down, shift it down or up.
             pos.y = pos.y < 0 ? 0 : pos.y;
-            pos.y = pos.y + 450 > windowY ? windowY-450 : pos.y;
+            pos.y = pos.y + next_window_size.y > sfml_windowY ? sfml_windowY-next_window_size.y : pos.y;
             
             ImGui::SetNextWindowPos(sf::Vector2i{pos.x,pos.y}, ImGuiSetCond_Appearing);
-            ImGui::SetNextWindowSize({500,450}, ImGuiSetCond_Appearing);
 
             // The window's title background is set to the unique color
             // associated with the 'lsys_view_'.

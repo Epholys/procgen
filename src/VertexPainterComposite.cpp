@@ -1,6 +1,7 @@
 #include <cmath>
 #include "VertexPainterComposite.h"
 #include "VertexPainterLinear.h"
+#include "VertexPainterSerializer.h"
 
 namespace colors
 {
@@ -58,6 +59,12 @@ namespace colors
         {
             return std::make_shared<ColorGeneratorComposite>();
         }
+
+        std::string ColorGeneratorComposite::type_name() const
+        {
+            return "ColorGeneratorComposite";
+        }
+        
 
         //------------------------------------------------------------
 
@@ -262,6 +269,15 @@ namespace colors
         vertices = vertices_copy;
     }
 
+    void VertexPainterComposite::supplementary_drawing(sf::FloatRect bounding_box) const
+    {
+        main_painter_observer_.get_target()->unwrap()->supplementary_drawing(bounding_box);
+        for (const auto& painter : child_painters_observers_)
+        {
+            painter.get_target()->unwrap()->supplementary_drawing(bounding_box);
+        }
+    }
+    
 
     bool VertexPainterComposite::has_copied_painter()
     {
@@ -276,9 +292,9 @@ namespace colors
     {
         copied_painter_ = painter->clone();
     }
-}
 
-CEREAL_REGISTER_TYPE_WITH_NAME(colors::impl::ColorGeneratorComposite, "ColorGeneratorComposite");
-CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::ColorGenerator, colors::impl::ColorGeneratorComposite)
-CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterComposite, "VertexPainterComposite");
-CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterComposite)
+    std::string VertexPainterComposite::type_name() const
+    {
+        return "VertexPainterComposite";
+    }
+}

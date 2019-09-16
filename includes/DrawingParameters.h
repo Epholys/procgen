@@ -9,6 +9,7 @@
 
 #include "helper_math.h"
 #include "Observable.h"
+#include "WindowController.h"
 
 // Main explanation of drawing in Turtle.h
 namespace drawing
@@ -76,23 +77,34 @@ namespace drawing
         template <class Archive>
         void save (Archive& ar, const std::uint32_t) const
             {
-                ar(cereal::make_nvp("starting_angle", std::round(math::rad_to_degree(starting_angle_)*1000)/1000),
-                   cereal::make_nvp("delta_angle", std::round(math::rad_to_degree(delta_angle_)*1000)/1000),
-                   CEREAL_NVP(step_),
-                   CEREAL_NVP(n_iter_));
+                ar(cereal::make_nvp("starting_angle", math::rad_to_degree(starting_angle_)),
+                   cereal::make_nvp("delta_angle", math::rad_to_degree(delta_angle_)),
+                   cereal::make_nvp("n_iter", n_iter_));
             }
         
         template <class Archive>
         void load (Archive& ar, const std::uint32_t)
             {
-                ar(starting_angle_, delta_angle_, step_, n_iter_);
+                ar(starting_angle_, delta_angle_, n_iter_);
+                if (starting_angle_ < 0 || starting_angle_ > 360)
+                {
+                    starting_angle_ = math::clamp_angle(starting_angle_);
+                    controller::WindowController::add_loading_error_message("DrawingParameters' starting_angle wasn't in the [0,360] range, so it is clamped.");
+                }
+                if (delta_angle_ < 0 || delta_angle_ > 360)
+                {
+                    delta_angle_ = math::clamp_angle(delta_angle_);
+                    controller::WindowController::add_loading_error_message("DrawingParameters' delta_angle wasn't in the [0,360] range, so it is clamped.");
+                }
+                if (n_iter_ < 0)
+                {
+                    n_iter_ = 0;
+                    controller::WindowController::add_loading_error_message("DrawingParameters' n_iter was negative, so it is now set to 0.");
+                }
                 starting_angle_ = math::degree_to_rad(starting_angle_);
                 delta_angle_ = math::degree_to_rad(delta_angle_);
-                
             }
-
     };
-    
 }
 
 #endif

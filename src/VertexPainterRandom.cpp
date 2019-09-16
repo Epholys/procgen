@@ -81,7 +81,10 @@ namespace colors
             ++block_index;
         }
     }
+
+    std::string VertexPainterRandom::type_name() const
+    {
+        return "VertexPainterRandom";
+    }
 }
 
-CEREAL_REGISTER_TYPE_WITH_NAME(colors::VertexPainterRandom, "VertexPainterRandom");
-CEREAL_REGISTER_POLYMORPHIC_RELATION(colors::VertexPainter, colors::VertexPainterRandom)

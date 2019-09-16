@@ -1,5 +1,5 @@
 {
-    "LSystemView": {
+    "value0": {
         "cereal_class_version": 0,
         "name": "Plant",
         "LSystem": {
@@ -7,44 +7,31 @@
             "axiom": "X",
             "production_rules": {
                 "F": "FF",
-                "X": "F[-X][+X]"
+                "X": "F[+X][-X]"
             },
-            "iteration_predecessor": "X"
+            "iteration_predecessors": "X"
         },
         "DrawingParameters": {
             "cereal_class_version": 0,
             "starting_angle": 90.0,
-            "delta_angle": 30.0,
-            "step_": 20.0,
-            "n_iter_": 5
+            "delta_angle": 29.999899999999998,
+            "n_iter": 5
         },
         "Interpretation Map": {
             "cereal_class_version": 0,
-            "]": "Load position",
-            "+": "Turn right",
-            "-": "Turn left",
-            "[": "Save Position",
-            "F": "Go forward"
+            "-": "turn_left",
+            "]": "load_position",
+            "+": "turn_right",
+            "F": "go_forward",
+            "[": "save_position"
         },
         "VertexPainter": {
-            "polymorphic_id": 2147483649,
-            "polymorphic_name": "VertexPainterConstant",
-            "ptr_wrapper": {
-                "id": 2147483649,
-                "data": {
-                        "cereal_class_version": 0,
-                        "ColorGenerator": {
-                        "polymorphic_id": 2147483650,
-                        "polymorphic_name": "ConstantColor",
-                        "ptr_wrapper": {
-                            "id": 2147483650,
-                            "data": {
-                                "cereal_class_version": 0,
-                                "Color": "#FFFFFFFF"
-                            }
-                        }
-                    }
-                }
+            "cereal_class_version": 0,
+            "type": "VertexPainterConstant",
+            "ColorGenerator": {
+                "cereal_class_version": 0,
+                "type": "ConstantColor",
+                "color": "#FFFFFFFF"
             }
         }
     }

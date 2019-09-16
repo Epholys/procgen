@@ -2,25 +2,25 @@
 
 #include "imgui/imgui-SFML.h"
 
-#include "LSystem.h"
-#include "WindowController.h"
+#include "LSystemView.h"
 #include "RenderWindow.h"
+#include "SupplementaryRendering.h"
 
 using namespace drawing;
 using namespace math;
 using namespace procgui;
 using namespace controller;
 using namespace colors;
+using sfml_window::window;
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(window::window_size.x, window::window_size.y), "Procgen");
-    window.setVerticalSyncEnabled(true);
+    sfml_window::init_window();
     ImGui::SFML::Init(window);
 
     // auto serpinski = std::make_shared<LSystem>(LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
-    auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[-X][X]F[-X]+FX" }, { 'F', "FF" } }, "X" });
-    // auto fract = std::make_shared<LSystem>(LSystem { "F", { { 'F', "FF+F" } } });
+    auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[+X][X]F[+X]-FX" }, { 'F', "FF" } }, "X" });
+    // auto fract = std::make_shared<LSystem>(LSystem { "F", { { 'F', "FF-F" } } });
     auto map = std::make_shared<InterpretationMap>(default_interpretation_map);
 
     // auto serpinski_param = std::make_shared<DrawingParameters>();
@@ -57,7 +57,8 @@ int main()
     sf::Clock delta_clock;
     while (window.isOpen())
     {
-        window.clear(window::background_color);
+        window.clear(sfml_window::background_color);
+        SupplementaryRendering::clear_draw_calls();
 
         std::vector<sf::Event> events;
         sf::Event event;
@@ -68,17 +69,17 @@ int main()
             events.push_back(event); 
             ImGui::SFML::ProcessEvent(event);
         }
-        
-        // procgui::new_frame();
+
+        // TODO remove 'window'
         ImGui::SFML::Update(window, delta_clock.restart());
         
-        WindowController::handle_input(events, window, views);
+        WindowController::handle_input(events, views);
  
         for (auto& v : views)
         {
             v.draw(window);
         }
-        
+        SupplementaryRendering::draw(window);
 
         ImGui::SFML::Render(window);
         window.display();
