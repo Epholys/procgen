@@ -26,11 +26,9 @@ namespace colors
         
         // Getters
         float get_angle() const;
-        sf::Vector2f get_center() const;
         
         // Setter
         void set_angle(float angle);
-        void set_center(sf::Vector2f center);
         
         // Paint 'vertices' following a line passing through the center at a
         // certain 'angle_' according to the informations of 'bounding_box'
@@ -56,8 +54,7 @@ namespace colors
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const
             {
-                ar(cereal::make_nvp("angle", angle_),
-                   cereal::make_nvp("center", center_));
+                ar(cereal::make_nvp("angle", angle_));
                 
                 auto color_generator = get_generator_wrapper()->unwrap();
                 auto serializer = ColorGeneratorSerializer(color_generator);
@@ -67,19 +64,11 @@ namespace colors
         void load(Archive& ar, const std::uint32_t)
             {
                 ar(cereal::make_nvp("angle", angle_));
-                ar(cereal::make_nvp("center", center_));
 
                 if (angle_ < 0. || angle_ > 360)
                 {
                     angle_ = math::clamp_angle(angle_);
                     controller::WindowController::add_loading_error_message("VertexPainterLinear's angle wasn't in the [0,360] range, so it is clamped.");
-                }
-                if (center_.x < 0. || center_.x > 1. ||
-                    center_.y < 0. || center_.y > 1.)
-                {
-                    center_.x = std::clamp(center_.x, 0.f, 1.f);
-                    center_.y = std::clamp(center_.y, 0.f, 1.f);
-                    controller::WindowController::add_loading_error_message("VertexPainterLinear's center's coordinates weren't in the [0,1] range, so they are clamped.");
                 }
                 
                 ColorGeneratorSerializer serializer;

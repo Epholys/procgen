@@ -188,39 +188,37 @@ TEST(VertexPainter, IterationSerialization)
 
 TEST(VertexPainter, Linear)
 {
-    std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Green};
+    std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Green, sf::Color::Yellow};
     auto colors_gen =
         std::make_shared<ColorGeneratorWrapper>(
             std::make_shared<DiscreteGradient>(
-                DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2}})));
+                DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2}, {colors[3], 3}})));
     VertexPainterLinear painter (colors_gen);
-    painter.set_center({1/3., 2/3.});
-    painter.set_angle(45);
+    painter.set_angle(90);
     std::vector<sf::Vertex> grid = vertices.grid;
     painter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
  
     std::vector<sf::Color> expected_colors =
-        { sf::Color::Blue, sf::Color::Red , sf::Color::Red  , sf::Color::Red,
-          sf::Color::Red , sf::Color::Red , sf::Color::Red  , sf::Color::Blue,
-          sf::Color::Red , sf::Color::Red , sf::Color::Blue , sf::Color::Green,
-          sf::Color::Red , sf::Color::Blue, sf::Color::Green, sf::Color::Green };
+        { sf::Color::Yellow, sf::Color::Yellow, sf::Color::Yellow, sf::Color::Yellow,
+          sf::Color::Green , sf::Color::Green , sf::Color::Green , sf::Color::Green ,
+          sf::Color::Blue  , sf::Color::Blue  , sf::Color::Blue  , sf::Color::Blue  ,
+          sf::Color::Red   , sf::Color::Red   , sf::Color::Red   , sf::Color::Red   };
     int size = vertices.grid_size;
     int size_2 = size * size;
     for (int i=0; i<size_2; ++i)
-    {        
+    {
         ASSERT_EQ(expected_colors[i], grid[i].color);
     }
 }
 TEST(VertexPainter, LinearSerialization)
 {
-    std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Green};
+    std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Green, sf::Color::Yellow};
     auto colors_gen =
         std::make_shared<ColorGeneratorWrapper>(
             std::make_shared<DiscreteGradient>(
-                DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2}})));
+                DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2}, {colors[3], 3}})));
     VertexPainterLinear opainter (colors_gen);
-    opainter.set_center({1/3., 2/3.});
-    opainter.set_angle(45);
+    opainter.set_angle(90);
     VertexPainterLinear ipainter;
 
     std::stringstream ss;
@@ -234,12 +232,12 @@ TEST(VertexPainter, LinearSerialization)
     }
 
     std::vector<sf::Vertex> grid = vertices.grid;
-    ipainter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    ipainter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box); 
     std::vector<sf::Color> expected_colors =
-        { sf::Color::Blue, sf::Color::Red , sf::Color::Red  , sf::Color::Red,
-          sf::Color::Red , sf::Color::Red , sf::Color::Red  , sf::Color::Blue,
-          sf::Color::Red , sf::Color::Red , sf::Color::Blue , sf::Color::Green,
-          sf::Color::Red , sf::Color::Blue, sf::Color::Green, sf::Color::Green };
+        { sf::Color::Yellow, sf::Color::Yellow, sf::Color::Yellow, sf::Color::Yellow,
+          sf::Color::Green , sf::Color::Green , sf::Color::Green , sf::Color::Green ,
+          sf::Color::Blue  , sf::Color::Blue  , sf::Color::Blue  , sf::Color::Blue  ,
+          sf::Color::Red   , sf::Color::Red   , sf::Color::Red   , sf::Color::Red   };
     int size = vertices.grid_size;
     int size_2 = size * size;
     for (int i=0; i<size_2; ++i)
@@ -403,7 +401,6 @@ TEST(VertexPainter, Composite)
     auto constant_wrapper = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterConstant>(constant_gen));
     auto radial_wrapper = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterRadial>(discrete_gen1));
     auto linear_painter = std::make_shared<VertexPainterLinear>(discrete_gen2);
-    linear_painter->set_angle(90);
     auto linear_wrapper = std::make_shared<VertexPainterWrapper>(linear_painter);
     auto sequential_wrapper = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterSequential>(discrete_gen3));
 
@@ -416,8 +413,8 @@ TEST(VertexPainter, Composite)
     std::vector<sf::Color> expected_colors =
         { sf::Color::Red   , sf::Color::Red    , sf::Color::Red    , sf::Color::Red,
           sf::Color::Blue  , sf::Color::Green  , sf::Color::Green  , sf::Color::Blue,
-          sf::Color::Magenta, sf::Color::Yellow, sf::Color::Yellow, sf::Color::Magenta,
-          sf::Color::Cyan , sf::Color::Cyan  , sf::Color::White  , sf::Color::White };
+          sf::Color::Yellow, sf::Color::Yellow , sf::Color::Magenta, sf::Color::Magenta,
+          sf::Color::Cyan  , sf::Color::Cyan   , sf::Color::White  , sf::Color::White };
 
     int size = vertices.grid_size;
     int size_2 = size * size;
@@ -451,7 +448,6 @@ TEST(VertexPainter, CompositeSerialization)
     auto constant_wrapper = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterConstant>(constant_gen));
     auto radial_wrapper = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterRadial>(discrete_gen1));
     auto linear_painter = std::make_shared<VertexPainterLinear>(discrete_gen2);
-    linear_painter->set_angle(90);
     auto linear_wrapper = std::make_shared<VertexPainterWrapper>(linear_painter);
     auto sequential_wrapper = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterSequential>(discrete_gen3));
 
@@ -477,7 +473,7 @@ TEST(VertexPainter, CompositeSerialization)
     std::vector<sf::Color> expected_colors =
         { sf::Color::Red   , sf::Color::Red    , sf::Color::Red    , sf::Color::Red,
           sf::Color::Blue  , sf::Color::Green  , sf::Color::Green  , sf::Color::Blue,
-          sf::Color::Magenta, sf::Color::Yellow, sf::Color::Yellow, sf::Color::Magenta,
+          sf::Color::Yellow, sf::Color::Yellow , sf::Color::Magenta, sf::Color::Magenta,
           sf::Color::Cyan , sf::Color::Cyan  , sf::Color::White  , sf::Color::White };
 
     int size = vertices.grid_size;
@@ -509,7 +505,6 @@ TEST(VertexPainter, PolymorphicSerialization)
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors3[0], 0}, {colors3[1], 1}, {colors3[2], 2}})));
     auto olinear = std::make_shared<VertexPainterLinear> (colors_gen3);
-    olinear->set_center({1/3., 2/3.});
     olinear->set_angle(45);
 
     std::shared_ptr<VertexPainter> irandom;
