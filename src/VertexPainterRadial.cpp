@@ -10,12 +10,14 @@ namespace colors
     VertexPainterRadial::VertexPainterRadial()
         : VertexPainter{}
         , center_{.5,.5}
+        , display_helper_{true}
     {
     }
 
     VertexPainterRadial::VertexPainterRadial(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
         : VertexPainter{wrapper}
         , center_{.5,.5}
+        , display_helper_{true}
     {
     }
     
@@ -31,12 +33,21 @@ namespace colors
     {
         return center_;
     }
+    bool VertexPainterRadial::get_display_flag() const
+    {
+        return display_helper_;
+    }
 
     void VertexPainterRadial::set_center(sf::Vector2f center)
     {
         center_ = center;
         notify();
     }
+    void VertexPainterRadial::set_display_flag(bool flag)
+    {
+        display_helper_ = flag;
+    }
+    
 
     void VertexPainterRadial::paint_vertices(std::vector<sf::Vertex>& vertices,
                                              const std::vector<int>&, 
@@ -97,6 +108,11 @@ namespace colors
 
     void VertexPainterRadial::supplementary_drawing(sf::FloatRect bounding_box) const
     {
+        if (!display_helper_)
+        {
+            return;
+        }
+        
         constexpr float ratio = 1/16.f;
         float half_indicator_size = bounding_box.width < bounding_box.height ? ratio*bounding_box.width/2. : ratio*bounding_box.height/2.;
         sf::Vector2f center = {bounding_box.left+bounding_box.width*center_.x, bounding_box.top+bounding_box.height*(1-center_.y)};

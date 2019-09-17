@@ -396,6 +396,12 @@ namespace
     }
     void interact_with(colors::VertexPainterLinear& painter, bool from_composite=false)
     {
+        bool display_helper = painter.get_display_flag();
+        if (ImGui::Checkbox("Display angle marker", &display_helper))
+        {
+            painter.set_display_flag(display_helper);
+        }
+        
         // --- Gradient angle ---
         float angle = painter.get_angle();
         if (ImGui::DragFloat("Gradient Angle", &angle,
@@ -414,6 +420,12 @@ namespace
 
     void interact_with(colors::VertexPainterRadial& painter, bool from_composite=false)
     {
+        bool display_helper = painter.get_display_flag();
+        if (ImGui::Checkbox("Display center marker", &display_helper))
+        {
+            painter.set_display_flag(display_helper);
+        }
+
         // --- Center ---
         float center[2] = {painter.get_center().x, painter.get_center().y};
         if (ImGui::DragFloat2("Circle Center", center,

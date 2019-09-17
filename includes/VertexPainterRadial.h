@@ -24,10 +24,13 @@ namespace colors
         
         // Getters
         sf::Vector2f get_center() const;
+        bool get_display_flag() const;
 
         // Setter
         void set_center(sf::Vector2f center);
+        void set_display_flag(bool flag);
 
+        // Display a circle representing the position of 'circle_'
         virtual void supplementary_drawing(sf::FloatRect bounding_box) const override;
         
         // Paint 'vertices' in a 'center_' centered distance-bases radial
@@ -48,6 +51,7 @@ namespace colors
     private:
         // [0, 1] center: 0 is the left/up of the bounding_box and 1 the right/down.
         sf::Vector2f center_ {0, 0};
+        bool display_helper_ {true};
         
         friend class cereal::access;
         template<class Archive>

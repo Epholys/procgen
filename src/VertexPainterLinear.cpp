@@ -11,12 +11,14 @@ namespace colors
     VertexPainterLinear::VertexPainterLinear()
         : VertexPainter{}
         , angle_{0}
+        , display_helper_{true}
     {
     }
 
     VertexPainterLinear::VertexPainterLinear(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
         : VertexPainter{wrapper}
         , angle_{0}
+        , display_helper_{true}
     {
     }
     std::shared_ptr<VertexPainter> VertexPainterLinear::clone() const
@@ -31,11 +33,19 @@ namespace colors
     {
         return angle_;
     }
+    bool VertexPainterLinear::get_display_flag() const
+    {
+        return display_helper_;
+    }
     
     void VertexPainterLinear::set_angle(float angle)
     {
         angle_ = angle;
         notify();
+    }
+    void VertexPainterLinear::set_display_flag(bool flag)
+    {
+        display_helper_ = flag;
     }
 
     void VertexPainterLinear::paint_vertices(std::vector<sf::Vertex>& vertices,
@@ -87,6 +97,11 @@ namespace colors
 
     void VertexPainterLinear::supplementary_drawing(sf::FloatRect bounding_box) const
     {
+        if (!display_helper_)
+        {
+            return;
+        }
+        
         sf::Vector2f normal_direction = {-std::sin(math::degree_to_rad(angle_)), -std::cos(math::degree_to_rad(angle_))};
         sf::Vector2f center = {bounding_box.left + bounding_box.width/2,
                                bounding_box.top + bounding_box.height/2}; 

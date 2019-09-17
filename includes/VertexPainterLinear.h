@@ -26,9 +26,11 @@ namespace colors
         
         // Getters
         float get_angle() const;
+        bool get_display_flag() const;
         
         // Setter
         void set_angle(float angle);
+        void set_display_flag(bool flag);
         
         // Paint 'vertices' following a line passing through the center at a
         // certain 'angle_' according to the informations of 'bounding_box'
@@ -44,13 +46,15 @@ namespace colors
 
         friend class VertexPainterSerializer;
         virtual std::string type_name() const override;       
- 
+
+        // Display a line representing 'angle_'
         virtual void supplementary_drawing(sf::FloatRect bounding_box) const override;
 
     private:
         
         float angle_ {0};
         sf::Vector2f center_ {0.5,0.5};
+        bool display_helper_ {true};
         
         friend class cereal::access;
         template<class Archive>
