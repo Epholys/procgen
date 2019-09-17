@@ -232,7 +232,7 @@ namespace controller
         error_messages.push_back(message);
     }
 
-    void WindowController::load_menu(std::list<procgui::LSystemView>& lsys_views)
+    void WindowController::load_menu(std::list<procgui::LSystemView>& lsys_views, sf::Keyboard::Key key)
     {
         // The file name in which will be save the LSystem.
         static std::array<char, FILENAME_LENGTH_> filename;
@@ -350,7 +350,9 @@ namespace controller
             ImGui::Text(tmp.c_str());
             ImGui::SameLine();
 
-            if (ImGui::Button("Load"))
+            if (!array_to_string(filename).empty() &&
+                (ImGui::Button("Load") ||
+                 key == sf::Keyboard::Enter))
             {
                 // Open the input file.
                 std::ifstream ifs (save_dir_/array_to_string(filename));
@@ -499,7 +501,8 @@ namespace controller
                                         std::list<procgui::LSystemView>& lsys_views)
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
-
+        
+        sf::Keyboard::Key key_to_load_window = sf::Keyboard::KeyCount;
         for(const auto& event : events)
         {
             // Close the Window if necessary
@@ -530,11 +533,26 @@ namespace controller
                 }
                 else if (event.key.code == sf::Keyboard::O)
                 {
-                    mouse_position_to_load_ = real_mouse_position(sf::Mouse::getPosition(window));
+                    mouse_position_to_load_ = real_mouse_position({int(sfml_window::window.getSize().x/2),
+                                                                   int(sfml_window::window.getSize().y/2)});
                     load_menu_open_ = true;
                 }
             }
 
+            else if (load_menu_open_ &&
+                     event.type == sf::Event::KeyPressed &&
+                     event.key.code == sf::Keyboard::Enter)
+            {
+                key_to_load_window = sf::Keyboard::Enter;
+            }
+
+            else if (load_menu_open_ &&
+                     event.type == sf::Event::KeyPressed &&
+                     event.key.code == sf::Keyboard::Escape)
+            {
+                load_menu_open_ = false;
+            }
+            
             else if (event.type == sf::Event::GainedFocus)
             {
                 has_focus_ = true;
@@ -597,7 +615,7 @@ namespace controller
         }
         if (load_menu_open_)
         {
-            load_menu(lsys_views);
+            load_menu(lsys_views, key_to_load_window);
         }
         
         // The right-click menu depends on the location of the mouse.

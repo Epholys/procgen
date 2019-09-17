@@ -83,7 +83,7 @@ namespace controller
 
         // Display and interact with the load menu window. Load from files the
         // LSystems into 'lsys_views'.
-        static void load_menu(std::list<procgui::LSystemView>& lsys_views);
+        static void load_menu(std::list<procgui::LSystemView>& lsys_views, sf::Keyboard::Key key);
 
         // When ordering the load menu to open, save the current mouse position
         // to load the LSystemView at this position instead of the center.
