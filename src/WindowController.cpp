@@ -9,7 +9,6 @@
 #include "LSystemController.h"
 #include "LSystemView.h"
 
-
 using sfml_window::window;
 namespace fs = std::experimental::filesystem;
 
@@ -247,7 +246,7 @@ namespace controller
         static bool error_message_popup = false;
 
         ImGui::SetNextWindowPosCenter();
-        if (ImGui::Begin("Load LSystem from file", &load_menu_open_, ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
+        if (ImGui::Begin("Load LSystem from file", &load_menu_open_, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
         {
             // Avoid interaction with the background when saving a file.
             ImGui::CaptureKeyboardFromApp();
@@ -275,17 +274,51 @@ namespace controller
                               return left_str < right_str;                          
                           });
 
-                for (const auto& file : files)
+                // ... remove the directory, links, etc ...
+                std::remove_if(begin(files), end(files), [](const auto& f){return !fs::is_regular_file(f.path());});
+
+                // I'm bad at imgui's layout witchcrasft, so there is a lot of
+                // magic numbers here and there.
+                constexpr float font_margin = 10;                                // Little margin to add spacing
+                const float font_size = ImGui::GetFontSize()+font_margin;        // Font and spacing
+                const float max_x_size = sfml_window::window.getSize().x * 2/3;  // Maximum x-size of the load window
+                const float max_y_size = sfml_window::window.getSize().y * 2/3;  // Maximum y-size of the load window
+
+                const float total_vertical_size = font_size * files.size();      // Vertical size of the file list
+                const int n_column = (total_vertical_size / max_y_size)+1;       // Number of column deduced
+                const int file_per_column = files.size() / n_column;             // Explicit
+                const float vertical_size = total_vertical_size / n_column;      // Useful if the list is small
+                    
+                const auto longest_file = std::max_element(begin(files), end(files));  // Iterator to the file with the biggest file name
+                const int longest_file_size = longest_file->path().filename().string().size();
+                const float total_horizontal_size =  longest_file_size * font_size * n_column;
+                const float horizontal_size = total_horizontal_size < max_x_size ? total_horizontal_size : max_x_size;
+
+                const float x_margin = 80, y_margin = 70; // Margins for the text below
+                ImGui::SetWindowSize(ImVec2(horizontal_size + x_margin, vertical_size + y_margin));
+
+                ImGui::SetNextWindowContentSize(ImVec2(total_horizontal_size, 0.0f)); // Total size of the scrolling area
+                //  Max size taken by the file list
+                ImGui::BeginChild("##ScrollingRegion", ImVec2(horizontal_size, vertical_size), false, ImGuiWindowFlags_HorizontalScrollbar);
+                ImGui::Columns(n_column);
+                
+                for (auto i=1u; i<=files.size(); ++i)
                 {
+                    const auto& file = files.at(i-1);
                     // ... displays them in a selectable list ...
-                    if (fs::is_regular_file(file.path()) &&
-                        ImGui::Selectable(file.path().filename().c_str()))
+                    if (ImGui::Selectable(file.path().filename().c_str()))
                     {
                         // ... and set 'filename' to the one clicked (to
                         // load this file).
                         filename = string_to_array<filename.size()>(file.path().filename());
                     }
+                    if (i % file_per_column == 0)
+                    {
+                        ImGui::NextColumn();
+                    }
                 }
+                ImGui::Columns(1);
+                ImGui::EndChild();
             }
             catch (const fs::filesystem_error& e)
             {
