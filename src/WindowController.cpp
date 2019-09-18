@@ -275,36 +275,44 @@ namespace controller
                           });
 
                 // ... remove the directory, links, etc ...
-                std::remove_if(begin(files), end(files), [](const auto& f){return !fs::is_regular_file(f.path());});
-
+                const auto to_remove = std::remove_if(begin(files), end(files), [](const auto& f){return !fs::is_regular_file(f.path());});
+                files.erase(to_remove, end(files));
+                
                 // I'm bad at imgui's layout witchcrasft, so there is a lot of
                 // magic numbers here and there.
-                constexpr float font_margin = 10;                                // Little margin to add spacing
-                const float font_size = ImGui::GetFontSize()+font_margin;        // Font and spacing
+                constexpr float hfont_margin = -5.6;                                // Little margin to adjust spacing
+                constexpr float vfont_margin = 10;     // TODO adjust               // Little margin to adjust spacing
+                const float hfont_size = ImGui::GetFontSize()+hfont_margin;        // Font and spacing
+                const float vfont_size = ImGui::GetFontSize()+vfont_margin;        // Font and spacing
                 const float max_x_size = sfml_window::window.getSize().x * 2/3;  // Maximum x-size of the load window
                 const float max_y_size = sfml_window::window.getSize().y * 2/3;  // Maximum y-size of the load window
 
-                const float total_vertical_size = font_size * files.size();      // Vertical size of the file list
+                const float total_vertical_size = vfont_size * files.size();      // Vertical size of the file list
                 const int n_column = (total_vertical_size / max_y_size)+1;       // Number of column deduced
-                const int file_per_column = files.size() / n_column;             // Explicit
+                const int file_per_column = (files.size() / n_column)+1;             // Explicit
                 const float vertical_size = total_vertical_size / n_column;      // Useful if the list is small
-                    
-                const auto longest_file = std::max_element(begin(files), end(files));  // Iterator to the file with the biggest file name
+
+                // Iterator to the file with the biggest file name
+                const auto longest_file = std::max_element(begin(files), end(files),
+                                                           [](const auto& f1, const auto& f2)
+                                                           {return f1.path().filename().u32string().size() <
+                                                                   f2.path().filename().u32string().size();});
+
                 const int longest_file_size = longest_file->path().filename().string().size();
-                const float total_horizontal_size =  longest_file_size * font_size * n_column;
+                const float total_horizontal_size =  longest_file_size * hfont_size * n_column;
                 const float horizontal_size = total_horizontal_size < max_x_size ? total_horizontal_size : max_x_size;
 
-                const float x_margin = 80, y_margin = 70; // Margins for the text below
-                ImGui::SetWindowSize(ImVec2(horizontal_size + x_margin, vertical_size + y_margin));
+                const float x_margin = 80, y_margin = 70; // Margins for the text below // TODO adjust
+                ImGui::SetWindowSize(ImVec2(horizontal_size + x_margin, vertical_size + y_margin));  // TODO clamp when lots of files
 
                 ImGui::SetNextWindowContentSize(ImVec2(total_horizontal_size, 0.0f)); // Total size of the scrolling area
                 //  Max size taken by the file list
                 ImGui::BeginChild("##ScrollingRegion", ImVec2(horizontal_size, vertical_size), false, ImGuiWindowFlags_HorizontalScrollbar);
                 ImGui::Columns(n_column);
                 
-                for (auto i=1u; i<=files.size(); ++i)
+                for (auto i=0u; i<files.size(); ++i)
                 {
-                    const auto& file = files.at(i-1);
+                    const auto& file = files.at(i);
                     // ... displays them in a selectable list ...
                     if (ImGui::Selectable(file.path().filename().c_str()))
                     {
@@ -312,7 +320,7 @@ namespace controller
                         // load this file).
                         filename = string_to_array<filename.size()>(file.path().filename());
                     }
-                    if (i % file_per_column == 0)
+                    if ((i+1) % file_per_column == 0)
                     {
                         ImGui::NextColumn();
                     }

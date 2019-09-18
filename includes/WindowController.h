@@ -108,7 +108,7 @@ namespace controller
         static bool view_can_move_;
 
         // Arbitrary value for the maximum length of the file name.
-        static constexpr int FILENAME_LENGTH_ = 64;
+        static constexpr int FILENAME_LENGTH_ = 128;
         
         // The fixed save directory of the application
         static std::experimental::filesystem::path save_dir_;
