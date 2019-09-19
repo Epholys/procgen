@@ -261,6 +261,7 @@ namespace controller
                 {
                     files.emplace_back(file);
                 }
+
                 // ... sort them lexicographically, ...
                 std::sort(begin(files), end(files),
                           [](const auto& left, const auto& right)
@@ -278,19 +279,29 @@ namespace controller
                 const auto to_remove = std::remove_if(begin(files), end(files), [](const auto& f){return !fs::is_regular_file(f.path());});
                 files.erase(to_remove, end(files));
                 
-                // I'm bad at imgui's layout witchcrasft, so there is a lot of
+                // I'm bad at imgui's layout witchcraft, so there is a lot of
                 // magic numbers here and there.
-                constexpr float hfont_margin = -5.6;                                // Little margin to adjust spacing
-                constexpr float vfont_margin = 10;     // TODO adjust               // Little margin to adjust spacing
-                const float hfont_size = ImGui::GetFontSize()+hfont_margin;        // Font and spacing
-                const float vfont_size = ImGui::GetFontSize()+vfont_margin;        // Font and spacing
-                const float max_x_size = sfml_window::window.getSize().x * 2/3;  // Maximum x-size of the load window
-                const float max_y_size = sfml_window::window.getSize().y * 2/3;  // Maximum y-size of the load window
+                constexpr float xfont_margin = -5.6;      // Little margin to adjust horizontal spacing of the font size
+                constexpr float yfont_margin = 5;         // Little margin to adjust vertical spacing of the font size
+                constexpr float separation_size = 10;     // Little margin to take care of the case : lots of small files
+                constexpr float min_xsize = 200;         // Minimum horizontal size of the window, for the bottom text
+                constexpr float ymargin = 70;            // Vertical margin for the text below
+                const float hfont_size = ImGui::GetFontSize()+xfont_margin;    // Total horizontal font size
+                const float vfont_size = ImGui::GetFontSize()+yfont_margin;    // Total vertical font size
+                constexpr float xratio = 3/4.;           // Ratio of the horizontal size of the load window
+                                                         //   in regards to the sfml window
+                constexpr float yratio = 3/4.;           // Ratio of the vertical size of the load window
+                                                         //   in regards to the sfml window
+                const float max_xsize = sfml_window::window.getSize().x * xratio;  // Maximum x-size of the load window
+                const float max_ysize = sfml_window::window.getSize().y * yratio;  // Maximum y-size of the load window
 
-                const float total_vertical_size = vfont_size * files.size();      // Vertical size of the file list
-                const int n_column = (total_vertical_size / max_y_size)+1;       // Number of column deduced
-                const int file_per_column = (files.size() / n_column)+1;             // Explicit
-                const float vertical_size = total_vertical_size / n_column;      // Useful if the list is small
+                const float total_vertical_size = vfont_size * files.size();    // Total vertical size of the file list
+                const int n_column = (total_vertical_size / max_ysize)+1;       // Number of column deduced
+                const int file_per_column = (files.size() / n_column)+1;        // Number of files per column, taking
+                                                                                // care that only the last column has
+                                                                                //   less elements
+                float vertical_size = total_vertical_size / n_column;           // On-screen vertical size of the file list
+                vertical_size = vertical_size == 0 ? 1 : vertical_size;         // '0' has a special value for imgui, put '1'
 
                 // Iterator to the file with the biggest file name
                 const auto longest_file = std::max_element(begin(files), end(files),
@@ -298,15 +309,28 @@ namespace controller
                                                            {return f1.path().filename().u32string().size() <
                                                                    f2.path().filename().u32string().size();});
 
-                const int longest_file_size = longest_file->path().filename().string().size();
-                const float total_horizontal_size =  longest_file_size * hfont_size * n_column;
-                const float horizontal_size = total_horizontal_size < max_x_size ? total_horizontal_size : max_x_size;
+                int longest_file_size = 0;
+                if (longest_file != end(files)) // Makes sure there are files.
+                {
+                    longest_file_size = longest_file->path().filename().string().size();                    
+                }
+                float total_horizontal_size =  (longest_file_size * hfont_size + separation_size) * n_column; // Total horizontal size of the file list, column included.
+                total_horizontal_size = total_horizontal_size == 0 ? 1 : total_horizontal_size;               // '0' has a special value for imgui, put '1'
+                const float horizontal_size = std::clamp(total_horizontal_size, min_xsize, max_xsize);        // Clamp to have at least space for the text
+                
+                // The size of the load window.
+                // x is the clamped total horizontal size
+                // y is the vertical size of the list + space for the bottom text
+                ImGui::SetWindowSize(ImVec2(horizontal_size, vertical_size + ymargin)); 
 
-                const float x_margin = 80, y_margin = 70; // Margins for the text below // TODO adjust
-                ImGui::SetWindowSize(ImVec2(horizontal_size + x_margin, vertical_size + y_margin));  // TODO clamp when lots of files
+                // The virtual size of the files list. Virtual because it may not appear completely on screen, with scrollbar
+                // x is the horizontal size of the columned files list
+                // y is the vertical size of the list without the space for the bottom text
+                ImGui::SetNextWindowContentSize(ImVec2(total_horizontal_size, vertical_size));
 
-                ImGui::SetNextWindowContentSize(ImVec2(total_horizontal_size, 0.0f)); // Total size of the scrolling area
-                //  Max size taken by the file list
+                //  Visible size of the files list
+                //  x has the same size of the load window
+                //  y has the same size of the content size
                 ImGui::BeginChild("##ScrollingRegion", ImVec2(horizontal_size, vertical_size), false, ImGuiWindowFlags_HorizontalScrollbar);
                 ImGui::Columns(n_column);
                 
