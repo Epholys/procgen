@@ -232,10 +232,13 @@ namespace controller
         error_messages.push_back(message);
     }
 
-    void WindowController::load_menu(std::list<procgui::LSystemView>& lsys_views, sf::Keyboard::Key key)
+    void WindowController::load_menu(std::list<procgui::LSystemView>& lsys_views,
+                                     sf::Keyboard::Key key,
+                                     sf::Uint32 unicode)
     {
         // The file name in which will be save the LSystem.
-        static std::array<char, FILENAME_LENGTH_> filename;
+        static std::array<char, FILENAME_LENGTH_> file_to_load;
+        static unsigned int selected_file = 0;
         // Flag to let the directory error popup open between frames.
         static bool dir_error_popup = false;
         // Flag to let the file error popup open between frames.
@@ -253,31 +256,59 @@ namespace controller
             ImGui::CaptureMouseFromApp();
 
             ImGui::Separator();
+
+            // %%%%%%%%%%%%%%%% LOAD SCREEN %%%%%%%%%%%%%%%%
             try
             {
-                std::vector<fs::directory_entry> files;
+                struct file_entry
+                {
+                    fs::directory_entry file;
+                    std::string filename;
+                    std::u32string u32filename;
+                };
+                
+                std::vector<file_entry> files;
                 // Get all files in the 'save_dir_' directory, ...
                 for (const auto& file : fs::directory_iterator(save_dir_))
                 {
-                    files.emplace_back(file);
+                    files.push_back({file,
+                                file.path().filename().string(),
+                                file.path().filename().u32string()});
                 }
 
+                // ... remove the directory, links, etc ...
+                const auto to_remove = std::remove_if(begin(files),
+                                                      end(files),
+                                                      [](const auto& f){return !fs::is_regular_file(f.file.path());});
+                files.erase(to_remove, end(files));
+                                
                 // ... sort them lexicographically, ...
                 std::sort(begin(files), end(files),
                           [](const auto& left, const auto& right)
                           {
-                              auto left_str = left.path().string();
-                              std::transform(begin(left_str), end(left_str), begin(left_str),
-                                             [](unsigned char c){return std::tolower(c);});
-                              auto right_str = right.path().string();
-                              std::transform(begin(right_str), end(right_str), begin(right_str),
-                                             [](unsigned char c){return std::tolower(c);});
-                              return left_str < right_str;                          
+                              auto left_u32str = left.u32filename;
+                              std::transform(begin(left_u32str), end(left_u32str), begin(left_u32str),
+                                             [](auto c){return std::tolower(c);});
+                              auto right_u32str = right.u32filename;
+                              std::transform(begin(right_u32str), end(right_u32str), begin(right_u32str),
+                                             [](auto c){return std::tolower(c);});
+                              return left_u32str < right_u32str;                          
                           });
 
-                // ... remove the directory, links, etc ...
-                const auto to_remove = std::remove_if(begin(files), end(files), [](const auto& f){return !fs::is_regular_file(f.path());});
-                files.erase(to_remove, end(files));
+                // Select the appropriate file if the user pressed a key
+                if (unicode != 0)
+                {
+                    for (auto i=0u; i<files.size(); ++i)
+                    {
+                        const auto& f = files.at(i);
+                        if (f.u32filename.size() > 0 &&
+                            std::tolower(f.u32filename.at(0)) == std::tolower(unicode))
+                        {
+                            selected_file = i;
+                            break;
+                        }
+                    }
+                }
                 
                 // I'm bad at imgui's layout witchcraft, so there is a lot of
                 // magic numbers here and there.
@@ -306,13 +337,13 @@ namespace controller
                 // Iterator to the file with the biggest file name
                 const auto longest_file = std::max_element(begin(files), end(files),
                                                            [](const auto& f1, const auto& f2)
-                                                           {return f1.path().filename().u32string().size() <
-                                                                   f2.path().filename().u32string().size();});
+                                                           {return f1.u32filename.size() <
+                                                                   f2.u32filename.size();});
 
                 int longest_file_size = 0;
                 if (longest_file != end(files)) // Makes sure there are files.
                 {
-                    longest_file_size = longest_file->path().filename().string().size();                    
+                    longest_file_size = longest_file->filename.size();                    
                 }
                 float total_horizontal_size =  (longest_file_size * hfont_size + separation_size) * n_column; // Total horizontal size of the file list, column included.
                 total_horizontal_size = total_horizontal_size == 0 ? 1 : total_horizontal_size;               // '0' has a special value for imgui, put '1'
@@ -337,12 +368,14 @@ namespace controller
                 for (auto i=0u; i<files.size(); ++i)
                 {
                     const auto& file = files.at(i);
-                    // ... displays them in a selectable list ...
-                    if (ImGui::Selectable(file.path().filename().c_str()))
+                    // Displays the files in a selectable list
+                    if (ImGui::Selectable(file.filename.c_str(), selected_file == i) ||
+                        selected_file == i)
                     {
-                        // ... and set 'filename' to the one clicked (to
-                        // load this file).
-                        filename = string_to_array<filename.size()>(file.path().filename());
+                        // If the file was selected by clicking on the Selectable, update the selected_file
+                        selected_file = i;
+                        
+                        file_to_load = string_to_array<file_to_load.size()>(file.filename);
                     }
                     if ((i+1) % file_per_column == 0)
                     {
@@ -378,16 +411,18 @@ namespace controller
             ImGui::Separator();
 
             // Simple informative text
-            std::string tmp = "File to load: '"+array_to_string(filename)+"'";
+            std::string tmp = "File to load: '"+array_to_string(file_to_load)+"'";
             ImGui::Text(tmp.c_str());
             ImGui::SameLine();
 
-            if (!array_to_string(filename).empty() &&
+            // %%%%%%%%%%%%%%%% LOAD LSYSTEMVIEW %%%%%%%%%%%%%%%%
+            
+            if (!array_to_string(file_to_load).empty() &&
                 (ImGui::Button("Load") ||
                  key == sf::Keyboard::Enter))
             {
                 // Open the input file.
-                std::ifstream ifs (save_dir_/array_to_string(filename));
+                std::ifstream ifs (save_dir_/array_to_string(file_to_load));
 
                 // Open the error popup if we can not open the file.
                 if(!ifs.is_open())
@@ -459,7 +494,7 @@ namespace controller
                 ImGui::OpenPopup("Error");
                 if (ImGui::BeginPopupModal("Error", &file_error_popup))
                 {
-                    std::string message = "Error: can't open file: '" + array_to_string(filename) + "'";
+                    std::string message = "Error: can't open file: '" + array_to_string(file_to_load) + "'";
                     ImGui::Text(message.c_str());
                     ImGui::EndPopup();
                 }
@@ -470,7 +505,7 @@ namespace controller
                 ImGui::OpenPopup("Error");
                 if (ImGui::BeginPopupModal("Error", &format_error_popup))
                 {
-                    std::string message = "Error: file '" + array_to_string(filename) + "' isn't a valid or complete JSON L-System file.";
+                    std::string message = "Error: file '" + array_to_string(file_to_load) + "' isn't a valid or complete JSON L-System file.";
                     ImGui::Text(message.c_str());
                     ImGui::EndPopup();
                 }
@@ -484,11 +519,11 @@ namespace controller
                     std::string message;
                     if (error_messages.size() > 1)
                     {
-                        message = "Warning: file '" + array_to_string(filename) + "' has some issues:\n";
+                        message = "Warning: file '" + array_to_string(file_to_load) + "' has some issues:\n";
                     }
                     else
                     {
-                        message = "Warning: file '" + array_to_string(filename) + "' has one issue:\n";
+                        message = "Warning: file '" + array_to_string(file_to_load) + "' has one issue:\n";
                     }
                     ImGui::Text(message.c_str());
 
@@ -535,6 +570,7 @@ namespace controller
         ImGuiIO& imgui_io = ImGui::GetIO();
         
         sf::Keyboard::Key key_to_load_window = sf::Keyboard::KeyCount;
+        sf::Uint32 unicode_to_load_window = 0;
         for(const auto& event : events)
         {
             // Close the Window if necessary
@@ -546,7 +582,7 @@ namespace controller
                 window.close();
             }
 
-
+            // Paste, Create, Load LSystemView 
             else if (!imgui_io.WantCaptureKeyboard &&
                      event.type == sf::Event::KeyPressed &&
                      (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
@@ -566,25 +602,32 @@ namespace controller
                 else if (event.key.code == sf::Keyboard::O)
                 {
                     mouse_position_to_load_ = real_mouse_position({int(sfml_window::window.getSize().x/2),
-                                                                   int(sfml_window::window.getSize().y/2)});
+                                int(sfml_window::window.getSize().y/2)});
                     load_menu_open_ = true;
                 }
             }
-
+            
+            // Open File shortcut
             else if (load_menu_open_ &&
                      event.type == sf::Event::KeyPressed &&
                      event.key.code == sf::Keyboard::Enter)
             {
                 key_to_load_window = sf::Keyboard::Enter;
             }
-
+            else if (load_menu_open_ &&
+                     event.type == sf::Event::TextEntered)
+            {
+                unicode_to_load_window = event.text.unicode;
+            }
+            // Close load menu
             else if (load_menu_open_ &&
                      event.type == sf::Event::KeyPressed &&
                      event.key.code == sf::Keyboard::Escape)
             {
                 load_menu_open_ = false;
             }
-            
+
+            // SFML Window management
             else if (event.type == sf::Event::GainedFocus)
             {
                 has_focus_ = true;
@@ -647,7 +690,7 @@ namespace controller
         }
         if (load_menu_open_)
         {
-            load_menu(lsys_views, key_to_load_window);
+            load_menu(lsys_views, key_to_load_window, unicode_to_load_window);
         }
         
         // The right-click menu depends on the location of the mouse.

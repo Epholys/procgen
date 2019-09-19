@@ -72,7 +72,8 @@ namespace controller
 
         // The right-click menu managing everything between
         // creation/copy-pasting of LSystemViews, saving and loading.
-        static void right_click_menu(sf::RenderWindow& window, std::list<procgui::LSystemView>& lsys_view);
+        static void right_click_menu(sf::RenderWindow& window,
+                                     std::list<procgui::LSystemView>& lsys_view);
 
         // Display and interact with the save menu window.
         // Managed the window, opening and saving into a file.
@@ -83,7 +84,9 @@ namespace controller
 
         // Display and interact with the load menu window. Load from files the
         // LSystems into 'lsys_views'.
-        static void load_menu(std::list<procgui::LSystemView>& lsys_views, sf::Keyboard::Key key);
+        static void load_menu(std::list<procgui::LSystemView>& lsys_views,
+                              sf::Keyboard::Key key,
+                              sf::Uint32 unicode);
 
         // When ordering the load menu to open, save the current mouse position
         // to load the LSystemView at this position instead of the center.
