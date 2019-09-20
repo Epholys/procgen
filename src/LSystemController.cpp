@@ -33,6 +33,8 @@ namespace controller
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
 
+//        if (under_mouse
+        
         if (!imgui_io.WantCaptureMouse &&
             event.type == sf::Event::MouseButtonPressed)
         {
@@ -132,6 +134,7 @@ namespace controller
                                       [id](const auto& v){return v.get_id() == id;});
         Expects(to_delete != end(views));
         views.erase(to_delete);
+        under_mouse_ = nullptr;
     }
 
 
