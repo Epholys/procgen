@@ -98,55 +98,216 @@ namespace controller
         }
     }
 
-    void WindowController::save_menu()
+    void WindowController::save_menu(sf::Keyboard::Key key)
     {
         // The file name in which will be save the LSystem.
-        static std::array<char, FILENAME_LENGTH_> filename;
+        static std::array<char, FILENAME_LENGTH_> save_file;
+        static int selected_file = -1;
         // Flag to let the directory error popup open between frames.
         static bool dir_error_popup = false;
         // Flag to let the file error popup open between frames.
         static bool file_error_popup = false;
 
         ImGui::SetNextWindowPosCenter();
-        if (ImGui::Begin("Save LSystem to file", &save_menu_open_, ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
+        if (ImGui::Begin("Save LSystem to file", &save_menu_open_, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
         {
             // Avoid interaction with the background when saving a file.
             ImGui::CaptureKeyboardFromApp();
             ImGui::CaptureMouseFromApp();
 
             ImGui::Separator();
+
+            // %%%%%%%%%%%%%%%% SAVE SCREEN %%%%%%%%%%%%%%%%
             try
             {
-                std::vector<fs::directory_entry> files;
-                // Get all files in the 'save_dir_', ...
+                struct file_entry
+                {
+                    fs::directory_entry file;
+                    std::string filename;
+                    std::u32string u32filename;
+                };
+                
+                std::vector<file_entry> files;
+                // Get all files in the 'save_dir_' directory, ...
                 for (const auto& file : fs::directory_iterator(save_dir_))
                 {
-                    files.emplace_back(file);
+                    files.push_back({file,
+                                file.path().filename().string(),
+                                file.path().filename().u32string()});
                 }
 
+                // ... remove the directory, links, etc ...
+                const auto to_remove = std::remove_if(begin(files),
+                                                      end(files),
+                                                      [](const auto& f){return !fs::is_regular_file(f.file.path());});
+                files.erase(to_remove, end(files));
+                                
                 // ... sort them lexicographically, ...
                 std::sort(begin(files), end(files),
                           [](const auto& left, const auto& right)
                           {
-                              auto left_str = left.path().string();
-                              std::transform(begin(left_str), end(left_str), begin(left_str),
-                                             [](unsigned char c){return std::tolower(c);});
-                              auto right_str = right.path().string();
-                              std::transform(begin(right_str), end(right_str), begin(right_str),
-                                             [](unsigned char c){return std::tolower(c);});
-                              return left_str < right_str;                          
+                              auto left_u32str = left.u32filename;
+                              std::transform(begin(left_u32str), end(left_u32str), begin(left_u32str),
+                                             [](auto c){return std::tolower(c);});
+                              auto right_u32str = right.u32filename;
+                              std::transform(begin(right_u32str), end(right_u32str), begin(right_u32str),
+                                             [](auto c){return std::tolower(c);});
+                              return left_u32str < right_u32str;                          
                           });
+                
+                // I'm bad at imgui's layout witchcraft, so there is a lot of
+                // magic numbers here and there.
+                constexpr float xfont_margin = -5.6;      // Little margin to adjust horizontal spacing of the font size
+                constexpr float yfont_margin = 5;         // Little margin to adjust vertical spacing of the font size
+                constexpr float separation_size = 10;     // Little margin to take care of the case : lots of small files
+                constexpr float min_xsize = 300;         // Minimum horizontal size of the window, for the bottom text
+                constexpr float ymargin = 100;            // Vertical margin for the text below
+                const float hfont_size = ImGui::GetFontSize()+xfont_margin;    // Total horizontal font size
+                const float vfont_size = ImGui::GetFontSize()+yfont_margin;    // Total vertical font size
+                constexpr float xratio = 3/4.;           // Ratio of the horizontal size of the load window
+                                                         //   in regards to the sfml window
+                constexpr float yratio = 3/4.;           // Ratio of the vertical size of the load window
+                                                         //   in regards to the sfml window
+                const float max_xsize = sfml_window::window.getSize().x * xratio;  // Maximum x-size of the load window
+                const float max_ysize = sfml_window::window.getSize().y * yratio;  // Maximum y-size of the load window
 
-                for (const auto& file : files)
+                const float total_vertical_size = vfont_size * files.size();    // Total vertical size of the file list
+                const int n_column = (total_vertical_size / max_ysize)+1;       // Number of column deduced
+                // Number of files per column, taking care that only the last column has less element
+                int file_per_column = files.size() / n_column;
+                file_per_column = file_per_column % n_column != 0 ? file_per_column + 1 : file_per_column;
+                    
+                float vertical_size = total_vertical_size / n_column;           // On-screen vertical size of the file list
+                vertical_size = vertical_size == 0 ? 1 : vertical_size;         // '0' has a special value for imgui, put '1'
+
+                // Iterator to the file with the biggest file name
+                const auto longest_file = std::max_element(begin(files), end(files),
+                                                           [](const auto& f1, const auto& f2)
+                                                           {return f1.u32filename.size() <
+                                                                   f2.u32filename.size();});
+
+                int longest_file_size = 0;
+                if (longest_file != end(files)) // Makes sure there are files.
                 {
-                   // ... display them in a selectable list ...
-                   if (fs::is_regular_file(file.path()) &&
-                        ImGui::Selectable(file.path().filename().c_str()))
+                    longest_file_size = longest_file->filename.size();                    
+                }
+                float total_horizontal_size =  (longest_file_size * hfont_size + separation_size) * n_column; // Total horizontal size of the file list, column included.
+                total_horizontal_size = total_horizontal_size == 0 ? 1 : total_horizontal_size;               // '0' has a special value for imgui, put '1'
+                float horizontal_size = total_horizontal_size < min_xsize ? min_xsize : total_horizontal_size;
+                horizontal_size = horizontal_size < max_xsize ? horizontal_size : max_xsize;
+                
+                // The size of the load window.
+                // x is the clamped total horizontal size
+                // y is the vertical size of the list + space for the bottom text
+                ImGui::SetWindowSize(ImVec2(horizontal_size, vertical_size + ymargin)); 
+
+                // The virtual size of the files list. Virtual because it may not appear completely on screen, with scrollbar
+                // x is the horizontal size of the columned files list
+                // y is the vertical size of the list without the space for the bottom text
+                ImGui::SetNextWindowContentSize(ImVec2(total_horizontal_size, vertical_size));
+
+                //  Visible size of the files list
+                //  x has the same size of the load window
+                //  y has the same size of the content size
+                ImGui::BeginChild("##ScrollingRegion", ImVec2(horizontal_size, vertical_size), false, ImGuiWindowFlags_HorizontalScrollbar);
+                ImGui::Columns(n_column);
+                
+
+                if (!files.empty())
+                {
+                    if (key != sf::Keyboard::Key::Unknown &&
+                        selected_file < 0)
                     {
-                        // ... and set 'filename' to if one is clicked (to overwrite this file).
-                        filename = string_to_array<filename.size()>(file.path().filename());
+                        selected_file = 0;
+                    }
+                    else if (key == sf::Keyboard::Key::Right)
+                    {
+                        selected_file += file_per_column; // Jump right a column
+                        if (selected_file / file_per_column >= n_column) // If we are at the right edge
+                        {
+                            selected_file = selected_file % file_per_column; // Go to the beginning at the same height
+                        }
+                        else if (selected_file >= (int)files.size()) // We are below the last element in the last column
+                        {
+                            selected_file = files.size() - 1;
+                        }
+                    }
+                    else if (key == sf::Keyboard::Key::Left)
+                    {
+                        const int jump_back = selected_file - file_per_column;
+                        if (jump_back >= 0)
+                        {
+                            selected_file = jump_back;
+                        }
+                        else // We are at the left edge
+                        {
+                            // Go to the end at the same height
+                            selected_file = ((n_column-1) * file_per_column) + selected_file;
+                            if (selected_file >= (int)files.size()) // past the end
+                            {
+                                selected_file = files.size() - 1 ;
+                            }
+                        }
+                    }
+                    else if (key == sf::Keyboard::Key::Down)
+                    {
+                        ++selected_file;
+                        if (selected_file > file_per_column * (n_column-1)) // File is in last column
+                        {
+                            if (selected_file == (int)files.size()) // If past last element
+                            {
+                                selected_file = file_per_column * (n_column - 1); // Go to the top of the last column
+                            }
+                        }
+                        else // File not in last column
+                        {
+                            const int pos_in_column = selected_file % file_per_column;
+                            if (pos_in_column % file_per_column == 0)
+                            {
+                                selected_file -= file_per_column;
+                            }
+                        }
+                    }
+                    else if (key == sf::Keyboard::Key::Up)
+                    {
+                        if (selected_file % file_per_column == 0) // Top of a column
+                        {
+                            if (selected_file >= file_per_column * (n_column-1)) // Last column
+                            {
+                                selected_file = files.size()-1;                  // Last element
+                            }
+                            else
+                            {
+                                selected_file += file_per_column-1;
+                            }
+                        }
+                        else
+                        {
+                            --selected_file;
+                        }
                     }
                 }
+                
+
+                for (auto i=0; i<(int)files.size(); ++i)
+                {
+                    const auto& file = files.at(i);
+                    // Displays the files in a selectable list
+                    if (ImGui::Selectable(file.filename.c_str(), selected_file == i) ||
+                        selected_file == i)
+                    {
+                        // If the file was selected by clicking on the Selectable, update the selected_file
+                        selected_file = i;
+                        
+                        save_file = string_to_array<save_file.size()>(file.filename);
+                    }
+                    if ((i+1) % file_per_column == 0)
+                    {
+                        ImGui::NextColumn();
+                    }
+                }
+                ImGui::Columns(1);
+                ImGui::EndChild();
             }
             catch (const fs::filesystem_error& e)
             {
@@ -175,14 +336,15 @@ namespace controller
             ImGui::Separator();
 
             // InputText for the file's name.
-            ImGui::InputText("Filename", filename.data(), filename.size());
-            std::string trimmed_filename = array_to_string(filename);
+            ImGui::InputText("Filename", save_file.data(), save_file.size());
+            std::string trimmed_filename = array_to_string(save_file);
             trim(trimmed_filename);
             
             ImGui::Separator();
 
             // Save button (with a simple check for a empty filename)
-            if (ImGui::Button("Save") && !trimmed_filename.empty())
+            if (!trimmed_filename.empty() &&
+                (ImGui::Button("Save") || key == sf::Keyboard::Enter))
             {
                 // Open the output file.
                 std::ofstream ofs (save_dir_/trimmed_filename);
@@ -210,7 +372,7 @@ namespace controller
                 ImGui::OpenPopup("Error");
                 if (ImGui::BeginPopupModal("Error", &file_error_popup))
                 {
-                    std::string message = "Error: can't open file: '" + array_to_string(filename) + "'";
+                    std::string message = "Error: can't open file: '" + array_to_string(save_file) + "'";
                     ImGui::Text(message.c_str());
                     ImGui::EndPopup();
                 }
@@ -642,7 +804,7 @@ namespace controller
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
         
-        sf::Keyboard::Key key_to_load_window = sf::Keyboard::Unknown;
+        sf::Keyboard::Key key_to_menus = sf::Keyboard::Unknown;
         sf::Uint32 unicode_to_load_window = 0;
         for(const auto& event : events)
         {
@@ -680,7 +842,7 @@ namespace controller
                 }
             }
             
-            // Close load menu
+            // Load menu forwarding
             else if (load_menu_open_ &&
                      event.type == sf::Event::KeyPressed &&
                      event.key.code == sf::Keyboard::Escape)
@@ -690,12 +852,25 @@ namespace controller
             else if (load_menu_open_ &&
                      event.type == sf::Event::KeyPressed)
             {
-                key_to_load_window = event.key.code;
+                key_to_menus = event.key.code;
             }
             else if (load_menu_open_ &&
                      event.type == sf::Event::TextEntered)
             {
                 unicode_to_load_window = event.text.unicode;
+            }
+
+            // Save mnu forwarding
+            else if (save_menu_open_ &&
+                     event.type == sf::Event::KeyPressed &&
+                     event.key.code == sf::Keyboard::Escape)
+            {
+                save_menu_open_ = false;
+            }
+            else if (save_menu_open_ &&
+                     event.type == sf::Event::KeyPressed)
+            {
+                key_to_menus = event.key.code;
             }
 
             // SFML Window management
@@ -757,11 +932,11 @@ namespace controller
 
         if (save_menu_open_)
         {
-            save_menu();
+            save_menu(key_to_menus);
         }
         if (load_menu_open_)
         {
-            load_menu(lsys_views, key_to_load_window, unicode_to_load_window);
+            load_menu(lsys_views, key_to_menus, unicode_to_load_window);
         }
         
         // The right-click menu depends on the location of the mouse.
