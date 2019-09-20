@@ -33,7 +33,19 @@ namespace controller
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
 
-//        if (under_mouse
+        // If a LSystemView is selected and there is no under_mouse_,
+        // automatically set it to this view. Useful at the startup
+        // or loading.
+        if (under_mouse_ == nullptr &&
+            !views.empty())
+        {
+            auto selected = std::find_if(begin(views), end(views),
+                                         [](const auto& view){return view.is_selected(); });
+            if (selected != end(views))
+            {
+                under_mouse_ = &(*selected);
+            }
+        }
         
         if (!imgui_io.WantCaptureMouse &&
             event.type == sf::Event::MouseButtonPressed)
