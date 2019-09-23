@@ -77,7 +77,7 @@ namespace controller
 
         // Display and interact with the save menu window.
         // Managed the window, opening and saving into a file.
-        static void save_menu(sf::Keyboard::Key key);
+        static void save_menu(sf::Keyboard::Key key  = sf::Keyboard::Unknown);
 
         // Private flag to let the load menu open between frames.
         static bool load_menu_open_;
@@ -85,8 +85,8 @@ namespace controller
         // Display and interact with the load menu window. Load from files the
         // LSystems into 'lsys_views'.
         static void load_menu(std::list<procgui::LSystemView>& lsys_views,
-                              sf::Keyboard::Key key,
-                              sf::Uint32 unicode);
+                              sf::Keyboard::Key key = sf::Keyboard::Unknown,
+                              sf::Uint32 unicode = 0);
 
         // When ordering the load menu to open, save the current mouse position
         // to load the LSystemView at this position instead of the center.

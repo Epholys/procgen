@@ -30,3 +30,5 @@ GTAGS
 # valgrind
 *.suppression
 
+# clang
+compile_commands.json

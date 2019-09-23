@@ -102,12 +102,16 @@ namespace controller
     {
         // The file name in which will be save the LSystem.
         static std::array<char, FILENAME_LENGTH_> save_file;
+        // Index of the file in the save menu
         static int selected_file = -1;
+        // True if an existing save file is selected with the mouse.
+        static bool click_selected = false;
         // Flag to let the directory error popup open between frames.
         static bool dir_error_popup = false;
         // Flag to let the file error popup open between frames.
         static bool file_error_popup = false;
 
+        
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Save LSystem to file", &save_menu_open_, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
         {
@@ -212,93 +216,19 @@ namespace controller
                 ImGui::BeginChild("##ScrollingRegion", ImVec2(horizontal_size, vertical_size), false, ImGuiWindowFlags_HorizontalScrollbar);
                 ImGui::Columns(n_column);
                 
-
-                if (!files.empty())
-                {
-                    if (key != sf::Keyboard::Key::Unknown &&
-                        selected_file < 0)
-                    {
-                        selected_file = 0;
-                    }
-                    else if (key == sf::Keyboard::Key::Right)
-                    {
-                        selected_file += file_per_column; // Jump right a column
-                        if (selected_file / file_per_column >= n_column) // If we are at the right edge
-                        {
-                            selected_file = selected_file % file_per_column; // Go to the beginning at the same height
-                        }
-                        else if (selected_file >= (int)files.size()) // We are below the last element in the last column
-                        {
-                            selected_file = files.size() - 1;
-                        }
-                    }
-                    else if (key == sf::Keyboard::Key::Left)
-                    {
-                        const int jump_back = selected_file - file_per_column;
-                        if (jump_back >= 0)
-                        {
-                            selected_file = jump_back;
-                        }
-                        else // We are at the left edge
-                        {
-                            // Go to the end at the same height
-                            selected_file = ((n_column-1) * file_per_column) + selected_file;
-                            if (selected_file >= (int)files.size()) // past the end
-                            {
-                                selected_file = files.size() - 1 ;
-                            }
-                        }
-                    }
-                    else if (key == sf::Keyboard::Key::Down)
-                    {
-                        ++selected_file;
-                        if (selected_file > file_per_column * (n_column-1)) // File is in last column
-                        {
-                            if (selected_file == (int)files.size()) // If past last element
-                            {
-                                selected_file = file_per_column * (n_column - 1); // Go to the top of the last column
-                            }
-                        }
-                        else // File not in last column
-                        {
-                            const int pos_in_column = selected_file % file_per_column;
-                            if (pos_in_column % file_per_column == 0)
-                            {
-                                selected_file -= file_per_column;
-                            }
-                        }
-                    }
-                    else if (key == sf::Keyboard::Key::Up)
-                    {
-                        if (selected_file % file_per_column == 0) // Top of a column
-                        {
-                            if (selected_file >= file_per_column * (n_column-1)) // Last column
-                            {
-                                selected_file = files.size()-1;                  // Last element
-                            }
-                            else
-                            {
-                                selected_file += file_per_column-1;
-                            }
-                        }
-                        else
-                        {
-                            --selected_file;
-                        }
-                    }
-                }
-                
-
                 for (auto i=0; i<(int)files.size(); ++i)
                 {
                     const auto& file = files.at(i);
+
                     // Displays the files in a selectable list
-                    if (ImGui::Selectable(file.filename.c_str(), selected_file == i) ||
-                        selected_file == i)
+                    if (ImGui::Selectable(file.filename.c_str(), selected_file == i))
                     {
-                        // If the file was selected by clicking on the Selectable, update the selected_file
+                        // Update selected file to highlight the Selectable
                         selected_file = i;
-                        
+                        // The user have selected with the mouse
+                        click_selected = true;
+
+                        // Updates the save file selection
                         save_file = string_to_array<save_file.size()>(file.filename);
                     }
                     if ((i+1) % file_per_column == 0)
@@ -335,17 +265,63 @@ namespace controller
 
             ImGui::Separator();
 
-            // InputText for the file's name.
-            ImGui::InputText("Filename", save_file.data(), save_file.size());
+            // Allows directly typing a filename after opening the save menu
+            if (!ImGui::IsAnyItemActive())
+                ImGui::SetKeyboardFocusHere();
+
+            // If the user selected a save file:
+            if (click_selected)
+            {
+                // InputText does not put automatically the cursor to the end
+                // when selecting a file. As such, we use a InputText callback
+                // to put the cursor to the end. The problem is, this callback
+                // is executed each frame, but the first one does not count. So
+                // we must execute this part for two frames, which is the role
+                // of 'first_frame'.
+
+                
+                static bool first_frame = true;
+
+                struct PutCursorEndCallback
+                {
+                    static int put_cursor_at_end(ImGuiInputTextCallbackData *data)
+                        {
+                            data->CursorPos = data->BufTextLen * sizeof(int);
+                            return 0;
+                        }
+                };
+                ImGui::InputText("Filename###SAME", save_file.data(), save_file.size(),
+                                 ImGuiInputTextFlags_CallbackAlways,
+                                 PutCursorEndCallback::put_cursor_at_end);
+
+                if(!first_frame)
+                {
+                    click_selected = false;
+                }
+
+                first_frame = false;
+            }
+            else
+            {
+                if(ImGui::InputText("Filename###SAME", save_file.data(), save_file.size()))
+                {
+                    // The file now does not correspond to any existing save file
+                    selected_file = -1;
+                }
+            }
+
             std::string trimmed_filename = array_to_string(save_file);
             trim(trimmed_filename);
             
             ImGui::Separator();
 
             // Save button (with a simple check for a empty filename)
-            if (!trimmed_filename.empty() &&
-                (ImGui::Button("Save") || key == sf::Keyboard::Enter))
+            if ((ImGui::Button("Save") || key == sf::Keyboard::Enter) &&
+                !trimmed_filename.empty())
             {
+                // Remove manual selection to focus on the Input text the next time.
+                selected_file = -1;
+                
                 // Open the output file.
                 std::ofstream ofs (save_dir_/trimmed_filename);
 
