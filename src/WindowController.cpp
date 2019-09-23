@@ -116,23 +116,24 @@ namespace controller
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Save LSystem to file", &save_menu_open_, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
         {
+            std::string trimmed_filename = "";
+            
             // Avoid interaction with the background when saving a file.
             ImGui::CaptureKeyboardFromApp();
             ImGui::CaptureMouseFromApp();
 
             ImGui::Separator();
 
-            // %%%%%%%%%%%%%%%% SAVE SCREEN %%%%%%%%%%%%%%%%
+            struct file_entry
+            {
+                fs::directory_entry file;
+                std::string filename;
+                std::u32string u32filename;
+            };
+                
+            std::vector<file_entry> files;
             try
             {
-                struct file_entry
-                {
-                    fs::directory_entry file;
-                    std::string filename;
-                    std::u32string u32filename;
-                };
-                
-                std::vector<file_entry> files;
                 // Get all files in the 'save_dir_' directory, ...
                 for (const auto& file : fs::directory_iterator(save_dir_))
                 {
@@ -231,6 +232,8 @@ namespace controller
 
                         // Updates the save file selection
                         save_file = string_to_array<save_file.size()>(file.filename);
+                        trimmed_filename = trim(file.filename);
+                        
                     }
                     if ((i+1) % file_per_column == 0)
                     {
@@ -270,6 +273,7 @@ namespace controller
             if (!ImGui::IsAnyItemActive())
                 ImGui::SetKeyboardFocusHere();
 
+
             // If the user selected a save file:
             if (click_selected)
             {
@@ -306,13 +310,23 @@ namespace controller
             {
                 if(ImGui::InputText("Filename###SAME", save_file.data(), save_file.size()))
                 {
-                    // The file now does not correspond to any existing save file
-                    selected_file = -1;
+                    trimmed_filename = trim(array_to_string(save_file));
+
+                    int i = -1;
+                    auto same_name = std::find_if(begin(files), end(files),
+                                                  [trimmed_filename, &i](const auto& f)
+                                                  {++i; return trimmed_filename == f.filename;});
+                    if (same_name != end(files))
+                    {
+                        selected_file = i;
+                    }
+                    else
+                    {
+                        selected_file = -1;
+                    }
                 }
             }
 
-            std::string trimmed_filename = array_to_string(save_file);
-            trim(trimmed_filename);
             
             ImGui::Separator();
 
