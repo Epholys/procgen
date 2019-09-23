@@ -439,7 +439,7 @@ namespace controller
                 constexpr float xfont_margin = -5.6;      // Little margin to adjust horizontal spacing of the font size
                 constexpr float yfont_margin = 5;         // Little margin to adjust vertical spacing of the font size
                 constexpr float separation_size = 10;     // Little margin to take care of the case : lots of small files
-                constexpr float min_xsize = 300;         // Minimum horizontal size of the window, for the bottom text
+                float min_xsize = 250;         // Minimum horizontal size of the window, for the bottom text
                 constexpr float ymargin = 70;            // Vertical margin for the text below
                 const float hfont_size = ImGui::GetFontSize()+xfont_margin;    // Total horizontal font size
                 const float vfont_size = ImGui::GetFontSize()+yfont_margin;    // Total vertical font size
@@ -468,8 +468,9 @@ namespace controller
                 int longest_file_size = 0;
                 if (longest_file != end(files)) // Makes sure there are files.
                 {
-                    longest_file_size = longest_file->filename.size();                    
+                    longest_file_size = longest_file->filename.size();
                 }
+                min_xsize += longest_file_size * hfont_size;
                 float total_horizontal_size =  (longest_file_size * hfont_size + separation_size) * n_column; // Total horizontal size of the file list, column included.
                 total_horizontal_size = total_horizontal_size == 0 ? 1 : total_horizontal_size;               // '0' has a special value for imgui, put '1'
                 float horizontal_size = total_horizontal_size < min_xsize ? min_xsize : total_horizontal_size;
