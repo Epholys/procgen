@@ -73,6 +73,7 @@ namespace controller
         middle = pasted_view.get_parameters().get_starting_position() - middle;
         pasted_view.ref_parameters().set_starting_position(pos + middle);
         lsys_views.emplace_front(pasted_view);
+        lsys_views.front().select();
     }
     
     void WindowController::right_click_menu(sf::RenderWindow& window, std::list<procgui::LSystemView>& lsys_views)
