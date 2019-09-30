@@ -167,10 +167,15 @@ public:
        
 private:
 
+    // OPT
+    // // The predecessors indicating than, at their next derivation, the iteration
+    // // counter will be incremented by one.
+    // std::string iteration_predecessors_ = {};
     // The predecessors indicating than, at their next derivation, the iteration
     // counter will be incremented by one.
-    std::string iteration_predecessors_ = {};
-
+    std::unordered_map<char, bool> iteration_predecessors_ = {};
+    // STOP OPT
+    
     // The cache of all computed iterations and the axiom.
     // It contains all the iterations up to the highest iteration
     // calculated. It is clearly not optimized for memory

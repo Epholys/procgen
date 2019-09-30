@@ -4,10 +4,14 @@
 
 LSystem::LSystem(const std::string& axiom, const production_rules& prod, const std::string& preds)
     : RuleMap<std::string>(prod)
-    , iteration_predecessors_ {preds}
+    , iteration_predecessors_ {}
     , production_cache_{ {0, axiom} }
     , iteration_count_cache_ { {0, {std::vector<int>(axiom.size(), 0), 0} } }
     {
+        for (const auto& ch : preds)
+        {
+            iteration_predecessors_[ch] = true;
+        }
     }
 
 std::string LSystem::get_axiom() const
@@ -30,7 +34,15 @@ const std::unordered_map<int, std::string>& LSystem::get_production_cache() cons
 
 std::string LSystem::get_iteration_predecessors() const
 {
-    return iteration_predecessors_;
+    std::string preds;
+    for (const auto& pair : iteration_predecessors_)
+    {
+        if (pair.second)
+        {
+            preds += pair.first;
+        }
+    }
+    return preds;
 }
 
 
@@ -70,7 +82,10 @@ void LSystem::clear_rules()
 void LSystem::set_iteration_predecessors(const std::string& predecessors)
 {
     iteration_count_cache_ = { {0, {std::vector<int>(get_axiom().size(), 0), 0} } };
-    iteration_predecessors_ = predecessors;
+    for (const auto& ch : predecessors)
+    {
+        iteration_predecessors_[ch] = true;
+    }
     notify();
 }
 
@@ -120,8 +135,13 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
     
     // We use temporary results: we can't iterate "in place".
     std::string tmp_production;
-    std::vector<int> tmp_iteration;    
-
+    std::vector<int> tmp_iteration;
+    // OPTIMIZATION
+    base_production.reserve(350000000);
+    tmp_production.reserve(350000000);
+    tmp_iteration.reserve(350000000);
+    // END OPTIMIZATION
+    
     int n_iter = n - highest_iteration->first;
     for (int i=0; i<n_iter; ++i) {
         tmp_production.clear();
@@ -170,7 +190,7 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
             // If the current predecessor must be counted, add 1 to each element
             // of the successor.
             char order = base_iteration.at(j);
-            if (iteration_predecessors_.find(c) != std::string::npos)
+            if (iteration_predecessors_[c])
             {
                 order += 1;
                 new_iteration = true;

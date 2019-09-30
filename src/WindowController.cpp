@@ -116,7 +116,6 @@ namespace controller
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Save LSystem to file", &save_menu_open_, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
         {
-            std::string trimmed_filename = "";
             
             // Avoid interaction with the background when saving a file.
             ImGui::CaptureKeyboardFromApp();
@@ -232,7 +231,6 @@ namespace controller
 
                         // Updates the save file selection
                         save_file = string_to_array<save_file.size()>(file.filename);
-                        trimmed_filename = trim(file.filename);
                         
                     }
                     if ((i+1) % file_per_column == 0)
@@ -274,6 +272,7 @@ namespace controller
                 ImGui::SetKeyboardFocusHere();
 
 
+            std::string trimmed_filename = trim(array_to_string(save_file));
             // If the user selected a save file:
             if (click_selected)
             {
@@ -334,8 +333,20 @@ namespace controller
             if ((ImGui::Button("Save") || key == sf::Keyboard::Enter) &&
                 !trimmed_filename.empty())
             {
-                // Remove manual selection to focus on the Input text the next time.
-                selected_file = -1;
+                std::cout << selected_file<<'\n';
+                if (selected_file >= 0)
+                {
+                    std::cout << "hello" << std::endl;
+                    
+                    // If a save file already exists, warn the user
+                    ImGui::OpenPopup("Warning");
+                    if (ImGui::BeginPopupModal("Warning"))
+                    {
+                        std::string message = "File '" + array_to_string(save_file) + "' already exists, do you want to replace it?";
+                        ImGui::Text(message.c_str());
+                        ImGui::EndPopup();
+                    }
+                }
                 
                 // Open the output file.
                 std::ofstream ofs (save_dir_/trimmed_filename);
