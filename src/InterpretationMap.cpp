@@ -7,6 +7,10 @@ namespace drawing
     
     void go_forward_fn(Turtle& turtle)
     {
+        // OPT IDEAS :
+        // - fill vec with vertices and only access x and y
+        // - create intermediaire vertices with only x, y, bool (transparent)
+        
         // Go forward following the direction vector.
         double dx = turtle.parameters.get_step() * turtle.state.direction.x;
         double dy = turtle.parameters.get_step() * -turtle.state.direction.y;

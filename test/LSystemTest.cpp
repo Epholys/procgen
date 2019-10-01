@@ -13,7 +13,7 @@ TEST(LSystemTest, default_ctor)
     LSystem::production_rules empty_rules;
     std::string empty_str;
     std::unordered_map<int, std::string> empty_prod_cache;
-    std::unordered_map<int, std::pair<std::vector<int>, int>> empty_rec_cache;
+    std::unordered_map<int, std::tuple<std::vector<int>, int>> empty_rec_cache;
     
     ASSERT_EQ(lsys.get_axiom(), empty_str);
     ASSERT_EQ(lsys.get_rules(), empty_rules);
@@ -26,7 +26,7 @@ TEST(LSystemTest, complete_ctor)
 {
     LSystem lsys { "F", { { 'F', "F+F" } }, "F" };
     LSystem::production_rules expected_rules = { { 'F', "F+F" } };
-    std::unordered_map<int, std::pair<std::vector<int>, int>> expected_recursion_cache =
+    std::unordered_map<int, std::tuple<std::vector<int>, int>> expected_recursion_cache =
         { {0, {{0}, 0}} };
 
     ASSERT_EQ(lsys.get_axiom(), "F");
@@ -96,7 +96,7 @@ TEST(LSystemTest, set_iteration_predecessors)
 {
     LSystem lsys { "F", { { 'F', "F+F" }, { 'G', "GG" } }, "F" };
     std::string expected_predecessors = "";
-    std::unordered_map<int, std::pair<std::vector<int>, int>> expected_cache = { {0, {{0}, 0}} };
+    std::unordered_map<int, std::tuple<std::vector<int>, int>> expected_cache = { {0, {{0}, 0}} };
 
 
     lsys.set_iteration_predecessors("");
@@ -181,7 +181,7 @@ TEST(LSystemTest, disjoint_derivation)
     lsys.produce(1);
 
     std::unordered_map<int, std::string> production_cache { {0, "F"}, {1, "F+G"}, {2, "F+G+G-F"} };
-    std::unordered_map<int, std::pair<std::vector<int>, int>> recursion_cache
+    std::unordered_map<int, std::tuple<std::vector<int>, int>> recursion_cache
                     { {0, {{0}, 0}}, {1, {{0,0,0}, 0}} };
 
     ASSERT_EQ(lsys.get_production_cache(), production_cache);

@@ -33,6 +33,21 @@ int main(int argc, char* argv[])
             std::cout << serpinski.get_production_cache().at(10).size() << std::endl;
         }
     }
+    else if (arg == 'T')
+    {
+        LSystem serpinski = LSystem({"F", { { 'F', "G[-F-GFFFF" }, { 'G', "F]]+G+F" }}, "G" });
+
+        DrawingParameters params;
+        params.set_n_iter(10);
+
+        auto map = drawing::default_interpretation_map;
+        
+        for (int i=0; i<2; ++i)
+        {
+            compute_vertices(serpinski, map, params);
+            std::cout << i << std::endl;
+        }
+    }
     else
     {
         std::cerr << "Usage:\n\tL->LSys stressing" << std::endl;

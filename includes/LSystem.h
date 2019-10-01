@@ -130,7 +130,7 @@ public:
     std::string get_axiom() const;
     const std::unordered_map<int, std::string>& get_production_cache() const;
     std::string get_iteration_predecessors() const;
-    const std::unordered_map<int, std::pair<std::vector<int>, int>>& get_iteration_cache() const;
+    const std::unordered_map<int, std::tuple<std::vector<int>, int>>& get_iteration_cache() const;
 
     // Set the axiom to 'axiom'
     void set_axiom(const std::string& axiom);
@@ -163,7 +163,7 @@ public:
     //   - Ensures coherence of 'production_rules
     //   - Throw in case of allocation problem.
     //   - Throw at '.at()' if code is badly refactored.
-    std::tuple<std::string, std::vector<int>, int> produce(int n);
+    std::tuple<const std::string&, const std::vector<int>&, int> produce(int n);
        
 private:
 
@@ -185,7 +185,7 @@ private:
     std::unordered_map<int, std::string> production_cache_ = {};
     // The cache of all computed iteration values. The second element in the pair
     // is the maximum number of iteration for this iteration.
-    std::unordered_map<int, std::pair<std::vector<int>, int>> iteration_count_cache_ = {};
+    std::unordered_map<int, std::tuple<std::vector<int>, int>> iteration_count_cache_ = {};
 
     
     friend class cereal::access;

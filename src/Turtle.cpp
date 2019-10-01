@@ -19,14 +19,40 @@ namespace drawing
         }
     }
 
+    void pleasedo (OrderID id, Turtle& t)
+    {
+        switch (id)
+        {
+        case OrderID::GO_FORWARD:
+            go_forward_fn(t);
+            break;
+        case OrderID::TURN_RIGHT :
+            turn_right_fn(t);
+            break;
+        case OrderID::TURN_LEFT:
+            turn_left_fn(t);
+            break;
+        case OrderID::SAVE_POSITION:
+            save_position_fn(t);
+            break;
+        case OrderID::LOAD_POSITION:
+            load_position_fn(t);
+            break;
+        default:
+            break;
+        }
+    }
+    
     std::tuple<std::vector<sf::Vertex>, std::vector<int>, int>
         compute_vertices(LSystem& lsys,
                          InterpretationMap& interpretation,
                          const DrawingParameters& parameters)
 
     {
-        const auto [str, rec, max] = lsys.produce(parameters.get_n_iter());
+        const auto& [str, rec, max] = lsys.produce(parameters.get_n_iter());
         Turtle turtle (parameters, rec);
+        turtle.vertices.reserve(59000000);
+        turtle.iteration_of_vertices.reserve(59000000);
         
         for (auto c : str)
         {
@@ -34,12 +60,10 @@ namespace drawing
             {
                 // If an interpretation of the character 'c' is found,
                 // applies it to the current turtle.
-                interpretation.get_rule(c).second(turtle);
-            }
-            else
-            {
-                // Do nothing: if 'c' does not have an associated
-                // order, it has no effects.
+                pleasedo(interpretation.get_rule(c).second.id, turtle);
+            } else {
+              // Do nothing: if 'c' does not have an associated
+              // order, it has no effects.
             }
             // Increment the iteration index: each character has an iteration
             // count. Can not be in the orders, otherwise characters without
@@ -48,6 +72,8 @@ namespace drawing
         }
 
         Ensures(turtle.vertices.size() == turtle.iteration_of_vertices.size());
-        return {turtle.vertices, turtle.iteration_of_vertices, max};
+        std::cout << turtle.vertices.size() << '\n';
+        return std::make_tuple(turtle.vertices, turtle.iteration_of_vertices,
+                               max);
     }
-}
+} // namespace drawing

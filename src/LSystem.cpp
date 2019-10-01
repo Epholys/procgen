@@ -46,7 +46,7 @@ std::string LSystem::get_iteration_predecessors() const
 }
 
 
-const std::unordered_map<int, std::pair<std::vector<int>, int>>& LSystem::get_iteration_cache() const
+const std::unordered_map<int, std::tuple<std::vector<int>, int>>& LSystem::get_iteration_cache() const
 {
     return iteration_count_cache_;
 }
@@ -82,6 +82,7 @@ void LSystem::clear_rules()
 void LSystem::set_iteration_predecessors(const std::string& predecessors)
 {
     iteration_count_cache_ = { {0, {std::vector<int>(get_axiom().size(), 0), 0} } };
+    iteration_predecessors_.clear();
     for (const auto& ch : predecessors)
     {
         iteration_predecessors_[ch] = true;
@@ -94,7 +95,7 @@ void LSystem::set_iteration_predecessors(const std::string& predecessors)
 //   - If 'production_cache_' is empty so does not contains the axiom, simply
 //   returns an empty string.
 //   - If the axiom is an empty string, early-out.
-std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
+std::tuple<const std::string&, const std::vector<int>&, int> LSystem::produce(int n)
 {
     Expects(n >= 0);
 
@@ -109,8 +110,8 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
     {
         // A solution was already computed.
         return {production_cache_.at(n),
-                iteration_count_cache_.at(n).first,
-                iteration_count_cache_.at(n).second};
+                std::get<0>(iteration_count_cache_.at(n)),
+                std::get<1>(iteration_count_cache_.at(n))};
     }
 
     // The caches saves all the iteration from the start. So we get
@@ -128,24 +129,37 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
     // greater than the iteration one.
     Expects(highest_production->first >= highest_iteration->first);
     
-    // We start iterating from the iteration's highest iteration.
-    std::string base_production = production_cache_.at(highest_iteration->first);
-    auto [base_iteration, max_iteration] = highest_iteration->second;
+    // // We start iterating from the iteration's highest iteration.
+    // const std::string& base_production = production_cache_.at(highest_iteration->first);
+    // auto [base_iteration, max_iteration] = highest_iteration->second;
     
     
-    // We use temporary results: we can't iterate "in place".
-    std::string tmp_production;
-    std::vector<int> tmp_iteration;
-    // OPTIMIZATION
-    base_production.reserve(350000000);
-    tmp_production.reserve(350000000);
-    tmp_iteration.reserve(350000000);
-    // END OPTIMIZATION
-    
+    // // We use temporary results: we can't iterate "in place".
+    // std::string tmp_production;
+    // std::vector<int> tmp_iteration;
+    // // OPTIMIZATION
+    // base_production.reserve(350000000);
+    // tmp_production.reserve(350000000);
+    // tmp_iteration.reserve(350000000);
+    // // END OPTIMIZATION
+
+    int max_iteration = std::get<1>(highest_iteration->second);
     int n_iter = n - highest_iteration->first;
     for (int i=0; i<n_iter; ++i) {
-        tmp_production.clear();
-        tmp_iteration.clear();
+    // We start iterating from the iteration's highest iteration.
+        const std::string& base_production = production_cache_.at(highest_production->first + i);
+        const auto& [base_iteration, _] = iteration_count_cache_.at(highest_iteration->first + i);
+        // We use temporary results: we can't iterate "in place".
+        std::string tmp_production;
+        std::vector<int> tmp_iteration;
+        // OPTIMIZATION
+        tmp_production.reserve(350000000);
+        tmp_iteration.reserve(350000000);
+        // END OPTIMIZATION
+
+
+        // tmp_production.clear();
+        // tmp_iteration.clear();
 
         // If 'true', computes only the iteration vector and not the resulting
         // production string.
@@ -200,18 +214,19 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
 
         if(only_iteration)
         {
-            base_production = production_cache_.at(highest_iteration->first + i + 1);
+            // base_production = production_cache_.at(highest_iteration->first + i + 1);
         }
         else
         {
-            base_production = tmp_production;
-            production_cache_.emplace(highest_iteration->first + i + 1, tmp_production);
+            // base_production = tmp_production;
+            production_cache_.emplace(highest_iteration->first + i + 1, std::move(tmp_production));
         }
 
-        base_iteration = tmp_iteration;
-        iteration_count_cache_[highest_iteration->first + i + 1] =
-                                 {tmp_iteration, new_iteration ? max_iteration+1 : max_iteration};
-        max_iteration = iteration_count_cache_.at(highest_iteration->first + i + 1).second;
+
+        iteration_count_cache_.emplace(highest_iteration->first + i + 1,
+                                       std::forward_as_tuple(std::move(tmp_iteration),
+                                                             new_iteration ? max_iteration+1 : max_iteration));
+        max_iteration = std::get<1>(iteration_count_cache_.at(highest_iteration->first + i + 1));
     }
 
     // No 'notify()' call: this function is generally called each time there is
@@ -221,6 +236,6 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
 
     Ensures(production_cache_.size() >= iteration_count_cache_.size());
     
-    return {production_cache_.at(n), iteration_count_cache_.at(n).first, iteration_count_cache_.at(n).second};
+    return {production_cache_.at(n), std::get<0>(iteration_count_cache_.at(n)), std::get<1>(iteration_count_cache_.at(n))};
 }
 
