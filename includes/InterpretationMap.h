@@ -44,25 +44,31 @@ namespace drawing
     // equality comparison between orders (as 'std::function<>' does not have
     // it) and a name used in the GUI and the serialization.
     struct Order {
-        Order() : Order(OrderID::GO_FORWARD,go_forward_fn, "Go forward") {}
-        Order(OrderID id, const order_fn& fn, const std::string& name)
-            : id{id}, order{fn}, name{name} {}
+        Order() : Order(OrderID::GO_FORWARD,/*go_forward_fn,*/"Go forward") {}
+        Order(OrderID id,/*const order_fn& fn,*/ const std::string& name)
+            : id{id}, /*order{fn},*/ name{name} {}
         
         OrderID id;
-        order_fn order;
+        // order_fn order;
         std::string name;
-        void operator() (impl::Turtle& t) { order(t); }
+        //  void operator() (impl::Turtle& t) { order(t); }
     };
     inline bool operator== (const Order& lhs, const Order& rhs)
     {
         return lhs.id == rhs.id;
     }
     
-    const Order go_forward    { OrderID::GO_FORWARD,    go_forward_fn, "Go forward" };
-    const Order turn_right    { OrderID::TURN_RIGHT,    turn_right_fn, "Turn right" };
-    const Order turn_left     { OrderID::TURN_LEFT,     turn_left_fn, "Turn left"  };
-    const Order save_position { OrderID::SAVE_POSITION, save_position_fn, "Save position" };
-    const Order load_position { OrderID::LOAD_POSITION, load_position_fn, "Load position" };
+    // const Order go_forward    { OrderID::GO_FORWARD,    go_forward_fn, "Go forward" };
+    // const Order turn_right    { OrderID::TURN_RIGHT,    turn_right_fn, "Turn right" };
+    // const Order turn_left     { OrderID::TURN_LEFT,     turn_left_fn, "Turn left"  };
+    // const Order save_position { OrderID::SAVE_POSITION, save_position_fn, "Save position" };
+    // const Order load_position { OrderID::LOAD_POSITION, load_position_fn, "Load position" };
+
+    const Order go_forward    { OrderID::GO_FORWARD,  "Go forward" };
+    const Order turn_right    { OrderID::TURN_RIGHT,  "Turn right" };
+    const Order turn_left     { OrderID::TURN_LEFT,   "Turn left"  };
+    const Order save_position { OrderID::SAVE_POSITION,  "Save position" };
+    const Order load_position { OrderID::LOAD_POSITION,  "Load position" };
         
     // All the orders available.
     const std::vector<Order> all_orders { go_forward, turn_right, turn_left,

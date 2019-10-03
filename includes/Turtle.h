@@ -48,6 +48,7 @@ namespace drawing
             // calculations.
             const double cos = std::cos(parameters.get_delta_angle());
             const double sin = std::sin(parameters.get_delta_angle());
+            const double step = parameters.get_step();
 
 
             // The current position and direction of the Turtle.
@@ -71,7 +72,7 @@ namespace drawing
 
             // All the iteration count produced by the LSystem. For each new
             // vertices, its iteration count will be copied to 'iteration_of_vertices'.
-            const std::vector<int> iteration_vec;
+            const std::vector<int>& iteration_vec;
             
             // Index indicating the position in 'iteration_vec'.
             std::size_t iteration_index {0};
@@ -81,18 +82,18 @@ namespace drawing
             // 'iteration_vec', the operation is simply to copy it in this
             // vector corresponding to the vertices.
             std::vector<int> iteration_of_vertices;
+
+            // Compute all vertices and their iteration count of a turtle interpretation
+            // of a L-system.  First, this function iterates 'parameters.n_iter' times
+            // the LSystem 'lsys', using and modifying its cache. Then, it interprates
+            // the result with 'interpretation' and 'parameters'. The third returned
+            // value is the maximum number of iteration count.
+            std::tuple<const std::vector<sf::Vertex>&, const std::vector<int>&>
+            compute_vertices(const std::string& str,
+                             InterpretationMap& interpretation);
         };
     }
 
-    // Compute all vertices and their iteration count of a turtle interpretation
-    // of a L-system.  First, this function iterates 'parameters.n_iter' times
-    // the LSystem 'lsys', using and modifying its cache. Then, it interprates
-    // the result with 'interpretation' and 'parameters'. The third returned
-    // value is the maximum number of iteration count.
-    std::tuple<std::vector<sf::Vertex>, std::vector<int>, int>
-        compute_vertices(LSystem& lsys,
-                         InterpretationMap& interpretation,
-                         const DrawingParameters& parameters);
 }
 
 

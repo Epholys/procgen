@@ -6,7 +6,7 @@ namespace geometry
 {
     float distance (const sf::Vector2f& a, const sf::Vector2f& b)
     {
-        return std::sqrt(std::pow(b.x-a.x, 2)+std::pow(b.y-a.y, 2));
+        return std::sqrt(std::pow(b.x-a.x, 2)+std::pow(b.y-a.y, 2));  // TODO OPT remove pow!
     }
     
     sf::Vector2f intersection(const Line& l1, const Line& l2)

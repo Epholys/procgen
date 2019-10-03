@@ -36,15 +36,17 @@ int main(int argc, char* argv[])
     else if (arg == 'T')
     {
         LSystem serpinski = LSystem({"F", { { 'F', "G[-F-GFFFF" }, { 'G', "F]]+G+F" }}, "G" });
+        const auto& [str, rec, _] = serpinski.produce(10);
 
         DrawingParameters params;
-        params.set_n_iter(10);
 
         auto map = drawing::default_interpretation_map;
+
+        drawing::impl::Turtle turtle (params, rec);
         
         for (int i=0; i<2; ++i)
         {
-            compute_vertices(serpinski, map, params);
+            turtle.compute_vertices(str, map);
             std::cout << i << std::endl;
         }
     }

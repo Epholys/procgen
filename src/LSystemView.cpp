@@ -256,11 +256,13 @@ namespace procgui
     {
         // Invariant respected: cohesion between the vertices and the bounding
         // boxes. 
+
+        const auto& [str, rec, max_iteration_] = OLSys::get_target()->produce(10);
         
-        std::tie(vertices_, iteration_of_vertices_, max_iteration_) =
-            drawing::compute_vertices(*OLSys::get_target(),
-                                      *OMap::get_target(),
-                                      *OParams::get_target());
+        drawing::impl::Turtle turtle (*OParams::get_target(), rec);
+        
+        std::tie(vertices_, iteration_of_vertices_) =
+            turtle.compute_vertices(str, *OMap::get_target()); 
         bounding_box_ = geometry::bounding_box(vertices_);
         sub_boxes_ = geometry::sub_boxes(vertices_, MAX_SUB_BOXES);
         geometry::expand_boxes(sub_boxes_); // Add some margin

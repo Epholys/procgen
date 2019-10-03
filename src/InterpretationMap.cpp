@@ -12,11 +12,11 @@ namespace drawing
         // - create intermediaire vertices with only x, y, bool (transparent)
         
         // Go forward following the direction vector.
-        double dx = turtle.parameters.get_step() * turtle.state.direction.x;
-        double dy = turtle.parameters.get_step() * -turtle.state.direction.y;
+        double dx = turtle.step * turtle.state.direction.x;
+        double dy = turtle.step * -turtle.state.direction.y;
         turtle.state.position += {dx, dy};
-        turtle.vertices.push_back(sf::Vector2f(turtle.state.position));
-        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
+        turtle.vertices.emplace_back(sf::Vector2f(turtle.state.position));
+        turtle.iteration_of_vertices.emplace_back(turtle.iteration_vec.at(turtle.iteration_index));
     }
 
     void turn_left_fn(Turtle& turtle)
@@ -50,13 +50,13 @@ namespace drawing
         }
         else
         {
-            turtle.vertices.push_back( {turtle.vertices.back().position, sf::Color::Transparent} );
+            turtle.vertices.emplace_back(turtle.vertices.back().position, sf::Color::Transparent);
             turtle.state = turtle.stack.top();
-            turtle.vertices.push_back( {sf::Vector2f(turtle.state.position), sf::Color::Transparent} );
-            turtle.vertices.push_back( {sf::Vector2f(turtle.state.position)} );
-            turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-            turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-            turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
+            turtle.vertices.emplace_back(sf::Vector2f(turtle.state.position), sf::Color::Transparent);
+            turtle.vertices.emplace_back(sf::Vector2f(turtle.state.position));
+            turtle.iteration_of_vertices.emplace_back(turtle.iteration_vec.at(turtle.iteration_index));
+            turtle.iteration_of_vertices.emplace_back(turtle.iteration_vec.at(turtle.iteration_index));
+            turtle.iteration_of_vertices.emplace_back(turtle.iteration_vec.at(turtle.iteration_index));
 
             turtle.stack.pop();
         }
