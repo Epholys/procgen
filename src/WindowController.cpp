@@ -116,8 +116,6 @@ namespace controller
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Save LSystem to file", &save_menu_open_, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
         {
-            std::string trimmed_filename = "";
-            
             // Avoid interaction with the background when saving a file.
             ImGui::CaptureKeyboardFromApp();
             ImGui::CaptureMouseFromApp();
@@ -232,7 +230,6 @@ namespace controller
 
                         // Updates the save file selection
                         save_file = string_to_array<save_file.size()>(file.filename);
-                        trimmed_filename = trim(file.filename);
                         
                     }
                     if ((i+1) % file_per_column == 0)
@@ -273,6 +270,8 @@ namespace controller
             if (!ImGui::IsAnyItemActive())
                 ImGui::SetKeyboardFocusHere();
 
+
+            std::string trimmed_filename = trim(array_to_string(save_file));
 
             // If the user selected a save file:
             if (click_selected)
@@ -327,7 +326,6 @@ namespace controller
                 }
             }
 
-            
             ImGui::Separator();
 
             // Save button (with a simple check for a empty filename)
