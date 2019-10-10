@@ -107,11 +107,14 @@ namespace controller
         static int selected_file = -1;
         // True if an existing save file is selected with the mouse.
         static bool click_selected = false;
-        // Flag to let the directory error popup open between frames.
+        // Flag to open the directory error popup open between frames.
         static bool dir_error_popup = false;
-        // Flag to let the file error popup open between frames.
+        // Flag to open the file error popup open between frames.
         static bool file_error_popup = false;
+        // Flag to open the save confirmation popup.
+        static bool save_validation_popup = false;
 
+        // TODO: manages Escape key in regards to popups
         
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Save LSystem to file", &save_menu_open_, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
@@ -266,10 +269,13 @@ namespace controller
 
             ImGui::Separator();
 
-            // Allows directly typing a filename after opening the save menu
-            if (!ImGui::IsAnyItemActive())
+            // Allows directly typing a filename after opening the save menu.
+            // Only focus if no popup is open
+            if (!save_validation_popup && !dir_error_popup && !file_error_popup
+                 && !ImGui::IsAnyItemActive())
+            {
                 ImGui::SetKeyboardFocusHere();
-
+            }
 
             std::string trimmed_filename = trim(array_to_string(save_file));
 
@@ -328,13 +334,52 @@ namespace controller
 
             ImGui::Separator();
 
+            bool save = false;
             // Save button (with a simple check for a empty filename)
-            if ((ImGui::Button("Save") || key == sf::Keyboard::Enter) &&
+            if (!save_validation_popup &&
+                (ImGui::Button("Save") || key == sf::Keyboard::Enter) &&
                 !trimmed_filename.empty())
             {
-                // Remove manual selection to focus on the Input text the next time.
-                selected_file = -1;
+                // Consume the key to avoid propagating it to the popup.
+                key = sf::Keyboard::Unknown;
                 
+                if (selected_file >= 0)
+                {
+                    save_validation_popup = true;
+                }
+                else
+                {
+                    save = true;
+                }
+            }
+            
+            if (save_validation_popup) // TODO manages escape key
+            {
+                // Popup is now open, imgui takes care of the open/close state.
+                ImGui::OpenPopup("Error");
+                if (ImGui::BeginPopupModal("Error", &save_validation_popup,
+                                           ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+                {
+                    std::string warning_text = trimmed_filename + " already exists.\nDo you want to overwrite it?";
+                    ImGui::Text(warning_text.c_str());
+
+                    if (ImGui::Button("Overwrite") || key == sf::Keyboard::Enter)
+                    {
+                        save = true;
+                        save_validation_popup = false;
+                    }
+
+                    if (ImGui::Button("Cancel"))
+                    {
+                        save_validation_popup = false;
+                    }
+
+                    ImGui::EndPopup();
+                }
+            }
+
+            if (save)
+            {
                 // Open the output file.
                 std::ofstream ofs (save_dir_/trimmed_filename);
 
@@ -354,9 +399,9 @@ namespace controller
                     save_menu_open_ = false;
                 }
             }
-
+            
             // File error popup if we can not open the output file.
-            if (file_error_popup)
+            if (file_error_popup) // TODO: put it before ? Interaction with save confirmation menu
             {
                 ImGui::OpenPopup("Error");
                 if (ImGui::BeginPopupModal("Error", &file_error_popup))
@@ -837,6 +882,7 @@ namespace controller
                      event.type == sf::Event::KeyPressed &&
                      event.key.code == sf::Keyboard::Escape)
             {
+                // TODO: let the load menu manages this
                 load_menu_open_ = false;
             }
             else if (load_menu_open_ &&
@@ -850,13 +896,7 @@ namespace controller
                 unicode_to_load_window = event.text.unicode;
             }
 
-            // Save mnu forwarding
-            else if (save_menu_open_ &&
-                     event.type == sf::Event::KeyPressed &&
-                     event.key.code == sf::Keyboard::Escape)
-            {
-                save_menu_open_ = false;
-            }
+            // Save menu forwarding
             else if (save_menu_open_ &&
                      event.type == sf::Event::KeyPressed)
             {
