@@ -115,6 +115,18 @@ namespace controller
         static bool save_validation_popup = false;
 
         // TODO: manages Escape key in regards to popups
+        auto escape_popup_if_necessary = [](sf::Keyboard::Key& key, bool& popup)
+            {
+                if (key == sf::Keyboard::Escape)
+                {
+                    // Consume the key to avoid propagating it to another element.
+                    key = sf::Keyboard::Unknown;
+                    popup = false;
+                    ImGui::CloseCurrentPopup();
+                }
+            };
+
+
         
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Save LSystem to file", &save_menu_open_, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
@@ -252,9 +264,11 @@ namespace controller
 
             if (dir_error_popup)
             {
-                ImGui::OpenPopup("Error");
-                if (ImGui::BeginPopupModal("Error", &dir_error_popup))
+                ImGui::OpenPopup("Error##DIR");
+                if (ImGui::BeginPopupModal("Error##DIR", &dir_error_popup))
                 {
+                    escape_popup_if_necessary(key, dir_error_popup);
+                    
                     std::string error_message = "Error: can't open directory: "+save_dir_.filename().string();
                     ImGui::Text(error_message.c_str());
                     ImGui::EndPopup();
@@ -288,8 +302,6 @@ namespace controller
                 // is executed each frame, but the first one does not count. So
                 // we must execute this part for two frames, which is the role
                 // of 'first_frame'.
-
-                
                 static bool first_frame = true;
 
                 struct PutCursorEndCallback
@@ -307,9 +319,12 @@ namespace controller
                 if(!first_frame)
                 {
                     click_selected = false;
+                    first_frame = true;
                 }
-
-                first_frame = false;
+                else
+                {
+                    first_frame = false;
+                }
             }
             else
             {
@@ -336,11 +351,11 @@ namespace controller
 
             bool save = false;
             // Save button (with a simple check for a empty filename)
-            if (!save_validation_popup &&
-                (ImGui::Button("Save") || key == sf::Keyboard::Enter) &&
-                !trimmed_filename.empty())
+            if ((!save_validation_popup && !dir_error_popup && !file_error_popup) &&  // If no popup is open &&
+                (ImGui::Button("Save") || key == sf::Keyboard::Enter) &&              // If the user want to save &&
+                !trimmed_filename.empty())                                            // A valid filename
             {
-                // Consume the key to avoid propagating it to the popup.
+                // Consume the key to avoid propagating it to another element.
                 key = sf::Keyboard::Unknown;
                 
                 if (selected_file >= 0)
@@ -356,19 +371,23 @@ namespace controller
             if (save_validation_popup) // TODO manages escape key
             {
                 // Popup is now open, imgui takes care of the open/close state.
-                ImGui::OpenPopup("Error");
-                if (ImGui::BeginPopupModal("Error", &save_validation_popup,
+                ImGui::OpenPopup("Error##EXISTS");
+                if (ImGui::BeginPopupModal("Error##EXISTS", &save_validation_popup,
                                            ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
                 {
+                    escape_popup_if_necessary(key, save_validation_popup);
+                    
                     std::string warning_text = trimmed_filename + " already exists.\nDo you want to overwrite it?";
                     ImGui::Text(warning_text.c_str());
 
                     if (ImGui::Button("Overwrite") || key == sf::Keyboard::Enter)
                     {
+                        key = sf::Keyboard::Unknown;
                         save = true;
                         save_validation_popup = false;
                     }
 
+                    ImGui::SameLine();
                     if (ImGui::Button("Cancel"))
                     {
                         save_validation_popup = false;
@@ -403,9 +422,11 @@ namespace controller
             // File error popup if we can not open the output file.
             if (file_error_popup) // TODO: put it before ? Interaction with save confirmation menu
             {
-                ImGui::OpenPopup("Error");
-                if (ImGui::BeginPopupModal("Error", &file_error_popup))
+                ImGui::OpenPopup("Error##PERM");
+                if (ImGui::BeginPopupModal("Error##PERM", &file_error_popup))
                 {
+                    escape_popup_if_necessary(key, file_error_popup);
+                    
                     std::string message = "Error: can't open file: '" + array_to_string(save_file) + "'";
                     ImGui::Text(message.c_str());
                     ImGui::EndPopup();
@@ -420,6 +441,11 @@ namespace controller
             }
             
             ImGui::End();
+        }
+
+        if (key == sf::Keyboard::Escape)
+        {
+            save_menu_open_ = false;
         }
     }
 
