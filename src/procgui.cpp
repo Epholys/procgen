@@ -12,6 +12,7 @@
 #include "VertexPainterIteration.h"
 #include "VertexPainterComposite.h"
 #include "VertexPainterConstant.h"
+#include "imgui_extension.h"
 
 using namespace math;
 using std::clamp;
@@ -93,52 +94,6 @@ namespace
     }
 }
 
-namespace ext::ImGui
-{
-    // Taken from 'imgui_demo.cpp', helper function to display a help tooltip.
-    void ShowHelpMarker(const char* desc)
-    {
-        ::ImGui::TextDisabled("(?)");
-        if (::ImGui::IsItemHovered())
-        {
-            ::ImGui::BeginTooltip();
-            ::ImGui::PushTextWrapPos(450.0f);
-            ::ImGui::TextUnformatted(desc);
-            ::ImGui::PopTextWrapPos();
-            ::ImGui::EndTooltip();
-        }
-    }
-
-    // Taken from 'imgui_demo.cpp': the styles for colored buttons with a style
-    // close to the default button.
-    // WARNING: Use these with 'ImGui::PopStyleColor(3)'.
-    template<int hue> void PushStyleColoredButton()
-    {
-        ::ImGui::PushStyleColor(::ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(hue/7.0f, 0.6f, 0.6f)));
-        ::ImGui::PushStyleColor(::ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(hue/7.0f, 0.7f, 0.7f)));
-        ::ImGui::PushStyleColor(::ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(hue/7.0f, 0.8f, 0.8f)));
-    }
-    auto PushStyleRedButton = PushStyleColoredButton<0>;
-    auto PushStyleYellowButton = PushStyleColoredButton<1>;
-    auto PushStyleGreenButton = PushStyleColoredButton<2>;
-    auto PushStyleTurquoiseButton = PushStyleColoredButton<3>;
-    auto PushStyleBlueButton = PushStyleColoredButton<4>;
-    auto PushStylePurpleButton = PushStyleColoredButton<5>;
-    auto PushStylePinkButton = PushStyleColoredButton<6>;
-
-    bool DragDouble(const char* label, double* v, double v_speed = 1.0, double v_min = 0.0, double v_max = double_max_limit, const char* format = "%.3f", double power = 1.0)
-    {
-        double* min = &v_min;
-        double* max = &v_max;
-        return ::ImGui::DragScalarN(label, ::ImGuiDataType_Double, v, 1, v_speed, min, max, format, power);
-    }
-    bool DragDouble2(const char* label, double v[2], double v_speed = 1.0, double v_min = 0.0, double v_max = double_max_limit, const char* format = "%.3f", double power = 1.0)
-    {
-        double* min = &v_min;
-        double* max = &v_max;
-        return ::ImGui::DragScalarN(label, ::ImGuiDataType_Double, v, 2, v_speed, min, max, format, power);
-    }
-}
 
 namespace procgui
 {
@@ -454,7 +409,7 @@ namespace
             }
         }
 
-        ext::ImGui::PushStyleGreenButton();
+        ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
         if (ImGui::Button("Randomize"))
         {
             painter.randomize();
@@ -497,6 +452,10 @@ namespace
 
     void interact_with(colors::VertexPainterComposite& painter)
     {
+        // Composite of composite will have ImGui's widget ID collision issue.
+        static int nested_id = 0;
+        ImGui::PushID(nested_id++);
+        
         // ImGui's ID for the several child painters.
         int index = 0;
         auto child_painters = painter.get_child_painters();
@@ -512,7 +471,7 @@ namespace
         ImGui::Separator();
 
         // Button to add a new painter at the beginning.
-        ::ext::ImGui::PushStyleGreenButton();
+        ::ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
         if (ImGui::Button("Add Painter here"))
         {
             to_add = begin(child_painters);
@@ -521,7 +480,7 @@ namespace
         ImGui::PopStyleColor(3);
 
         // Button to add the copied painter at the beginning.
-        ::ext::ImGui::PushStyleTurquoiseButton();
+        ::ext::ImGui::PushStyleColoredButton<ext::ImGui::Turquoise>();
         if (colors::VertexPainterComposite::has_copied_painter() &&
             ImGui::Button("Paste copied Painter here"))
         { 
@@ -545,7 +504,7 @@ namespace
             ImGui::Separator();
 
             // Button to add a new painter at this position.
-            ::ext::ImGui::PushStyleGreenButton();
+            ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
             if (ImGui::Button("Add Painter here"))
             {
                 to_add = next(it);
@@ -557,7 +516,7 @@ namespace
             if (child_painters.size() > 1)
             {
                 ImGui::SameLine();                
-                ::ext::ImGui::PushStyleRedButton();
+                ::ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
                 if (ImGui::Button("Remove previous Painter"))
                 {
                     to_remove = it;
@@ -566,7 +525,7 @@ namespace
             }
 
             // Button to copy the previous painter.
-            ::ext::ImGui::PushStylePurpleButton();
+            ::ext::ImGui::PushStyleColoredButton<ext::ImGui::Purple>();
             if (ImGui::Button("Copy previous Painter"))
             {
                 colors::VertexPainterComposite::save_painter((*it)->get_target());
@@ -577,7 +536,7 @@ namespace
             if (colors::VertexPainterComposite::has_copied_painter())
             {
                 ImGui::SameLine();
-                ::ext::ImGui::PushStyleTurquoiseButton();
+                ::ext::ImGui::PushStyleColoredButton<ext::ImGui::Turquoise>();
                 if(ImGui::Button("Paste copied Painter here"))
                 {
                     to_add = next(it);
@@ -610,6 +569,9 @@ namespace
                                   std::make_shared<colors::VertexPainterWrapper>(colors::VertexPainterComposite::get_copied_painter()));
             painter.set_child_painters(child_painters);
         }
+
+        nested_id--;
+        ImGui::PopID();
     }
 
     void create_new_vertex_painter(colors::VertexPainterWrapper& wrapper,
@@ -933,7 +895,7 @@ namespace
             ImGui::PushID(index);
 
             // Button '+' to add a key.
-            ext::ImGui::PushStyleGreenButton();
+            ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
             if (ImGui::Button("+"))
             {
                 will_insert = true;
@@ -945,7 +907,7 @@ namespace
             ImGui::SameLine();
 
             // Button '-' to remove a key.
-            ext::ImGui::PushStyleRedButton();
+            ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
             if (keys.size() > 2 && ImGui::Button("-"))
             {
                 will_remove = true;
@@ -1003,7 +965,7 @@ namespace
         }
 
         // Button '+' to add a key at the end.
-        ext::ImGui::PushStyleGreenButton();
+        ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
         if (ImGui::Button("+"))
         {
             will_insert = true;
@@ -1135,7 +1097,7 @@ namespace
             ImGui::PushID(index);
 
             ImGui::PushID(0);
-            ext::ImGui::PushStyleGreenButton();
+            ::ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
             if (ImGui::Button("+"))
             {
                 will_insert = true;
@@ -1147,7 +1109,7 @@ namespace
             ImGui::PopStyleColor(3);
 
             ImGui::SameLine();
-            ext::ImGui::PushStyleRedButton();
+            ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
             if (keys.size() > 2 && ImGui::Button("-"))
             {
                 will_remove = true;
@@ -1174,7 +1136,7 @@ namespace
 
             ImGui::PushID(1);
             ImGui::SameLine();
-            ext::ImGui::PushStyleGreenButton();
+            ::ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
             if (ImGui::Button("+"))
             {
                 will_insert = true;
@@ -1226,7 +1188,7 @@ namespace
         }
 
         // Button '+' to add a key.
-        ext::ImGui::PushStyleGreenButton();
+        ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
         if (ImGui::Button("+"))
         {
             will_insert = true;
@@ -1237,7 +1199,7 @@ namespace
 
         ImGui::SameLine();
         // Button '-' to remove a key
-        ext::ImGui::PushStyleRedButton();
+        ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
         if (keys.size() > 2 && (ImGui::SameLine(), ImGui::Button("-")))
         {
             will_remove = true;
@@ -1260,7 +1222,7 @@ namespace
         ImGui::PushID(keys.size());
         ImGui::SameLine();
         // Button '+' to add a key.
-        ext::ImGui::PushStyleGreenButton();
+        ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
         if (ImGui::Button("+"))
         {
             is_modified = true;
@@ -1494,7 +1456,7 @@ namespace procgui
         // same name ==> same window for the LSystemView which is a unique
         // window for a system.
         std::stringstream str_ID;
-        str_ID << "###" << lsys_view.get_id();
+        str_ID << lsys_view.get_id();
         std::stringstream window_name;
         window_name << name
                     << (is_modified ? "*" : "")
@@ -1563,10 +1525,10 @@ namespace procgui
         }
 
         push_embedded();
-        interact_with(lsys_view.ref_parameters(), "Drawing Parameters"+str_ID.str());
-        interact_with(lsys_view.ref_lsystem_buffer(), "LSystem"+str_ID.str());
-        interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map"+str_ID.str());
-        interact_with(lsys_view.ref_vertex_painter_wrapper(), "Painter"+str_ID.str());
+        interact_with(lsys_view.ref_parameters(), "Drawing Parameters##"+str_ID.str());
+        interact_with(lsys_view.ref_lsystem_buffer(), "LSystem##"+str_ID.str());
+        interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map##"+str_ID.str());
+        interact_with(lsys_view.ref_vertex_painter_wrapper(), "Painter##"+str_ID.str());
 
         bool bounding_box_visibility = lsys_view.box_is_visible();
         interact_with_graphics_parameters(bounding_box_visibility);
