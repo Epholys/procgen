@@ -114,7 +114,7 @@ namespace controller
         // Flag to open the save confirmation popup.
         static bool save_validation_popup = false;
 
-        // TODO: manages Escape key in regards to popups
+        // Little helper to manage the use of 'Escape' key in popups.
         auto escape_popup_if_necessary = [](sf::Keyboard::Key& key, bool& popup)
             {
                 if (key == sf::Keyboard::Escape)
@@ -125,8 +125,6 @@ namespace controller
                     ImGui::CloseCurrentPopup();
                 }
             };
-
-
         
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Save LSystem to file", &save_menu_open_, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
@@ -254,6 +252,13 @@ namespace controller
                 }
                 ImGui::Columns(1);
                 ImGui::EndChild();
+
+                // If there is no issue the popup should not be opened.
+                // This is useful in the rare case when the file permissions for
+                // the saves/ directory changes while the dir_error_popup is
+                // open.
+                dir_error_popup = false;
+
             }
             catch (const fs::filesystem_error& e)
             {
@@ -368,7 +373,7 @@ namespace controller
                 }
             }
             
-            if (save_validation_popup) // TODO manages escape key
+            if (save_validation_popup)
             {
                 // Popup is now open, imgui takes care of the open/close state.
                 ImGui::OpenPopup("Error##EXISTS");
@@ -420,7 +425,7 @@ namespace controller
             }
             
             // File error popup if we can not open the output file.
-            if (file_error_popup) // TODO: put it before ? Interaction with save confirmation menu
+            if (file_error_popup)
             {
                 ImGui::OpenPopup("Error##PERM");
                 if (ImGui::BeginPopupModal("Error##PERM", &file_error_popup))
@@ -470,6 +475,18 @@ namespace controller
 
         static bool error_message_popup = false;
 
+        // Little helper to manage the use of 'Escape' key in popups.
+        auto escape_popup_if_necessary = [](sf::Keyboard::Key& key, bool& popup)
+            {
+                if (key == sf::Keyboard::Escape)
+                {
+                    // Consume the key to avoid propagating it to another element.
+                    key = sf::Keyboard::Unknown;
+                    popup = false;
+                    ImGui::CloseCurrentPopup();
+                }
+            };
+        
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Load LSystem from file", &load_menu_open_, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
         {
@@ -680,6 +697,12 @@ namespace controller
                 }
                 ImGui::Columns(1);
                 ImGui::EndChild();
+
+                // If there is no issue the popup should not be opened.
+                // This is useful in the rare case when the file permissions for
+                // the saves/ directory changes while the dir_error_popup is
+                // open.
+                dir_error_popup = false;
             }
             catch (const fs::filesystem_error& e)
             {
@@ -689,9 +712,11 @@ namespace controller
 
             if (dir_error_popup)
             {
-                ImGui::OpenPopup("Error");
-                if (ImGui::BeginPopupModal("Error", &dir_error_popup))
+                ImGui::OpenPopup("Error##DIR");
+                if (ImGui::BeginPopupModal("Error##DIR", &dir_error_popup))
                 {
+                    escape_popup_if_necessary(key, dir_error_popup);
+
                     std::string error_message = "Error: can't open directory: "+save_dir_.filename().string();
                     ImGui::Text(error_message.c_str());
                     ImGui::EndPopup();
@@ -713,9 +738,9 @@ namespace controller
 
             // %%%%%%%%%%%%%%%% LOAD LSYSTEMVIEW %%%%%%%%%%%%%%%%
             
-            if (!array_to_string(file_to_load).empty() &&
-                (ImGui::Button("Load") ||
-                 key == sf::Keyboard::Enter))
+            if ((!dir_error_popup && !error_message_popup && !file_error_popup && !format_error_popup) && // If no popup is open &&
+                (ImGui::Button("Load") || key == sf::Keyboard::Enter) &&                                  // If the user want to load &&
+                !array_to_string(file_to_load).empty())                                                   // an existing file
             {
                 // Open the input file.
                 std::ifstream ifs (save_dir_/array_to_string(file_to_load));
@@ -787,9 +812,11 @@ namespace controller
             // wrong format.
             if (file_error_popup)
             {
-                ImGui::OpenPopup("Error");
-                if (ImGui::BeginPopupModal("Error", &file_error_popup))
+                ImGui::OpenPopup("Error##FILE");
+                if (ImGui::BeginPopupModal("Error##FILE", &file_error_popup))
                 {
+                    escape_popup_if_necessary(key, file_error_popup);
+                    
                     std::string message = "Error: can't open file: '" + array_to_string(file_to_load) + "'";
                     ImGui::Text(message.c_str());
                     ImGui::EndPopup();
@@ -798,9 +825,11 @@ namespace controller
 
             if (format_error_popup)
             {
-                ImGui::OpenPopup("Error");
-                if (ImGui::BeginPopupModal("Error", &format_error_popup))
+                ImGui::OpenPopup("Error##FORMAT");
+                if (ImGui::BeginPopupModal("Error##FORMAT", &format_error_popup))
                 {
+                    escape_popup_if_necessary(key, format_error_popup);
+                    
                     std::string message = "Error: file '" + array_to_string(file_to_load) + "' isn't a valid or complete JSON L-System file.";
                     ImGui::Text(message.c_str());
                     ImGui::EndPopup();
@@ -809,9 +838,11 @@ namespace controller
 
             if (error_message_popup)
             {
-                ImGui::OpenPopup("Warning");
-                if (ImGui::BeginPopupModal("Warning", &error_message_popup))
+                ImGui::OpenPopup("Warning##ISSUE");
+                if (ImGui::BeginPopupModal("Warning##ISSUE", &error_message_popup))
                 {
+                    escape_popup_if_necessary(key, error_message_popup);
+                    
                     std::string message;
                     if (error_messages.size() > 1)
                     {
@@ -858,6 +889,11 @@ namespace controller
             
             ImGui::End();
         }
+
+        if (key == sf::Keyboard::Escape)
+        {
+            load_menu_open_ = false;
+        }
     }
     
     void WindowController::handle_input(std::vector<sf::Event> events,
@@ -903,14 +939,6 @@ namespace controller
                 }
             }
             
-            // Load menu forwarding
-            else if (load_menu_open_ &&
-                     event.type == sf::Event::KeyPressed &&
-                     event.key.code == sf::Keyboard::Escape)
-            {
-                // TODO: let the load menu manages this
-                load_menu_open_ = false;
-            }
             else if (load_menu_open_ &&
                      event.type == sf::Event::KeyPressed)
             {

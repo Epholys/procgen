@@ -83,7 +83,8 @@ namespace controller
         static bool load_menu_open_;
 
         // Display and interact with the load menu window. Load from files the
-        // LSystems into 'lsys_views'.
+        // LSystems into 'lsys_views'. 'key' is forwarded to manage navigation
+        // and 'unicode' to help selection.
         static void load_menu(std::list<procgui::LSystemView>& lsys_views,
                               sf::Keyboard::Key key = sf::Keyboard::Unknown,
                               sf::Uint32 unicode = 0);
