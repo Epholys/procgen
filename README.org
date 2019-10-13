@@ -17,8 +17,6 @@
 
 ** Main Roadmap
    1. Polish before the first release
-      * Polish the imgui interface
-      * Remove frictions and limitations of the save/load GUI
       * Add low-hanging fruits optimization
       * Remove a maximum of code smells
    2. Add automation:
