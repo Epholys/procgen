@@ -27,6 +27,7 @@ namespace controller
 
     bool WindowController::save_menu_open_ {false};
     bool WindowController::load_menu_open_ {false};
+    bool WindowController::quit_popup_open_ { false };
 
     const double WindowController::default_step_ {25.f}; 
     
@@ -939,7 +940,26 @@ namespace controller
             double_selection = false;
         }
     }
-        
+
+    void  WindowController::quit_popup(sf::Keyboard::Key key)
+    {
+        ImGui::OpenPopup("WARNING##SAVES");
+        if (ImGui::BeginPopupModal("WARNING##SAVES"))
+        {
+            ImGui::Text("At least one L-System is not saved.\nDo you still want to quit?");
+            if (ImGui::Button("Yes, quit") || key == sf::Keyboard::Enter)
+            {
+                window.close();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("No, stay") || key ==  sf::Keyboard::Escape)
+            {
+                quit_popup_open_ = false;
+            }
+            ImGui::EndPopup();
+        }                        
+    }
+    
     void WindowController::handle_input(std::vector<sf::Event> events,
                                         std::list<procgui::LSystemView>& lsys_views)
     {
@@ -955,7 +975,13 @@ namespace controller
                  event.type == sf::Event::KeyPressed &&
                  event.key.code == sf::Keyboard::Escape))
             {
-                window.close();
+                // Check if a LSystemView is saved but not modified
+                quit_popup_open_ = std::any_of(begin(lsys_views), end(lsys_views),
+                                                [](const auto& view){return view.is_modified();});
+                if (!quit_popup_open_)
+                {
+                    window.close();
+                }
             }
 
             // Paste, Create, Load LSystemView 
@@ -985,7 +1011,7 @@ namespace controller
                 }
             }
             
-            else if (load_menu_open_ &&
+            else if ((load_menu_open_ || save_menu_open_ || quit_popup_open_) &&
                      event.type == sf::Event::KeyPressed)
             {
                 key_to_menus = event.key.code;
@@ -994,13 +1020,6 @@ namespace controller
                      event.type == sf::Event::TextEntered)
             {
                 unicode_to_load_window = event.text.unicode;
-            }
-
-            // Save menu forwarding
-            else if (save_menu_open_ &&
-                     event.type == sf::Event::KeyPressed)
-            {
-                key_to_menus = event.key.code;
             }
 
             // SFML Window management
@@ -1056,15 +1075,19 @@ namespace controller
                     view_can_move_ = false;
                 }
             }
-            
+
             LSystemController::handle_input(lsys_views, event);
         }
 
-        if (save_menu_open_)
+        if (quit_popup_open_)
+        {
+            quit_popup(key_to_menus);
+        }
+        else if (save_menu_open_)
         {
             save_menu(key_to_menus);
         }
-        if (load_menu_open_)
+        else if (load_menu_open_)
         {
             load_menu(lsys_views, key_to_menus, unicode_to_load_window);
         }
@@ -1108,3 +1131,4 @@ namespace controller
         window.setView(view_);
     }
 }
+ 

@@ -89,6 +89,11 @@ namespace controller
                               sf::Keyboard::Key key = sf::Keyboard::Unknown,
                               sf::Uint32 unicode = 0);
 
+        // Flag to let the quit popup open;
+        static bool quit_popup_open_;
+        // If at least one open LSystemView is not saved, open a quit warning popup.
+        static void quit_popup(sf::Keyboard::Key key);
+
         // When ordering the load menu to open, save the current mouse position
         // to load the LSystemView at this position instead of the center.
         static sf::Vector2f mouse_position_to_load_;
