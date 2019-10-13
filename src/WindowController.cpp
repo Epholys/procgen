@@ -114,6 +114,10 @@ namespace controller
         static bool file_error_popup = false;
         // Flag to open the save confirmation popup.
         static bool save_validation_popup = false;
+        // Flag to know if a file is selected twice (meaning two click or one
+        // other selection and one click).
+        // Used to quickly save a file with the mouse.
+        static bool double_selection = false;
 
         // Little helper to manage the use of 'Escape' key in popups.
         auto escape_popup_if_necessary = [](sf::Keyboard::Key& key, bool& popup)
@@ -237,6 +241,11 @@ namespace controller
                     // Displays the files in a selectable list
                     if (ImGui::Selectable(file.filename.c_str(), selected_file == i))
                     {
+                        if (!double_selection && selected_file == i)
+                        {
+                            double_selection = true;
+                        }
+                        
                         // Update selected file to highlight the Selectable
                         selected_file = i;
                         // The user have selected with the mouse
@@ -358,9 +367,11 @@ namespace controller
             bool save = false;
             // Save button (with a simple check for a empty filename)
             if ((!save_validation_popup && !dir_error_popup && !file_error_popup) &&  // If no popup is open &&
-                (ImGui::Button("Save") || key == sf::Keyboard::Enter) &&              // If the user want to save &&
+                (ImGui::Button("Save") || key == sf::Keyboard::Enter || double_selection) && // If the user want to save &&
                 !trimmed_filename.empty())                                            // A valid filename
             {
+                double_selection = false;
+                
                 // Consume the key to avoid propagating it to another element.
                 key = sf::Keyboard::Unknown;
                 
@@ -462,6 +473,7 @@ namespace controller
             file_error_popup = false;
             save_validation_popup = false;
             click_selected = false;
+            double_selection = false;
         }
     }
 
