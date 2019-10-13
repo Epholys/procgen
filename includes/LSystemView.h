@@ -82,9 +82,19 @@ namespace procgui
         const colors::VertexPainterWrapper& get_vertex_painter_wrapper() const;
         int get_id() const;
         sf::Color get_color() const;
+        
         std::string get_name() const;
         void set_name(const std::string& name);
 
+        bool is_modified() const;
+        // Should be called externally when a LSystemView is fully loaded.
+        // It shows a bad design, because loading a LSystemView should just take
+        // one step by constructing it. However, for now, loading a LSystem is
+        // done in two steps as repositionning and scaling are necessary to put
+        // the LSystemView on screen. But optimization is possible, and will be
+        // done. So TODO.
+        void finish_loading();
+        
         // Translation transform to correct screen-space position of the
         // LSystem. 
         sf::Transform get_transform() const;
@@ -134,6 +144,9 @@ namespace procgui
         
         // The window's name.
         std::string name_;
+
+        // true if the LSystem is modified from the last save
+        bool is_modified_;
 
         // The LSystem's buffer. It has shared ownership of a
         // shared_ptr<LSystem> with the associated Observable.

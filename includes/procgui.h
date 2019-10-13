@@ -57,7 +57,10 @@ namespace procgui {
     // 'open' manages the selection of the LSystemView: if it is true, the
     // window is keeped open. Otherwise, when clicking at the close widget, the
     // view is un-selected and the window closed.
-    void interact_with(LSystemView& lsys_view, const std::string& name, bool* open = nullptr);
+    void interact_with(LSystemView& lsys_view,
+                       const std::string& name,
+                       bool is_modified,
+                       bool* open = nullptr);
 
     void interact_with_graphics_parameters(bool& box_is_visible);
     

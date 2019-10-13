@@ -35,6 +35,7 @@ namespace procgui
         , id_{unique_ids_.get_id()}
         , color_id_{unique_colors_.get_color(id_)}
         , name_ {name}
+        , is_modified_{false}                            
         , lsys_buff_ {lsys}
         , interpretation_buff_ {map}
         , vertices_ {}
@@ -75,6 +76,7 @@ namespace procgui
         , id_{unique_ids_.get_id()}
         , color_id_{unique_colors_.get_color(id_)}
         , name_ {other.name_}
+        , is_modified_{other.is_modified_}
         , lsys_buff_ {other.lsys_buff_, OLSys::get_target()}
         , interpretation_buff_ {other.interpretation_buff_, OMap::get_target()}
         , vertices_ {other.vertices_}
@@ -97,6 +99,7 @@ namespace procgui
         , id_ {other.id_}
         , color_id_{std::move(other.color_id_)}
         , name_ {std::move(other.name_)}
+        , is_modified_{other.is_modified_}
         , lsys_buff_ {std::move(other.lsys_buff_)}
         , interpretation_buff_ {std::move(other.interpretation_buff_)}
         , vertices_ {std::move(other.vertices_)}
@@ -121,6 +124,7 @@ namespace procgui
         other.color_id_ = sf::Color::Black;
         other.bounding_box_ = {};
         other.is_selected_ = false;
+        other.is_modified_ = false;
     }
 
     LSystemView& LSystemView::operator=(const LSystemView& other)
@@ -134,6 +138,7 @@ namespace procgui
             id_ = unique_ids_.get_id();
             color_id_ = unique_colors_.get_color(id_);
             name_ = other.name_;
+            is_modified_ = other.is_modified_;
             lsys_buff_ = LSystemBuffer(other.lsys_buff_, OLSys::get_target());
             interpretation_buff_ = InterpretationMapBuffer(other.interpretation_buff_, OMap::get_target());
             vertices_ = other.vertices_;
@@ -162,6 +167,7 @@ namespace procgui
             id_ = other.id_;
             color_id_ = other.color_id_;
             name_ = std::move(other.name_);
+            is_modified_ = other.is_modified_;
             lsys_buff_ = std::move(other.lsys_buff_);
             interpretation_buff_ = std::move(other.interpretation_buff_);
             vertices_ = std::move(other.vertices_);
@@ -186,6 +192,7 @@ namespace procgui
             other.color_id_ = sf::Color::Black;
             other.bounding_box_ = {};
             other.is_selected_ = false;
+            other.is_modified_ = false;
         }
 
         return *this;
@@ -258,7 +265,18 @@ namespace procgui
     void LSystemView::set_name(const std::string& name)
     {
         name_ = name;
+        is_modified_ = false;
     }
+
+    bool LSystemView::is_modified() const
+    {
+        return is_modified_;
+    }
+    void LSystemView::finish_loading()
+    {
+        is_modified_ = false;
+    }
+
     
     
     void LSystemView::compute_vertices()
@@ -283,13 +301,14 @@ namespace procgui
                                                              iteration_of_vertices_,
                                                              max_iteration_,
                                                              bounding_box_);
+        is_modified_ = true;
     }
 
     
     void LSystemView::draw(sf::RenderTarget &target)
     {
         // Interact with the models.
-        interact_with(*this, name_, &is_selected_);
+        interact_with(*this, name_, is_modified_, &is_selected_);
 
         sf::FloatRect visible_bounding_box = get_transform().transformRect(bounding_box_);
 

@@ -1479,7 +1479,10 @@ namespace procgui
     }
 
     
-    void interact_with(LSystemView& lsys_view, const std::string& name, bool* open)
+    void interact_with(LSystemView& lsys_view,
+                       const std::string& name,
+                       bool is_modified,
+                       bool* open)
     {
         if (open && !(*open))
         {
@@ -1490,9 +1493,13 @@ namespace procgui
         // unique ID for the created window. We override the mecanism of
         // same name ==> same window for the LSystemView which is a unique
         // window for a system.
-        std::stringstream ss;
-        ss << "##" << lsys_view.get_id(); // Each window of LSystemView
-                                          // is conserved by its id.
+        std::stringstream str_ID;
+        str_ID << "###" << lsys_view.get_id();
+        std::stringstream window_name;
+        window_name << name
+                    << (is_modified ? "*" : "")
+                    << "###"
+                    << str_ID.str(); // Each window of LSystemView is conserved by its id.
         if (embedded_level == 0)
         {
             // Make the window appear at the mouse double-click position with a
@@ -1545,7 +1552,7 @@ namespace procgui
                                   static_cast<ImVec4>(ImColor(color.r, color.g, color.b)));
 
         }
-        if (!set_up(name+ss.str(), open))
+        if (!set_up(window_name.str(), open))
         {
             if (embedded_level == 0)
             {
@@ -1556,10 +1563,10 @@ namespace procgui
         }
 
         push_embedded();
-        interact_with(lsys_view.ref_parameters(), "Drawing Parameters"+ss.str());
-        interact_with(lsys_view.ref_lsystem_buffer(), "LSystem"+ss.str());
-        interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map"+ss.str());
-        interact_with(lsys_view.ref_vertex_painter_wrapper(), "Painter");
+        interact_with(lsys_view.ref_parameters(), "Drawing Parameters"+str_ID.str());
+        interact_with(lsys_view.ref_lsystem_buffer(), "LSystem"+str_ID.str());
+        interact_with(lsys_view.ref_interpretation_buffer(), "Interpretation Map"+str_ID.str());
+        interact_with(lsys_view.ref_vertex_painter_wrapper(), "Painter"+str_ID.str());
 
         bool bounding_box_visibility = lsys_view.box_is_visible();
         interact_with_graphics_parameters(bounding_box_visibility);
