@@ -474,6 +474,10 @@ namespace controller
         static bool format_error_popup = false;
 
         static bool error_message_popup = false;
+        // Flag to know if a file is selected twice (meaning two click or one
+        // other selection and one click).
+        // Used to quickly load a file with the mouse.
+        static bool double_selection = false;
 
         // Little helper to manage the use of 'Escape' key in popups.
         auto escape_popup_if_necessary = [](sf::Keyboard::Key& key, bool& popup)
@@ -681,9 +685,15 @@ namespace controller
                 for (auto i=0; i<(int)files.size(); ++i)
                 {
                     const auto& file = files.at(i);
+
+                    bool selectable_clicked = ImGui::Selectable(file.filename.c_str(), selected_file == i);
+                    if (selectable_clicked && selected_file == i && !double_selection)
+                    {
+                        // The selectable was previously selected
+                            double_selection = true;
+                    }
                     // Displays the files in a selectable list
-                    if (ImGui::Selectable(file.filename.c_str(), selected_file == i) ||
-                        selected_file == i)
+                    if (selectable_clicked || selected_file == i)
                     {
                         // If the file was selected by clicking on the Selectable, update the selected_file
                         selected_file = i;
@@ -739,9 +749,11 @@ namespace controller
             // %%%%%%%%%%%%%%%% LOAD LSYSTEMVIEW %%%%%%%%%%%%%%%%
             
             if ((!dir_error_popup && !error_message_popup && !file_error_popup && !format_error_popup) && // If no popup is open &&
-                (ImGui::Button("Load") || key == sf::Keyboard::Enter) &&                                  // If the user want to load &&
+                (ImGui::Button("Load") || key == sf::Keyboard::Enter || double_selection) &&              // If the user want to load &&
                 !array_to_string(file_to_load).empty())                                                   // an existing file
             {
+                double_selection = false;
+                
                 // Open the input file.
                 std::ifstream ifs (save_dir_/array_to_string(file_to_load));
 
