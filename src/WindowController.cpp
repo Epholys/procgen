@@ -452,6 +452,15 @@ namespace controller
         {
             save_menu_open_ = false;
         }
+
+        if (save_menu_open_ == false)
+        {
+            dir_error_popup = false;
+            dir_error_popup = false;
+            file_error_popup = false;
+            save_validation_popup = false;
+            click_selected = false;
+        }
     }
 
     void WindowController::add_loading_error_message(const std::string& message)
@@ -470,9 +479,9 @@ namespace controller
         static bool dir_error_popup = false;
         // Flag to let the file error popup open between frames.
         static bool file_error_popup = false;
-
+        // Flag to open the format error popup between frames.
         static bool format_error_popup = false;
-
+        // Flatg to open the error message popup between frames
         static bool error_message_popup = false;
         // Flag to know if a file is selected twice (meaning two click or one
         // other selection and one click).
@@ -906,8 +915,16 @@ namespace controller
         {
             load_menu_open_ = false;
         }
+        if (load_menu_open_ == false)
+        {
+            dir_error_popup = false;
+            file_error_popup = false;
+            format_error_popup = false;
+            error_message_popup = false;
+            double_selection = false;
+        }
     }
-    
+        
     void WindowController::handle_input(std::vector<sf::Event> events,
                                         std::list<procgui::LSystemView>& lsys_views)
     {
