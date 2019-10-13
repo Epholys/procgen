@@ -419,6 +419,7 @@ namespace controller
                     cereal::JSONOutputArchive archive (ofs);
                     if (LSystemController::under_mouse()) // Virtually useless check.
                     {
+                        LSystemController::under_mouse()->set_name(trimmed_filename);
                         archive(cereal::make_nvp("LSystemView", *LSystemController::under_mouse()));
                     }
                     save_menu_open_ = false;

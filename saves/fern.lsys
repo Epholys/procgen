@@ -1,7 +1,7 @@
 {
-    "value0": {
+    "LSystemView": {
         "cereal_class_version": 0,
-        "name": "Plant",
+        "name": "fern.lsys",
         "LSystem": {
             "cereal_class_version": 0,
             "axiom": "X",
@@ -13,17 +13,17 @@
         },
         "DrawingParameters": {
             "cereal_class_version": 0,
-            "starting_angle": 80.0,
-            "delta_angle": 25.0,
+            "starting_angle": 79.99999767274336,
+            "delta_angle": 25.00000012650595,
             "n_iter": 6
         },
         "Interpretation Map": {
             "cereal_class_version": 0,
-            "-": "turn_left",
+            "[": "save_position",
             "]": "load_position",
             "+": "turn_right",
-            "F": "go_forward",
-            "[": "save_position"
+            "-": "turn_left",
+            "F": "go_forward"
         },
         "VertexPainter": {
             "cereal_class_version": 0,

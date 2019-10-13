@@ -251,6 +251,15 @@ namespace procgui
         transform.translate(sf::Vector2f(OParams::get_target()->get_starting_position()));
         return transform;
     }
+    std::string LSystemView::get_name() const
+    {
+        return name_;
+    }
+    void LSystemView::set_name(const std::string& name)
+    {
+        name_ = name;
+    }
+    
     
     void LSystemView::compute_vertices()
     {

@@ -42,7 +42,7 @@ namespace controller
 
         // Getters
         static const std::optional<procgui::LSystemView>& saved_view();
-        static const procgui::LSystemView* under_mouse();
+        static procgui::LSystemView* under_mouse();
 
     private:
         // Delete the LSystemView with identifier 'id' in 'views'

@@ -24,7 +24,7 @@ namespace controller
     {
         return saved_view_;
     }
-    const procgui::LSystemView* LSystemController::under_mouse()
+    procgui::LSystemView* LSystemController::under_mouse()
     {
         return under_mouse_;
     }

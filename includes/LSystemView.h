@@ -82,6 +82,8 @@ namespace procgui
         const colors::VertexPainterWrapper& get_vertex_painter_wrapper() const;
         int get_id() const;
         sf::Color get_color() const;
+        std::string get_name() const;
+        void set_name(const std::string& name);
 
         // Translation transform to correct screen-space position of the
         // LSystem. 
