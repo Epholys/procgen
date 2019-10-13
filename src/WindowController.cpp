@@ -8,6 +8,7 @@
 #include "WindowController.h"
 #include "LSystemController.h"
 #include "LSystemView.h"
+#include "imgui_extension.h"
 
 using sfml_window::window;
 namespace fs = std::experimental::filesystem;
@@ -368,6 +369,7 @@ namespace controller
 
             bool save = false;
             // Save button (with a simple check for a empty filename)
+            ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
             if ((!save_validation_popup && !dir_error_popup && !file_error_popup) &&  // If no popup is open &&
                 (ImGui::Button("Save") || key == sf::Keyboard::Enter || double_selection) && // If the user want to save &&
                 !trimmed_filename.empty())                                            // A valid filename
@@ -386,6 +388,7 @@ namespace controller
                     save = true;
                 }
             }
+            ImGui::PopStyleColor(3);
             
             if (save_validation_popup)
             {
@@ -399,19 +402,23 @@ namespace controller
                     std::string warning_text = trimmed_filename + " already exists.\nDo you want to overwrite it?";
                     ImGui::Text(warning_text.c_str());
 
+                    ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
                     if (ImGui::Button("Overwrite") || key == sf::Keyboard::Enter)
                     {
                         key = sf::Keyboard::Unknown;
                         save = true;
                         save_validation_popup = false;
                     }
+                    ImGui::PopStyleColor(3);                    
 
                     ImGui::SameLine();
+                    ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
                     if (ImGui::Button("Cancel"))
                     {
                         save_validation_popup = false;
                     }
-
+                    ImGui::PopStyleColor(3);
+                    
                     ImGui::EndPopup();
                 }
             }
@@ -455,11 +462,13 @@ namespace controller
             
             // Fast close the save menu
             ImGui::SameLine();
+            ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
             if (ImGui::Button("Cancel"))
             {
                 save_menu_open_ = false;
             }
-            
+            ImGui::PopStyleColor(3);
+                                
             ImGui::End();
         }
 
@@ -772,7 +781,7 @@ namespace controller
             ImGui::SameLine();
 
             // %%%%%%%%%%%%%%%% LOAD LSYSTEMVIEW %%%%%%%%%%%%%%%%
-            
+            ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();            
             if ((!dir_error_popup && !error_message_popup && !file_error_popup && !format_error_popup) && // If no popup is open &&
                 (ImGui::Button("Load") || key == sf::Keyboard::Enter || double_selection) &&              // If the user want to load &&
                 !array_to_string(file_to_load).empty())                                                   // an existing file
@@ -844,6 +853,7 @@ namespace controller
             
                 }
             }
+            ImGui::PopStyleColor(3);
 
             // File error popup if we can not open the file or if it is in the
             // wrong format.
@@ -919,10 +929,12 @@ namespace controller
             }
             
             ImGui::SameLine();
+            ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
             if (ImGui::Button("Cancel"))
             {
                 load_menu_open_ = false;
             }
+            ImGui::PopStyleColor(3);
             
             ImGui::End();
         }
@@ -947,15 +959,19 @@ namespace controller
         if (ImGui::BeginPopupModal("WARNING##SAVES"))
         {
             ImGui::Text("At least one L-System is not saved.\nDo you still want to quit?");
+            ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
             if (ImGui::Button("Yes, quit") || key == sf::Keyboard::Enter)
             {
                 window.close();
             }
+            ImGui::PopStyleColor(3);
             ImGui::SameLine();
+            ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
             if (ImGui::Button("No, stay") || key ==  sf::Keyboard::Escape)
             {
                 quit_popup_open_ = false;
             }
+            ImGui::PopStyleColor(3);
             ImGui::EndPopup();
         }                        
     }
