@@ -291,6 +291,7 @@ namespace procgui
         bounding_box_ = geometry::bounding_box(vertices_);
         sub_boxes_ = geometry::sub_boxes(vertices_, MAX_SUB_BOXES);
         geometry::expand_boxes(sub_boxes_); // Add some margin
+
         paint_vertices();
     }
 
