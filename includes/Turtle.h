@@ -88,7 +88,7 @@ namespace drawing
             // the LSystem 'lsys', using and modifying its cache. Then, it interprates
             // the result with 'interpretation' and 'parameters'. The third returned
             // value is the maximum number of iteration count.
-            std::tuple<const std::vector<sf::Vertex>&, const std::vector<int>&>
+            std::tuple<std::vector<sf::Vertex>&, std::vector<int>&>
             compute_vertices(const std::string& str,
                              InterpretationMap& interpretation);
         };

@@ -34,6 +34,7 @@ namespace colors
         for (auto& v : vertices)
         {
             sf::Color color = generator->get(.5);
+
             if (v.color != sf::Color::Transparent)
             {
                 v.color = color;

@@ -47,7 +47,7 @@ namespace colors
 
             // Dummy color (BUT NOT TRANSPARENT (Transparent is a special value
             // for save/load position))
-            return sf::Color(0,0,0,1);
+            return sf::Color::White;
         }
 
         void ColorGeneratorComposite::reset_index()

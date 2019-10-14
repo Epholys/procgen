@@ -43,7 +43,7 @@ namespace drawing
         }
     }
     
-    std::tuple<const std::vector<sf::Vertex>&, const std::vector<int>&>
+    std::tuple<std::vector<sf::Vertex>&, std::vector<int>&>
     Turtle::compute_vertices(const std::string& str,
                              InterpretationMap& interpretation)
 

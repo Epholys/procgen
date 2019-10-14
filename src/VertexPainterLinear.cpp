@@ -87,7 +87,7 @@ namespace colors
             sf::Vector2f projection = geometry::project(opposite_intersection_line.first, opposite_intersection_line.second, v.position);
             float lerp = geometry::distance(projection, v.position) / distance;
 
-            sf::Color color = generator->get(lerp);
+            sf::Color color = generator->get(lerp);            
             if (v.color != sf::Color::Transparent)
             {
                 v.color = color;

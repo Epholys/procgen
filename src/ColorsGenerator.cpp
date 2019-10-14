@@ -95,18 +95,20 @@ namespace colors
 
     sf::Color LinearGradient::get(float f)
     {
-        // Clamp 'f'.
-        f = f < 0. ? 0. : f;
-        f = f > 1. ? 1. : f;
+        // // Clamp 'f'.
+        // f = f < 0. ? 0. : f;
+        // f = f > 1. ? 1. : f;
 
         // Find the upper-bound key...
         auto superior_it = std::find_if(begin(keys_), end(keys_),
                                 [f](const auto& p){return f <= p.position;});
-        Expects(superior_it != end(keys_)); // (should never happen if correctly sanitized)
+        // Expects(superior_it != end(keys_)); // (should never happen if correctly sanitized) TODO OPT : opt mode w/o checks
         auto superior_index = std::distance(begin(keys_), superior_it);
         auto inferior_index = superior_index == 0 ? 0 : superior_index-1; // ...and the lower-bound one.
-        const auto& superior = keys_.at(superior_index);
-        const auto& inferior = keys_.at(inferior_index);
+        // const auto& superior = keys_.at(superior_index);
+        // const auto& inferior = keys_.at(inferior_index);
+        const auto& superior = keys_[superior_index];
+        const auto& inferior = keys_[inferior_index];
 
         float factor = 0.f;
         if (superior_index == inferior_index)

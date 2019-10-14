@@ -44,9 +44,61 @@ int main(int argc, char* argv[])
 
         drawing::impl::Turtle turtle (params, rec);
         
-        for (int i=0; i<2; ++i)
+        for (int i=0; i<5; ++i)
         {
             turtle.compute_vertices(str, map);
+            std::cout << i << std::endl;
+        }
+    }
+    else if (arg == 'c')
+    {
+        LSystem serpinski = LSystem({"F", { { 'F', "G[-F-GFFFF" }, { 'G', "F]]+G+F" }}, "G" });
+        const auto& [str, rec, max] = serpinski.produce(10);
+
+        DrawingParameters params;
+
+        auto map = drawing::default_interpretation_map;
+
+        drawing::impl::Turtle turtle (params, rec);
+
+        ConstantColor cc (sf::Color::Red);
+        auto wcc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<ConstantColor>(cc));
+        VertexPainterConstant vp (wcc);
+        
+        auto tuple = turtle.compute_vertices(str, map);
+        auto box = geometry::bounding_box(std::get<0>(tuple));
+        
+        std::cout << "BeginPainting\n";
+        for (int i=0; i<20; ++i)
+        {
+            vp.paint_vertices(std::get<0>(tuple), std::get<1>(tuple), max, box);
+            std::cout << i << std::endl;
+        }
+    }
+    else if (arg == 'l')
+    {
+        LSystem serpinski = LSystem({"F", { { 'F', "G[-F-GFFFF" }, { 'G', "F]]+G+F" }}, "G" });
+        const auto& [str, rec, max] = serpinski.produce(10);
+
+        DrawingParameters params;
+
+        auto map = drawing::default_interpretation_map;
+
+        drawing::impl::Turtle turtle (params, rec);
+
+        LinearGradient lc({{sf::Color::Red, 0}, {sf::Color::Blue, 1}});
+        auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
+        VertexPainterLinear vp (wlc);
+        vp.set_angle(25);
+        vp.set_display_flag(false);
+        
+        auto tuple = turtle.compute_vertices(str, map);
+        auto box = geometry::bounding_box(std::get<0>(tuple));
+        
+        std::cout << "BeginPainting\n";
+        for (int i=0; i<7; ++i)
+        {
+            vp.paint_vertices(std::get<0>(tuple), std::get<1>(tuple), max, box);
             std::cout << i << std::endl;
         }
     }
