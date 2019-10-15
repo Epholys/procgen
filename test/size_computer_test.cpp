@@ -59,30 +59,33 @@ TEST_F(size_computer_test, MatrixMult)
 
 TEST_F(size_computer_test, MatrixGrandSum)
 {
-    // TODO EXCEPTION
+    std::vector<std::vector<int>> data{{1, 2}, {3, 4}, {5, 6}};
+    Matrix mat (data);
 
-    ASSERT_TRUE(false);
+    constexpr int expected_sum = 1 + 2 + 3 + 4 + 5 + 6;
+
+    ASSERT_EQ(expected_sum, mat.grand_sum());
 }
 
 TEST_F(size_computer_test, all_predecessors)
 {
-    // TODO LSYS MAP
-    // GET ALL STRINGS
-    // SORT
+    const std::string expected_predecessors = "+-FG[]xy";
 
-    ASSERT_TRUE(false);
+    const std::string predecessors = all_predecessors(lsys, map);
+    
+    ASSERT_EQ(expected_predecessors, predecessors);
 }
 TEST_F(size_computer_test, lsys_matrix)
 {
     // PREDS:  F G x + - [ ] y        // TODO SORT
     // AX: [1 0 0 0 0 0 0]            // UPDATE W/ SORT
-    // RULES: [[1 2 1 2 0 1 1 0]  : F // UPDATE W/ SORT
-    //         [2 1 0 0 2 0 0 0]  : G
-    //         [0 0 0 0 0 0 0 0]  : x
-    //         [0 0 0 1 0 0 0 0]  : +
+    // RULES: [[0 0 0 1 0 0 0 0]  : +
     //         [0 0 0 0 1 0 0 0]  : -
+    //         [1 2 1 2 0 1 1 0]  : F
+    //         [2 1 0 0 2 0 0 0]  : G
     //         [0 0 0 0 0 1 0 0]  : [
     //         [0 0 0 0 0 0 1 0]  : ]
+    //         [0 0 0 0 0 0 0 0]  : x
     //         [0 0 0 0 0 0 0 1]] : y
     // CHECK ^^^THIS^^^ MATRIX AS EXPECTED
     
@@ -91,13 +94,11 @@ TEST_F(size_computer_test, lsys_matrix)
 TEST_F(size_computer_test, map_matrix)
 {
     // PREDS:  F G x + - [ ] y        // TODO SORT
-    // [[1]  : F                      // UPDATE W/ SORT
+    // [[0]  : +
+    //  [0]  : -
+    //  [1]  : F
     //  [1]  : G
     //  [0]  : x
-    //  [0]  : +
-    //  [0]  : -
-    //  [0]  : [
-    //  [3]  : ]
     //  [1]] : y
     // CHECK ^^^THIS^^^ MATRIX AS EXPECTED    
 
