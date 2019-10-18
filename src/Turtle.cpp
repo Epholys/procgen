@@ -47,9 +47,6 @@ namespace drawing
             ++turtle.iteration_index;
         }
 
-        std::cout << "lsys " << str.size() << std::endl;
-        std::cout << "vertx " << turtle.vertices.size() << std::endl;
-
         Ensures(turtle.vertices.size() == turtle.iteration_of_vertices.size());
         return {turtle.vertices, turtle.iteration_of_vertices, max};
     }
