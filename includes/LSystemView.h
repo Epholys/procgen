@@ -13,6 +13,7 @@
 #include "UniqueId.h"
 #include "VertexPainterWrapper.h"
 #include "VertexPainterSerializer.h"
+#include "size_computer.h"
 
 namespace procgui
 {
@@ -37,6 +38,8 @@ namespace procgui
     //    - LSystemView contain a shared ownership of the LSystem and the
     //    InterpretationMap via the corresponding Observer. As a consequence, a
     //    copy of LSystemView will share the same LSystem and Map.
+    //
+    // TODO: simplifies ctor by initializing some attribute here.
     class LSystemView : public Observer<LSystem>,
                         public Observer<drawing::InterpretationMap>,
                         public Observer<drawing::DrawingParameters>,
@@ -113,8 +116,16 @@ namespace procgui
         bool is_inside(const sf::Vector2f& click) const;
 
 
+        // Safeguard the computation of vertices when the size is too big.
+        // Flag the opening of the size warning popup if the size is higher than
+        // TODO, otherwise, simply call 'compute_vertices()'
+        void size_safeguard();
+        // Display the size warning popup and call 'compute_vertices()' if the
+        // user confirms the computation.
+        void size_warning_popup();
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();
+        // Paint the vertices.
         void paint_vertices();
 
         // Draw the vertices.
@@ -176,6 +187,11 @@ namespace procgui
         bool is_selected_;
         // True if the bounding box must be visible
         bool bounding_box_is_visible_;
+
+        // Flag to open the warning size popup
+        bool open_safeguard_popup_;
+        // RAM size of the data the user want to compute
+        drawing::Matrix::number approximate_mem_size_;
 
         // Serialization
         friend class cereal::access;

@@ -8,6 +8,8 @@ using namespace procgui;
 using namespace drawing;
 using namespace colors;
 
+// TODO use test fixture instead of parameters_example
+
 // This class is very visual, so it is difficult to test. However, one part is
 // testable : constructors.
 // There is very little getters in LSystemView and RuleMapBuffer<>, so accessing
