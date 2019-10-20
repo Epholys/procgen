@@ -250,7 +250,7 @@ TEST_F(size_computer_test, compute_max_size)
 }
 TEST_F(size_computer_test, compute_max_size_overflow)
 {
-    constexpr int n_iter = 50;
+    constexpr int n_iter = 40;
     LSystem no_const_lsys = lsys;
     InterpretationMap no_const_map = map;
     DrawingParameters params;
@@ -287,3 +287,23 @@ TEST_F(size_computer_test, compute_max_sizeKO_n)
 
     ASSERT_ANY_THROW(compute_max_size(lsys, map, n_iter));
 }
+TEST_F(size_computer_test, memory_size)
+{
+    constexpr int n_iter = 7;
+    Matrix::number total_size { 0 };
+    auto sizes = compute_max_size(lsys, map, n_iter);
+
+    total_size += sizes.lsystem_size * bytes_per_predecessor;
+    total_size += sizes.vertices_size * bytes_per_vertex;
+
+    ASSERT_EQ(total_size, memory_size(sizes));
+}
+TEST_F(size_computer_test, memory_size_overflow)
+{
+    constexpr int n_iter = 40;
+    Matrix::number total_size { 0 };
+    auto sizes = compute_max_size(lsys, map, n_iter);
+
+    ASSERT_EQ(Matrix::MAX, memory_size(sizes));
+}
+

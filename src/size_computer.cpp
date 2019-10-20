@@ -110,7 +110,7 @@ namespace drawing
         return overflowed_;
     }
 
-    bool Matrix::add_overflow(number a, number b) const
+    bool Matrix::add_overflow(number a, number b)
     {
         if (a > MAX - b)
         {
@@ -119,7 +119,7 @@ namespace drawing
 
         return false;
     }
-    bool Matrix::mult_overflow(number a, number b) const
+    bool Matrix::mult_overflow(number a, number b)
     {
         if (a > MAX / b)
         {
@@ -273,6 +273,45 @@ namespace drawing
         }
         
         return sizes;
+    }
+
+    Matrix::number memory_size(const system_size& size)
+    {
+        Matrix::number total_size{0};
+        if (size.overflow)
+        {
+            return Matrix::MAX;
+        }
+
+        if (Matrix::mult_overflow(size.lsystem_size, bytes_per_predecessor))
+        {
+            return Matrix::MAX;
+        }
+        else
+        {
+            total_size += size.lsystem_size * bytes_per_predecessor;
+        }
+
+        Matrix::number vx_size {0};
+        if (Matrix::mult_overflow(size.vertices_size, bytes_per_vertex))
+        {
+            return Matrix::MAX;
+        }
+        else
+        {
+            vx_size = size.vertices_size* bytes_per_vertex;
+        }
+
+        if (Matrix::add_overflow(total_size, vx_size))
+        {
+            return Matrix::MAX;
+        }
+        else
+        {
+            total_size += vx_size;
+        }
+
+        return total_size;
     }
 }
 

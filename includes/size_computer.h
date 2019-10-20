@@ -61,11 +61,12 @@ namespace drawing
         // Compute the grand sum : the sum of all element of the matrix.
         number grand_sum();
 
-    private:
         // Return true if a+b overflows.
-        bool add_overflow(number a, number b) const;
+        static bool add_overflow(number a, number b);
         // Return true if a*b overflows.
-        bool mult_overflow(number a, number b) const;
+        static bool mult_overflow(number a, number b);
+        
+    private:
         
         // Easiest data structure to implement the Matrix.
         // The innermost vectors<number> represents the rows, the outermost
@@ -132,6 +133,11 @@ namespace drawing
     system_size compute_max_size(const LSystem &lsystem,
                                  const drawing::InterpretationMap &map,
                                  int n_iter);
+
+    // Return the total memory size taken by 'size', using the number of bytes
+    // per element.
+    // If there is a overflow, returns Matrix::MAX.
+    Matrix::number memory_size(const system_size& size);
 }
 
 
