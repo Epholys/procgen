@@ -17,25 +17,32 @@ namespace drawing
     constexpr int vx_per_goforward = 1;
     constexpr int vx_per_loadposition = 3;
     constexpr int bytes_per_predecessor = sizeof(char);
-    constexpr int bytes_per_vertex = sizeof(sf::Vertex);
+    constexpr int bytes_per_vertex = sizeof(sf::Vertex) + sizeof(int); // Vertex + Iteration
     
-    // Struct containing the number of element of a complete system:
+    // Struct containing the number of element of a complete system and a overflow flag;
     struct system_size
     {
-        int lsystem_size { 0 };  // number of element for the LSystem
-        int vertices_size { 0 }; // number of element for the vertices
+        unsigned long long lsystem_size { 0 };  // number of element for the LSystem
+        unsigned long long vertices_size { 0 }; // number of element for the vertices
+        bool overflow {false};                  // true if the computation overflowed
     };
 
     // Classic Matrix helper class to compute the size, as we use Linear
     // Algebra. This is a minimalist class only implementing what's necessary.
+    // Using unsigned values makes sense for the use case of computing a size.
+    // A non-trivial part of the implementation is checking the overflow, as the
+    // size of the system is increasing exponentially.
     class Matrix
     {
     public:
+        using number = unsigned long long;
+        static constexpr number MAX = std::numeric_limits<number>::max();
+        
         // Default rule-of-five ctors
         Matrix() = default;
         ~Matrix() = default;
         // Create a matrix from 'data'
-        explicit Matrix(const std::vector<std::vector<int>>& data);
+        explicit Matrix(const std::vector<std::vector<number>>& data);
         // Create a matrix filled with 0 with dimension i*j (i=number of
         // columns).
         Matrix(std::size_t i, std::size_t j);
@@ -48,17 +55,26 @@ namespace drawing
         friend Matrix operator*(Matrix lhs, const Matrix& rhs);
 
         // Getter
-        const std::vector<std::vector<int>>& get_data() const;
+        const std::vector<std::vector<number>>& get_data() const;
+        bool has_overflowed() const;
 
         // Compute the grand sum : the sum of all element of the matrix.
-        int grand_sum() const;
-        
+        number grand_sum();
+
     private:
+        // Return true if a+b overflows.
+        bool add_overflow(number a, number b) const;
+        // Return true if a*b overflows.
+        bool mult_overflow(number a, number b) const;
+        
         // Easiest data structure to implement the Matrix.
-        // The innermost vectors<int> represents the rows, the outermost
-        // vector<int> is a collection of rows.
+        // The innermost vectors<number> represents the rows, the outermost
+        // vector<number> is a collection of rows.
         // So, the first dim is the column number, and the second the rows number.
-        std::vector<std::vector<int>> data_ {{0}};
+        std::vector<std::vector<number>> data_ {{0}};
+
+        // Flag set to true if 'operator*' or 'grand_sum' overflowed.
+        bool overflowed_ {false};
     };
 
     // Returns all the predecessors of the system LSystem-InterpretationMap, in

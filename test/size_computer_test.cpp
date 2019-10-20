@@ -6,6 +6,8 @@
 
 using namespace drawing;
 
+using number = Matrix::number;
+
 class size_computer_test :  public ::testing::Test
 {
 public:
@@ -33,33 +35,33 @@ public:
 
 TEST_F(size_computer_test, MatrixDataCtor)
 {
-    std::vector<std::vector<int>> data{{1, 2}, {3, 4}};
+    std::vector<std::vector<number>> data{{1, 2}, {3, 4}};
     Matrix mat (data);
     
     ASSERT_EQ(data, mat.get_data());
 }
 TEST_F(size_computer_test, Matrix0Ctor)
 {
-    std::vector<std::vector<int>> data{{0, 0}, {0, 0}, {0, 0}};
+    std::vector<std::vector<number>> data{{0, 0}, {0, 0}, {0, 0}};
     Matrix mat(3, 2);
     
     ASSERT_EQ(data, mat.get_data());
 }
 TEST_F(size_computer_test, MatrixCtorKOFullEmpty)
 {
-    std::vector<std::vector<int>> data {};
+    std::vector<std::vector<number>> data {};
 
     ASSERT_ANY_THROW(Matrix fail (data));
 }
 TEST_F(size_computer_test, MatrixCtorKOSecondDimEmpty)
 {
-    std::vector<std::vector<int>> data{{0}, {}, {1}};
+    std::vector<std::vector<number>> data{{0}, {}, {1}};
 
     ASSERT_ANY_THROW(Matrix fail(data));
 }
 TEST_F(size_computer_test, MatrixCtorKOMismatchedDims)
 {
-    std::vector<std::vector<int>> data{{1, 2}, {4, 5, 6}, {7, 8}};
+    std::vector<std::vector<number>> data{{1, 2}, {4, 5, 6}, {7, 8}};
 
     ASSERT_ANY_THROW(Matrix fail(data));
 }
@@ -67,21 +69,30 @@ TEST_F(size_computer_test, MatrixCtorKOMismatchedDims)
 // https://www.wolframalpha.com/input/?i=%7B%7B1%2C+2%2C+3%7D%2C%7B3%2C+2%2C+1%7D%2C%7B1%2C+2%2C+3%7D%7D*%7B%7B1%2C+2%7D%2C%7B3%2C4%7D%2C%7B5%2C6%7D%7D
 TEST_F(size_computer_test, MatrixMult)
 {
-    std::vector<std::vector<int>> data1{{1, 2, 3}, {3, 2, 1}, {1, 2, 3}};
-    std::vector<std::vector<int>> data2{{1, 2}, {3, 4}, {5, 6}};
+    std::vector<std::vector<number>> data1{{1, 2, 3}, {3, 2, 1}, {1, 2, 3}};
+    std::vector<std::vector<number>> data2{{1, 2}, {3, 4}, {5, 6}};
     Matrix mat1(data1);
     Matrix mat2(data2);
     Matrix result = mat1 * mat2;
     
-    std::vector<std::vector<int>> expected_result{{22, 28}, {14, 20}, {22, 28}};
+    std::vector<std::vector<number>> expected_result{{22, 28}, {14, 20}, {22, 28}};
 
     ASSERT_EQ(expected_result, result.get_data());
+    ASSERT_FALSE(result.has_overflowed()); 
 }
+TEST_F(size_computer_test, MatrixMultOverflow){
+    std::vector<std::vector<number>> data{{1 << 16, 2 << 16}, {3 << 16, 4 << 16}};
+    Matrix mat(data);
+    for (int i = 0; i < 10; ++i) {
+        mat *= mat;
+    }
 
+    ASSERT_TRUE(mat.has_overflowed());
+}
 TEST_F(size_computer_test, MatrixMultKOMismatchedDim)
 {
-    std::vector<std::vector<int>> data1{{1, 2, 3}, {3, 2, 1}};
-    std::vector<std::vector<int>> data2{{1, 2}, {3, 4}, {5, 6}, {7, 8}};
+    std::vector<std::vector<number>> data1{{1, 2, 3}, {3, 2, 1}};
+    std::vector<std::vector<number>> data2{{1, 2}, {3, 4}, {5, 6}, {7, 8}};
     Matrix mat1(data1);
     Matrix mat2(data2);
 
@@ -90,12 +101,22 @@ TEST_F(size_computer_test, MatrixMultKOMismatchedDim)
 
 TEST_F(size_computer_test, MatrixGrandSum)
 {
-    std::vector<std::vector<int>> data{{1, 2}, {3, 4}, {5, 6}};
+    std::vector<std::vector<number>> data{{1, 2}, {3, 4}, {5, 6}};
     Matrix mat (data);
 
-    constexpr int expected_sum = 1 + 2 + 3 + 4 + 5 + 6;
+    constexpr number expected_sum = 1 + 2 + 3 + 4 + 5 + 6;
 
     ASSERT_EQ(expected_sum, mat.grand_sum());
+    ASSERT_FALSE(mat.has_overflowed());
+}
+TEST_F(size_computer_test, MatrixGrandSumOverflow)
+{
+    std::vector<std::vector<number>> data{{Matrix::MAX, 2}, {3, 4}, {5, 6}};
+    Matrix mat (data);
+
+    number UNUSED = mat.grand_sum();
+    
+    ASSERT_TRUE(mat.has_overflowed());
 }
 
 TEST_F(size_computer_test, all_predecessors)
@@ -118,7 +139,7 @@ TEST_F(size_computer_test, lsys_rules_matrix)
     //         [0 0 0 0 0 0 0 0 0]  : x ->
     //         [0 0 0 0 0 0 0 1 0]  : y -> y
     //         [0 0 0 0 0 0 0 0 1]] : z -> z
-    const std::vector<std::vector<int>> expected_data =
+    const std::vector<std::vector<number>> expected_data =
     { {1, 0, 0, 0, 0, 0, 0, 0, 0},
       {0, 1, 0, 0, 0, 0, 0, 0, 0},
       {2, 0, 1, 2, 1, 1, 1, 0, 0},
@@ -153,7 +174,7 @@ TEST_F(size_computer_test, lsys_axiom_matrix)
     //         [0 0 0 0 0 0 0 0 0]  : x ->
     //         [0 0 0 0 0 0 0 1 0]  : y -> y
     //         [0 0 0 0 0 0 0 0 1]] : z -> z
-    const std::vector<std::vector<int>> expected_data = { {0, 0, 1, 0, 0, 0, 0, 0, 1} };
+    const std::vector<std::vector<number>> expected_data = { {0, 0, 1, 0, 0, 0, 0, 0, 1} };
 
     const Matrix computed_matrix = lsys_axiom_matrix(lsys, expected_predecessors);
 
@@ -186,7 +207,7 @@ TEST_F(size_computer_test, map_matrix)
     //  [0]  : x
     //  [1]  : y
     //  [1]] : z
-    const std::vector<std::vector<int>> expected_data =
+    const std::vector<std::vector<number>> expected_data =
     { {0},
       {0},
       {vx_per_goforward},
@@ -218,13 +239,26 @@ TEST_F(size_computer_test, compute_max_size)
     const auto [str, _1, _2] = no_const_lsys.produce(n_iter);
     const auto& [vx, _3, _4] = drawing::compute_vertices(no_const_lsys, no_const_map, params);    
    
-    const int expected_lsys_size = str.size();
-    const int expected_vx_size = vx.size();
+    const number expected_lsys_size = str.size();
+    const number expected_vx_size = vx.size();
     
     auto sizes = compute_max_size(lsys, map, n_iter);
 
     ASSERT_EQ(expected_lsys_size, sizes.lsystem_size);
     ASSERT_EQ(expected_vx_size, sizes.vertices_size);
+    ASSERT_FALSE(sizes.overflow); 
+}
+TEST_F(size_computer_test, compute_max_size_overflow)
+{
+    constexpr int n_iter = 50;
+    LSystem no_const_lsys = lsys;
+    InterpretationMap no_const_map = map;
+    DrawingParameters params;
+    params.set_n_iter(n_iter);
+    
+    auto sizes = compute_max_size(lsys, map, n_iter);
+
+    ASSERT_TRUE(sizes.overflow);
 }
 // Test if compute_max_size returns a bigger or equal size for unbalanced
 // LSystems.
@@ -239,8 +273,8 @@ TEST_F(size_computer_test, compute_max_size_unbalanced)
     const auto [str, _1, _2] = unbalanced_lsys.produce(n_iter);
     const auto& [vx, _3, _4] = drawing::compute_vertices(unbalanced_lsys, no_const_map, params);
 
-    int lsys_size = str.size();
-    int vx_size = vx.size();
+    number lsys_size = str.size();
+    number vx_size = vx.size();
     
     auto sizes = compute_max_size(lsys, map, n_iter);
 

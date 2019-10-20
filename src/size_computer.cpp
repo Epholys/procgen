@@ -5,7 +5,9 @@
 
 namespace drawing
 {
-    Matrix::Matrix(const std::vector<std::vector<int>> & data)
+    using number = Matrix::number;
+    
+    Matrix::Matrix(const std::vector<std::vector<number>> & data)
         : data_{data}
     {
         Expects(!data.empty());
@@ -19,8 +21,8 @@ namespace drawing
 
     Matrix::Matrix(std::size_t i, std::size_t j)
     {
-        std::vector<int> inners (j, 0);
-        std::vector<std::vector<int>> data (i, inners);
+        std::vector<number> inners (j, 0);
+        std::vector<std::vector<number>> data (i, inners);
         data_ = data;
     }
     
@@ -40,7 +42,29 @@ namespace drawing
             {
                 for (auto k=0ull; k<rhs_column_dim; ++k)
                 {
-                    mult.data_.at(i).at(j) += data_.at(i).at(k) * rhs.data_.at(k).at(j);
+                    number& ij = mult.data_.at(i).at(j);
+                    number ik = data_.at(i).at(k);
+                    number kj = rhs.data_.at(k).at(j);
+                    number tmp = 0;
+                    if (mult_overflow(ik, kj))
+                    {
+                        tmp = MAX;
+                        mult.overflowed_ = true;
+                    }
+                    else
+                    {
+                        tmp = ik * kj;
+                    }
+                    
+                    if (add_overflow(ij, tmp))
+                    {
+                        ij = MAX;
+                        mult.overflowed_ = true;
+                    }
+                    else
+                    {
+                        ij += tmp;
+                    }
                 }
             }
         }
@@ -48,29 +72,61 @@ namespace drawing
         *this = mult;
         return *this;
     }
-
+    
     Matrix operator*(Matrix lhs, const Matrix& rhs)
     {
         lhs *= rhs;
         return lhs;
     }
     
-    const std::vector<std::vector<int>>& Matrix::get_data() const
+    const std::vector<std::vector<number>>& Matrix::get_data() const
     {
         return data_;
     }
-
-    int Matrix::grand_sum() const
+    
+    number Matrix::grand_sum()
     {
-        int sum = 0;
+        number sum = 0;
         for (auto i=0ull; i<data_.size(); ++i)
         {
             for (auto j=0ull; j<data_.at(0).size(); ++j)
             {
-                sum += data_.at(i).at(j);
+                if (add_overflow(sum, data_.at(i).at(j)))
+                {
+                    overflowed_ = true;
+                    return MAX;
+                }
+                else
+                {
+                    sum += data_.at(i).at(j);
+                }
             }
         }
         return sum;
+    }
+
+    bool Matrix::has_overflowed() const
+    {
+        return overflowed_;
+    }
+
+    bool Matrix::add_overflow(number a, number b) const
+    {
+        if (a > MAX - b)
+        {
+            return true;
+        }
+
+        return false;
+    }
+    bool Matrix::mult_overflow(number a, number b) const
+    {
+        if (a > MAX / b)
+        {
+            return true;
+        }
+
+        return false;
     }
     
     std::string all_predecessors (const LSystem &lsystem, const drawing::InterpretationMap &map)
@@ -98,14 +154,14 @@ namespace drawing
         Expects(std::is_sorted(begin(predecessors), end(predecessors)));
         
         const auto n = predecessors.size();
-        std::vector<int> inner (n, 0);
+        std::vector<number> inner (n, 0);
 
         const auto& axiom = lsystem.get_axiom();
         for (auto i=0ull; i<n; ++i)
         {
             inner.at(i) = std::count(begin(axiom), end(axiom), predecessors.at(i));
         }
-        std::vector<std::vector<int>> data (1, inner);
+        std::vector<std::vector<number>> data (1, inner);
         return Matrix(data);
     }
     Matrix lsys_rules_matrix (const LSystem& lsystem, const std::string& predecessors)
@@ -114,8 +170,8 @@ namespace drawing
         
         // Please see the documentation to understand the matrix.
         const auto n = predecessors.size();
-        std::vector<int> inner (n, 0);
-        std::vector<std::vector<int>> data (n, inner);
+        std::vector<number> inner (n, 0);
+        std::vector<std::vector<number>> data (n, inner);
 
         const auto& rules = lsystem.get_rules();
         for (auto i=0ull; i<n; ++i)
@@ -148,8 +204,8 @@ namespace drawing
         Expects(std::is_sorted(begin(predecessors), end(predecessors)));
 
         const auto n = predecessors.size();
-        std::vector<int> inner(1, 0);
-        std::vector<std::vector<int>> data(predecessors.size(), inner);
+        std::vector<number> inner(1, 0);
+        std::vector<std::vector<number>> data(predecessors.size(), inner);
 
         const auto& rules = map.get_rules();
         for (auto i=0ull; i<n; ++i)
@@ -182,27 +238,41 @@ namespace drawing
 
     system_size compute_max_size(const LSystem &lsystem,
                                  const drawing::InterpretationMap &map,
-                                 int n_iter) {
-      Expects(n_iter >= 0);
+                                 int n_iter)
+    {
+        Expects(n_iter >= 0);
 
-      system_size sizes;
+        system_size sizes;
       
-      const auto predecessors = all_predecessors(lsystem, map);
-      const auto axiom_mat = lsys_axiom_matrix(lsystem, predecessors);
-      const auto lsys_mat = lsys_rules_matrix(lsystem, predecessors);
-      const auto map_mat = map_matrix(map, predecessors);
+        const auto predecessors = all_predecessors(lsystem, map);
+        const auto axiom_mat = lsys_axiom_matrix(lsystem, predecessors);
+        const auto lsys_mat = lsys_rules_matrix(lsystem, predecessors);
+        const auto map_mat = map_matrix(map, predecessors);
 
-      Matrix lsys_production = axiom_mat;
-      for (int i = 0; i < n_iter; ++i)
-      {
-          lsys_production *= lsys_mat;
-      }
-      sizes.lsystem_size = lsys_production.grand_sum();
-
-      Matrix vertices_interpretation = lsys_production * map_mat;
-      sizes.vertices_size = vertices_interpretation.grand_sum();
-      sizes.vertices_size += 1; // first vertex
-      
-      return sizes;
+        Matrix lsys_production = axiom_mat;
+        for (int i = 0; i < n_iter; ++i)
+        {
+            lsys_production *= lsys_mat;
+        }
+        sizes.lsystem_size = lsys_production.grand_sum();
+        if (lsys_production.has_overflowed())
+        {
+            sizes.overflow = true;
+        }
+        
+        Matrix vertices_interpretation = lsys_production * map_mat;
+        sizes.vertices_size = vertices_interpretation.grand_sum();
+        if (vertices_interpretation.has_overflowed() ||
+            sizes.vertices_size == Matrix::MAX)
+        {
+            sizes.overflow = true;
+        }
+        else
+        {
+            sizes.vertices_size += 1; // first vertex
+        }
+        
+        return sizes;
     }
 }
+
