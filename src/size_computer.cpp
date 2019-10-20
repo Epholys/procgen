@@ -197,12 +197,11 @@ namespace drawing
       {
           lsys_production *= lsys_mat;
       }
-      sizes.lsystem_size = lsys_production.grand_sum() * bytes_per_predecessor;
+      sizes.lsystem_size = lsys_production.grand_sum();
 
       Matrix vertices_interpretation = lsys_production * map_mat;
       sizes.vertices_size = vertices_interpretation.grand_sum();
       sizes.vertices_size += 1; // first vertex
-      sizes.vertices_size *= bytes_per_vertex;
       
       return sizes;
     }

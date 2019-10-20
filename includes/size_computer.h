@@ -8,7 +8,7 @@
 
 class LSystem;
 
-// Functions to compute the memory size of the LSystem string production and
+// Functions to compute the element size of the LSystem string production and
 // Turtle vertices interpretation.
 namespace drawing
 {
@@ -19,11 +19,11 @@ namespace drawing
     constexpr int bytes_per_predecessor = sizeof(char);
     constexpr int bytes_per_vertex = sizeof(sf::Vertex);
     
-    // Struct containing the number of bytes of a complete system:
+    // Struct containing the number of element of a complete system:
     struct system_size
     {
-        int lsystem_size { 0 };  // number of bytes for the LSystem
-        int vertices_size { 0 }; // number of bytes for the vertices
+        int lsystem_size { 0 };  // number of element for the LSystem
+        int vertices_size { 0 }; // number of element for the vertices
     };
 
     // Classic Matrix helper class to compute the size, as we use Linear

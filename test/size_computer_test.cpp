@@ -209,16 +209,22 @@ TEST_F(size_computer_test, map_matrixKOnoSorted)
 }
 TEST_F(size_computer_test, compute_max_size)
 {
-  constexpr int n_iter = 7;
+    constexpr int n_iter = 7;
+    LSystem no_const_lsys = lsys;
+    InterpretationMap no_const_map = map;
+    DrawingParameters params;
+    params.set_n_iter(n_iter);
 
-  auto sizes = compute_max_size(lsys, map, n_iter);
+    const auto [str, _1, _2] = no_const_lsys.produce(n_iter);
+    const auto& [vx, _3, _4] = drawing::compute_vertices(no_const_lsys, no_const_map, params);    
+   
+    const int expected_lsys_size = str.size();
+    const int expected_vx_size = vx.size();
+    
+    auto sizes = compute_max_size(lsys, map, n_iter);
 
-  // Computed directely from the application
-  constexpr int expected_lsys_size = 5833 * bytes_per_predecessor;
-  constexpr int expected_vx_size = 3829 * bytes_per_vertex;
-  ASSERT_EQ(sizes.lsystem_size, expected_lsys_size);
-  ASSERT_EQ(sizes.vertices_size, expected_vx_size);
-
+    ASSERT_EQ(expected_lsys_size, sizes.lsystem_size);
+    ASSERT_EQ(expected_vx_size, sizes.vertices_size);
 }
 // Test if compute_max_size returns a bigger or equal size for unbalanced
 // LSystems.
@@ -233,8 +239,8 @@ TEST_F(size_computer_test, compute_max_size_unbalanced)
     const auto [str, _1, _2] = unbalanced_lsys.produce(n_iter);
     const auto& [vx, _3, _4] = drawing::compute_vertices(unbalanced_lsys, no_const_map, params);
 
-    int lsys_size = str.size() * bytes_per_predecessor;
-    int vx_size = vx.size() * bytes_per_vertex;
+    int lsys_size = str.size();
+    int vx_size = vx.size();
     
     auto sizes = compute_max_size(lsys, map, n_iter);
 
@@ -243,7 +249,7 @@ TEST_F(size_computer_test, compute_max_size_unbalanced)
 }
 TEST_F(size_computer_test, compute_max_sizeKO_n)
 {
-  constexpr int n_iter = -1;
+    constexpr int n_iter = -1;
 
-  ASSERT_ANY_THROW(compute_max_size(lsys, map, n_iter));
+    ASSERT_ANY_THROW(compute_max_size(lsys, map, n_iter));
 }
