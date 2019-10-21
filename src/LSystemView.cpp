@@ -5,7 +5,7 @@
 #include "WindowController.h"
 #include "RenderWindow.h"
 #include "SupplementaryRendering.h"
-#include "imgui_extension.h"
+#include "PopupGUI.h"
 
 namespace procgui
 {
@@ -46,7 +46,6 @@ namespace procgui
         , sub_boxes_ {}
         , is_selected_ {false}
         , bounding_box_is_visible_{true}
-        , open_safeguard_popup_{false}
     {
         // Invariant respected: cohesion between the LSystem/InterpretationMap
         // and the vertices.             
@@ -89,7 +88,6 @@ namespace procgui
         , sub_boxes_ {other.sub_boxes_}
         , is_selected_ {false}
         , bounding_box_is_visible_{true}
-        , open_safeguard_popup_{false}
     {
         // Manually managing Observer<> callbacks.
         update_callbacks();
@@ -113,7 +111,6 @@ namespace procgui
         , sub_boxes_ {std::move(other.sub_boxes_)}
         , is_selected_ {false}
         , bounding_box_is_visible_{true}
-        , open_safeguard_popup_{false}
     {
         // Manually managing Observer<> callbacks.
         update_callbacks();
@@ -130,7 +127,6 @@ namespace procgui
         other.bounding_box_ = {};
         other.is_selected_ = false;
         other.is_modified_ = false;
-        other.open_safeguard_popup_ = false;
     }
 
     LSystemView& LSystemView::operator=(const LSystemView& other)
@@ -154,7 +150,6 @@ namespace procgui
             sub_boxes_ = other.sub_boxes_;
             is_selected_ = false;
             bounding_box_is_visible_ = true;
-            open_safeguard_popup_ = false;
 
             
             update_callbacks();
@@ -184,7 +179,6 @@ namespace procgui
             sub_boxes_ = std::move(other.sub_boxes_);
             is_selected_ = false;
             bounding_box_is_visible_ = true;
-            open_safeguard_popup_ = false;
 
             // Manually managing Observer<> callbacks.
             update_callbacks();
@@ -201,7 +195,6 @@ namespace procgui
             other.bounding_box_ = {};
             other.is_selected_ = false;
             other.is_modified_ = false;
-            other.open_safeguard_popup_ = false;
         }
 
         return *this;
@@ -298,77 +291,70 @@ namespace procgui
 
         if (approximate_mem_size_ > max_size)
         {
-            open_safeguard_popup_ = true;
+            open_size_warning_popup();
         }
         else
         {
             compute_vertices();
         }
     }
-    void LSystemView::size_warning_popup()
+    void LSystemView::open_size_warning_popup()
     {
-        constexpr drawing::Matrix::number megabyte = 1024 * 1024;
-        
-        ImGui::OpenPopup("Size Warning##LSysView");
-        if (ImGui::BeginPopupModal("Size Warning##LSysView"))
-        {
-            ImGui::TextColored(ImVec4(1.f, 0.5f, 0.f, 1.f), "WARNING\n");
-            if (approximate_mem_size_ == drawing::Matrix::MAX)
-            {
-                ImGui::Text("You are trying to compute a big L-System of a size bigger than 16 exabytes");
-                ImGui::Text("(bigger than the data stored by Google in 2013).");
-                ImGui::Text("You still have the choice to proceed if you have alien tech,");
-                ImGui::Text("but otherwise the application or your");
-                ImGui::SameLine();
-                ImGui::TextColored(ImVec4(0.8f, 0.f, 1.f, 1.f), "computer");
-                ImGui::SameLine();
-                ImGui::Text("will");
-                ImGui::SameLine();
-                ImGui::TextColored(ImVec4(0.f, 0.5f, 1.f, 1.f), "freeze");
-                ImGui::SameLine();
-                ImGui::Text("or");
-                ImGui::SameLine();
-                ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.f), "CRASH");
-                ImGui::SameLine();
-                ImGui::Text(".");
-            }
-            else
-            {
-                ImGui::Text("You are trying to compute a big L-System of size %llu MB, do you want to continue?", approximate_mem_size_/megabyte);
-                ImGui::Text("For big L-System, the application may take a long time to compute it.");
-                ImGui::Text("For bigger L-System, the application or your");
-                ImGui::SameLine();
-                ImGui::TextColored(ImVec4(0.8f, 0.f, 1.f, 1.f), "computer");
-                ImGui::SameLine();
-                ImGui::Text("may");
-                ImGui::SameLine();
-                ImGui::TextColored(ImVec4(0.f, 0.5f, 1.f, 1.f), "freeze");
-                ImGui::SameLine();
-                ImGui::Text("or");
-                ImGui::SameLine();
-                ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.f), "CRASH");
-                ImGui::SameLine();
-                ImGui::Text(".");
-            }
-            ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
-            if (ImGui::Button("Yes"))
-            {
-                open_safeguard_popup_ = false;
-                compute_vertices();
-            }
-            ImGui::PopStyleColor(3);
+        procgui::PopupGUI size_warning_popup =
+            { "Size Warning##LSysView",
+              [this]()
+              {
+                  constexpr drawing::Matrix::number megabyte = 1024 * 1024;
+                  ImGui::TextColored(ImVec4(1.f, 0.5f, 0.f, 1.f), "WARNING\n");
+                  if (approximate_mem_size_ == drawing::Matrix::MAX)
+                  {
+                      ImGui::Text("You are trying to compute a big L-System of a size bigger than 16 exabytes");
+                      ImGui::Text("(bigger than the data stored by Google in 2013).");
+                      ImGui::Text("You still have the choice to proceed if you have alien tech,");
+                      ImGui::Text("but otherwise the application or your");
+                      ImGui::SameLine();
+                      ImGui::TextColored(ImVec4(0.8f, 0.f, 1.f, 1.f), "computer");
+                      ImGui::SameLine();
+                      ImGui::Text("will");
+                      ImGui::SameLine();
+                      ImGui::TextColored(ImVec4(0.f, 0.5f, 1.f, 1.f), "freeze");
+                      ImGui::SameLine();
+                      ImGui::Text("or");
+                      ImGui::SameLine();
+                      ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.f), "CRASH");
+                      ImGui::SameLine();
+                      ImGui::Text(".");
+                  }
+                  else
+                  {
+                      ImGui::Text("You are trying to compute a big L-System of size %llu MB, do you want to continue?", approximate_mem_size_/megabyte);
+                      ImGui::Text("For big L-System, the application may take a long time to compute it.");
+                      ImGui::Text("For bigger L-System, the application or your");
+                      ImGui::SameLine();
+                      ImGui::TextColored(ImVec4(0.8f, 0.f, 1.f, 1.f), "computer");
+                      ImGui::SameLine();
+                      ImGui::Text("may");
+                      ImGui::SameLine();
+                      ImGui::TextColored(ImVec4(0.f, 0.5f, 1.f, 1.f), "freeze");
+                      ImGui::SameLine();
+                      ImGui::Text("or");
+                      ImGui::SameLine();
+                      ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.f), "CRASH");
+                      ImGui::SameLine();
+                      ImGui::Text(".");
+                  }
 
-            ImGui::SameLine();
-            ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
-            if (ImGui::Button("No"))
-            {
-                open_safeguard_popup_ = false;
-            }
-            ImGui::PopStyleColor(3);
-            
-            ImGui::EndPopup();
-        }
+                  ImGui::Text("Selecting 'OK' will start the computation, this popup will stay open during this time.");
+              },
+              false, "Yes", "No",
+              [this]()
+              {
+                  compute_vertices();
+              }
+            };
+        procgui::push_popup(size_warning_popup);
     }
+
     void LSystemView::compute_vertices()
     {
         // Invariant respected: cohesion between the vertices and the bounding
@@ -398,11 +384,6 @@ namespace procgui
     
     void LSystemView::draw(sf::RenderTarget &target)
     {
-        if (open_safeguard_popup_)
-        {
-            size_warning_popup();
-        }
-        
         // Interact with the models.
         interact_with(*this, name_, is_modified_, &is_selected_);
 

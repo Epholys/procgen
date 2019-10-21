@@ -30,8 +30,7 @@ namespace controller
                   {
                       std::string error_message = "Error: can't open file: "+save_dir_.filename().string();
                       ImGui::Text(error_message.c_str());
-                  },
-                  true
+                  }
                 };
 
             procgui::push_popup(file_error_popup);
@@ -281,8 +280,7 @@ namespace controller
                   {
                       std::string error_message = "Error: can't open directory: "+save_dir_.filename().string();
                       ImGui::Text(error_message.c_str());
-                  },
-                  true
+                  }
                 };
             procgui::push_popup(dir_error_popup);
             close_menu_ = true;

@@ -116,13 +116,6 @@ namespace procgui
         bool is_inside(const sf::Vector2f& click) const;
 
 
-        // Safeguard the computation of vertices when the size is too big.
-        // Flag the opening of the size warning popup if the size is higher than
-        // TODO, otherwise, simply call 'compute_vertices()'
-        void size_safeguard();
-        // Display the size warning popup and call 'compute_vertices()' if the
-        // user confirms the computation.
-        void size_warning_popup();
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();
         // Paint the vertices.
@@ -143,6 +136,14 @@ namespace procgui
 
         // Draw the box when a LSystemView is selected.
         void draw_select_box(sf::RenderTarget& target, const sf::FloatRect& bounding_box) const;
+
+        // Safeguard the computation of vertices when the size is too big.
+        // Flag the opening of the size warning popup if the size is higher than
+        // TODO, otherwise, simply call 'compute_vertices()'
+        void size_safeguard();
+        // Display the size warning popup and call 'compute_vertices()' if the
+        // user confirms the computation.
+        void open_size_warning_popup();
         
         // The managers of unique identifiers and colors for each instance of
         // LSystemView. 
@@ -188,8 +189,6 @@ namespace procgui
         // True if the bounding box must be visible
         bool bounding_box_is_visible_;
 
-        // Flag to open the warning size popup
-        bool open_safeguard_popup_;
         // RAM size of the data the user want to compute
         drawing::Matrix::number approximate_mem_size_;
 

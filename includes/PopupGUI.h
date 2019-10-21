@@ -12,7 +12,7 @@ namespace procgui
     {
         std::string name {"Popup"};
         std::function<void()> message{nullptr};
-        bool only_info { false };
+        bool only_info { true };
         std::string ok_text = "OK";
         std::string cancel_text = "Cancel";
         std::function<void()> ok_callback {nullptr};
