@@ -9,6 +9,8 @@
 
 #include "imgui/imgui.h"
 
+#include "SaveMenu.h"
+
 namespace procgui
 {
     class LSystemView;
@@ -77,8 +79,9 @@ namespace controller
 
         // Display and interact with the save menu window.
         // Managed the window, opening and saving into a file.
-        static void save_menu(sf::Keyboard::Key key  = sf::Keyboard::Unknown);
-
+        // static void save_menu(sf::Keyboard::Key key  = sf::Keyboard::Unknown);
+        static SaveMenu save_menu_;
+        
         // Private flag to let the load menu open between frames.
         static bool load_menu_open_;
 

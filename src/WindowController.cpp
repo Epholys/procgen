@@ -9,6 +9,7 @@
 #include "LSystemController.h"
 #include "LSystemView.h"
 #include "imgui_extension.h"
+#include "PopupGUI.h"
 
 using sfml_window::window;
 namespace fs = std::experimental::filesystem;
@@ -34,6 +35,8 @@ namespace controller
     
     fs::path WindowController::save_dir_ = fs::u8path(u8"saves");
 
+    SaveMenu WindowController::save_menu_;
+    
     std::vector<std::string> WindowController::error_messages {};
     
     sf::Vector2f WindowController::real_mouse_position(sf::Vector2i mouse_click)
@@ -100,391 +103,6 @@ namespace controller
                 paste_view(lsys_views, LSystemController::saved_view(), real_mouse_position(sf::Mouse::getPosition(window)));
             }
             ImGui::EndPopup();
-        }
-    }
-
-    void WindowController::save_menu(sf::Keyboard::Key key)
-    {
-        // The file name in which will be save the LSystem.
-        static std::array<char, FILENAME_LENGTH_> save_file;
-        // Index of the file in the save menu
-        static int selected_file = -1;
-        // True if an existing save file is selected with the mouse.
-        static bool click_selected = false;
-        // Flag to open the directory error popup open between frames.
-        static bool dir_error_popup = false;
-        // Flag to open the file error popup open between frames.
-        static bool file_error_popup = false;
-        // Flag to open the save confirmation popup.
-        static bool save_validation_popup = false;
-        // Flag to know if a file is selected twice (meaning two click or one
-        // other selection and one click).
-        // Used to quickly save a file with the mouse.
-        static bool double_selection = false;
-
-        // Little helper to manage the use of 'Escape' key in popups.
-        auto escape_popup_if_necessary = [](sf::Keyboard::Key& key, bool& popup)
-            {
-                if (key == sf::Keyboard::Escape)
-                {
-                    // Consume the key to avoid propagating it to another element.
-                    key = sf::Keyboard::Unknown;
-                    popup = false;
-                    ImGui::CloseCurrentPopup();
-                }
-            };
-        
-        ImGui::SetNextWindowPosCenter();
-        if (ImGui::Begin("Save LSystem to file", &save_menu_open_, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
-        {
-            // Avoid interaction with the background when saving a file.
-            ImGui::CaptureKeyboardFromApp();
-            ImGui::CaptureMouseFromApp();
-
-            ImGui::Separator();
-
-            struct file_entry
-            {
-                fs::directory_entry file;
-                std::string filename;
-                std::u32string u32filename;
-            };
-                
-            std::vector<file_entry> files;
-            try
-            {
-                // Get all files in the 'save_dir_' directory, ...
-                for (const auto& file : fs::directory_iterator(save_dir_))
-                {
-                    files.push_back({file,
-                                file.path().filename().string(),
-                                file.path().filename().u32string()});
-                }
-
-                // ... remove the directory, links, etc ...
-                const auto to_remove = std::remove_if(begin(files),
-                                                      end(files),
-                                                      [](const auto& f){return !fs::is_regular_file(f.file.path());});
-                files.erase(to_remove, end(files));
-                                
-                // ... sort them lexicographically, ...
-                std::sort(begin(files), end(files),
-                          [](const auto& left, const auto& right)
-                          {
-                              auto left_u32str = left.u32filename;
-                              std::transform(begin(left_u32str), end(left_u32str), begin(left_u32str),
-                                             [](auto c){return std::tolower(c);});
-                              auto right_u32str = right.u32filename;
-                              std::transform(begin(right_u32str), end(right_u32str), begin(right_u32str),
-                                             [](auto c){return std::tolower(c);});
-                              return left_u32str < right_u32str;                          
-                          });
-                
-                // I'm bad at imgui's layout witchcraft, so there is a lot of
-                // magic numbers here and there.
-                constexpr float xfont_margin = -5.6;      // Little margin to adjust horizontal spacing of the font size
-                constexpr float yfont_margin = 5;         // Little margin to adjust vertical spacing of the font size
-                constexpr float separation_size = 10;     // Little margin to take care of the case : lots of small files
-                constexpr float min_xsize = 300;         // Minimum horizontal size of the window, for the bottom text
-                constexpr float ymargin = 100;            // Vertical margin for the text below
-                const float hfont_size = ImGui::GetFontSize()+xfont_margin;    // Total horizontal font size
-                const float vfont_size = ImGui::GetFontSize()+yfont_margin;    // Total vertical font size
-                constexpr float xratio = 3/4.;           // Ratio of the horizontal size of the load window
-                                                         //   in regards to the sfml window
-                constexpr float yratio = 3/4.;           // Ratio of the vertical size of the load window
-                                                         //   in regards to the sfml window
-                const float max_xsize = sfml_window::window.getSize().x * xratio;  // Maximum x-size of the load window
-                const float max_ysize = sfml_window::window.getSize().y * yratio;  // Maximum y-size of the load window
-
-                const float total_vertical_size = vfont_size * files.size();    // Total vertical size of the file list
-                const int n_column = (total_vertical_size / max_ysize)+1;       // Number of column deduced
-                // Number of files per column, taking care that only the last column has less element
-                int file_per_column = files.size() / n_column;
-                file_per_column = file_per_column % n_column != 0 ? file_per_column + 1 : file_per_column;
-                    
-                float vertical_size = total_vertical_size / n_column;           // On-screen vertical size of the file list
-                vertical_size = vertical_size == 0 ? 1 : vertical_size;         // '0' has a special value for imgui, put '1'
-
-                // Iterator to the file with the biggest file name
-                const auto longest_file = std::max_element(begin(files), end(files),
-                                                           [](const auto& f1, const auto& f2)
-                                                           {return f1.u32filename.size() <
-                                                                   f2.u32filename.size();});
-
-                int longest_file_size = 0;
-                if (longest_file != end(files)) // Makes sure there are files.
-                {
-                    longest_file_size = longest_file->filename.size();                    
-                }
-                float total_horizontal_size =  (longest_file_size * hfont_size + separation_size) * n_column; // Total horizontal size of the file list, column included.
-                total_horizontal_size = total_horizontal_size == 0 ? 1 : total_horizontal_size;               // '0' has a special value for imgui, put '1'
-                float horizontal_size = total_horizontal_size < min_xsize ? min_xsize : total_horizontal_size;
-                horizontal_size = horizontal_size < max_xsize ? horizontal_size : max_xsize;
-                
-                // The size of the load window.
-                // x is the clamped total horizontal size
-                // y is the vertical size of the list + space for the bottom text
-                ImGui::SetWindowSize(ImVec2(horizontal_size, vertical_size + ymargin)); 
-
-                // The virtual size of the files list. Virtual because it may not appear completely on screen, with scrollbar
-                // x is the horizontal size of the columned files list
-                // y is the vertical size of the list without the space for the bottom text
-                ImGui::SetNextWindowContentSize(ImVec2(total_horizontal_size, vertical_size));
-
-                //  Visible size of the files list
-                //  x has the same size of the load window
-                //  y has the same size of the content size
-                ImGui::BeginChild("##ScrollingRegion", ImVec2(horizontal_size, vertical_size), false, ImGuiWindowFlags_HorizontalScrollbar);
-                ImGui::Columns(n_column);
-                
-                for (auto i=0; i<(int)files.size(); ++i)
-                {
-                    const auto& file = files.at(i);
-
-                    // Displays the files in a selectable list
-                    if (ImGui::Selectable(file.filename.c_str(), selected_file == i))
-                    {
-                        if (!double_selection && selected_file == i)
-                        {
-                            double_selection = true;
-                        }
-                        
-                        // Update selected file to highlight the Selectable
-                        selected_file = i;
-                        // The user have selected with the mouse
-                        click_selected = true;
-
-                        // Updates the save file selection
-                        save_file = string_to_array<save_file.size()>(file.filename);
-                        
-                    }
-                    if ((i+1) % file_per_column == 0)
-                    {
-                        ImGui::NextColumn();
-                    }
-                }
-                ImGui::Columns(1);
-                ImGui::EndChild();
-
-                // If there is no issue the popup should not be opened.
-                // This is useful in the rare case when the file permissions for
-                // the saves/ directory changes while the dir_error_popup is
-                // open.
-                dir_error_popup = false;
-
-            }
-            catch (const fs::filesystem_error& e)
-            {
-                // If we can't open 'save_dir_', open an error popup.
-
-                dir_error_popup = true;
-            }
-
-            if (dir_error_popup)
-            {
-                ImGui::OpenPopup("Error##DIR");
-                if (ImGui::BeginPopupModal("Error##DIR", &dir_error_popup))
-                {
-                    escape_popup_if_necessary(key, dir_error_popup);
-                    
-                    std::string error_message = "Error: can't open directory: "+save_dir_.filename().string();
-                    ImGui::Text(error_message.c_str());
-                    ImGui::EndPopup();
-                }
-                if (!dir_error_popup)
-                {
-                    // Close the save menu when closing the error popup: if we
-                    // can not open the directory, we can not save anything.
-                    save_menu_open_ = false;
-                }
-            }
-
-            ImGui::Separator();
-
-            // Allows directly typing a filename after opening the save menu.
-            // Only focus if no popup is open
-            if (!save_validation_popup && !dir_error_popup && !file_error_popup
-                 && !ImGui::IsAnyItemActive())
-            {
-                ImGui::SetKeyboardFocusHere();
-            }
-
-            std::string trimmed_filename = trim(array_to_string(save_file));
-
-            // If the user selected a save file:
-            if (click_selected)
-            {
-                // InputText does not put automatically the cursor to the end
-                // when selecting a file. As such, we use a InputText callback
-                // to put the cursor to the end. The problem is, this callback
-                // is executed each frame, but the first one does not count. So
-                // we must execute this part for two frames, which is the role
-                // of 'first_frame'.
-                static bool first_frame = true;
-
-                struct PutCursorEndCallback
-                {
-                    static int put_cursor_at_end(ImGuiInputTextCallbackData *data)
-                        {
-                            data->CursorPos = data->BufTextLen * sizeof(int);
-                            return 0;
-                        }
-                };
-                ImGui::InputText("Filename###SAME", save_file.data(), save_file.size(),
-                                 ImGuiInputTextFlags_CallbackAlways,
-                                 PutCursorEndCallback::put_cursor_at_end);
-
-                if(!first_frame)
-                {
-                    click_selected = false;
-                    first_frame = true;
-                }
-                else
-                {
-                    first_frame = false;
-                }
-            }
-            else
-            {
-                if(ImGui::InputText("Filename###SAME", save_file.data(), save_file.size()))
-                {
-                    trimmed_filename = trim(array_to_string(save_file));
-
-                    int i = -1;
-                    auto same_name = std::find_if(begin(files), end(files),
-                                                  [trimmed_filename, &i](const auto& f)
-                                                  {++i; return trimmed_filename == f.filename;});
-                    if (same_name != end(files))
-                    {
-                        selected_file = i;
-                    }
-                    else
-                    {
-                        selected_file = -1;
-                    }
-                }
-            }
-
-            ImGui::Separator();
-
-            bool save = false;
-            // Save button (with a simple check for a empty filename)
-            ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
-            if ((!save_validation_popup && !dir_error_popup && !file_error_popup) &&  // If no popup is open &&
-                (ImGui::Button("Save") || key == sf::Keyboard::Enter || double_selection) && // If the user want to save &&
-                !trimmed_filename.empty())                                            // A valid filename
-            {
-                double_selection = false;
-                
-                // Consume the key to avoid propagating it to another element.
-                key = sf::Keyboard::Unknown;
-                
-                if (selected_file >= 0)
-                {
-                    save_validation_popup = true;
-                }
-                else
-                {
-                    save = true;
-                }
-            }
-            ImGui::PopStyleColor(3);
-            
-            if (save_validation_popup)
-            {
-                // Popup is now open, imgui takes care of the open/close state.
-                ImGui::OpenPopup("Error##EXISTS");
-                if (ImGui::BeginPopupModal("Error##EXISTS", &save_validation_popup,
-                                           ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
-                {
-                    escape_popup_if_necessary(key, save_validation_popup);
-                    
-                    std::string warning_text = trimmed_filename + " already exists.\nDo you want to overwrite it?";
-                    ImGui::Text(warning_text.c_str());
-
-                    ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
-                    if (ImGui::Button("Overwrite") || key == sf::Keyboard::Enter)
-                    {
-                        key = sf::Keyboard::Unknown;
-                        save = true;
-                        save_validation_popup = false;
-                    }
-                    ImGui::PopStyleColor(3);                    
-
-                    ImGui::SameLine();
-                    ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
-                    if (ImGui::Button("Cancel"))
-                    {
-                        save_validation_popup = false;
-                    }
-                    ImGui::PopStyleColor(3);
-                    
-                    ImGui::EndPopup();
-                }
-            }
-
-            if (save)
-            {
-                // Open the output file.
-                std::ofstream ofs (save_dir_/trimmed_filename);
-
-                // Open the error popup if we can not open the file.
-                if(!ofs.is_open())
-                {
-                    file_error_popup = true;
-                }
-                else
-                {
-                    // Save the LSystemView in the file.
-                    cereal::JSONOutputArchive archive (ofs);
-                    if (LSystemController::under_mouse()) // Virtually useless check.
-                    {
-                        LSystemController::under_mouse()->set_name(trimmed_filename);
-                        archive(cereal::make_nvp("LSystemView", *LSystemController::under_mouse()));
-                    }
-                    save_menu_open_ = false;
-                }
-            }
-            
-            // File error popup if we can not open the output file.
-            if (file_error_popup)
-            {
-                ImGui::OpenPopup("Error##PERM");
-                if (ImGui::BeginPopupModal("Error##PERM", &file_error_popup))
-                {
-                    escape_popup_if_necessary(key, file_error_popup);
-                    
-                    std::string message = "Error: can't open file: '" + array_to_string(save_file) + "'";
-                    ImGui::Text(message.c_str());
-                    ImGui::EndPopup();
-                }
-            }
-            
-            // Fast close the save menu
-            ImGui::SameLine();
-            ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
-            if (ImGui::Button("Cancel"))
-            {
-                save_menu_open_ = false;
-            }
-            ImGui::PopStyleColor(3);
-                                
-            ImGui::End();
-        }
-
-        if (key == sf::Keyboard::Escape)
-        {
-            save_menu_open_ = false;
-        }
-
-        if (save_menu_open_ == false)
-        {
-            dir_error_popup = false;
-            dir_error_popup = false;
-            file_error_popup = false;
-            save_validation_popup = false;
-            click_selected = false;
-            double_selection = false;
         }
     }
 
@@ -1027,7 +645,7 @@ namespace controller
                 }
             }
             
-            else if ((load_menu_open_ || save_menu_open_ || quit_popup_open_) &&
+            else if ((load_menu_open_ || save_menu_open_ || quit_popup_open_ || !procgui::popup_empty()) &&
                      event.type == sf::Event::KeyPressed)
             {
                 key_to_menus = event.key.code;
@@ -1095,13 +713,17 @@ namespace controller
             LSystemController::handle_input(lsys_views, event);
         }
 
+        if (!procgui::popup_empty())
+        {
+            procgui::display_popups(key_to_menus);
+        }        
         if (quit_popup_open_)
         {
             quit_popup(key_to_menus);
         }
         else if (save_menu_open_)
         {
-            save_menu(key_to_menus);
+            save_menu_open_ = !save_menu_.open_save_menu(key_to_menus);
         }
         else if (load_menu_open_)
         {
