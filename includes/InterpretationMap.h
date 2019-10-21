@@ -9,7 +9,7 @@
 #include "DrawingParameters.h"
 #include "RuleMap.h"
 #include "helper_string.h"
-#include "WindowController.h"
+#include "LoadMenu.h"
 
 // Main explanation of drawing in Turtle.h
 namespace drawing
@@ -100,7 +100,7 @@ namespace drawing
         int index = 0;
         if (it == end(all_orders_json_name))
         {
-            controller::WindowController::add_loading_error_message("One InterpretationMap's order does not exist, it is now set to go_forward");
+            controller::LoadMenu::add_loading_error_message("One InterpretationMap's order does not exist, it is now set to go_forward");
         }
         else
         {
@@ -177,11 +177,11 @@ namespace drawing
 
                 if (key_too_big)
                 {
-                    controller::WindowController::add_loading_error_message("One or more InterpretationMap's key was too big, it is now cropped.");
+                    controller::LoadMenu::add_loading_error_message("One or more InterpretationMap's key was too big, it is now cropped.");
                 }
                 if (void_key)
                 {
-                    controller::WindowController::add_loading_error_message("One or more InterpretationMap's key was empty, so it was ignored.");
+                    controller::LoadMenu::add_loading_error_message("One or more InterpretationMap's key was empty, so it was ignored.");
                 }
             }
     };

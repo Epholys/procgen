@@ -5,7 +5,7 @@
 #include "helper_cereal.hpp"
 #include "ColorsGeneratorSerializer.h"
 #include "helper_math.h"
-#include "WindowController.h"
+#include "LoadMenu.h"
 
 namespace colors
 {
@@ -74,7 +74,7 @@ namespace colors
                 if (angle_ < 0. || angle_ > 360)
                 {
                     angle_ = math::clamp_angle(angle_);
-                    controller::WindowController::add_loading_error_message("VertexPainterLinear's angle wasn't in the [0,360] range, so it is clamped.");
+                    controller::LoadMenu::add_loading_error_message("VertexPainterLinear's angle wasn't in the [0,360] range, so it is clamped.");
                 }
                 
                 ColorGeneratorSerializer serializer;

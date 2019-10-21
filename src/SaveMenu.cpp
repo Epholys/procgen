@@ -28,6 +28,7 @@ namespace controller
                 { "Error##PERM",
                   [this]()
                   {
+                      // TODO true name
                       std::string error_message = "Error: can't open file: "+save_dir_.filename().string();
                       ImGui::Text(error_message.c_str());
                   }
@@ -306,6 +307,7 @@ namespace controller
 
             // Allows directly typing a filenxame after opening the save menu.
             // Only focus if no popup is open
+            // TODO move
             if (procgui::popup_empty() &&
                 !ImGui::IsAnyItemActive())
             {

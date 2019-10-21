@@ -5,6 +5,7 @@
 #include "LSystemView.h"
 #include "RenderWindow.h"
 #include "SupplementaryRendering.h"
+#include "WindowController.h"
 
 using namespace drawing;
 using namespace math;

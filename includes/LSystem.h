@@ -10,7 +10,7 @@
 
 #include "Observable.h"
 #include "RuleMap.h"
-#include "WindowController.h"
+#include "LoadMenu.h"
 
 namespace cereal
 {
@@ -61,11 +61,11 @@ namespace cereal
         
         if (key_too_big)
         {
-            controller::WindowController::add_loading_error_message("One or more LSystem's key was too big, it is now cropped.");
+            controller::LoadMenu::add_loading_error_message("One or more LSystem's key was too big, it is now cropped.");
         }
         if (void_key)
         {
-            controller::WindowController::add_loading_error_message("One or more LSystem's key was empty, so it was ignored.");
+            controller::LoadMenu::add_loading_error_message("One or more LSystem's key was empty, so it was ignored.");
         }
 
     }

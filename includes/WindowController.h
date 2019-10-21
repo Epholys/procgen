@@ -10,6 +10,7 @@
 #include "imgui/imgui.h"
 
 #include "SaveMenu.h"
+#include "LoadMenu.h"
 
 namespace procgui
 {
@@ -53,11 +54,6 @@ namespace controller
 
         // Getter for the zoom level
         static float get_zoom_level();
-
-        // Add a error message to be displayed at loading time.
-        // This function should be called when an error occurs when
-        // deserializing a LSystemView.
-        static void add_loading_error_message(const std::string& message);
         
         // Public flag to message WindowController to start the save menu. It is
         // also used to let the window open between frames.
@@ -65,7 +61,11 @@ namespace controller
         // called elsewhere, so there is this ugly flag.
         static bool save_menu_open_;
 
+        // Default step size at default zoom level TODO: remove when step optimization
+        static const double default_step_;
+
     private:
+        
         // Helper method to paste 'view' at 'position' and add it to
         // 'lsys_views'. 
         static void paste_view(std::list<procgui::LSystemView>& lsys_views,
@@ -81,6 +81,7 @@ namespace controller
         // Managed the window, opening and saving into a file.
         // static void save_menu(sf::Keyboard::Key key  = sf::Keyboard::Unknown);
         static SaveMenu save_menu_;
+
         
         // Private flag to let the load menu open between frames.
         static bool load_menu_open_;
@@ -88,10 +89,11 @@ namespace controller
         // Display and interact with the load menu window. Load from files the
         // LSystems into 'lsys_views'. 'key' is forwarded to manage navigation
         // and 'unicode' to help selection.
-        static void load_menu(std::list<procgui::LSystemView>& lsys_views,
-                              sf::Keyboard::Key key = sf::Keyboard::Unknown,
-                              sf::Uint32 unicode = 0);
-
+        // static void load_menu(std::list<procgui::LSystemView>& lsys_views,
+        //                       sf::Keyboard::Key key = sf::Keyboard::Unknown,
+        //                       sf::Uint32 unicode = 0);
+        static LoadMenu load_menu_;
+        
         // Flag to let the quit popup open;
         static bool quit_popup_open_;
         // If at least one open LSystemView is not saved, open a quit warning popup.
@@ -107,8 +109,6 @@ namespace controller
 
         // The zoom level in the window.
         static float zoom_level_;
-        // Default step size at default zoom level
-        static const double default_step_;
         
         // Current mouse position
         static sf::Vector2i mouse_position_;
@@ -124,9 +124,6 @@ namespace controller
         
         // The fixed save directory of the application
         static std::experimental::filesystem::path save_dir_;
-
-        // Error messages to be displayed if necessary at loading time.
-        static std::vector<std::string> error_messages;
     };
 }
 

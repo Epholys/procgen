@@ -68,6 +68,4 @@ namespace drawing
         n_iter_ = n_iter;
         notify();
     }
-
 }
-
