@@ -570,29 +570,6 @@ namespace controller
             double_selection = false;
         }
     }
-
-    void  WindowController::quit_popup(sf::Keyboard::Key key)
-    {
-        ImGui::OpenPopup("WARNING##SAVES");
-        if (ImGui::BeginPopupModal("WARNING##SAVES"))
-        {
-            ImGui::Text("At least one L-System is not saved.\nDo you still want to quit?");
-            ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
-            if (ImGui::Button("Yes, quit") || key == sf::Keyboard::Enter)
-            {
-                window.close();
-            }
-            ImGui::PopStyleColor(3);
-            ImGui::SameLine();
-            ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
-            if (ImGui::Button("No, stay") || key ==  sf::Keyboard::Escape)
-            {
-                quit_popup_open_ = false;
-            }
-            ImGui::PopStyleColor(3);
-            ImGui::EndPopup();
-        }                        
-    }
     
     void WindowController::handle_input(std::vector<sf::Event> events,
                                         std::list<procgui::LSystemView>& lsys_views)
@@ -611,10 +588,26 @@ namespace controller
             {
                 // Check if a LSystemView is saved but not modified
                 quit_popup_open_ = std::any_of(begin(lsys_views), end(lsys_views),
-                                                [](const auto& view){return view.is_modified();});
+                                               [](const auto& view){return view.is_modified();});
                 if (!quit_popup_open_)
                 {
                     window.close();
+                }
+                else
+                {
+                    procgui::PopupGUI quit_popup =
+                        { "WARNING##SAVES",
+                          []()
+                          {
+                              ImGui::Text("At least one L-System is not saved.\nDo you still want to quit?");
+                          },
+                          false, "Yes, quit", "No, stay",
+                          []()
+                          {
+                              window.close();
+                          }
+                        };
+                    procgui::push_popup(quit_popup);
                 }
             }
 
@@ -645,7 +638,7 @@ namespace controller
                 }
             }
             
-            else if ((load_menu_open_ || save_menu_open_ || quit_popup_open_ || !procgui::popup_empty()) &&
+            else if ((load_menu_open_ || save_menu_open_ || !procgui::popup_empty()) &&
                      event.type == sf::Event::KeyPressed)
             {
                 key_to_menus = event.key.code;
@@ -717,11 +710,7 @@ namespace controller
         {
             procgui::display_popups(key_to_menus);
         }        
-        if (quit_popup_open_)
-        {
-            quit_popup(key_to_menus);
-        }
-        else if (save_menu_open_)
+        if (save_menu_open_)
         {
             save_menu_open_ = !save_menu_.open_save_menu(key_to_menus);
         }
