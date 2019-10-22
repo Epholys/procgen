@@ -8,55 +8,84 @@
 
 #include <SFML/Window.hpp>
 
+#include "WindowController.h"
+
 namespace controller
 {
-    // Warning: modifying permission on files or saves/ directory while the menu is open is not graceful, but works
+    // A class implementing the save menu of the application.
+    // Usage : simply call 'open()' and it manages the display and user inputs,
+    // with the huge help of imgui.
+    // 
+    // Warning: modifying permission on files or saves/ directory while the menu
+    // is open is not graceful, but works. 
     class SaveMenu
     {
     public:
-        bool open_save_menu(sf::Keyboard::Key key);
+
+        // Function called every frame the save menu should be open.
+        // Main entry managing display and actions of the save menu.
+        //
+        // Returns true if the menu has done its job and should be closed
+        bool open(sf::Keyboard::Key key);
 
     private:
-      struct file_entry {
-        std::filesystem::directory_entry file;
-        std::string filename;
-        std::u32string u32filename;
-      };
+        // A file entry with all its components
+        struct file_entry {
+            std::filesystem::directory_entry file; // The file object
+            std::string filename;       // The name in 'char' raw encoding
+            std::u32string u32filename; // The name in 'utf32' encoding
+        };
 
+        // The column layout of the save manu
         struct column_layout
         {
-            int n_column { 1 };
-            int file_per_column { 1 };
+            int n_column { 1 };        // Number of column
+            int file_per_column { 1 }; // Number of files per column
         };
+
+        // Compute the layout of the file list display and open it.
+        // 'save_files' is used to manages filename sizes.
         column_layout list_layout(const std::vector<file_entry>& save_files);
+
+        // Display the list and manages selection of files
+        // 'save_files' is filled here.
         void list(std::vector<file_entry>& save_files);
 
+        // InputText management
+        // 'saves_files' is used to update selected_file_ if the entered name matches.
+        void input_text_field(const std::vector<file_entry>& save_files,
+                              std::string& trimmed_filename);
 
-        // InputText does not put automatically the cursor to the end
-        // when selecting a file. As such, we use a InputText callback
-        // to put the cursor to the end. The problem is, this callback
-        // is executed each frame, but the first one does not count. So
-        // we must execute this part for two frames, which is the role
-        // of 'first_frame'.
-        bool first_input_frame_ = true;
-        void input_text_field(const std::vector<file_entry>& save_files, std::string& trimmed_filename);
+        // Save button
+        // 'trimmed_filename' is used in the warning popup
+        // 'key' for the shortcut save validation
+        // Returns true if the LSys should be saved
         bool save_button(const std::string& trimmed_filename, sf::Keyboard::Key& key);
+
+        // Finally, the method to save the LSys.
+        // 'trimmed_filename' is the final name.
         void save_lsys(const std::string& trimmed_filename);
 
         
-        // TODO common w/ load
-        static constexpr int FILENAME_LENGTH_ = 128;
+        static constexpr int FILENAME_LENGTH_ = WindowController::FILENAME_LENGTH_;
+        // File to save to.
         std::array<char, FILENAME_LENGTH_> filename_;
+        // Saves directory.
+        const std::filesystem::path save_dir_ = WindowController::save_dir_;
 
-        // TODO common w/ load
-        const std::filesystem::path save_dir_ = std::filesystem::u8path(u8"saves");
-
-        
-        int selected_file_ {-1};
-        bool click_selected_ { false };
-        bool double_selection_ { false };
-
+        // True if the save menu should be closed
         bool close_menu_ { false };
+
+        // Index of the selected file in the list
+        int selected_file_ {-1};
+
+        // True if the file was selected by clicking on the list.
+        bool click_selected_ { false };
+        // True if the file was selected twise (two clicks or text+click)
+        bool double_selection_ { false };
+        // Flag to warn the InputText the user selected a file in the list (see
+        // .cpp for its use)
+        bool first_input_frame_ = true;
     };
 }
 

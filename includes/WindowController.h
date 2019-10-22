@@ -3,14 +3,11 @@
 
 
 #include <list>
-#include <experimental/filesystem>
+#include <filesystem>
 
 #include <SFML/Graphics.hpp>
 
 #include "imgui/imgui.h"
-
-#include "SaveMenu.h"
-#include "LoadMenu.h"
 
 namespace procgui
 {
@@ -19,6 +16,9 @@ namespace procgui
 
 namespace controller
 {
+    class SaveMenu;
+    class LoadMenu;
+    
     // WindowController is the hub for all the inputs. The main code in
     // 'handle_input()' manages the 'sf::View' of the window: resizing, zooming, and
     // dragging the view. All the others component of this application needing input
@@ -65,7 +65,7 @@ namespace controller
         static constexpr int FILENAME_LENGTH_ = 128;
         
         // The fixed save directory of the application
-        static const std::experimental::filesystem::path save_dir_;
+        static const std::filesystem::path save_dir_;
 
     private:
         

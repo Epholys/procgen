@@ -9,10 +9,12 @@
 #include "LSystemController.h"
 #include "LSystemView.h"
 #include "imgui_extension.h"
+#include "SaveMenu.h"
+#include "LoadMenu.h"
 #include "PopupGUI.h"
 
 using sfml_window::window;
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 namespace controller
 {
@@ -249,7 +251,7 @@ namespace controller
         }        
         if (save_menu_open_)
         {
-            save_menu_open_ = !save_menu_.open_save_menu(key_to_menus);
+            save_menu_open_ = !save_menu_.open(key_to_menus);
         }
         else if (load_menu_open_)
         {

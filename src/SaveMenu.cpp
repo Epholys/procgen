@@ -23,7 +23,7 @@ namespace controller
         // Open the error popup if we can not open the file.
         if(!ofs.is_open())
         {
-            // Flag to open the file error popup open between frames.
+            // Open the file error popup if the save file is inaccessible
             procgui::PopupGUI file_error_popup =
                 { "Error##PERM",
                   [this]()
@@ -40,7 +40,9 @@ namespace controller
         {
             // Save the LSystemView in the file.
             cereal::JSONOutputArchive archive (ofs);
-            if (LSystemController::under_mouse()) // Virtually useless check.
+            if (LSystemController::under_mouse()) // Virtually useless check,
+                                                  // but here to avoid null
+                                                  // pointer crash at worst
             {
                 LSystemController::under_mouse()->set_name(trimmed_filename);
                 archive(cereal::make_nvp("LSystemView", *LSystemController::under_mouse()));
@@ -55,9 +57,9 @@ namespace controller
         bool save = false;
         
         ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
-        if (procgui::popup_empty() &&  // If no popup is open &&
+        if (procgui::popup_empty() &&                                                     // If no popup is open &&
             (ImGui::Button("Save") || key == sf::Keyboard::Enter || double_selection_) && // If the user want to save &&
-            !trimmed_filename.empty())                                            // A valid filename
+            !trimmed_filename.empty())                                                    // A valid filename
         {
             double_selection_ = false;
                 
@@ -66,7 +68,7 @@ namespace controller
                 
             if (selected_file_ >= 0)
             {
-                // Flag to open the save confirmation popup.
+                // If the file already exsists, open a validation popup
                 procgui::PopupGUI  save_validation_popup =
                     { "Error##EXISTS",
                       [trimmed_filename]()
@@ -95,9 +97,24 @@ namespace controller
     
     void SaveMenu::input_text_field(const std::vector<file_entry>& save_files, std::string& trimmed_filename)
     {
+        // Allows directly typing a filenxame after opening the save menu.
+        // Only focus if no popup is open
+        if (procgui::popup_empty() &&
+            !ImGui::IsAnyItemActive())
+        {
+            ImGui::SetKeyboardFocusHere();
+        }
+        
         // If the user selected a save file:
         if (click_selected_)
         {
+            // InputText does not put automatically the cursor to the end
+            // when selecting a file. As such, we use a InputText callback
+            // to put the cursor to the end. The problem is, this callback
+            // is executed each frame, but the first one does not count. So
+            // we must execute this part for two frames, which is the role
+            // of 'first_frame'.
+            
             struct PutCursorEndCallback
             {
                 static int put_cursor_at_end(ImGuiInputTextCallbackData *data)
@@ -236,6 +253,7 @@ namespace controller
                           return left_u32str < right_u32str;                          
                       });
 
+            
             auto [n_column, file_per_column] = list_layout(save_files);
                                 
             ImGui::Columns(n_column);
@@ -275,6 +293,7 @@ namespace controller
         }
         catch (const fs::filesystem_error& e)
         {
+            // Open a popup if the directory can't be opened
             procgui::PopupGUI dir_error_popup =
                 { "Error##DIR",
                   [this]()
@@ -288,7 +307,7 @@ namespace controller
         }
     }
     
-    bool SaveMenu::open_save_menu(sf::Keyboard::Key key)
+    bool SaveMenu::open(sf::Keyboard::Key key)
     {
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Save LSystem to file", NULL, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
@@ -305,15 +324,6 @@ namespace controller
             
             ImGui::Separator();
 
-            // Allows directly typing a filenxame after opening the save menu.
-            // Only focus if no popup is open
-            // TODO move
-            if (procgui::popup_empty() &&
-                !ImGui::IsAnyItemActive())
-            {
-                ImGui::SetKeyboardFocusHere();
-            }
-
             std::string trimmed_filename = trim(array_to_string(filename_));
 
             input_text_field(save_files, trimmed_filename);
@@ -327,7 +337,6 @@ namespace controller
                 save_lsys(trimmed_filename);
             }
             
-            // Fast close the save menu
             ImGui::SameLine();
             
             ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
@@ -342,6 +351,7 @@ namespace controller
         
         if (close_menu_)
         {
+            // Reset flags
             click_selected_ = false;
             double_selection_ = false;
             close_menu_ = false;
