@@ -3,6 +3,7 @@ RuleMapBuffer<Target>::RuleMapBuffer(std::shared_ptr<Target> target)
     : Observer<Target>(target)
     , buffer_ {}
     , instruction_ {nullptr}
+    , reverse_instruction_ {nullptr}
 {
     this->add_callback([this](){sync();});
         
@@ -20,6 +21,7 @@ RuleMapBuffer<Target>::RuleMapBuffer(const RuleMapBuffer& other)
     : Observer<Target>(other.Observer<Target>::get_target())
     , buffer_ {other.buffer_}
     , instruction_ {nullptr}
+    , reverse_instruction_ {nullptr}
 {
     Observer<Target>::add_callback([this](){sync();});
 }
@@ -29,6 +31,7 @@ RuleMapBuffer<Target>::RuleMapBuffer(const RuleMapBuffer& other, std::shared_ptr
     : Observer<Target>(target)
     , buffer_ {other.buffer_}
     , instruction_ {nullptr}
+    , reverse_instruction_ {nullptr}
 {
     Observer<Target>::add_callback([this](){sync();});
 }
@@ -38,12 +41,14 @@ RuleMapBuffer<Target>::RuleMapBuffer(RuleMapBuffer&& other)
     : Observer<Target>(std::move(other.Observer<Target>::get_target()))
     , buffer_ {std::move(other.buffer_)}
     , instruction_ {nullptr}
+    , reverse_instruction_ {nullptr}
 {
     Observer<Target>::add_callback([this](){sync();});
 
     other.set_target(nullptr);
     other.buffer_ = {};
     other.instruction_ = nullptr;
+    reverse_instruction_ = nullptr;
 }
 
 template<typename Target>
@@ -54,6 +59,7 @@ RuleMapBuffer<Target>& RuleMapBuffer<Target>::operator=(const RuleMapBuffer& oth
         Observer<Target>::set_target(other.Observer<Target>::get_target());
         buffer_ = other.buffer_;
         instruction_ = nullptr;
+        reverse_instruction_ = nullptr;
 
         Observer<Target>::add_callback([this](){sync();});
     }
@@ -68,12 +74,14 @@ RuleMapBuffer<Target>& RuleMapBuffer<Target>::operator=(RuleMapBuffer&& other)
         Observer<Target>::set_target(std::move(other.Observer<Target>::get_target()));
         buffer_ = std::move(other.buffer_);
         instruction_ = nullptr;
+        reverse_instruction_ = nullptr;
 
         Observer<Target>::add_callback([this](){sync();});
 
         other.set_target(nullptr);
         other.buffer_ = {};
         other.instruction_ = nullptr;
+        other.reverse_instruction_ = nullptr;
     }
     return *this;
 }
@@ -114,6 +122,8 @@ typename RuleMapBuffer<Target>::iterator RuleMapBuffer<Target>::remove_const(con
 template<typename Target>
 void RuleMapBuffer<Target>::add_rule()
 {
+    reverse_instruction_ = nullptr;
+    
     // Add a scratch buffer: a valid empty rule.
     buffer_.push_back({});
 }
@@ -123,7 +133,9 @@ template<typename Target>
 void RuleMapBuffer<Target>::erase(const_iterator cit)
 {
     Expects(cit != buffer_.end());
-        
+
+    reverse_instruction_ = nullptr;
+    
     auto is_valid = cit->validity;
     auto pred = cit->predecessor;
 
@@ -142,8 +154,12 @@ void RuleMapBuffer<Target>::erase(const_iterator cit)
 
 template<typename Target>
 void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
-{
+{    
     Expects(cit != buffer_.end());
+
+    reverse_instruction_ = nullptr;
+    std::function<void()> part1 = []() {};
+    std::function<void()> part2 = []() {};
 
     // If the new predecessor is null, remove it.
     if (pred == '\0')
@@ -153,7 +169,7 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
     }
 
     // There is 2 cases for the new rule:
-    //  1. The new rule is valid/original => add it to the LSystem.
+    //  1. The new rule is valid/original => add it to the RuleMap.
     //  2. The new rule is a duplicate => do nothing
     // There is 4 cases for the old rule at 'cit': 
     //  3. It was a duplicate rule => do nothing
@@ -182,10 +198,10 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
     if (new_is_original) // Case 1.
     {
         observer_target().add_rule(pred, succ);
+        part1 = [=]() { observer_target().remove_rule(pred); };
     }
     else // Case 2.
     {
-        // Do nothing
     }
         
     if (old_was_original && old_pred != '\0')
@@ -206,13 +222,23 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
         {
             old_duplicate->validity = true;
             observer_target().add_rule(old_pred, old_duplicate->successor);
-                
+            part2 = [=]()
+                {
+                    old_duplicate->validity = false;
+                    observer_target().remove_rule(old_pred);
+                };
         }
     }
     else // Case 3. & 6.
     {
         // Do nothing
     }
+
+    reverse_instruction_ = [=]()
+        {
+            part1();
+            part2();
+        };
 }
     
 template<typename Target>
@@ -220,6 +246,8 @@ void RuleMapBuffer<Target>::remove_predecessor(RuleMapBuffer<Target>::const_iter
 {
     Expects(cit != buffer_.end());
 
+    reverse_instruction_ = nullptr;
+    
     // Turn '*cit' into a scratch buffer
         
     auto old_pred = cit->predecessor;
@@ -241,23 +269,31 @@ template<typename Target>
 void RuleMapBuffer<Target>::change_successor(const_iterator cit, const succ& succ)
 {
     Expects(cit != buffer_.end());
+    reverse_instruction_ = nullptr;
 
     auto it = remove_const(cit);
 
     auto is_valid = cit->validity;
     auto pred = cit->predecessor;
+    auto old_succ = cit->successor;
     *it = { is_valid, pred, succ };
 
     // If it was an original rule, replace it in the Target
     if (is_valid && pred != '\0')
     {
         observer_target().add_rule(pred, succ);
+        reverse_instruction_ = [=]()
+            {
+                observer_target().add_rule(pred, old_succ);
+            };
     }
 }
 
 template<typename Target>
 void RuleMapBuffer<Target>::remove_rule(char pred)
 {
+    reverse_instruction_ = nullptr;
+    
     // This method is called instead of 'observer_target().remove_rule(pred)' to replace
     // the old rule by a duplicate that is in priority in the same
     // RuleMapBuffer.
@@ -319,11 +355,28 @@ void RuleMapBuffer<Target>::delayed_change_successor(const_iterator cit, const s
 template<typename Target>
 void RuleMapBuffer<Target>::apply()
 {
-    if(instruction_)
+    if(reverse_instruction_)
     {
-        instruction_();
-        instruction_ = nullptr;
+        reverse_instruction_();
+        reverse_instruction_ = nullptr;
     }
+}
+
+template<typename Target>
+void RuleMapBuffer<Target>::revert()
+{
+    if (reverse_instruction_)
+    {
+        reverse_instruction_();
+        reverse_instruction_= nullptr;
+    }
+}
+
+// Confirms the change, reset 'reverse_instruction_'
+template<typename Target>
+void RuleMapBuffer<Target>::validate()
+{
+    reverse_instruction_ = nullptr;
 }
 
 template<typename Target>

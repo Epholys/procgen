@@ -151,6 +151,14 @@ namespace procgui
         // Apply the buffered instruction.
         // If 'instruction_' is nullptr, does nothing.
         void apply();
+
+        // Apply 'reverse_instrution_' and reset it.
+        // If it is a nullptr, does nothing.
+        // Shoud be reseted in unrelated method and replaced in related method.
+        void revert();
+
+        // Confirms the change, reset 'reverse_instruction_'
+        void validate();
         
     private:
         Target& observer_target() const;
@@ -172,6 +180,12 @@ namespace procgui
 
         // The buffered instruction from the 'delayed_*' methods.
         std::function<void()> instruction_;
+
+        // The reverse instruction to roll back if the RuleMap modification is
+        // harmful.
+        // Only applies to instructions which could increase the size of the
+        // buffer : 'change_predecessor()' and 'change_successor()'
+        std::function<void()> reverse_instruction_;
     };
 
     #include "RuleMapBuffer.tpp"

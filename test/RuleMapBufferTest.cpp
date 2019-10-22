@@ -511,6 +511,86 @@ TEST_F(RuleBufferTest, erase_replacement)
     ASSERT_EQ(size, buffer2.size());
 }
 
+// Test if the predecessor is correctly reverted
+TEST_F(RuleBufferTest, revert_predecessor)
+{
+    for (const auto& rule : buffer1)
+    {
+        std::cout << rule.validity << " " <<rule.predecessor << " -> " << rule.successor << '\n';
+    }
+
+    buffer1.change_predecessor(std::begin(buffer1), new_pred1);
+
+    std::cout << '\n';
+    for (const auto& rule : buffer1)
+    {
+        std::cout << rule.validity << " " <<rule.predecessor << " -> " << rule.successor << '\n';
+    }
+
+
+    buffer1.revert();
+
+    std::cout << '\n';
+    for (const auto& rule : buffer1)
+    {
+        std::cout << rule.validity << " " <<rule.predecessor << " -> " << rule.successor << '\n';
+    }
+
+
+    
+    ASSERT_TRUE(has_rule(buffer1, pred1, succ1));
+    ASSERT_FALSE(has_rule(buffer1, new_pred1, succ1));
+    ASSERT_FALSE(has_predecessor(buffer1, new_pred1));
+}
+
+// Test if the succesor is correctly reverted
+TEST_F(RuleBufferTest, revert_successor)
+{
+    buffer1.change_successor(std::begin(buffer1), new_succ1);
+    buffer1.revert();
+
+    ASSERT_TRUE(has_rule(buffer1, pred1, succ1));
+    ASSERT_FALSE(has_rule(buffer1, pred1, new_succ1));
+}
+
+// Test if validating a predecessor forbid reverting
+TEST_F(RuleBufferTest, validate_predecessor)
+{
+    std::cout << '\n';
+    for (const auto& rule : buffer1)
+    {
+        std::cout << rule.validity << " " <<rule.predecessor << " -> " << rule.successor << '\n';
+    }
+
+    
+    buffer1.change_predecessor(std::begin(buffer1), new_pred1);
+    buffer1.validate();
+    buffer1.revert(); //  Should do nothing
+
+    std::cout << '\n';
+    for (const auto& rule : buffer1)
+    {
+        std::cout << rule.validity << " " <<rule.predecessor << " -> " << rule.successor << '\n';
+    }
+
+    
+    ASSERT_TRUE(has_rule(buffer1, pred1, succ1));
+    ASSERT_FALSE(has_rule(buffer1, new_pred1, succ1));
+    ASSERT_FALSE(has_predecessor(buffer1, pred1));
+
+}
+
+// Test if validating a successor forbid reverting
+TEST_F(RuleBufferTest, validate_successor)
+{
+    buffer1.change_successor(std::begin(buffer1), new_succ1);
+    buffer1.validate();
+    buffer1.revert();
+
+    ASSERT_TRUE(has_rule(buffer1, pred1, succ1));
+    ASSERT_FALSE(has_rule(buffer1, pred1, new_succ1));
+}
+
 TEST_F(RuleBufferTest, advanced_sync_and_layout1)
 {
     // Example:
