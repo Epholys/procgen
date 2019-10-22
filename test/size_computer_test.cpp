@@ -301,7 +301,6 @@ TEST_F(size_computer_test, memory_size)
 TEST_F(size_computer_test, memory_size_overflow)
 {
     constexpr int n_iter = 40;
-    Matrix::number total_size { 0 };
     auto sizes = compute_max_size(lsys, map, n_iter);
 
     ASSERT_EQ(Matrix::MAX, memory_size(sizes));

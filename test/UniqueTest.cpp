@@ -17,9 +17,9 @@ TEST(UniqueTest, new_id)
 TEST(UniqueTest, replace_id)
 {
     UniqueId ids;
-    auto id0 = ids.get_id();
+    auto UNUSED1 = ids.get_id();
     auto id1 = ids.get_id();
-    auto id2 = ids.get_id();
+    auto UNUSED = ids.get_id();
 
     ids.free_id(id1);
     auto id1bis = ids.get_id();
