@@ -5,13 +5,16 @@
 
 namespace procgui
 {
+    // The popup stack
     std::stack<PopupGUI> popups;
 
+    
     void PopupGUI::operator()(sf::Keyboard::Key& key) const
     {
         ImGui::OpenPopup(name.c_str());
         if (ImGui::BeginPopupModal(name.c_str()))
         {
+            // Close the popup
             if (key == sf::Keyboard::Escape ||
                 (only_info && key == sf::Keyboard::Enter))
             {
@@ -24,17 +27,23 @@ namespace procgui
                 message();
             }
 
+            // If the popup is more than just an informative message.
             if (!only_info)
             {
                 if (key == sf::Keyboard::Enter)
                 {
                     key = sf::Keyboard::Unknown;
-                    popups.pop(); // before: callback can open popup
+
+                    // The order is important: 'ok_callback()' could add a
+                    // callback on top of the stack.
+                    popups.pop();
                     if (ok_callback)
                     {
                         ok_callback();
                     }
                 }
+
+                // Repetition but the 'key' here should stay the same
                 ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
                 if (ImGui::Button(ok_text.c_str()))
                 {
@@ -78,8 +87,9 @@ namespace procgui
             return;
         }
 
-        // NOT const auto&
-        auto popup = popups.top();
+        // Do not put a const &: the popup will pop the top of stack, and it
+        // will lead to danging reference.
+        PopupGUI popup = popups.top();
         popup(key);
     }
 }
