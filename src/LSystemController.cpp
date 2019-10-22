@@ -33,20 +33,6 @@ namespace controller
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
 
-        // If a LSystemView is selected and there is no under_mouse_,
-        // automatically set it to this view. Useful at the startup
-        // or loading.
-        if (under_mouse_ == nullptr &&
-            !views.empty())
-        {
-            auto selected = std::find_if(begin(views), end(views),
-                                         [](const auto& view){return view.is_selected(); });
-            if (selected != end(views))
-            {
-                under_mouse_ = &(*selected);
-            }
-        }
-        
         if (!imgui_io.WantCaptureMouse &&
             event.type == sf::Event::MouseButtonPressed)
         {
@@ -105,11 +91,19 @@ namespace controller
 
         else if (!imgui_io.WantCaptureKeyboard &&
                  event.type == sf::Event::KeyPressed &&
-                 event.key.code == sf::Keyboard::Delete &&
-                 under_mouse_ &&
-                 under_mouse_->is_selected())
+                 event.key.code == sf::Keyboard::Delete)
         {
-            delete_view(views, under_mouse_->get_id());
+            // Remove the LSys under_mouse_ if there are several of them.
+            if (under_mouse_ &&
+                under_mouse_->is_selected())
+            {
+                delete_view(views, under_mouse_->get_id());
+            }
+            // If there is only one, delete it automatically
+            else if (views.size() == 1)
+            {
+                delete_view(views, views.back().get_id());
+            }
         }
 
         else if (!imgui_io.WantCaptureKeyboard &&
@@ -125,7 +119,7 @@ namespace controller
             }
             else if (event.key.code == sf::Keyboard::S)
             {
-                WindowController::save_menu_open_ = true;
+                WindowController::open_save_menu();
             }
         }
     }
@@ -166,7 +160,7 @@ namespace controller
             ImGui::Separator();
             if (ImGui::MenuItem("Save", "Ctrl+S"))
             {
-                WindowController::save_menu_open_ = true;
+                WindowController::open_save_menu();
             }
             ImGui::EndPopup();
         }

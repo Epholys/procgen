@@ -55,14 +55,17 @@ namespace controller
         // Getter for the zoom level
         static float get_zoom_level();
         
-        // Public flag to message WindowController to start the save menu. It is
-        // also used to let the window open between frames.
-        // The save menu is managed in this class with the load menu, but can be
-        // called elsewhere, so there is this ugly flag.
-        static bool save_menu_open_;
+        // Public method to message WindowController to open the save menu.
+        static void open_save_menu();
 
         // Default step size at default zoom level TODO: remove when step optimization
         static const double default_step_;
+
+        // Arbitrary value for the maximum length of the file name.
+        static constexpr int FILENAME_LENGTH_ = 128;
+        
+        // The fixed save directory of the application
+        static const std::experimental::filesystem::path save_dir_;
 
     private:
         
@@ -77,32 +80,19 @@ namespace controller
         static void right_click_menu(sf::RenderWindow& window,
                                      std::list<procgui::LSystemView>& lsys_view);
 
-        // Display and interact with the save menu window.
-        // Managed the window, opening and saving into a file.
-        // static void save_menu(sf::Keyboard::Key key  = sf::Keyboard::Unknown);
+
+        // The save menu, called in 'handle_input()' if save_menu_open_ is true.
+        static bool save_menu_open_;
         static SaveMenu save_menu_;
 
-        
-        // Private flag to let the load menu open between frames.
+        // The save load, called in 'handle_input()' if load_menu_open_ is true.
         static bool load_menu_open_;
-
-        // Display and interact with the load menu window. Load from files the
-        // LSystems into 'lsys_views'. 'key' is forwarded to manage navigation
-        // and 'unicode' to help selection.
-        // static void load_menu(std::list<procgui::LSystemView>& lsys_views,
-        //                       sf::Keyboard::Key key = sf::Keyboard::Unknown,
-        //                       sf::Uint32 unicode = 0);
         static LoadMenu load_menu_;
         
         // Flag to let the quit popup open;
         static bool quit_popup_open_;
         // If at least one open LSystemView is not saved, open a quit warning popup.
         static void quit_popup(sf::Keyboard::Key key);
-
-        // When ordering the load menu to open, save the current mouse position
-        // to load the LSystemView at this position instead of the center.
-        static sf::Vector2f mouse_position_to_load_;
-
         
         // The view modified by the user and given to the window.
         static sf::View view_;
@@ -118,12 +108,6 @@ namespace controller
 
         // Signal that the view can be dragged.
         static bool view_can_move_;
-
-        // Arbitrary value for the maximum length of the file name.
-        static constexpr int FILENAME_LENGTH_ = 128;
-        
-        // The fixed save directory of the application
-        static std::experimental::filesystem::path save_dir_;
     };
 }
 

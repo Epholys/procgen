@@ -21,7 +21,6 @@ namespace controller
     float WindowController::zoom_level_ {1.f};
 
     sf::Vector2i WindowController::mouse_position_ {};
-    sf::Vector2f WindowController::mouse_position_to_load_;
     
     bool WindowController::has_focus_ {true};
 
@@ -33,7 +32,7 @@ namespace controller
 
     const double WindowController::default_step_ {25.f}; 
     
-    fs::path WindowController::save_dir_ = fs::u8path(u8"saves");
+    const fs::path WindowController::save_dir_ = fs::u8path(u8"saves");
 
     SaveMenu WindowController::save_menu_;
     LoadMenu WindowController::load_menu_;
@@ -60,6 +59,11 @@ namespace controller
         return zoom_level_;
     }
 
+    void WindowController::open_save_menu()
+    {
+        save_menu_open_ = true;
+    }
+    
     void WindowController::paste_view(std::list<procgui::LSystemView>& lsys_views,
                                       const std::optional<procgui::LSystemView>& view,
                                       const sf::Vector2f& position)
@@ -94,7 +98,6 @@ namespace controller
             }
             if (ImGui::MenuItem("Load LSystem", "Ctrl+O"))
             {
-                mouse_position_to_load_ = real_mouse_position(sf::Mouse::getPosition(window));
                 load_menu_open_ = true;
             }
             ImGui::Separator();
@@ -168,8 +171,6 @@ namespace controller
                 }
                 else if (event.key.code == sf::Keyboard::O)
                 {
-                    mouse_position_to_load_ = real_mouse_position({int(sfml_window::window.getSize().x/2),
-                                int(sfml_window::window.getSize().y/2)});
                     load_menu_open_ = true;
                 }
             }
