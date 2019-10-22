@@ -8,6 +8,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "imgui/imgui.h"
+#include "imgui_extension.h"
 
 namespace procgui
 {
@@ -88,6 +89,7 @@ namespace controller
         // The save load, called in 'handle_input()' if load_menu_open_ is true.
         static bool load_menu_open_;
         static LoadMenu load_menu_;
+        static ext::sf::Vector2d load_position_;
         
         // Flag to let the quit popup open;
         static bool quit_popup_open_;

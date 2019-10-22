@@ -8,7 +8,6 @@
 #include "WindowController.h"
 #include "LSystemController.h"
 #include "LSystemView.h"
-#include "imgui_extension.h"
 #include "SaveMenu.h"
 #include "LoadMenu.h"
 #include "PopupGUI.h"
@@ -31,6 +30,8 @@ namespace controller
     bool WindowController::save_menu_open_ {false};
     bool WindowController::load_menu_open_ {false};
     bool WindowController::quit_popup_open_ { false };
+
+    ext::sf::Vector2d WindowController::load_position_ { 0, 0 };
 
     const double WindowController::default_step_ {25.f}; 
     
@@ -101,6 +102,7 @@ namespace controller
             if (ImGui::MenuItem("Load LSystem", "Ctrl+O"))
             {
                 load_menu_open_ = true;
+                load_position_ = ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window)));
             }
             ImGui::Separator();
             if (LSystemController::saved_view() && ImGui::MenuItem("Paste", "Ctrl+V"))
@@ -174,6 +176,10 @@ namespace controller
                 else if (event.key.code == sf::Keyboard::O)
                 {
                     load_menu_open_ = true;
+                    load_position_= ext::sf::Vector2d(real_mouse_position(
+                                                          {int(sfml_window::window.getSize().x/2),
+                                                                  int(sfml_window::window.getSize().y/2)}));
+
                 }
             }
             
@@ -255,7 +261,10 @@ namespace controller
         }
         else if (load_menu_open_)
         {
-            load_menu_open_ = !load_menu_.open_load_menu(lsys_views, key_to_menus, unicode_to_load_window);
+            load_menu_open_ = !load_menu_.open(lsys_views,
+                                               load_position_,
+                                               key_to_menus,
+                                               unicode_to_load_window);
         }
         
         // The right-click menu depends on the location of the mouse.

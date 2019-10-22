@@ -16,6 +16,7 @@ namespace controller
 {
     namespace fs = std::filesystem;
 
+    // Global error message access in deserialization of LSys
     std::vector<std::string> LoadMenu::error_messages;
 
     void LoadMenu::add_loading_error_message(const std::string& message)
@@ -23,7 +24,8 @@ namespace controller
         error_messages.push_back(message);
     }
     
-    void LoadMenu::adjust_lsys(procgui::LSystemView& view)
+    void LoadMenu::adjust_lsys(procgui::LSystemView& view,
+                               ext::sf::Vector2d load_position)
     {
         // Redimension the L-System to take 2/3 of the lowest
         // screen. Double the load time, but it should be okay
@@ -50,15 +52,16 @@ namespace controller
         }
         view.ref_parameters().set_step(step);
 
-        ext::sf::Vector2d pos (WindowController::real_mouse_position({int(sfml_window::window.getSize().x/2),
-                        int(sfml_window::window.getSize().y/2)}));
-        ext::sf::Vector2d middle = {box.left + box.width/2, box.top + box.height/2};
+        box = view.get_bounding_box();
+        ext::sf::Vector2d middle = {box.left + box.width / 2,
+                                    box.top + box.height / 2};
         middle = view.get_parameters().get_starting_position() - middle;
-        view.ref_parameters().set_starting_position(pos + middle);
+        view.ref_parameters().set_starting_position(load_position + middle);
     }
     
-    void LoadMenu::load_lsys(std::list<procgui::LSystemView>& lsys_views,
-                             std::ifstream& ifs)
+    void LoadMenu::load(std::list<procgui::LSystemView>& lsys_views,
+                        ext::sf::Vector2d load_position,
+                        std::ifstream& ifs)
     {
         bool no_error = true;
         
@@ -72,6 +75,8 @@ namespace controller
         }
         catch (const cereal::RapidJSONException& e)
         {
+            // Open a popup if the save file is not in valid JSON format.
+            
             procgui::PopupGUI format_popup =
                 { "Error##FORMAT",
                   [this]()
@@ -87,7 +92,9 @@ namespace controller
         }
         if(no_error)
         {
-            adjust_lsys(loaded_view);
+            // Load the LSys
+            
+            adjust_lsys(loaded_view, load_position);
 
             lsys_views.emplace_front(loaded_view);
             lsys_views.front().select();
@@ -99,6 +106,8 @@ namespace controller
                     
         if (!error_messages.empty())
         {
+            // Open a final warning popup if there were error in the save file.
+            
             procgui::PopupGUI warning_popup =
                 { "Warning##ISSUE",
                   [this]()
@@ -137,13 +146,14 @@ namespace controller
         }
     }
     
-    void LoadMenu::load(std::list<procgui::LSystemView>& lsys_views,
-                        sf::Keyboard::Key& key)
+    void LoadMenu::load_button(std::list<procgui::LSystemView>& lsys_views,
+                               ext::sf::Vector2d load_position,
+                               sf::Keyboard::Key& key)
     {
         ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();            
-        if (procgui::popup_empty() &&
-            (ImGui::Button("Load") || key == sf::Keyboard::Enter || double_selection_) &&              // If the user want to load &&
-            !array_to_string(file_to_load_).empty())                                                   // an existing file
+        if (procgui::popup_empty() &&                                                     // If no popups are open &&
+            (ImGui::Button("Load") || key == sf::Keyboard::Enter || double_selection_) && // If the user want to load &&
+            !array_to_string(file_to_load_).empty())                                      // an existing file
         {
             double_selection_ = false;
                 
@@ -153,7 +163,6 @@ namespace controller
             // Open the error popup if we can not open the file.
             if(!ifs.is_open())
             {
-                // Flag to open the file error popup open between frames.
                 procgui::PopupGUI file_error_popup =
                     { "Error##PERM",
                       [this]()
@@ -168,7 +177,7 @@ namespace controller
             }
             else
             {
-                load_lsys(lsys_views, ifs);
+                load(lsys_views, load_position, ifs);
             }
         }
         ImGui::PopStyleColor(3);
@@ -237,7 +246,7 @@ namespace controller
         return {n_column, file_per_column};
     }
 
-    void LoadMenu::list_navigation(const std::vector<file_entry> files,
+    void LoadMenu::list_navigation(const std::vector<file_entry>& files,
                                    sf::Keyboard::Key key,
                                    sf::Uint32 unicode,
                                    column_layout layout)
@@ -333,7 +342,6 @@ namespace controller
                         sf::Keyboard::Key key,
                         sf::Uint32 unicode)
     {
-        // %%%%%%%%%%%%%%%% LOAD SCREEN %%%%%%%%%%%%%%%%
         try
         {
             // Get all files in the 'save_dir_' directory, ...
@@ -374,13 +382,14 @@ namespace controller
             {
                 const auto& file = files.at(i);
 
+                // Displays the files in a selectable list
                 bool selectable_clicked = ImGui::Selectable(file.filename.c_str(), file_idx_ == i);
+                
                 if (selectable_clicked && file_idx_ == i && !double_selection_)
                 {
-                    // The selectable was previously selected
+                    // Double click : the selectable was previously selected, 
                     double_selection_ = true;
                 }
-                // Displays the files in a selectable list
                 if (selectable_clicked || file_idx_ == i)
                 {
                     // If the file was selected by clicking on the Selectable, update the file_idx_
@@ -411,9 +420,10 @@ namespace controller
         }
     }
     
-    bool LoadMenu::open_load_menu(std::list<procgui::LSystemView>& lsys_views,
-                                  sf::Keyboard::Key key,
-                                  sf::Uint32 unicode)
+    bool LoadMenu::open(std::list<procgui::LSystemView>& lsys_views,
+                        ext::sf::Vector2d load_position,
+                        sf::Keyboard::Key key,
+                        sf::Uint32 unicode)
     {
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Load LSystem from file", NULL, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
@@ -437,7 +447,7 @@ namespace controller
             ImGui::Text(tmp.c_str());
             ImGui::SameLine();
 
-            load(lsys_views, key);
+            load_button(lsys_views, load_position, key);
 
             ImGui::SameLine();
             ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
