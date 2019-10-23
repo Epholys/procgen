@@ -200,12 +200,6 @@ TEST_F(RuleBufferTest, change_predecessor_old_duplicated)
     // dup pred succ
     //  f  A    0
     //  t  A    1
-
-    std::cout << "map before:\n";
-    for (auto it : buffer)
-    {
-        std::cout << it.validity << " " << it.predecessor << " " << it.successor << '\n';
-    }
     
     // === MODIFICATION
     begin = std::begin(buffer);
@@ -214,14 +208,7 @@ TEST_F(RuleBufferTest, change_predecessor_old_duplicated)
     // BUFFER
     // dup pred succ
     //  f  X    0
-    //  f  A    1
-
-    std::cout << "map after:\n";
-    for (auto it : buffer)
-    {
-        std::cout << it.validity << " " << it.predecessor << " " << it.successor << '\n';
-    }
-   
+    //  f  A    1   
     
     // === ASSERTIONS
 
@@ -571,36 +558,218 @@ TEST_F(RuleBufferTest, erase_replacement)
 }
 
 // Test if the predecessor is correctly reverted
-TEST_F(RuleBufferTest, revert_predecessor)
+TEST_F(RuleBufferTest, revert_predecessors_new_orig_old_orig_no_dup)
 {
-    for (const auto& rule : buffer1)
+    std::cout << "BEGIN\n";
+    for (auto cit : buffer1)
     {
-        std::cout << rule.validity << " " <<rule.predecessor << " -> " << rule.successor << '\n';
+        std::cout << cit.validity << " " << cit.predecessor <<  " " << cit.successor << '\n';
     }
-
+    std::cout << "\n";
+    
+    // BUFFER
+    // dup pred succ
+    //  t  A    0
+    //  t  B    1    
     buffer1.change_predecessor(std::begin(buffer1), new_pred1);
+    // BUFFER
+    // dup pred succ
+    //  t  X    0
+    //  t  B    1
 
-    std::cout << '\n';
-    for (const auto& rule : buffer1)
+    std::cout << "CHANGE\n";
+    for (auto cit : buffer1)
     {
-        std::cout << rule.validity << " " <<rule.predecessor << " -> " << rule.successor << '\n';
+        std::cout << cit.validity << " " << cit.predecessor <<  " " << cit.successor << '\n';
     }
+    std::cout << "\n";
+    
+    buffer1.revert();
+
+    std::cout << "REVERT\n";
+    for (auto cit : buffer1)
+    {
+        std::cout << cit.validity << " " << cit.predecessor <<  " " << cit.successor << '\n';
+    }
+    std::cout << "\n";
+
+    ASSERT_TRUE(has_rule(buffer1, pred1, succ1));
+    ASSERT_FALSE(has_rule(buffer1, new_pred1, succ1));
+    ASSERT_EQ(2, map->size());
+}
+TEST_F(RuleBufferTest, revert_predecessors_new_dup_old_orig_no_dup)
+{
+    buffer1.add_rule();
+    auto end = std::prev(std::end(buffer1));
+    buffer1.change_predecessor(end, new_pred1);
+    buffer1.change_successor(end, new_succ1);
+    // BUFFER
+    // dup pred succ
+    //  t  A    0
+    //  t  B    1
+    //  t  X    2
+
+
+    std::cout << "BEGIN\n";
+    for (auto cit : buffer1)
+    {
+        std::cout << cit.validity << " " << cit.predecessor <<  " " << cit.successor << '\n';
+    }
+    std::cout << "\n";
+    
+    buffer1.change_predecessor(end, pred1);
+    // BUFFER
+    // dup pred succ
+    //  t  A    0
+    //  t  B    1
+    //  f  A    2
+
+    
+    std::cout << "CHANGE\n";
+    for (auto cit : buffer1)
+    {
+        std::cout << cit.validity << " " << cit.predecessor <<  " " << cit.successor << '\n';
+    }
+    std::cout << "\n";
 
 
     buffer1.revert();
 
-    std::cout << '\n';
-    for (const auto& rule : buffer1)
-    {
-        std::cout << rule.validity << " " <<rule.predecessor << " -> " << rule.successor << '\n';
-    }
-
 
     
+    std::cout << "REVERT\n";
+    for (auto cit : buffer1)
+    {
+        std::cout << cit.validity << " " << cit.predecessor <<  " " << cit.successor << '\n';
+    }
+    std::cout << "\n";
+
+
     ASSERT_TRUE(has_rule(buffer1, pred1, succ1));
-    ASSERT_FALSE(has_rule(buffer1, new_pred1, succ1));
-    ASSERT_FALSE(has_predecessor(buffer1, new_pred1));
+    ASSERT_TRUE(has_rule(buffer1, pred2, succ2));
+    ASSERT_TRUE(has_rule(buffer1, new_pred1, new_succ1));
+    ASSERT_FALSE(has_duplicate(buffer1, end));
+    ASSERT_FALSE(has_rule(buffer1, pred1, new_succ1));
+    ASSERT_EQ(3, map->size());
 }
+
+TEST_F(RuleBufferTest, revert_predecessors_new_orig_old_dup)
+{
+    buffer1.add_rule();
+    auto end = std::prev(std::end(buffer1));
+    buffer1.change_predecessor(end, pred1);
+    buffer1.change_successor(end, new_succ1);
+    // BUFFER
+    // dup pred succ
+    //  t  A    0
+    //  t  B    1
+    //  f  A    2
+    
+    buffer1.change_predecessor(end, new_pred1);
+    // BUFFER
+    // dup pred succ
+    //  t  A    0
+    //  t  B    1
+    //  t  X    2
+    
+    buffer1.revert();
+
+    ASSERT_TRUE(has_rule(buffer1, pred1, succ1));
+    ASSERT_TRUE(has_rule(buffer1, pred2, succ2));
+    ASSERT_TRUE(has_rule(buffer1, pred1, new_succ1));
+    ASSERT_TRUE(has_duplicate(buffer1, end));
+    ASSERT_FALSE(has_rule(buffer1, new_pred1, new_succ1));
+    ASSERT_EQ(3, map->size());
+}
+
+TEST_F(RuleBufferTest, revert_predecessors_new_dup_old_dup)
+{
+    buffer1.add_rule();
+    auto end = std::prev(std::end(buffer1));
+    buffer1.change_predecessor(end, pred1);
+    buffer1.change_successor(end, new_succ1);
+    // BUFFER
+    // dup pred succ
+    //  t  A    0
+    //  t  B    1
+    //  f  A    2
+    
+    buffer1.change_predecessor(end, pred2);
+    // BUFFER
+    // dup pred succ
+    //  t  A    0
+    //  t  B    1
+    //  f  B    2
+    
+    buffer1.revert();
+
+    ASSERT_TRUE(has_rule(buffer1, pred1, succ1));
+    ASSERT_TRUE(has_rule(buffer1, pred2, succ2));
+    ASSERT_TRUE(has_rule(buffer1, pred1, new_succ1));
+    ASSERT_TRUE(has_duplicate(buffer1, end));
+    ASSERT_FALSE(has_rule(buffer1, pred2, new_succ1));
+    ASSERT_EQ(3, map->size());
+}
+
+TEST_F(RuleBufferTest, revert_predecessors_new_dup_old_dup_dup)
+{
+    buffer1.add_rule();
+    auto end = std::prev(std::end(buffer1));
+    buffer1.change_predecessor(end, pred2);
+    buffer1.change_successor(end, new_succ1);
+    // BUFFER
+    // dup pred succ
+    //  t  A    0
+    //  t  B    1
+    //  f  B    2
+    
+    buffer1.change_predecessor(std::prev(end), new_pred1);
+    // BUFFER
+    // dup pred succ
+    //  t  A    0
+    //  t  X    1
+    //  t  B    2
+    
+    buffer1.revert();
+
+    ASSERT_TRUE(has_rule(buffer1, pred1, succ1));
+    ASSERT_TRUE(has_rule(buffer1, pred2, succ2));
+    ASSERT_TRUE(has_rule(buffer1, pred2, new_succ1));
+    ASSERT_TRUE(has_duplicate(buffer1, end));
+    ASSERT_FALSE(has_rule(buffer1, new_pred1, succ2));
+    ASSERT_EQ(2, map->size());
+}
+
+
+TEST_F(RuleBufferTest, revert_predecessors_new_dup_old_orig_w_dup)
+{
+    buffer1.add_rule();
+    auto end = std::prev(std::end(buffer1));
+    buffer1.change_predecessor(end, pred2);
+    buffer1.change_successor(end, new_succ1);
+    // BUFFER
+    // dup pred succ
+    //  t  A    0
+    //  t  B    1
+    //  f  B    2
+    
+    buffer1.change_predecessor(std::prev(end), pred1);
+    // BUFFER
+    // dup pred succ
+    //  t  A    0
+    //  f  A    1
+    //  t  B    2
+    
+    buffer1.revert();
+
+    ASSERT_TRUE(has_rule(buffer1, pred1, succ1));
+    ASSERT_TRUE(has_rule(buffer1, pred2, succ2));
+    ASSERT_TRUE(has_rule(buffer1, pred2, new_succ1));
+    ASSERT_TRUE(has_duplicate(buffer1, end));
+    ASSERT_FALSE(has_rule(buffer1, pred1, succ2));
+    ASSERT_EQ(2, map->size());
+}
+
 
 // Test if the succesor is correctly reverted
 TEST_F(RuleBufferTest, revert_successor)

@@ -255,7 +255,7 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
     part1();
 
     reverse_instruction_ = [=]()
-        {
+        {5
             reverse_part2();
             reverse_part1();
         };
