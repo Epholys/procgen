@@ -177,6 +177,65 @@ TEST_F(RuleBufferTest, change_predecessor_simple)
     ASSERT_FALSE(has_predecessor(buffer2, old_pred));
 }
 
+
+TEST_F(RuleBufferTest, change_predecessor_old_duplicated)
+{
+    IntMap::rule_map rules = {};
+    std::shared_ptr<IntMap> map =
+        std::make_shared<IntMap>(rules);
+    IntBuffer buffer (map);
+
+    // === SETUP
+    buffer.add_rule();
+    auto begin = std::begin(buffer);
+    buffer.change_predecessor(begin, pred1);
+    buffer.change_successor(begin, succ1);
+
+    buffer.add_rule();
+    auto next = std::next(std::begin(buffer));
+    buffer.change_predecessor(next, pred1);
+    buffer.change_successor(next, succ2);
+
+    // BUFFER
+    // dup pred succ
+    //  f  A    0
+    //  t  A    1
+
+    std::cout << "map before:\n";
+    for (auto it : buffer)
+    {
+        std::cout << it.validity << " " << it.predecessor << " " << it.successor << '\n';
+    }
+    
+    // === MODIFICATION
+    begin = std::begin(buffer);
+    buffer.change_predecessor(begin, new_pred1);
+
+    // BUFFER
+    // dup pred succ
+    //  f  X    0
+    //  f  A    1
+
+    std::cout << "map after:\n";
+    for (auto it : buffer)
+    {
+        std::cout << it.validity << " " << it.predecessor << " " << it.successor << '\n';
+    }
+   
+    
+    // === ASSERTIONS
+
+    ASSERT_TRUE(has_rule(buffer, new_pred1, succ1));
+    ASSERT_TRUE(has_rule(buffer, pred1, succ2));
+    ASSERT_FALSE(has_rule(buffer, pred1, succ1));
+    ASSERT_FALSE(has_duplicate(buffer, std::begin(buffer)));
+    ASSERT_FALSE(has_duplicate(buffer, std::next(std::begin(buffer))));
+    
+    ASSERT_TRUE(map->has_rule(new_pred1, succ1));
+    ASSERT_TRUE(map->has_rule(pred1, succ2));
+}
+
+
 TEST_F(RuleBufferTest, change_predecessor_is_duplicated)
 {
     auto begin = buffer1.begin();
@@ -195,7 +254,7 @@ TEST_F(RuleBufferTest, change_predecessor_is_duplicated)
     ASSERT_TRUE(has_duplicate(buffer1, begin));
     ASSERT_TRUE(duplicates_marked(buffer1));
 
-    ASSERT_FALSE(has_rule(buffer2, first_pred, new_succ1));
+    ASSERT_FALSE(has_rule(buffer2, first_pred, new_succ1)); 
 }
 
 TEST_F(RuleBufferTest, change_predecessor_remove_rule)

@@ -157,9 +157,16 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
 {    
     Expects(cit != buffer_.end());
 
-    reverse_instruction_ = nullptr;
+    // The target is modified at least two times. Each time, 'sync()' will be
+    // called, which can have side effect for the rest of this functions.
+    // As consequence, we save in two lambdas the action to do to call them at
+    // the end.
     std::function<void()> part1 = []() {};
     std::function<void()> part2 = []() {};
+    
+    reverse_instruction_ = nullptr;
+    // std::function<void()> part1 = []() {};
+    // std::function<void()> part2 = []() {};
 
     // If the new predecessor is null, remove it.
     if (pred == '\0')
@@ -197,8 +204,8 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
 
     if (new_is_original) // Case 1.
     {
-        observer_target().add_rule(pred, succ);
-        part1 = [=]() { observer_target().remove_rule(pred); };
+        part1 = [=]() { observer_target().add_rule(pred, succ); };
+        //    part1 = [=]() { observer_target().remove_rule(pred); };
     }
     else // Case 2.
     {
@@ -216,17 +223,21 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
         {
             // Note: it is not necessary to call 'this->remove_rule()' as we
             // already checked that the old rule did not have a duplicate.
-            observer_target().remove_rule(old_pred);
+            part2 = [=]() { observer_target().remove_rule(old_pred); };
         }
         else // Case 5.
         {
             old_duplicate->validity = true;
-            observer_target().add_rule(old_pred, old_duplicate->successor);
             part2 = [=]()
                 {
-                    old_duplicate->validity = false;
-                    observer_target().remove_rule(old_pred);
+                    observer_target().add_rule(old_duplicate->predecessor,
+                                               old_duplicate->successor);
                 };
+            // part2 = [=]()
+            //     {
+            //         old_duplicate->validity = false;
+            //         observer_target().remove_rule(old_pred);
+            //     };
         }
     }
     else // Case 3. & 6.
@@ -234,11 +245,14 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
         // Do nothing
     }
 
-    reverse_instruction_ = [=]()
-        {
-            part1();
-            part2();
-        };
+    // The order is important, I do not want to think too much about this
+    // clusterfuck.
+    // This class is so complicated because it must manages not only the
+    // duplicates rules (which maybe should completely be anihilated if the user
+    // tries to do it), but also the synchronisation between several Buffer with
+    // the same Target.
+    part2();
+    part1();
 }
     
 template<typename Target>
