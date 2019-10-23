@@ -355,10 +355,10 @@ void RuleMapBuffer<Target>::delayed_change_successor(const_iterator cit, const s
 template<typename Target>
 void RuleMapBuffer<Target>::apply()
 {
-    if(reverse_instruction_)
+    if(instruction_)
     {
-        reverse_instruction_();
-        reverse_instruction_ = nullptr;
+        instruction_();
+        instruction_ = nullptr;
     }
 }
 
