@@ -283,7 +283,8 @@ template<typename Target>
 void RuleMapBuffer<Target>::change_successor(const_iterator cit, const succ& succ)
 {
     Expects(cit != buffer_.end());
-    reverse_instruction_ = nullptr;
+
+    reverse_instruction_ = [=]() { change_successor(cit, cit->successor); };
 
     auto it = remove_const(cit);
 
@@ -296,10 +297,6 @@ void RuleMapBuffer<Target>::change_successor(const_iterator cit, const succ& suc
     if (is_valid && pred != '\0')
     {
         observer_target().add_rule(pred, succ);
-        reverse_instruction_ = [=]()
-            {
-                observer_target().add_rule(pred, old_succ);
-            };
     }
 }
 
