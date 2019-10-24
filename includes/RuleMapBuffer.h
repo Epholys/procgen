@@ -61,14 +61,14 @@ namespace procgui
         // A production rule: 
         struct Rule
         {
-            bool validity {true};    // If a rule is a duplicate of an already existing
-                              // rule, it is not valid.
+            bool is_duplicate {true};    // If a rule is a duplicate of an already existing
+                                     // rule, it is not valid.
             char predecessor {'\0'};
             succ successor {}; // If the successor is a basic type like 'int',
                                // it will be not be initialized. Do not forget
                                // to override 'add_rule' if this is the case.
             inline bool operator== (const Rule& other) const
-                { return validity == other.validity &&
+                { return is_duplicate == other.is_duplicate &&
                          predecessor == other.predecessor &&
                          successor == other.successor; }
             inline bool operator!= (const Rule& other) const
@@ -186,6 +186,8 @@ namespace procgui
         // Only applies to instructions which could increase the size of the
         // buffer : 'change_predecessor()' and 'change_successor()'
         std::function<void()> reverse_instruction_;
+
+        bool is_notification_origin_;
     };
 
     #include "RuleMapBuffer.tpp"

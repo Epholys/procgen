@@ -45,7 +45,7 @@ void interact_with_buffer(Buffer& buffer,
         ImGui::PopStyleColor(3);
 
         // If the current rule is not valid, add a warning.
-        if(!rule.validity)
+        if(!rule.is_duplicate)
         {
             ImGui::SameLine();
             ImGui::TextColored(ImVec4(1.f,0.f,0.f,1.f), "Duplicated predecessor: %s", predec);
