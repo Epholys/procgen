@@ -15,8 +15,9 @@ namespace procgui
         if (ImGui::BeginPopupModal(name.c_str()))
         {
             // Close the popup
-            if (key == sf::Keyboard::Escape ||
-                (only_info && key == sf::Keyboard::Enter))
+            if (only_info &&
+                (key == sf::Keyboard::Escape ||
+                 key == sf::Keyboard::Enter))
             {
                 key = sf::Keyboard::Unknown;
                 popups.pop();
@@ -42,6 +43,16 @@ namespace procgui
                         ok_callback();
                     }
                 }
+                else if (key == sf::Keyboard::Escape)
+                {
+                    key = sf::Keyboard::Unknown;
+
+                    popups.pop();
+                    if (cancel_callback)
+                    {
+                        cancel_callback();
+                    }
+                }
 
                 // Repetition but the 'key' here should stay the same
                 ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
@@ -61,6 +72,10 @@ namespace procgui
                 if (ImGui::Button(cancel_text.c_str()))
                 {
                     popups.pop();
+                    if (cancel_callback)
+                    {
+                        cancel_callback();
+                    }
                 }
                 ImGui::PopStyleColor(3);
             

@@ -148,6 +148,9 @@ public:
     // Clear the rules
     void clear_rules() override;
 
+    // Replace the rules by 'new_rules'
+    void replace_rules(const rule_map& new_rules) override;
+    
     // Set the symbols flagging the iteration count 'iteration_predecessors_' to
     // 'predecessors'.
     void set_iteration_predecessors(const std::string& predecessors);

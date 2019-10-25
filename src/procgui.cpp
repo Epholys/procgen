@@ -266,7 +266,7 @@ namespace procgui
         }
 
         // The LSystem itelf
-        LSystem& lsys = *buffer.get_target();
+        LSystem& lsys = *buffer.ref_rule_map();
         
         // --- Axiom ---
         auto buf = string_to_array<lsys_successor_size>(lsys.get_axiom());
@@ -281,19 +281,18 @@ namespace procgui
 
         ImGui::Text("Production rules:");
         interact_with_buffer(buffer,
-           [&buffer](auto it)
-            {
-                // Interact with the successor. Except for the input size, does not
-                // have any constraints.
-                auto array = string_to_array<lsys_successor_size>(it->successor);
-                if(ImGui::InputText("##succ", array.data(), lsys_successor_size))
-                {
-                    buffer.delayed_change_successor(it, array_to_string(array));
-                    return true;
-                }
-                return false;
-            });
-
+                             [&buffer](auto it, bool& updated)
+                             {
+                                 // Interact with the successor. Except for the input size, does not
+                                 // have any constraints.
+                                 auto array = string_to_array<lsys_successor_size>(it->successor);
+                                 if(ImGui::InputText("##succ", array.data(), lsys_successor_size) && !updated)
+                                 {
+                                     buffer.change_successor(it, array_to_string(array));
+                                     updated = true;
+                                 }
+                             });
+        
         // --- Iteration Predecessors ---
         buf = string_to_array<lsys_successor_size>(lsys.get_iteration_predecessors());
         if (ImGui::InputText("Iteration predecessors", buf.data(), lsys_successor_size))
@@ -315,7 +314,7 @@ namespace procgui
         using namespace drawing;
         
         interact_with_buffer(buffer,
-            [&buffer](auto it)
+            [&buffer](auto it, bool& updated)
             {
                 // ImGui::ListBox needs:
                 //   - An array of 'char *' for the different elements
@@ -331,12 +330,12 @@ namespace procgui
                                                             all_orders.end(),
                                                             it->successor);
                 int index = std::distance(all_orders.begin(), selected_interpretation_it);
-                if(ImGui::ListBox("##order", &index, all_orders_name.data(), all_orders_name.size()))
+                if(ImGui::ListBox("##order", &index, all_orders_name.data(), all_orders_name.size()) &&
+                    !updated)
                 {
-                    buffer.delayed_change_successor(it, all_orders.at(index));
-                    return true;
+                    buffer.change_successor(it, all_orders.at(index));
+                    updated = true;
                 }
-                return false;
             });
 
         conclude();

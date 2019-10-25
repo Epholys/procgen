@@ -11,6 +11,7 @@ namespace procgui
 {
     using namespace drawing;
     using namespace colors;
+    using namespace procgui;
 
     // int LSystemView::id_count_ = 0;
     UniqueId LSystemView::unique_ids_ {};
@@ -29,16 +30,14 @@ namespace procgui
                              std::shared_ptr<InterpretationMap> map,
                              std::shared_ptr<DrawingParameters> params,
                              std::shared_ptr<VertexPainterWrapper> painter)
-        : OLSys {lsys}
-        , OMap {map}
+        : OLSys (std::make_shared<LSystemBuffer>(lsys))
+        , OMap (std::make_shared<InterpretationMapBuffer>(map))
         , OParams {params}
         , OPainter {painter}
         , id_{unique_ids_.get_id()}
         , color_id_{unique_colors_.get_color(id_)}
         , name_ {name}
-        , is_modified_{false}                            
-        , lsys_buff_ {lsys}
-        , interpretation_buff_ {map}
+        , is_modified_{false}
         , vertices_ {}
         , iteration_of_vertices_ {}
         , max_iteration_ {0}
@@ -71,16 +70,16 @@ namespace procgui
     }
 
     LSystemView::LSystemView(const LSystemView& other)
-        : OLSys {std::make_shared<LSystem>(*other.OLSys::get_target())}
-        , OMap {std::make_shared<InterpretationMap>(*other.OMap::get_target())}
+        : OLSys {std::make_shared<LSystemBuffer>(
+            std::make_shared<LSystem>(*other.OLSys::get_target()->get_rule_map()))}
+        , OMap {std::make_shared<InterpretationMapBuffer>(
+            std::make_shared<InterpretationMap>(*other.OMap::get_target()->get_rule_map()))}
         , OParams {std::make_shared<DrawingParameters>(*other.OParams::get_target())}
         , OPainter {std::make_shared<VertexPainterWrapper>(*other.OPainter::get_target())}
         , id_{unique_ids_.get_id()}
         , color_id_{unique_colors_.get_color(id_)}
         , name_ {other.name_}
         , is_modified_{other.is_modified_}
-        , lsys_buff_ {other.lsys_buff_, OLSys::get_target()}
-        , interpretation_buff_ {other.interpretation_buff_, OMap::get_target()}
         , vertices_ {other.vertices_}
         , iteration_of_vertices_ {other.iteration_of_vertices_}
         , max_iteration_ {other.max_iteration_}
@@ -102,8 +101,6 @@ namespace procgui
         , color_id_{std::move(other.color_id_)}
         , name_ {std::move(other.name_)}
         , is_modified_{other.is_modified_}
-        , lsys_buff_ {std::move(other.lsys_buff_)}
-        , interpretation_buff_ {std::move(other.interpretation_buff_)}
         , vertices_ {std::move(other.vertices_)}
         , iteration_of_vertices_ {std::move(other.iteration_of_vertices_)}
         , max_iteration_ {other.max_iteration_}
@@ -133,16 +130,18 @@ namespace procgui
     {
         if (this != &other)
         {
-            OLSys::set_target(std::make_shared<LSystem>(*other.OLSys::get_target()));
-            OMap::set_target(std::make_shared<InterpretationMap>(*other.OMap::get_target()));
+            OLSys::set_target(
+                std::make_shared<LSystemBuffer>(
+                    std::make_shared<LSystem>(*other.OLSys::get_target()->get_rule_map())));
+            OMap::set_target(
+                std::make_shared<InterpretationMapBuffer>(
+                    std::make_shared<InterpretationMap>(*other.OMap::get_target()->get_rule_map())));
             OParams::set_target(std::make_shared<DrawingParameters>(*other.OParams::get_target()));
             OPainter::set_target(std::make_shared<VertexPainterWrapper>(*other.OPainter::get_target()));
             id_ = unique_ids_.get_id();
             color_id_ = unique_colors_.get_color(id_);
             name_ = other.name_;
             is_modified_ = other.is_modified_;
-            lsys_buff_ = LSystemBuffer(other.lsys_buff_, OLSys::get_target());
-            interpretation_buff_ = InterpretationMapBuffer(other.interpretation_buff_, OMap::get_target());
             vertices_ = other.vertices_;
             iteration_of_vertices_ = other.iteration_of_vertices_;
             max_iteration_ = other.max_iteration_;
@@ -170,8 +169,6 @@ namespace procgui
             color_id_ = other.color_id_;
             name_ = std::move(other.name_);
             is_modified_ = other.is_modified_;
-            lsys_buff_ = std::move(other.lsys_buff_);
-            interpretation_buff_ = std::move(other.interpretation_buff_);
             vertices_ = std::move(other.vertices_);
             iteration_of_vertices_ = std::move(other.iteration_of_vertices_);
             max_iteration_ = other.max_iteration_;
@@ -216,11 +213,11 @@ namespace procgui
     }
     LSystemBuffer& LSystemView::ref_lsystem_buffer()
     {
-        return lsys_buff_;
+        return *OLSys::get_target();
     }
     InterpretationMapBuffer& LSystemView::ref_interpretation_buffer()
     {
-        return interpretation_buff_;
+        return *OMap::get_target();
     }
     VertexPainterWrapper& LSystemView::ref_vertex_painter_wrapper()
     {
@@ -236,11 +233,11 @@ namespace procgui
     }
     const LSystemBuffer& LSystemView::get_lsystem_buffer() const
     {
-        return lsys_buff_;
+        return *OLSys::get_target();
     }
     const InterpretationMapBuffer& LSystemView::get_interpretation_buffer() const
     {
-        return interpretation_buff_;
+        return *OMap::get_target();
     }
     const VertexPainterWrapper& LSystemView::get_vertex_painter_wrapper() const
     {
@@ -282,11 +279,11 @@ namespace procgui
     
     void LSystemView::size_safeguard()
     {
-        static drawing::Matrix::number max_size = 100 * 1024 * 1024; // 100MiB
-        
-        drawing::system_size size = compute_max_size(*OLSys::get_target(),
-                                                     *OMap::get_target(),
-                                                      OParams::get_target()->get_n_iter());
+        static drawing::Matrix::number max_size = 10 * 1024 * 1024; // 500MiB
+
+        drawing::system_size size = compute_max_size(*OLSys::get_target()->get_rule_map(),
+                                                     *OMap::get_target()->get_rule_map(),
+                                                     OParams::get_target()->get_n_iter());
         approximate_mem_size_ = drawing::memory_size(size);
 
         if (approximate_mem_size_ > max_size)
@@ -295,6 +292,11 @@ namespace procgui
         }
         else
         {
+            // Validate all changes.
+            OParams::get_target()->validate();
+            OLSys::get_target()->validate();
+            OMap::get_target()->validate();
+            
             compute_vertices();
         }
     }
@@ -349,7 +351,20 @@ namespace procgui
               false, "Yes", "No",
               [this]()
               {
+                  // We do not know which one was modified, validate all.
+                  OParams::get_target()->validate();
+                  OLSys::get_target()->validate();
+                  OMap::get_target()->validate();
+
                   compute_vertices();
+              },
+              [this]()
+              {
+                  // Normally, only one was modified (or the user has a
+                  // sub-frame auto-clicker), so only one will be reverted.
+                  OParams::get_target()->revert();
+                  OLSys::get_target()->revert();
+                  OMap::get_target()->revert();
               }
             };
         procgui::push_popup(size_warning_popup);
@@ -361,8 +376,8 @@ namespace procgui
         // boxes. 
         
         std::tie(vertices_, iteration_of_vertices_, max_iteration_) =
-            drawing::compute_vertices(*OLSys::get_target(),
-                                      *OMap::get_target(),
+            drawing::compute_vertices(*OLSys::get_target()->ref_rule_map(),
+                                      *OMap::get_target()->get_rule_map(),
                                       *OParams::get_target());
         bounding_box_ = geometry::bounding_box(vertices_);
         sub_boxes_ = geometry::sub_boxes(vertices_, MAX_SUB_BOXES);

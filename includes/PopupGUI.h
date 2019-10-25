@@ -35,18 +35,26 @@ namespace procgui
         // The text of the "cancel" button.
         std::string cancel_text = "Cancel";
         // Arbitrary function called when the popup is validated, meaning a
-        // click on the 'ok_text' button or by pressing 'Enter'
+        // click on the 'ok_text' button or by pressing 'Enter', if 'only_info'
+        // is false.
         std::function<void()> ok_callback {nullptr};
+        // Arbitrary function called when the popup is cancelled, meaning a
+        // click on the 'cancel_text' button or by pressing 'Escape', if
+        // 'only_info' is false.
+        std::function<void()> cancel_callback {nullptr};
 
         // Display the popup and defines its logic:
-        //   - If 'key' is 'escape' or the cancel_button is clicked, the popup is
-        //     closed.
+        //   - If 'key' is 'escape' and
+        //     - if the 'only_info' is true, the popup is closed
+        //     - Otherwise, the 'cancel_callback' is called and the popup is
+        //       closed.
         //   - If 'key' is 'enter' and
-        //     - if 'only_info' is true, the popup is closed
-        //     - otherwise, the 'ok_callback' is called and the popup is closed
+        //     - if 'only_info' is true, the popup is closed.
+        //     - Otherwise, the 'ok_callback' is called and the popup is closed
         //   - If the ok_button is clicked, 'ok_callback' is called and the
-        //     popup is closed
-        //
+        //     popup is closed.
+        //   - If the cancel_button is clicked, 'cancel_callback' is called and
+        //     the popup is closed.
         // If key is 'enter' or 'escape', it is set to 'sf::Keyboard::Unknown',
         // to avoid the other GUI elements to use it.
         //      

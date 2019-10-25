@@ -1,6 +1,6 @@
 template<typename Buffer>
 void interact_with_buffer(Buffer& buffer,
-                          std::function<bool(typename Buffer::const_iterator)>  successor_fn)
+                          std::function<void(typename Buffer::const_iterator, bool&)>  successor_fn)
 {
     //  --- Rules ---
     // [ predecessor ] -> [ successor ] [-] (remove rule) | [+] (add rule)
@@ -11,6 +11,8 @@ void interact_with_buffer(Buffer& buffer,
     // clicked on.
     auto to_delete = buffer.end();
 
+    bool buffer_updated = false;
+    
     // We use the old iterator style to save the rule to delete, if necessary.
     for (auto it = buffer.begin(); it != buffer.end(); ++it)
     { 
@@ -21,14 +23,15 @@ void interact_with_buffer(Buffer& buffer,
 
         char predec[2] { rule.predecessor, '\0' };
         // Display the predecessor as an InputText
-        if (ImGui::InputText("##pred", predec, 2))
+        if (ImGui::InputText("##pred", predec, 2) && !buffer_updated)
         {
-            buffer.delayed_change_predecessor(it, predec[0]);
+            buffer.change_predecessor(it, predec[0]);
+            buffer_updated = true;
         }
 
         ImGui::PopItemWidth(); ImGui::SameLine(); ImGui::Text("->"); ImGui::SameLine();
 
-        successor_fn(it);
+        successor_fn(it, buffer_updated);
         
         // The [-] button. If clicked, the current iterator is saved as the
         // one to delete. We reasonably assume a user can not click on two
@@ -38,14 +41,15 @@ void interact_with_buffer(Buffer& buffer,
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(0, 0.7f, 0.7f)));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(0, 0.8f, 0.8f)));
         ImGui::SameLine();
-        if (ImGui::Button("-"))
+        if (ImGui::Button("-") && !buffer_updated)
         {
             to_delete = it;
+            buffer_updated = true;
         }
         ImGui::PopStyleColor(3);
 
         // If the current rule is not valid, add a warning.
-        if(!rule.is_duplicate)
+        if(!rule.is_active)
         {
             ImGui::SameLine();
             ImGui::TextColored(ImVec4(1.f,0.f,0.f,1.f), "Duplicated predecessor: %s", predec);
@@ -57,20 +61,18 @@ void interact_with_buffer(Buffer& buffer,
     ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(2/7.0f, 0.6f, 0.6f)));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(2/7.0f, 0.7f, 0.7f)));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(2/7.0f, 0.8f, 0.8f)));
-    if (ImGui::Button("+"))
+    if (ImGui::Button("+") && !buffer_updated)
     {
-        buffer.delayed_add_rule();
+        buffer.add_rule();
+        buffer_updated = true;
     }
     ImGui::PopStyleColor(3);
 
     // Erase the marked rule if necessary
     if (to_delete != buffer.end())
     {
-        buffer.delayed_erase(to_delete);
+        buffer.erase(to_delete);
     }
-
-    // Apply the buffered methods.
-    buffer.apply();
             
     ImGui::Unindent();
 }

@@ -1,7 +1,33 @@
 #include <sstream>
 #include <gtest/gtest.h>
 #include "cereal/archives/json.hpp"
+#include "Observer.h"
 #include "LSystem.h"
+
+
+using LSysPtr = std::shared_ptr<LSystem>;
+using Rules = LSystem::production_rules;
+using ProductionCache = std::unordered_map<int, std::string>;
+using IterationCache = std::unordered_map<int, std::pair<std::vector<int>, int>>;
+
+class LSysObs
+{
+public:
+    explicit LSysObs(LSysPtr ptr)
+        : obs_(ptr)
+        {
+            obs_.add_callback([this](){notified_ = true;});
+        }
+
+    explicit operator bool() const
+        {
+            return notified_;
+        }
+    
+private:
+    Observer<LSystem> obs_ {nullptr};
+    bool notified_ {false};
+};
 
 
 // Check if all the members are initialized. Not so useful by itself, except if
@@ -12,8 +38,8 @@ TEST(LSystemTest, default_ctor)
     
     LSystem::production_rules empty_rules;
     std::string empty_str;
-    std::unordered_map<int, std::string> empty_prod_cache;
-    std::unordered_map<int, std::pair<std::vector<int>, int>> empty_rec_cache;
+    ProductionCache empty_prod_cache;
+    IterationCache empty_rec_cache;
     
     ASSERT_EQ(lsys.get_axiom(), empty_str);
     ASSERT_EQ(lsys.get_rules(), empty_rules);
@@ -26,14 +52,13 @@ TEST(LSystemTest, complete_ctor)
 {
     LSystem lsys { "F", { { 'F', "F+F" } }, "F" };
     LSystem::production_rules expected_rules = { { 'F', "F+F" } };
-    std::unordered_map<int, std::pair<std::vector<int>, int>> expected_recursion_cache =
-        { {0, {{0}, 0}} };
+    IterationCache expected_iteration_cache = { {0, {{0}, 0}} };
 
     ASSERT_EQ(lsys.get_axiom(), "F");
     ASSERT_EQ(lsys.get_rules(), expected_rules);
     ASSERT_EQ(lsys.get_production_cache().at(0), "F");
     ASSERT_EQ(lsys.get_iteration_predecessors(), "F");
-    ASSERT_EQ(lsys.get_iteration_cache(), expected_recursion_cache);
+    ASSERT_EQ(lsys.get_iteration_cache(), expected_iteration_cache);
 }
 // Other constructors are defaulted, we assume the implementation is correct.
 
@@ -46,62 +71,99 @@ TEST(LSystemTest, get_axiom)
 
 TEST(LSystemTest, set_axiom)
 {
-    LSystem lsys { "F", { { 'F', "F+F" } }, "F"  };
+    LSysPtr lsys = std::make_shared<LSystem>("F", Rules({{'F', "F+F"}}), "F");
+    LSysObs obs (lsys);
+    ProductionCache axiom_prod_cache { { 0, "FF" } };
+    IterationCache axiom_iter_cache { {0, {{0, 0}, 0 }} };
+    
+    lsys->set_axiom("FF");
 
-    lsys.set_axiom("FF");
+    ASSERT_EQ(lsys->get_axiom(), "FF");
+    ASSERT_EQ(lsys->get_production_cache(), axiom_prod_cache);
+    ASSERT_EQ(lsys->get_iteration_cache(), axiom_iter_cache);
 
-    ASSERT_EQ(lsys.get_axiom(),       "FF");
-    ASSERT_EQ(lsys.get_production_cache().at(0), "FF");
+    ASSERT_TRUE(obs);
 }
 
 TEST(LSystemTest, add_rule)
 {
-    LSystem lsys { "F", { }, "F"  };
+    LSysPtr lsys = std::make_shared<LSystem>("F", Rules({ }), "F");
+    LSysObs obs (lsys);
     LSystem::production_rules expected_rules = { { 'F', "F+F" } };
-    std::unordered_map<int, std::string> base_cache { { 0, "F" } };
-    
-    lsys.add_rule('F', "F+F");
+    ProductionCache base_prod_cache { { 0, "F" } };
+    IterationCache base_iter_cache { {0, {{0}, 0 }} };     
+    lsys->add_rule('F', "F+F");
 
-    ASSERT_EQ(lsys.get_rules(), expected_rules);
-    ASSERT_EQ(lsys.get_production_cache(), base_cache);
+    ASSERT_EQ(lsys->get_rules(), expected_rules);
+    ASSERT_EQ(lsys->get_production_cache(), base_prod_cache);
+    ASSERT_EQ(lsys->get_iteration_cache(), base_iter_cache);
+    ASSERT_TRUE(obs);
 }
 
 TEST(LSystemTest, remove_rule)
 {
-    LSystem lsys { "F", { { 'F', "F+F" } }, "F"  };
+    LSysPtr lsys = std::make_shared<LSystem>("F", Rules({ { 'F', "F+F" } }), "F");
+    LSysObs obs (lsys);
     LSystem::production_rules empty_rules;
-    std::unordered_map<int, std::string> base_cache { { 0, "F" } };
+    ProductionCache base_prod_cache { { 0, "F" } };
+    IterationCache base_iter_cache { {0, {{0}, 0 }} }; 
 
-    lsys.remove_rule('F');
+    lsys->remove_rule('F');
 
-    ASSERT_EQ(lsys.get_rules(), empty_rules);
-    ASSERT_EQ(lsys.get_production_cache(), base_cache);
+    ASSERT_EQ(lsys->get_rules(), empty_rules);
+    ASSERT_EQ(lsys->get_production_cache(), base_prod_cache);
+    ASSERT_EQ(lsys->get_iteration_cache(), base_iter_cache);
 
-    ASSERT_THROW(lsys.remove_rule('G'), gsl::fail_fast);
+    ASSERT_TRUE(obs);
+    
+    ASSERT_THROW(lsys->remove_rule('G'), gsl::fail_fast);
 }
 
 TEST(LSystemTest, clear_rules)
 {
-    LSystem lsys { "F", { { 'F', "F+F" }, { 'G', "GG" } }, "F"  };
+    LSysPtr lsys = std::make_shared<LSystem>("F", Rules({ { 'F', "F+F" }, { 'G', "GG" } }), "F");
+    LSysObs obs (lsys);
     LSystem::production_rules empty_rules;
-    std::unordered_map<int, std::string> base_cache { { 0, "F" } };
+    ProductionCache base_cache { { 0, "F" } };
 
-    lsys.clear_rules();
+    lsys->clear_rules();
 
-    ASSERT_EQ(lsys.get_rules(), empty_rules);
-    ASSERT_EQ(lsys.get_production_cache(), base_cache);
+    ASSERT_EQ(lsys->get_rules(), empty_rules);
+    ASSERT_EQ(lsys->get_production_cache(), base_cache);
+
+    ASSERT_TRUE(obs);
+}
+
+TEST(LSystemTest, replace_rules)
+{
+    LSysPtr lsys = std::make_shared<LSystem>("F", Rules({ { 'F', "FF" }, { 'G', "GG" } }), "F");
+    LSysObs obs (lsys);
+    LSystem::production_rules new_rules {{'H', "HH"},{'I', "II"}};;
+    ProductionCache base_prod_cache { { 0, "F" } };
+    IterationCache base_iter_cache { {0, {{0}, 0 }} };
+
+    lsys->replace_rules(new_rules);
+
+    ASSERT_EQ(lsys->get_rules(), new_rules);
+    ASSERT_EQ(lsys->get_production_cache(), base_prod_cache);
+    ASSERT_EQ(lsys->get_iteration_cache(), base_iter_cache);
+
+    ASSERT_TRUE(obs);
 }
 
 TEST(LSystemTest, set_iteration_predecessors)
 {
-    LSystem lsys { "F", { { 'F', "F+F" }, { 'G', "GG" } }, "F" };
+    LSysPtr lsys = std::make_shared<LSystem>("F", Rules({ { 'F', "F+F" }, { 'G', "GG" } }), "F");
+    LSysObs obs (lsys);
     std::string expected_predecessors = "";
-    std::unordered_map<int, std::pair<std::vector<int>, int>> expected_cache = { {0, {{0}, 0}} };
+    IterationCache expected_cache = { {0, {{0}, 0}} };
 
 
-    lsys.set_iteration_predecessors("");
-    ASSERT_EQ(lsys.get_iteration_predecessors(), expected_predecessors);
-    ASSERT_EQ(lsys.get_iteration_cache(), expected_cache);
+    lsys->set_iteration_predecessors("");
+    ASSERT_EQ(lsys->get_iteration_predecessors(), expected_predecessors);
+    ASSERT_EQ(lsys->get_iteration_cache(), expected_cache);
+
+    ASSERT_TRUE(obs);
 }
 
 // Test some iterations.
@@ -180,12 +242,12 @@ TEST(LSystemTest, disjoint_derivation)
     lsys.set_iteration_predecessors("G");
     lsys.produce(1);
 
-    std::unordered_map<int, std::string> production_cache { {0, "F"}, {1, "F+G"}, {2, "F+G+G-F"} };
-    std::unordered_map<int, std::pair<std::vector<int>, int>> recursion_cache
+    ProductionCache production_cache { {0, "F"}, {1, "F+G"}, {2, "F+G+G-F"} };
+    IterationCache iteration_cache
                     { {0, {{0}, 0}}, {1, {{0,0,0}, 0}} };
 
     ASSERT_EQ(lsys.get_production_cache(), production_cache);
-    ASSERT_EQ(lsys.get_iteration_cache(), recursion_cache);
+    ASSERT_EQ(lsys.get_iteration_cache(), iteration_cache);
 }
 
 TEST(LSystemTest, serialization)

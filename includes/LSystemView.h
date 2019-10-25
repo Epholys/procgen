@@ -40,14 +40,14 @@ namespace procgui
     //    copy of LSystemView will share the same LSystem and Map.
     //
     // TODO: simplifies ctor by initializing some attribute here.
-    class LSystemView : public Observer<LSystem>,
-                        public Observer<drawing::InterpretationMap>,
+    class LSystemView : public Observer<procgui::LSystemBuffer>,
+                        public Observer<procgui::InterpretationMapBuffer>,
                         public Observer<drawing::DrawingParameters>,
                         public Observer<colors::VertexPainterWrapper>
     {
     public:
-        using OLSys = Observer<LSystem>;
-        using OMap = Observer<drawing::InterpretationMap>;
+        using OLSys = Observer<procgui::LSystemBuffer>;
+        using OMap = Observer<procgui::InterpretationMapBuffer>;
         using OParams = Observer<drawing::DrawingParameters>;
         using OPainter = Observer<colors::VertexPainterWrapper>;
 
@@ -160,13 +160,13 @@ namespace procgui
         // true if the LSystem is modified from the last save
         bool is_modified_;
 
-        // The LSystem's buffer. It has shared ownership of a
-        // shared_ptr<LSystem> with the associated Observable.
-        LSystemBuffer lsys_buff_;
+        // // The LSystem's buffer. It has shared ownership of a
+        // // shared_ptr<LSystem> with the associated Observable.
+        // LSystemBuffer lsys_buff_;
 
-        // The InterpretationMap's buffer. It has shared ownership of a
-        // shared_ptr<InterpretationMap> with the associated Observable.
-        InterpretationMapBuffer interpretation_buff_;
+        // // The InterpretationMap's buffer. It has shared ownership of a
+        // // shared_ptr<InterpretationMap> with the associated Observable.
+        // InterpretationMapBuffer interpretation_buff_;
 
         // The vertices of the View and their iteration count. Computed at each
         // modification.
@@ -199,9 +199,9 @@ namespace procgui
         void save (Archive& ar, const std::uint32_t) const
             {
                 ar(cereal::make_nvp("name", name_),
-                   cereal::make_nvp("LSystem", *OLSys::get_target()),
+                   cereal::make_nvp("LSystem", *OLSys::get_target()->get_rule_map()),
                    cereal::make_nvp("DrawingParameters", *OParams::get_target()),
-                   cereal::make_nvp("Interpretation Map", *OMap::get_target()));
+                   cereal::make_nvp("Interpretation Map", *OMap::get_target()->get_rule_map()));
 
                 auto painter_serializer  = colors::VertexPainterSerializer(OPainter::get_target()->unwrap());
                 ar(cereal::make_nvp("VertexPainter", painter_serializer));

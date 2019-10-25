@@ -1,58 +1,40 @@
 template <typename Target>
-RuleMapBuffer<Target>::RuleMapBuffer(std::shared_ptr<Target> target)
-    : Observer<Target>(target)
-    , buffer_{}
-    , instruction_ {nullptr}
-    , reverse_instruction_{nullptr}
-    , is_notification_origin_{false}
- {
-     this->add_callback([this]() { sync(); });
-
-     // Initialize the buffer with the LSystem's rules.
-     // By construction, there are not duplicate rules in a 'LSystem', so
-     // there is no check: all rules are valid.
-     for (const auto &rule : observer_target().get_rules()) {
-         buffer_.push_back({true, rule.first, rule.second});
-     }
- }
-
-template<typename Target>
-RuleMapBuffer<Target>::RuleMapBuffer(const RuleMapBuffer& other)
-    : Observer<Target>(other.Observer<Target>::get_target())
-    , buffer_ {other.buffer_}
-    , instruction_ {nullptr}
-    , reverse_instruction_ {nullptr}
-    , is_notification_origin_{false}
+RuleMapBuffer<Target>::RuleMapBuffer(std::shared_ptr<Target> rule_map)
+    : rule_map_(rule_map)
 {
-    Observer<Target>::add_callback([this](){sync();});
+    Expects(rule_map);
+     
+    // Initialize the buffer with the LSystem's rules.
+    // By construction, there are not duplicate rules in a 'LSystem', so
+    // there is no check: all rules are valid.
+    for (const auto &rule : rule_map_->get_rules()) {
+        buffer_.push_back({true, rule.first, rule.second});
+    }
 }
 
 template<typename Target>
-RuleMapBuffer<Target>::RuleMapBuffer(const RuleMapBuffer& other, std::shared_ptr<Target> target)
-    : Observer<Target>(target)
-    , buffer_ {other.buffer_}
-    , instruction_ {nullptr}
-    , reverse_instruction_ {nullptr}
-    , is_notification_origin_{false}
+RuleMapBuffer<Target>::~RuleMapBuffer()
 {
-    Observer<Target>::add_callback([this](){sync();});
+}
+
+template<typename Target>
+RuleMapBuffer<Target>::RuleMapBuffer(const RuleMapBuffer& other)
+    : rule_map_ {std::make_shared<RuleMap<Target>>(*other.rule_map_)}
+    , buffer_ {other.buffer_}
+    , previous_buffer_ {other.previous_buffer_}
+{
+
 }
 
 template<typename Target>
 RuleMapBuffer<Target>::RuleMapBuffer(RuleMapBuffer&& other)
-    : Observer<Target>(std::move(other.Observer<Target>::get_target()))
-    , buffer_ {std::move(other.buffer_)}
-    , instruction_ {nullptr}
-    , reverse_instruction_ {nullptr}
-    , is_notification_origin_{false}
+    : Observer<Target>(std::move(other.rule_map_))
+    , buffer_ {other.buffer_}
+    , previous_buffer_ {other.previous_buffer_}
 {
-    Observer<Target>::add_callback([this](){sync();});
-
-    other.set_target(nullptr);
-    other.buffer_ = {};
-    other.instruction_ = nullptr;
-    other.reverse_instruction_ = nullptr;
-    other.is_notification_origin_ = false;
+    other.rule_map_.reset();
+    other.buffer_.clear();
+    other.previous_buffer_.clear();
 }
 
 template<typename Target>
@@ -60,13 +42,9 @@ RuleMapBuffer<Target>& RuleMapBuffer<Target>::operator=(const RuleMapBuffer& oth
 {
     if (this != &other)
     {
-        Observer<Target>::set_target(other.Observer<Target>::get_target());
+        rule_map_ = std::move(other.rule_map_);
         buffer_ = other.buffer_;
-        instruction_ = nullptr;
-        reverse_instruction_ = nullptr;
-        is_notification_origin_ = false;
-            
-        Observer<Target>::add_callback([this](){sync();});
+        previous_buffer_ = other.previous_buffer_;
     }
     return *this;
 }
@@ -76,27 +54,15 @@ RuleMapBuffer<Target>& RuleMapBuffer<Target>::operator=(RuleMapBuffer&& other)
 {
     if (this != &other)
     {
-        Observer<Target>::set_target(std::move(other.Observer<Target>::get_target()));
-        buffer_ = std::move(other.buffer_);
-        instruction_ = nullptr;
-        reverse_instruction_ = nullptr;
-        other.is_notification_origin_ = false;
+        rule_map_ = std::move(other.rule_map_);
+        buffer_ = other.buffer_;
+        previous_buffer_ = other.previous_buffer_;
 
-        Observer<Target>::add_callback([this](){sync();});
-
-        other.set_target(nullptr);
-        other.buffer_ = {};
-        other.instruction_ = nullptr;
-        other.reverse_instruction_ = nullptr;
-        other.is_notification_origin_ = false;
+        other.rule_map_.reset();
+        other.buffer_.clear();
+        other.previous_buffer_.clear();
     }
     return *this;
-}
-
-template<typename Target>
-Target& RuleMapBuffer<Target>::observer_target() const
-{
-    return *(this->get_target());
 }
 
 template<typename Target>
@@ -117,6 +83,23 @@ size_t RuleMapBuffer<Target>::size() const
     return buffer_.size();
 }
 
+template<typename Target>
+std::shared_ptr<const Target> RuleMapBuffer<Target>::get_rule_map() const
+{
+    return rule_map_;
+}
+template<typename Target>
+std::shared_ptr<Target> RuleMapBuffer<Target>::ref_rule_map() const
+{
+    return rule_map_;
+}
+
+template<typename Target>
+void RuleMapBuffer<Target>::set_rule_map(std::shared_ptr<Target> new_rule_map)
+{
+    return rule_map_ = new_rule_map;
+}
+
 
 template<typename Target>
 typename RuleMapBuffer<Target>::iterator RuleMapBuffer<Target>::remove_const(const_iterator cit)
@@ -129,10 +112,12 @@ typename RuleMapBuffer<Target>::iterator RuleMapBuffer<Target>::remove_const(con
 template<typename Target>
 void RuleMapBuffer<Target>::add_rule()
 {
-    reverse_instruction_ = nullptr;
+    previous_buffer_ = buffer_;
     
     // Add a scratch buffer: a valid empty rule.
     buffer_.push_back({});
+
+    // No notify : no visible change in effective RuleMap
 }
 
 
@@ -141,21 +126,18 @@ void RuleMapBuffer<Target>::erase(const_iterator cit)
 {
     Expects(cit != buffer_.end());
 
-    reverse_instruction_ = nullptr;
-    
-    auto is_valid = cit->is_duplicate;
-    auto pred = cit->predecessor;
+    previous_buffer_ = buffer_;
 
     // If the rule is valid and not a scratch buffer, removes it.
-    if (is_valid && pred != '\0')
+    if (cit->predecessor != '\0' && cit->is_active)
     {
-        remove_rule(pred);
+        remove_rule(cit->predecessor);
     }
     // Otherwise, simply remove it from the buffer.
     else
     {
         buffer_.erase(cit);
-        return;
+        // No notify : no visible change in effective RuleMap
     }
 }
 
@@ -164,10 +146,7 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
 {    
     Expects(cit != buffer_.end());
 
-    reverse_instruction_ = nullptr;
-    std::function<void()> part1 = []() {};
-    std::function<void()> part2 = []() {};
-    std::function<void()> part3 = []() {};
+    previous_buffer_ = buffer_;
     
     // If the new predecessor is null, remove it.
     if (pred == '\0')
@@ -176,9 +155,8 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
         return;
     }
 
-
     // There is 2 cases for the new rule:
-    //  1. The new rule is valid/original => add it to the RuleMap.
+    //  1. The new rule is active => add it to the RuleMap.
     //  2. The new rule is a duplicate => do nothing
     // There is 4 cases for the old rule at 'cit':
     //  3. It was a duplicate rule => do nothing
@@ -186,74 +164,48 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
     //  5. It was an original rule with a duplicate => replace it
     //  6. It was a scratch buffer => do nothing
 
-    // Note: the order is important: 'add_rule()' for the new rule must
-    // called before the others.
-    bool old_was_original = cit->is_duplicate;
-    auto old_pred = cit->predecessor; 
-    auto old_succ = cit->successor;
+    auto [previous_was_active, previous_pred, succ] = *cit;
     
     // Check if the new rule is original by finding an existing one with the
     // new predecessor.
     bool new_is_original = std::find_if(buffer_.cbegin(), buffer_.cend(),
                                         [pred](const auto& rule)
                                         { return rule.predecessor == pred &&
-                                          rule.is_duplicate; }) == buffer_.end();
-    const succ& succ = cit->successor;
+                                          rule.is_active; }) == buffer_.end();
 
     // Modify 'buffer_' with the new predicate.
     RuleMapBuffer<Target>::iterator it = remove_const(cit);
-    *it = { new_is_original, pred, succ };
-    part1 = [=]() { *it = { old_was_original, old_pred, old_succ }; };
+
+    *it = Rule({ new_is_original, pred, succ });
 
     if (new_is_original) // Case 1.
     {
-        is_notification_origin_= true;
-        observer_target().add_rule(pred, succ);
-
-        part2 = [=]()
-            {
-                is_notification_origin_= true;
-                observer_target().remove_rule(pred);
-            };
+        rule_map_->add_rule(pred, succ);
     }
     else // Case 2.
     {
+        // Do nothing
     }
         
-    if (old_was_original && old_pred != '\0')
+    if (previous_was_active && previous_pred != '\0')
     {
-        is_notification_origin_= true;
-        
         // Try to find a duplicate of the old rule
         auto old_duplicate = std::find_if(buffer_.begin(), buffer_.end(),
-                                          [old_pred](const auto& rule)
-                                          { return rule.predecessor == old_pred &&
-                                            !rule.is_duplicate; });
+                                          [previous_pred](const auto& rule)
+                                          { return rule.predecessor == previous_pred &&
+                                            !rule.is_active; });
 
         if (old_duplicate == buffer_.end()) // Case 4.
         {
             // Note: it is not necessary to call 'this->remove_rule()' as we
             // already checked that the old rule did not have a duplicate.
-            observer_target().remove_rule(old_pred);
-            part3 = [=]()
-                {
-                    is_notification_origin_ = true;
-                    observer_target().add_rule(old_pred, old_succ);
-                };
+            rule_map_->remove_rule(previous_pred);
         }
         else // Case 5.
         {
-            old_duplicate->is_duplicate = true;
-            observer_target().add_rule(old_duplicate->predecessor,
-                                       old_duplicate->successor);
-
-            part3 = [=]()
-                {
-                    is_notification_origin_ = true;
-                    observer_target().add_rule(old_duplicate->predecessor,
-                                               old_succ);
-                    old_duplicate->is_duplicate = false;
-                };
+            old_duplicate->is_active = true;
+            rule_map_->add_rule(old_duplicate->predecessor,
+                                old_duplicate->successor);
         }
     }
     else // Case 3. & 6.
@@ -261,12 +213,7 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
         // Do nothing
     }
 
-    reverse_instruction_ = [=]()
-        {
-            part3();
-            part2();
-            part1();
-        };
+    notify();
 }
     
 template<typename Target>
@@ -274,21 +221,24 @@ void RuleMapBuffer<Target>::remove_predecessor(RuleMapBuffer<Target>::const_iter
 {
     Expects(cit != buffer_.end());
 
-    reverse_instruction_ = nullptr;
-    
-    // Turn '*cit' into a scratch buffer
-        
-    auto old_pred = cit->predecessor;
-    auto is_valid = cit->is_duplicate;
+    previous_buffer_ = buffer_;
 
+    auto was_active = cit->is_active;
+    auto previous_predecessor = cit->predecessor;
+    
+    // Go back to scratch buffer.
     auto it = remove_const(cit);
-    const succ& succ = cit->successor;
-    *it = { true, '\0', succ };
+    *it = { true, '\0', cit->successor };
 
     // If it was an original rule, remove it.
-    if (is_valid)
+    if (was_active)
     {
-        remove_rule(old_pred);
+        remove_rule(previous_predecessor);
+        // notify will be called in 'remove_rule()'
+    }
+    else
+    {
+        notify();
     }
 }
 
@@ -298,50 +248,37 @@ void RuleMapBuffer<Target>::change_successor(const_iterator cit, const succ& suc
 {
     Expects(cit != buffer_.end());
 
-    reverse_instruction_ = nullptr;
-    std::function<void()> part1 = []() {};
-    std::function<void()> part2 = []() {};
-
-    auto old_succ = cit->successor;
+    previous_buffer_ = buffer_;
+    
     auto it = remove_const(cit);
-    auto is_valid = cit->is_duplicate;
-    auto pred = cit->predecessor;
-    *it = { is_valid, pred, succ };
-    part1 = [=]() { *it = {is_valid, pred, old_succ}; };
+    *it = Rule({ cit->is_active, cit->predecessor, succ });
 
     // If it was an original rule, replace it in the Target
-    if (is_valid && pred != '\0') {
-        is_notification_origin_ = true;
-        observer_target().add_rule(pred, succ);
-
-        part2 = [=]()
-            {
-                is_notification_origin_ = true;
-                observer_target().add_rule(pred, old_succ);
-            };
+    if (cit->is_active && cit->predecessor != '\0')
+    {
+        rule_map_->add_rule(cit->predecessor, succ);
     }
 
-    reverse_instruction_ = [=]()
-        {
-            part2();
-            part1();
-        };
+    notify();
 }
 
 template <typename Target>
-void RuleMapBuffer<Target>::remove_rule(char pred) {
-    reverse_instruction_ = nullptr;
-
-    // This method is called instead of 'observer_target().remove_rule(pred)'
+void RuleMapBuffer<Target>::remove_rule(char pred)
+{
+    previous_buffer_ = buffer_;
+    
+    // This method is called instead of 'rule_map_->remove_rule(pred)'
     // to replace the old rule by a duplicate that is in priority in the same
     // RuleMapBuffer.
 
     // If 'pred' designate a still valid rule, remove this rule.
-    auto original = std::find_if(
-        buffer_.begin(), buffer_.end(), [pred](const auto &rule) {
-            return rule.predecessor == pred && rule.is_duplicate;
-        });
-    if (original != buffer_.end()) {
+    auto original = std::find_if(buffer_.begin(), buffer_.end(),
+                                 [pred](const auto &rule)
+                                 {
+                                     return rule.predecessor == pred && rule.is_active;
+                                 });
+    if (original != buffer_.end())
+    {
         buffer_.erase(original);
     }
 
@@ -349,65 +286,49 @@ void RuleMapBuffer<Target>::remove_rule(char pred) {
     auto duplicate = std::find_if(buffer_.begin(), buffer_.end(),
                                   [pred](const auto& rule)
                                   { return rule.predecessor == pred &&
-                                    !rule.is_duplicate; });
+                                    !rule.is_active; });
 
-    is_notification_origin_= true;
     if (duplicate != buffer_.end())
     {
+        duplicate->is_active = true;
         // If found, replace the old rule by it.
-        duplicate->is_duplicate = true;
-        observer_target().add_rule(pred, duplicate->successor);
+        rule_map_->add_rule(pred, duplicate->successor);
     }
     else
     {
         // Otherwise, simply remove the rule.
-        observer_target().remove_rule(pred);
+        rule_map_->remove_rule(pred);
     }
+
+    notify();
 }
 
 template<typename Target>
-void RuleMapBuffer<Target>::delayed_add_rule()
+typename Target::rule_map RuleMapBuffer<Target>::generate_rule_map()
 {
-    instruction_ = [=](){ add_rule(); };
-}
-template<typename Target>
-void RuleMapBuffer<Target>::delayed_erase(const_iterator cit)
-{
-    instruction_ = [=](){ erase(cit); };
-}
-template<typename Target>
-void RuleMapBuffer<Target>::delayed_change_predecessor(const_iterator cit, char pred)
-{
-    instruction_ = [=](){ change_predecessor(cit, pred); };
-}
-template<typename Target>
-void RuleMapBuffer<Target>::delayed_remove_predecessor(const_iterator cit)
-{
-    instruction_ = [=](){ remove_predecessor(cit); };
-}
-template<typename Target>
-void RuleMapBuffer<Target>::delayed_change_successor(const_iterator cit, const succ& succ)
-{
-    instruction_ = [=](){ change_successor(cit, succ); };
-}
-
-template<typename Target>
-void RuleMapBuffer<Target>::apply()
-{
-    if(instruction_)
+    typename Target::rule_map map;
+    
+    for (const auto& rule : buffer_)
     {
-        instruction_();
-        instruction_ = nullptr;
+        if (rule.is_active)
+        {
+            map[rule.predecessor] = rule.successor;
+        }
     }
+
+    return map;
 }
 
 template<typename Target>
 void RuleMapBuffer<Target>::revert()
 {
-    if (reverse_instruction_)
+    if (!previous_buffer_.empty())
     {
-        reverse_instruction_();
-        reverse_instruction_= nullptr;
+        buffer_ = previous_buffer_;
+
+        rule_map_->replace_rules(generate_rule_map());
+        
+        previous_buffer_.clear(); 
     }
 }
 
@@ -415,22 +336,5 @@ void RuleMapBuffer<Target>::revert()
 template<typename Target>
 void RuleMapBuffer<Target>::validate()
 {
-    reverse_instruction_ = nullptr;
-}
-
-template<typename Target>
-void RuleMapBuffer<Target>::sync()
-{
-    if (is_notification_origin_)
-    {
-        is_notification_origin_ = false;
-        return;
-    }
-
-    buffer_.clear();
-
-    for (const auto& rule : observer_target().get_rules())
-    {
-        buffer_.push_back({true, rule.first, rule.second});
-    }
+    previous_buffer_.clear(); 
 }

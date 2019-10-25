@@ -51,6 +51,13 @@ namespace drawing
         void set_delta_angle(double delta_angle);
         void set_step(double step);
         void set_n_iter(int n_iter);
+
+        // Revert to previous 'n_iter'.
+        // Useful when cancelling computatoin of too big LSys.
+        void revert();
+
+        // Validate modification of 'n_iter'.
+        void validate();
         
     private:
         // The starting position and angle of the Turtle.
@@ -70,6 +77,10 @@ namespace drawing
         // The number of iterations done by the L-system.
         int n_iter_ { 0 };
 
+        // The previous number of iterations.
+        // Used in 'revert()' and 'validate()'.
+        int previous_n_iter_ { -1 };
+        
     private:
         // Serialization
         friend class cereal::access;

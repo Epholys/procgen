@@ -50,7 +50,7 @@ namespace procgui
     // Invariant:
     //   - The Target and the buffer must be synchronized
     template<typename Target>
-    class RuleMapBuffer : public Observer<Target>
+    class RuleMapBuffer : public Observable
     {
     public:
         /* must be a derived class of RuleMap */
@@ -61,14 +61,14 @@ namespace procgui
         // A production rule: 
         struct Rule
         {
-            bool is_duplicate {true};    // If a rule is a duplicate of an already existing
+            bool is_active {true};    // If a rule is a duplicate of an already existing
                                      // rule, it is not valid.
             char predecessor {'\0'};
             succ successor {}; // If the successor is a basic type like 'int',
                                // it will be not be initialized. Do not forget
                                // to override 'add_rule' if this is the case.
             inline bool operator== (const Rule& other) const
-                { return is_duplicate == other.is_duplicate &&
+                { return is_active == other.is_active &&
                          predecessor == other.predecessor &&
                          successor == other.successor; }
             inline bool operator!= (const Rule& other) const
@@ -82,13 +82,13 @@ namespace procgui
         using const_iterator = typename buffer::const_iterator;
 
         // Constructor
-        explicit RuleMapBuffer(std::shared_ptr<Target> target_);
-
+        explicit RuleMapBuffer(std::shared_ptr<Target> rule_map_);
+        virtual ~RuleMapBuffer();
+        
         // The copy constructor and the assignment operator are needed because
         // we need to register a callback for the new object to
         // 'Observer<Target>'
         RuleMapBuffer(const RuleMapBuffer& other);
-        RuleMapBuffer(const RuleMapBuffer& other, std::shared_ptr<Target> target);
         RuleMapBuffer(RuleMapBuffer&& other);
         RuleMapBuffer& operator=(const RuleMapBuffer& other);
         RuleMapBuffer& operator=(RuleMapBuffer&& other);
@@ -101,6 +101,14 @@ namespace procgui
         // Get the number of rules.
         size_t size() const;
 
+        // Get target
+        std::shared_ptr<const Target> get_rule_map() const;
+        std::shared_ptr<Target> ref_rule_map() const;
+        
+        // Set target
+        void set_rule_map(std::shared_ptr<Target> new_rule_map);
+            
+        
         // Add an empty rule: a scratch buffer.
         // Do not forget to override it if there is not a default initialization
         // for the successor.
@@ -140,54 +148,31 @@ namespace procgui
         //  - Precondition: 'cit' must be valid and derenferenceable.
         void change_successor(const_iterator cit, const succ& succ);
 
-        // These methods buffer to 'instruction_' the associated method.
-        // It is used to prevent iterator invalidation.
-        void delayed_add_rule();
-        void delayed_erase(const_iterator cit);
-        void delayed_change_predecessor(const_iterator cit, char pred);
-        void delayed_remove_predecessor(const_iterator cit);
-        void delayed_change_successor(const_iterator cit, const succ& succ);
-
-        // Apply the buffered instruction.
-        // If 'instruction_' is nullptr, does nothing.
-        void apply();
-
-        // Apply 'reverse_instrution_' and reset it.
-        // If it is a nullptr, does nothing.
-        // Shoud be reseted in unrelated method and replaced in related method.
+        // Reverse the last modification by replacing buffer_ by
+        // previous_buffer_ if it is not empty
         void revert();
 
-        // Confirms the change, reset 'reverse_instruction_'
+        // Confirms the change, clear previous_buffer_
         void validate();
         
     private:
-        Target& observer_target() const;
-
         // Remove a rule from the buffer.
         // Take care of updating the Target according to the existence of
         // duplicate rules in this buffer.
         void remove_rule(char pred);
-        
-        // Synchronize the rule buffer with the LSystems
-        void sync();
-       
+               
         // Remove the constness from 'cit'. Can only be used inside this class
         // to modify 'buffer_'.
         iterator remove_const(const_iterator cit);
-        
+
+        typename Target::rule_map generate_rule_map();
+
+        std::shared_ptr<Target> rule_map_{nullptr};
+
         // The rule buffer.
-        buffer buffer_;
+        buffer buffer_{};
 
-        // The buffered instruction from the 'delayed_*' methods.
-        std::function<void()> instruction_;
-
-        // The reverse instruction to roll back if the RuleMap modification is
-        // harmful.
-        // Only applies to instructions which could increase the size of the
-        // buffer : 'change_predecessor()' and 'change_successor()'
-        std::function<void()> reverse_instruction_;
-
-        bool is_notification_origin_;
+        buffer previous_buffer_{};
     };
 
     #include "RuleMapBuffer.tpp"
