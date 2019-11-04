@@ -832,10 +832,8 @@ TEST_F(RuleBufferTest, erase_to_duplicate)
 
 TEST_F(RuleBufferTest, erase_from_duplicate)
 {
-    auto size = buffer->size();
     auto begin = buffer->begin();
     auto first_pred = begin->predecessor;
-    auto first_succ = begin->successor;
     // BUFFER
     // dup pred succ
     //  t  A    0
@@ -852,13 +850,6 @@ TEST_F(RuleBufferTest, erase_from_duplicate)
     //  t  B    1
     //  f  A    2
 
-    std::cout << "BUFF\n";
-    for (const auto& rule : *buffer)
-    {
-        std::cout << rule.is_active << " " << rule.predecessor << " " << rule.successor << '\n';
-    }
-    std::cout << "\n";
-    
     buffer->erase(buffer->begin());
     
     // BUFFER
@@ -866,14 +857,6 @@ TEST_F(RuleBufferTest, erase_from_duplicate)
     //  t  B    1
     //  t  A    2
 
-    std::cout << "BUFF\n";
-    for (const auto& rule : *buffer)
-    {
-        std::cout << rule.is_active << " " << rule.predecessor << " " << rule.successor << '\n';
-    }
-    std::cout << "\n";
-    
-    
     ASSERT_TRUE(has_rule(buffer, first_pred, succ3));
     ASSERT_TRUE(has_rule(buffer, pred2, succ2));    
     ASSERT_FALSE(has_rule(buffer, pred1, succ1));    
