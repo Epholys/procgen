@@ -2,7 +2,7 @@
 #include "WindowController.h"
 #include "imgui/imgui.h"
 #include "LSystemView.h"
-
+#include "PopupGUI.h"
 
 namespace controller
 {
@@ -139,10 +139,32 @@ namespace controller
         auto to_delete = std::find_if(begin(views), end(views),
                                       [id](const auto& v){return v.get_id() == id;});
         Expects(to_delete != end(views));
-        views.erase(to_delete);
-        under_mouse_ = nullptr;
-    }
 
+        if (to_delete->is_modified())
+        {
+        
+            procgui::PopupGUI save_warning_popup =
+                { "Save Warning##LSysController",
+                  []()
+                  {
+                      ImGui::Text("This L-System has unsaved modification, are you sure to delete it?");
+                  },
+                  false, "Yes", "No",
+                  [to_delete, &views]()
+                  {
+                      views.erase(to_delete);
+                      under_mouse_ = nullptr;
+                  }
+                };
+            
+            procgui::push_popup(save_warning_popup);
+        }
+        else
+        {
+            views.erase(to_delete);
+            under_mouse_ = nullptr;
+        }
+    }
 
     void LSystemController::right_click_menu(std::list<procgui::LSystemView>& views)
     {

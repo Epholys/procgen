@@ -54,6 +54,7 @@ int main()
     // views.push_back(std::move(serpinski_view));
     views.push_back(std::move(plant_view));
     views.front().select();
+    views.front().finish_loading();
     // views.push_back(std::move(fract_view));
 
     sf::Clock delta_clock;
