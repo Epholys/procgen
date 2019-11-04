@@ -45,13 +45,13 @@ namespace procgui
         , sub_boxes_ {}
         , is_selected_ {false}
         , bounding_box_is_visible_{true}
+        , popups_ids_{}
     {
         // Invariant respected: cohesion between the LSystem/InterpretationMap
         // and the vertices.             
         update_callbacks();
         
         size_safeguard();
-        paint_vertices();
     }
 
     LSystemView::LSystemView(const ext::sf::Vector2d& position, double step)
@@ -61,12 +61,6 @@ namespace procgui
             std::make_shared<InterpretationMap>(default_interpretation_map),
             std::make_shared<DrawingParameters>(position, step))
     {
-        // TODO: remove this, as the previous constructor is called?
-        // Arbitrary default LSystem.
-        update_callbacks();
-
-        size_safeguard();
-        paint_vertices();
     }
 
     LSystemView::LSystemView(const LSystemView& other)
@@ -87,9 +81,12 @@ namespace procgui
         , sub_boxes_ {other.sub_boxes_}
         , is_selected_ {false}
         , bounding_box_is_visible_{true}
+        , popups_ids_{}
     {
         // Manually managing Observer<> callbacks.
         update_callbacks();
+
+        size_safeguard();
     }
 
     LSystemView::LSystemView(LSystemView&& other)
@@ -108,6 +105,7 @@ namespace procgui
         , sub_boxes_ {std::move(other.sub_boxes_)}
         , is_selected_ {false}
         , bounding_box_is_visible_{true}
+        , popups_ids_{}
     {
         // Manually managing Observer<> callbacks.
         update_callbacks();
@@ -124,6 +122,11 @@ namespace procgui
         other.bounding_box_ = {};
         other.is_selected_ = false;
         other.is_modified_ = false;
+
+        for (int id : other.popups_ids_)
+        {
+            procgui::remove_popup(id);
+        }
     }
 
     LSystemView& LSystemView::operator=(const LSystemView& other)
@@ -149,9 +152,11 @@ namespace procgui
             sub_boxes_ = other.sub_boxes_;
             is_selected_ = false;
             bounding_box_is_visible_ = true;
-
+            popups_ids_ = {};
             
             update_callbacks();
+
+            size_safeguard();
         }
 
         return *this;
@@ -176,6 +181,7 @@ namespace procgui
             sub_boxes_ = std::move(other.sub_boxes_);
             is_selected_ = false;
             bounding_box_is_visible_ = true;
+            popups_ids_ = {};
 
             // Manually managing Observer<> callbacks.
             update_callbacks();
@@ -185,13 +191,17 @@ namespace procgui
             other.OMap::set_target(nullptr);
             other.OParams::set_target(nullptr);
             other.OPainter::set_target(nullptr);
-
+            
             // the 'other' object must not matter in the 'color_gen_' anymore.
             other.id_ = -1;
             other.color_id_ = sf::Color::Black;
             other.bounding_box_ = {};
             other.is_selected_ = false;
             other.is_modified_ = false;
+            for (int id : other.popups_ids_)
+            {
+                procgui::remove_popup(id);
+            }
         }
 
         return *this;
@@ -204,6 +214,11 @@ namespace procgui
         if (id_ != -1)
         {
             unique_ids_.free_id(id_);
+        }
+
+        for (auto id : popups_ids_)
+        {
+            procgui::remove_popup(id);
         }
     }    
 
@@ -367,7 +382,7 @@ namespace procgui
                   OMap::get_target()->revert();
               }
             };
-        procgui::push_popup(size_warning_popup);
+        popups_ids_.push_back(procgui::push_popup(size_warning_popup));
     }
 
     void LSystemView::compute_vertices()

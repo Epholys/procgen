@@ -28,7 +28,17 @@ namespace controller
     class LoadMenu
     {
     public:
-        // Function called every frame the save menu should be open.
+
+        LoadMenu() = default;
+        ~LoadMenu();
+        // Simplify implementation by deleting these constructors/operator=. If
+        // necessary, they will be implemented. For now it avoid wrong behavior.
+        LoadMenu(const LoadMenu& other) = delete;
+        LoadMenu(LoadMenu&& other) = delete;
+        LoadMenu& operator=(const LoadMenu& menu) = delete;
+        LoadMenu& operator=(LoadMenu&& menu) = delete;
+
+         // Function called every frame the save menu should be open.
         // Main entry managing display and actions of the save menu.
         //
         // 'lsys_views' is where to save the LSys
@@ -117,6 +127,9 @@ namespace controller
         
         // Error messages to be displayed if necessary at loading time.
         static std::vector<std::string> error_messages;        
+
+        // Ids list of all created popups, existing or deleted.
+        std::vector<int> popups_ids_ {};
     };
 }
 

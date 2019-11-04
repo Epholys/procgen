@@ -15,6 +15,14 @@ namespace controller
 {
     namespace fs = std::filesystem;
 
+    SaveMenu::~SaveMenu()
+    {
+        for (auto id : popups_ids_)
+        {
+            procgui::remove_popup(id);
+        }
+    }
+    
     void SaveMenu::save_lsys(const std::string& trimmed_filename)
     {
         // Open the output file.
@@ -34,7 +42,7 @@ namespace controller
                   }
                 };
 
-            procgui::push_popup(file_error_popup);
+            popups_ids_.push_back(procgui::push_popup(file_error_popup));
         }
         else
         {
@@ -83,7 +91,7 @@ namespace controller
                       }
                     };
                 
-                procgui::push_popup(save_validation_popup);
+                popups_ids_.push_back(procgui::push_popup(save_validation_popup));
             }
             else
             {
@@ -302,7 +310,7 @@ namespace controller
                       ImGui::Text(error_message.c_str());
                   }
                 };
-            procgui::push_popup(dir_error_popup);
+            popups_ids_.push_back(procgui::push_popup(dir_error_popup));
             close_menu_ = true;
         }
     }

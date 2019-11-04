@@ -16,8 +16,13 @@ namespace procgui
     //
     // The usage of this framework is to construct a popup defining appopriate
     // attributes, then calls the 'push_popup()' to add it to the "hidden"
-    // stack. In the part of the code managing events, 'display_popups()' should
-    // be called with a sf::Keyboard::Key.
+    // stack-like structure. In the part of the code managing events,
+    // 'display_popups()' should be called with a sf::Keyboard::Key.
+    //
+    // A PopupGUI can run arbitrary code, by using std::function<>. So,
+    // 'remove_popup()' is necessary if this arbitrary code has reference to
+    // deleted objects. This is a manual memory management-like way of doing
+    // things, but that's a consequence of the flexibility of the popups.
     
     // A struct describing a popup
     struct PopupGUI
@@ -63,7 +68,11 @@ namespace procgui
     };
 
     // Push 'popup' on top of the stack.
-    void push_popup (const PopupGUI& popup);
+    // Returns the unique id of 'popup' in the underlying data structure.
+    int push_popup (const PopupGUI& popup);
+    // Remove the popup with unique id 'id' from the data structure.
+    // Do nothing if no popup with id 'id' exists.
+    void remove_popup (int id);
     // Returns true if the stack is empty.
     bool popup_empty();
     // If the stack is non-empty, display the popup at the top of the

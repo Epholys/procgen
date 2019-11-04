@@ -22,6 +22,15 @@ namespace controller
     {
     public:
 
+        SaveMenu() = default;
+        ~SaveMenu();
+        // Simplify implementation by deleting these constructors/operator=. If
+        // necessary, they will be implemented. For now it avoid wrong behavior.
+        SaveMenu(const SaveMenu& other) = delete;
+        SaveMenu(SaveMenu&& other) = delete;
+        SaveMenu& operator=(const SaveMenu& menu) = delete;
+        SaveMenu& operator=(SaveMenu&& menu) = delete;
+        
         // Function called every frame the save menu should be open.
         // Main entry managing display and actions of the save menu.
         //
@@ -86,6 +95,9 @@ namespace controller
         // Flag to warn the InputText the user selected a file in the list (see
         // .cpp for its use)
         bool first_input_frame_ = true;
+
+        // Ids list of all created popups, existing or deleted.
+        std::vector<int> popups_ids_ {};
     };
 }
 

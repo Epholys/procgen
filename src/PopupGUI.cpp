@@ -1,12 +1,24 @@
 #include <iostream> // TODO REMOVE
-#include <stack>
+#include <list>
 #include "imgui_extension.h"
 #include "PopupGUI.h"
 
 namespace procgui
 {
-    // The popup stack
-    std::stack<PopupGUI> popups;
+    // Incremented for each new popup.
+    static int new_popup_id = 0;
+
+    // Popup with its unique id.
+    struct PopupEntry
+    {
+        PopupGUI popup;
+        int id;
+    };
+    
+    // The popup list.
+    // Used as a stack for push/pop PopupGUI management, but iterating over it
+    // is necessary to delete popups.
+    std::list<PopupEntry> popups;
 
     
     void PopupGUI::operator()(sf::Keyboard::Key& key) const
@@ -20,7 +32,7 @@ namespace procgui
                  key == sf::Keyboard::Enter))
             {
                 key = sf::Keyboard::Unknown;
-                popups.pop();
+                popups.pop_back();
             }
 
             if (message)
@@ -37,7 +49,7 @@ namespace procgui
 
                     // The order is important: 'ok_callback()' could add a
                     // callback on top of the stack.
-                    popups.pop();
+                    popups.pop_back();
                     if (ok_callback)
                     {
                         ok_callback();
@@ -47,7 +59,7 @@ namespace procgui
                 {
                     key = sf::Keyboard::Unknown;
 
-                    popups.pop();
+                    popups.pop_back();
                     if (cancel_callback)
                     {
                         cancel_callback();
@@ -58,7 +70,7 @@ namespace procgui
                 ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
                 if (ImGui::Button(ok_text.c_str()))
                 {
-                    popups.pop();
+                    popups.pop_back();
                     if (ok_callback)
                     {
                         ok_callback();
@@ -71,7 +83,7 @@ namespace procgui
                 ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
                 if (ImGui::Button(cancel_text.c_str()))
                 {
-                    popups.pop();
+                    popups.pop_back();
                     if (cancel_callback)
                     {
                         cancel_callback();
@@ -85,9 +97,21 @@ namespace procgui
         }
     }
 
-    void push_popup (const PopupGUI& popup)
+    int push_popup (const PopupGUI& popup)
     {
-        popups.push(popup);
+        popups.push_back({popup, new_popup_id++});
+        return popups.back().id;
+    }
+
+    void remove_popup(int id)
+    {
+        auto to_remove = std::find_if(begin(popups), end(popups),
+                                      [id](const auto& e){return e.id == id;});
+
+        if (to_remove != end(popups))
+        {
+            popups.erase(to_remove);
+        }
     }
 
     bool popup_empty()
@@ -104,7 +128,7 @@ namespace procgui
 
         // Do not put a const &: the popup will pop the top of stack, and it
         // will lead to danging reference.
-        PopupGUI popup = popups.top();
+        PopupGUI popup = popups.back().popup;
         popup(key);
     }
 }

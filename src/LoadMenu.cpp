@@ -19,6 +19,15 @@ namespace controller
     // Global error message access in deserialization of LSys
     std::vector<std::string> LoadMenu::error_messages;
 
+    LoadMenu::~LoadMenu()
+    {
+        for (auto id : popups_ids_)
+        {
+            procgui::remove_popup(id);
+        }
+    }
+    
+    
     void LoadMenu::add_loading_error_message(const std::string& message)
     {
         error_messages.push_back(message);
@@ -86,7 +95,7 @@ namespace controller
                   }
                 };
 
-            procgui::push_popup(format_popup);
+            popups_ids_.push_back(procgui::push_popup(format_popup));
 
             no_error = false;
         }
@@ -142,7 +151,7 @@ namespace controller
                   }
                 };
                     
-            procgui::push_popup(warning_popup);
+            popups_ids_.push_back(procgui::push_popup(warning_popup));
         }
     }
     
@@ -173,7 +182,7 @@ namespace controller
                       }
                     };
 
-                procgui::push_popup(file_error_popup);
+                popups_ids_.push_back(procgui::push_popup(file_error_popup));
             }
             else
             {
@@ -415,7 +424,7 @@ namespace controller
                       ImGui::Text(error_message.c_str());
                   }
                 };
-            procgui::push_popup(dir_error_popup);
+            popups_ids_.push_back(procgui::push_popup(dir_error_popup));
             close_menu_ = true;
         }
     }

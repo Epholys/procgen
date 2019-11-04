@@ -192,6 +192,10 @@ namespace procgui
         // RAM size of the data the user want to compute
         drawing::Matrix::number approximate_mem_size_;
 
+        // Ids list of all created popups, existing or deleted.
+        std::vector<int> popups_ids_;
+        
+
         // Serialization
         friend class cereal::access;
 
