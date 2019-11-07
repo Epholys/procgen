@@ -13,6 +13,7 @@
 #include "VertexPainterComposite.h"
 #include "VertexPainterConstant.h"
 #include "imgui_extension.h"
+#include "config.h"
 
 using namespace math;
 using std::clamp;
@@ -1436,6 +1437,21 @@ namespace procgui
 
         ImGui::Checkbox("LSystem's box visibility", &box_is_visible);
 
+        drawing::Matrix::number max_size = config::sys_max_size / (1024 * 1024);
+        if (ext::ImGui::InputUnsignedLongLong("Maximum size in memory of L-System before warning, in Megabytes", &max_size))
+        {
+            if (max_size < 1)
+            {
+                max_size = config::sys_max_size;
+            }
+            else
+            {
+                config::sys_max_size = max_size * 1024 * 1024;
+            }
+        }
+        
+        
+        
         conclude();
     }
 

@@ -1,3 +1,4 @@
+#include <fstream>
 #include <SFML/Graphics.hpp>
 
 #include "imgui/imgui-SFML.h"
@@ -6,6 +7,7 @@
 #include "RenderWindow.h"
 #include "SupplementaryRendering.h"
 #include "WindowController.h"
+#include "config.h"
 
 using namespace drawing;
 using namespace math;
@@ -16,9 +18,30 @@ using sfml_window::window;
 
 int main()
 {
+    try
+    {
+        std::ifstream ifs (config::config_path);
+        if (!ifs.is_open())
+        {
+            std::cerr << "Can't open config file: " << config::config_path.string() << " . Default configuration will be loaded instead."  <<  std::endl;
+        }
+        else
+        {
+            cereal::JSONInputArchive ar (ifs);
+            config::save(ar, 0);
+        }
+    }
+    catch (const cereal::RapidJSONException& e)
+    {
+        std::cerr << "Error while loading the config file: " << e.what() << " . Default configuration will be loaded instead."  <<  std::endl;
+    }
+
+    
+
     sfml_window::init_window();
     ImGui::SFML::Init(window);
-
+    
+    
     // auto serpinski = std::make_shared<LSystem>(LSystem { "F", { { 'F', "G-F-G" }, { 'G', "F+G+F" } } });
     auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[+X][X]F[+X]-FX" }, { 'F', "FF" } }, "X" });
     // auto fract = std::make_shared<LSystem>(LSystem { "F", { { 'F', "FF-F" } } });
@@ -89,6 +112,24 @@ int main()
     }
 
     ImGui::SFML::Shutdown();
+
+    try
+    {
+        std::ofstream ofs (config::config_path);
+        if (!ofs.is_open())
+        {
+            std::cerr << "Can't open config file: " << config::config_path.string() << " . Modified configuration is not saved.\n";
+        }
+        else
+        {
+            cereal::JSONOutputArchive ar (ofs);
+            config::save(ar, 0);
+        }
+    }
+    catch (const cereal::RapidJSONException& e)
+    {
+        std::cerr << "Error while saving the config file: " << e.what()  << " . Modified configuration is not saved.\n";
+    }
 
     return 0;
 }

@@ -190,8 +190,9 @@ namespace procgui
         bool bounding_box_is_visible_;
 
         // RAM size of the data the user want to compute
-        drawing::Matrix::number approximate_mem_size_;
-
+        drawing::Matrix::number approximate_mem_size_ = 0;
+        drawing::Matrix::number max_mem_size_ = 0;
+        
         // Ids list of all created popups, existing or deleted.
         std::vector<int> popups_ids_;
         

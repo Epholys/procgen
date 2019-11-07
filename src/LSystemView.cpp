@@ -6,6 +6,7 @@
 #include "RenderWindow.h"
 #include "SupplementaryRendering.h"
 #include "PopupGUI.h"
+#include "config.h"
 
 namespace procgui
 {
@@ -294,7 +295,7 @@ namespace procgui
     
     void LSystemView::size_safeguard()
     {
-        static drawing::Matrix::number max_size = 10 * 1024 * 1024; // 500MiB
+        auto max_size = std::max(max_mem_size_, config::sys_max_size);
 
         drawing::system_size size = compute_max_size(*OLSys::get_target()->get_rule_map(),
                                                      *OMap::get_target()->get_rule_map(),
@@ -328,38 +329,28 @@ namespace procgui
                       ImGui::Text("You are trying to compute a big L-System of a size bigger than 16 exabytes");
                       ImGui::Text("(bigger than the data stored by Google in 2013).");
                       ImGui::Text("You still have the choice to proceed if you have alien tech,");
-                      ImGui::Text("but otherwise the application or your");
-                      ImGui::SameLine();
-                      ImGui::TextColored(ImVec4(0.8f, 0.f, 1.f, 1.f), "computer");
-                      ImGui::SameLine();
-                      ImGui::Text("will");
-                      ImGui::SameLine();
-                      ImGui::TextColored(ImVec4(0.f, 0.5f, 1.f, 1.f), "freeze");
-                      ImGui::SameLine();
-                      ImGui::Text("or");
-                      ImGui::SameLine();
-                      ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.f), "CRASH");
-                      ImGui::SameLine();
-                      ImGui::Text(".");
+                      ImGui::Text("but otherwise the application or your");                  
                   }
                   else
                   {
                       ImGui::Text("You are trying to compute a big L-System of size %llu MB, do you want to continue?", approximate_mem_size_/megabyte);
                       ImGui::Text("For big L-System, the application may take a long time to compute it.");
                       ImGui::Text("For bigger L-System, the application or your");
-                      ImGui::SameLine();
-                      ImGui::TextColored(ImVec4(0.8f, 0.f, 1.f, 1.f), "computer");
-                      ImGui::SameLine();
-                      ImGui::Text("may");
-                      ImGui::SameLine();
-                      ImGui::TextColored(ImVec4(0.f, 0.5f, 1.f, 1.f), "freeze");
-                      ImGui::SameLine();
-                      ImGui::Text("or");
-                      ImGui::SameLine();
-                      ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.f), "CRASH");
-                      ImGui::SameLine();
-                      ImGui::Text(".");
                   }
+                  ImGui::SameLine();
+                  ImGui::TextColored(ImVec4(0.8f, 0.f, 1.f, 1.f), "computer");
+                  ImGui::SameLine();
+                  ImGui::Text("will");
+                  ImGui::SameLine();
+                  ImGui::TextColored(ImVec4(0.f, 0.5f, 1.f, 1.f), "freeze");
+                  ImGui::SameLine();
+                  ImGui::Text("or");
+                  ImGui::SameLine();
+                  ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.f), "CRASH");
+                  ImGui::SameLine();
+                  ImGui::Text(".");
+
+                  ImGui::Text("You can change the global size limit in the \"Application parameters\" section of any L-System");
 
                   ImGui::Text("Selecting 'OK' will start the computation, this popup will stay open during this time.");
               },
@@ -371,6 +362,8 @@ namespace procgui
                   OLSys::get_target()->validate();
                   OMap::get_target()->validate();
 
+                  max_mem_size_ = approximate_mem_size_;
+                  
                   compute_vertices();
               },
               [this]()
