@@ -167,7 +167,7 @@ namespace procgui
 
         typename Target::rule_map generate_rule_map();
 
-        std::shared_ptr<Target> rule_map_{nullptr};
+        Observer<Target> target_observer_{nullptr};
 
         // The rule buffer.
         buffer buffer_{};
