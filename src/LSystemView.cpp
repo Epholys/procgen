@@ -82,6 +82,7 @@ namespace procgui
         , sub_boxes_ {other.sub_boxes_}
         , is_selected_ {false}
         , bounding_box_is_visible_{true}
+        , max_mem_size_{other.max_mem_size_}
         , popups_ids_{}
     {
         // Manually managing Observer<> callbacks.
@@ -106,6 +107,7 @@ namespace procgui
         , sub_boxes_ {std::move(other.sub_boxes_)}
         , is_selected_ {false}
         , bounding_box_is_visible_{true}
+        , max_mem_size_{other.max_mem_size_}
         , popups_ids_{}
     {
         // Manually managing Observer<> callbacks.
@@ -153,6 +155,7 @@ namespace procgui
             sub_boxes_ = other.sub_boxes_;
             is_selected_ = false;
             bounding_box_is_visible_ = true;
+            max_mem_size_ = other.max_mem_size_;           
             popups_ids_ = {};
             
             update_callbacks();
@@ -182,6 +185,7 @@ namespace procgui
             sub_boxes_ = std::move(other.sub_boxes_);
             is_selected_ = false;
             bounding_box_is_visible_ = true;
+            max_mem_size_ =other.max_mem_size_;
             popups_ids_ = {};
 
             // Manually managing Observer<> callbacks.

@@ -27,7 +27,7 @@ namespace ext::ImGui
     
     bool DragDouble2(const char* label, double v[2], double v_speed = 1.0, double v_min = 0.0, double v_max = math::double_max_limit, const char* format = "%.3f", double power = 1.0);
 
-    bool InputUnsignedLongLong(const char* label, unsigned long long* v, int step = 1, int step_fast = 100, ImGuiInputTextFlags flags = 0);
+    bool InputUnsignedLongLong(const char* label, unsigned long long* v, unsigned long long step = 1, unsigned long long step_fast = 100, ImGuiInputTextFlags flags = 0);
 }
 
 #endif // IMGUI_EXTENSION_H

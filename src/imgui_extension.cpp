@@ -29,7 +29,7 @@ namespace ext::ImGui
         return ::ImGui::DragScalarN(label, ::ImGuiDataType_Double, v, 2, v_speed, min, max, format, power);
     }
 
-    bool InputUnsignedLongLong(const char* label, unsigned long long* v, int step, int step_fast, ImGuiInputTextFlags flags)
+    bool InputUnsignedLongLong(const char* label, unsigned long long* v, unsigned long long step, unsigned long long step_fast, ImGuiInputTextFlags flags)
     {
         // Hexadecimal input provided as a convenience but the flag name is awkward. Typically you'd use InputText() to parse your own data, if you want to handle prefixes.
         const char* format = (flags & ImGuiInputTextFlags_CharsHexadecimal) ? "%08X" : "%llu";

@@ -1437,17 +1437,20 @@ namespace procgui
 
         ImGui::Checkbox("LSystem's box visibility", &box_is_visible);
 
+        static constexpr drawing::Matrix::number max_size_limit = 1024 * 1024;
         drawing::Matrix::number max_size = config::sys_max_size / (1024 * 1024);
-        if (ext::ImGui::InputUnsignedLongLong("Maximum size in memory of L-System before warning, in Megabytes", &max_size))
+        if (ext::ImGui::InputUnsignedLongLong("Maximum size in memory of L-System before warning, in MegaBytes", &max_size))
         {
             if (max_size < 1)
             {
-                max_size = config::sys_max_size;
+                max_size = 1;
             }
-            else
+            else if (max_size > max_size_limit)
             {
-                config::sys_max_size = max_size * 1024 * 1024;
+                max_size = max_size_limit;
             }
+
+            config::sys_max_size = max_size * 1024 * 1024;
         }
         
         

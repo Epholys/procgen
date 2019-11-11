@@ -8,18 +8,20 @@
 
 namespace config
 {
-    static drawing::Matrix::number sys_max_size = 100 * 1024 * 1024;  // 100 MiB
+    extern drawing::Matrix::number sys_max_size;  // in bytes
 
     static std::filesystem::path config_path = std::filesystem::u8path(u8"config/config.json");
     template <class Archive>
     void save(Archive& ar, std::uint32_t)
     {
-        ar(cereal::make_nvp("sys_max_size", sys_max_size));
+        // In MiB
+        ar(cereal::make_nvp("sys_max_size", sys_max_size / (1024*1024)));
     }
     template <class Archive>
     void load(Archive& ar, std::uint32_t)
     {
         ar(cereal::make_nvp("sys_max_size", sys_max_size));
+        sys_max_size *= 1024 * 1024;
     }
 }
 

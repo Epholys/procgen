@@ -23,12 +23,12 @@ int main()
         std::ifstream ifs (config::config_path);
         if (!ifs.is_open())
         {
-            std::cerr << "Can't open config file: " << config::config_path.string() << " . Default configuration will be loaded instead."  <<  std::endl;
+            std::cerr << "Can't open config file: " << config::config_path.string() << " . Default configuration will be loaded instead." <<  std::endl;
         }
         else
         {
             cereal::JSONInputArchive ar (ifs);
-            config::save(ar, 0);
+            config::load(ar, 0);
         }
     }
     catch (const cereal::RapidJSONException& e)
