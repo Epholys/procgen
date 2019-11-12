@@ -14,84 +14,69 @@ namespace procgui
         PopupGUI popup;
         int id;
     };
-    
+
     // The popup list.
     // Used as a stack for push/pop PopupGUI management, but iterating over it
     // is necessary to delete popups.
     std::list<PopupEntry> popups;
 
-    
+
     void PopupGUI::operator()(sf::Keyboard::Key& key) const
     {
         ImGui::OpenPopup(name.c_str());
         if (ImGui::BeginPopupModal(name.c_str()))
         {
-            // Close the popup
-            if (only_info &&
-                (key == sf::Keyboard::Escape ||
-                 key == sf::Keyboard::Enter))
-            {
-                key = sf::Keyboard::Unknown;
-                popups.pop_back();
-            }
-
             if (message)
             {
                 message();
             }
-
-            // If the popup is more than just an informative message.
-            if (!only_info)
+            if (key == sf::Keyboard::Enter)
             {
-                if (key == sf::Keyboard::Enter)
+                key = sf::Keyboard::Unknown;
+
+                // The order is important: 'ok_callback()' could add a
+                // callback on top of the stack.
+                popups.pop_back();
+                if (ok_callback)
                 {
-                    key = sf::Keyboard::Unknown;
-
-                    // The order is important: 'ok_callback()' could add a
-                    // callback on top of the stack.
-                    popups.pop_back();
-                    if (ok_callback)
-                    {
-                        ok_callback();
-                    }
+                    ok_callback();
                 }
-                else if (key == sf::Keyboard::Escape)
-                {
-                    key = sf::Keyboard::Unknown;
-
-                    popups.pop_back();
-                    if (cancel_callback)
-                    {
-                        cancel_callback();
-                    }
-                }
-
-                // Repetition but the 'key' here should stay the same
-                ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
-                if (ImGui::Button(ok_text.c_str()))
-                {
-                    popups.pop_back();
-                    if (ok_callback)
-                    {
-                        ok_callback();
-                    }
-                }
-                ImGui::PopStyleColor(3);
-
-                ImGui::SameLine();
-
-                ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
-                if (ImGui::Button(cancel_text.c_str()))
-                {
-                    popups.pop_back();
-                    if (cancel_callback)
-                    {
-                        cancel_callback();
-                    }
-                }
-                ImGui::PopStyleColor(3);
-            
             }
+            else if (key == sf::Keyboard::Escape)
+            {
+                key = sf::Keyboard::Unknown;
+
+                popups.pop_back();
+                if (!only_info && cancel_callback)
+                {
+                    cancel_callback();
+                }
+            }
+
+            // Repetition but the 'key' here should stay the same
+            ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
+            if (ImGui::Button(ok_text.c_str()))
+            {
+                popups.pop_back();
+                if (ok_callback)
+                {
+                    ok_callback();
+                }
+            }
+            ImGui::PopStyleColor(3);
+
+            ImGui::SameLine();
+
+            ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
+            if (!only_info && ImGui::Button(cancel_text.c_str()))
+            {
+                popups.pop_back();
+                if (!only_info && cancel_callback)
+                {
+                    cancel_callback();
+                }
+            }
+            ImGui::PopStyleColor(3);
 
             ImGui::EndPopup();
         }

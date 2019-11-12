@@ -23,7 +23,7 @@ namespace procgui
     // 'remove_popup()' is necessary if this arbitrary code has reference to
     // deleted objects. This is a manual memory management-like way of doing
     // things, but that's a consequence of the flexibility of the popups.
-    
+
     // A struct describing a popup
     struct PopupGUI
     {
@@ -32,8 +32,8 @@ namespace procgui
         // Arbitrary function called every 'display_popups()'. Usually used to
         // display text and other widgets with imgui.
         std::function<void()> message{nullptr};
-        // If true, the popup is a purely informative one, and no button with
-        // callbacks will be displayed. 
+        // If true, the popup is a purely informative one, so no cancel button
+        // with be displayed.
         bool only_info { true };
         // The text of the "validate" button.
         std::string ok_text = "OK";
@@ -49,20 +49,18 @@ namespace procgui
         std::function<void()> cancel_callback {nullptr};
 
         // Display the popup and defines its logic:
-        //   - If 'key' is 'escape' and
-        //     - if the 'only_info' is true, the popup is closed
-        //     - Otherwise, the 'cancel_callback' is called and the popup is
-        //       closed.
-        //   - If 'key' is 'enter' and
-        //     - if 'only_info' is true, the popup is closed.
-        //     - Otherwise, the 'ok_callback' is called and the popup is closed
-        //   - If the ok_button is clicked, 'ok_callback' is called and the
-        //     popup is closed.
-        //   - If the cancel_button is clicked, 'cancel_callback' is called and
-        //     the popup is closed.
+        //   - If 'key' is 'enter' or the ok_button is clicked, 'ok_callback' is
+        //   called, if it is defined, and the popup us closed.
+        //   - If the popup is a 'only_info': no cancel_button is displayed, and
+        //   if the 'key' is 'escape', the popup is closed without any
+        //   callback.
+        //   - Otherwise, a cancel_button is displayed, and if the user clicks
+        //   on it, or if 'key' is 'escape', the 'cancel_callback' is called,
+        //   if defined, and the popup is closed.
+        //
         // If key is 'enter' or 'escape', it is set to 'sf::Keyboard::Unknown',
         // to avoid the other GUI elements to use it.
-        //      
+        //
         // Closing a popup removes it from the popup stack.
         void operator()(sf::Keyboard::Key &key) const;
     };
