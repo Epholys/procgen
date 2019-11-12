@@ -18,7 +18,12 @@
 ** Main Roadmap
    1. Polish before the first release
       * Add low-hanging fruits optimization
+      * Move from makefiles to CMake
+      * Compile and package for Linux and Windows
+   2. BIG REFACTORING
+      * Complete test suit
       * Remove a maximum of code smells
+      * Refactor old code
    2. Add automation:
       * Loading file from command-line
       * Generating image(s) from command-line
@@ -46,10 +51,11 @@
 ** Development framework
    - *Environment:* debian sid chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=
    - *Dependencies:*
-     - SFML / 2.5.1 / [[https://www.sfml-dev.org/][Website]] / installed from packages / 
-     - googletest / 1.8.1-3 / [[https://github.com/google/googletest][Github Repository]] / installed from packages
-     - dear imgui, / 1.70 / [[https://github.com/ocornut/imgui][Github Repository]] / installed from repo's release / included in the repo
-     - imgui-sfml / 2.0.2 / [[https://github.com/eliasdaler/imgui-sfml][Github Repository]] / installed via the instructions from the README.org of the repository / included in the repo
+     - SFML / 2.5.1 / [[https://www.sfml-dev.org/][Website]] / installed from packages /
+     - googletest / 1.9.0 / [[https://github.com/google/googletest][Github Repository]] / installed from packages
+     - dear imgui, / 1.71 WIP / [[https://github.com/ocornut/imgui][Github Repository]] / installed from repo's release / included in the repo
+     - imgui-sfml / [[https://github.com/eliasdaler/imgui-sfml][Github Repository]] / installed via the instructions from the
+       README.org of the repository / included in the repo with patches
      - GSL (Guidelines Support Library) / 2018-05-21 / [[https://github.com/Microsoft/GSL][Github Repository]] / cloned from the repository / included in the repo
      - cereal / 1.2.2 / [[https://uscilab.github.io/cereal/index.html][Website]] / downloaded from the website / included in the repo
    - *Coding rule:* [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]] with GSL
