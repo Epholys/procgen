@@ -257,7 +257,14 @@ namespace controller
         }
         if (save_menu_open_)
         {
-            save_menu_open_ = !save_menu_.open(key_to_menus);
+            std::string save_name;
+
+            auto* under_mouse = LSystemController::under_mouse();
+            if (under_mouse)
+            {
+                save_name = under_mouse->get_name();
+            }
+            save_menu_open_ = !save_menu_.open(key_to_menus, save_name);
         }
         else if (load_menu_open_)
         {

@@ -114,7 +114,7 @@ namespace controller
         }
 
         // If the user selected a save file:
-        if (click_selected_)
+        if (first_menu_frame_ || click_selected_ || !first_input_frame_)
         {
             // InputText does not put automatically the cursor to the end
             // when selecting a file. As such, we use a InputText callback
@@ -315,11 +315,16 @@ namespace controller
         }
     }
 
-    bool SaveMenu::open(sf::Keyboard::Key key)
+    bool SaveMenu::open(sf::Keyboard::Key key, const std::string& filename)
     {
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Save LSystem to file", NULL, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
         {
+            if (first_menu_frame_)
+            {
+                filename_ = string_to_array<FILENAME_LENGTH_>(filename);
+            }
+
             std::vector<file_entry> save_files;
 
             // Avoid interaction with the background when saving a file.
@@ -355,6 +360,8 @@ namespace controller
             ImGui::PopStyleColor(3);
 
             ImGui::End();
+
+            first_menu_frame_ = false;
         }
 
         if (close_menu_)
@@ -363,6 +370,7 @@ namespace controller
             click_selected_ = false;
             double_selection_ = false;
             close_menu_ = false;
+            first_menu_frame_ = true;
             return true;
         }
 
