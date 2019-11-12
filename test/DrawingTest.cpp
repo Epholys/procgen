@@ -19,9 +19,6 @@ class DrawingTest :  public ::testing::Test
 public:
     DrawingTest()
         {
-            // Turtle is normally initialized inside
-            // drawing::compute_vertices. Manually initialized here to
-            // test smaller the functions.
         }
     
     LSystem lsys { "F", { { 'F', "F+G" } }, "F" };

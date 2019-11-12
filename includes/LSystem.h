@@ -10,7 +10,7 @@
 
 #include "Observable.h"
 #include "RuleMap.h"
-#include "WindowController.h"
+#include "LoadMenu.h"
 
 namespace cereal
 {
@@ -61,11 +61,11 @@ namespace cereal
         
         if (key_too_big)
         {
-            controller::WindowController::add_loading_error_message("One or more LSystem's key was too big, it is now cropped.");
+            controller::LoadMenu::add_loading_error_message("One or more LSystem's key was too big, it is now cropped.");
         }
         if (void_key)
         {
-            controller::WindowController::add_loading_error_message("One or more LSystem's key was empty, so it was ignored.");
+            controller::LoadMenu::add_loading_error_message("One or more LSystem's key was empty, so it was ignored.");
         }
 
     }
@@ -148,6 +148,9 @@ public:
     // Clear the rules
     void clear_rules() override;
 
+    // Replace the rules by 'new_rules'
+    void replace_rules(const rule_map& new_rules) override;
+    
     // Set the symbols flagging the iteration count 'iteration_predecessors_' to
     // 'predecessors'.
     void set_iteration_predecessors(const std::string& predecessors);

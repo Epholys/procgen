@@ -17,6 +17,7 @@ namespace sfml_window
 
     void init_window();
     extern sf::RenderWindow window;
+    extern bool close_window;
 }
 
 #endif // RENDER_WINDOW_H

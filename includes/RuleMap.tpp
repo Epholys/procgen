@@ -63,7 +63,14 @@ void RuleMap<Successor>::remove_rule(char predecessor)
 
 template<typename Successor>
 void RuleMap<Successor>::clear_rules()
-{
+{     
     rules_.clear();
     notify();
-}            
+}
+
+template<typename Successor>
+void RuleMap<Successor>::replace_rules(const rule_map& new_rules)
+{
+    rules_ = new_rules;
+    notify();
+}

@@ -9,7 +9,7 @@
 
 #include "helper_math.h"
 #include "Observable.h"
-#include "WindowController.h"
+#include "LoadMenu.h"
 
 // Main explanation of drawing in Turtle.h
 namespace drawing
@@ -51,6 +51,13 @@ namespace drawing
         void set_delta_angle(double delta_angle);
         void set_step(double step);
         void set_n_iter(int n_iter);
+
+        // Revert to previous 'n_iter'.
+        // Useful when cancelling computatoin of too big LSys.
+        void revert();
+
+        // Validate modification of 'n_iter'.
+        void validate();
         
     private:
         // The starting position and angle of the Turtle.
@@ -70,6 +77,10 @@ namespace drawing
         // The number of iterations done by the L-system.
         int n_iter_ { 0 };
 
+        // The previous number of iterations.
+        // Used in 'revert()' and 'validate()'.
+        int previous_n_iter_ { -1 };
+        
     private:
         // Serialization
         friend class cereal::access;
@@ -89,17 +100,17 @@ namespace drawing
                 if (starting_angle_ < 0 || starting_angle_ > 360)
                 {
                     starting_angle_ = math::clamp_angle(starting_angle_);
-                    controller::WindowController::add_loading_error_message("DrawingParameters' starting_angle wasn't in the [0,360] range, so it is clamped.");
+                    controller::LoadMenu::add_loading_error_message("DrawingParameters' starting_angle wasn't in the [0,360] range, so it is clamped.");
                 }
                 if (delta_angle_ < 0 || delta_angle_ > 360)
                 {
                     delta_angle_ = math::clamp_angle(delta_angle_);
-                    controller::WindowController::add_loading_error_message("DrawingParameters' delta_angle wasn't in the [0,360] range, so it is clamped.");
+                    controller::LoadMenu::add_loading_error_message("DrawingParameters' delta_angle wasn't in the [0,360] range, so it is clamped.");
                 }
                 if (n_iter_ < 0)
                 {
                     n_iter_ = 0;
-                    controller::WindowController::add_loading_error_message("DrawingParameters' n_iter was negative, so it is now set to 0.");
+                    controller::LoadMenu::add_loading_error_message("DrawingParameters' n_iter was negative, so it is now set to 0.");
                 }
                 starting_angle_ = math::degree_to_rad(starting_angle_);
                 delta_angle_ = math::degree_to_rad(delta_angle_);

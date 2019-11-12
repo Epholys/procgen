@@ -5,7 +5,7 @@
 #include "VertexPainter.h"
 #include "helper_math.h"
 #include "ColorsGeneratorSerializer.h"
-#include "WindowController.h"
+#include "LoadMenu.h"
 
 namespace colors
 {
@@ -71,7 +71,7 @@ namespace colors
                 if (block_size_ < 1)
                 {
                     block_size_ = 1;
-                    controller::WindowController::add_loading_error_message("VertexPainterRandom's block_size was smaller than 1, so it is set to 1.");
+                    controller::LoadMenu::add_loading_error_message("VertexPainterRandom's block_size was smaller than 1, so it is set to 1.");
                 }
                 
                 ColorGeneratorSerializer serializer;

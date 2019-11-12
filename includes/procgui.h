@@ -19,7 +19,7 @@
 
 // Define 'display()' and 'interact_with()' for the structs and classes to
 // display.
-// 
+//
 // The 'display()' functions display some of the data (attributes for example)
 // at each frame to visualize important parameters and/or dynamic attributes.
 //
@@ -33,23 +33,23 @@
 // and unique window.
 
 namespace procgui {
-    
+
     void display(const drawing::DrawingParameters& turtle,
                  const std::string& name);
-    
+
     void display(const LSystem& lsys, const std::string& name);
-    
+
     void display(const drawing::InterpretationMap& map, const std::string& name);
 
-    
+
     void interact_with(drawing::DrawingParameters& turtle,
                        const std::string& name);
 
     // Special case for the RuleMapBuffers
     template<typename Buffer>
     void interact_with_buffer(Buffer& buffer,
-                              std::function<bool(typename Buffer::const_iterator)> successor_fn);
-    
+                              std::function<void(typename Buffer::const_iterator, bool&)> successor_fn);
+
     void interact_with(LSystemBuffer& buffer, const std::string& name);
 
     void interact_with(InterpretationMapBuffer& buffer, const std::string& name);
@@ -62,8 +62,8 @@ namespace procgui {
                        bool is_modified,
                        bool* open = nullptr);
 
-    void interact_with_graphics_parameters(bool& box_is_visible);
-    
+    void interact_with_global_parameters(bool& box_is_visible);
+
     void interact_with(colors::VertexPainterWrapper& painter_wrapper,
                        const std::string& name);
 

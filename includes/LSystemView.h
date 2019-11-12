@@ -13,6 +13,7 @@
 #include "UniqueId.h"
 #include "VertexPainterWrapper.h"
 #include "VertexPainterSerializer.h"
+#include "size_computer.h"
 
 namespace procgui
 {
@@ -37,14 +38,16 @@ namespace procgui
     //    - LSystemView contain a shared ownership of the LSystem and the
     //    InterpretationMap via the corresponding Observer. As a consequence, a
     //    copy of LSystemView will share the same LSystem and Map.
-    class LSystemView : public Observer<LSystem>,
-                        public Observer<drawing::InterpretationMap>,
+    //
+    // TODO: simplifies ctor by initializing some attribute here.
+    class LSystemView : public Observer<procgui::LSystemBuffer>,
+                        public Observer<procgui::InterpretationMapBuffer>,
                         public Observer<drawing::DrawingParameters>,
                         public Observer<colors::VertexPainterWrapper>
     {
     public:
-        using OLSys = Observer<LSystem>;
-        using OMap = Observer<drawing::InterpretationMap>;
+        using OLSys = Observer<procgui::LSystemBuffer>;
+        using OMap = Observer<procgui::InterpretationMapBuffer>;
         using OParams = Observer<drawing::DrawingParameters>;
         using OPainter = Observer<colors::VertexPainterWrapper>;
 
@@ -67,7 +70,7 @@ namespace procgui
         LSystemView(LSystemView&& other);
         LSystemView& operator=(const LSystemView& other);
         LSystemView& operator=(LSystemView&& other);
-        
+
         // Reference Getters
         drawing::DrawingParameters& ref_parameters();
         LSystemBuffer& ref_lsystem_buffer();
@@ -82,7 +85,7 @@ namespace procgui
         const colors::VertexPainterWrapper& get_vertex_painter_wrapper() const;
         int get_id() const;
         sf::Color get_color() const;
-        
+
         std::string get_name() const;
         void set_name(const std::string& name);
 
@@ -94,9 +97,9 @@ namespace procgui
         // the LSystemView on screen. But optimization is possible, and will be
         // done. So TODO.
         void finish_loading();
-        
+
         // Translation transform to correct screen-space position of the
-        // LSystem. 
+        // LSystem.
         sf::Transform get_transform() const;
 
         // Getter to is_selected_.
@@ -109,59 +112,68 @@ namespace procgui
         void set_box_visibility(bool is_visible);
 
         // Check if 'click' is inside one of the correctly translated
-        // 'bounding_box_'. 
+        // 'bounding_box_'.
         bool is_inside(const sf::Vector2f& click) const;
 
 
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();
+        // Paint the vertices.
         void paint_vertices();
 
         // Draw the vertices.
         void draw(sf::RenderTarget &target);
 
-                
+
     private:
         void update_callbacks();
 
         // Draw a placeholder box if the LSystem does not have enough vertices
-        // or does not have any size. 
+        // or does not have any size.
         void draw_missing_placeholder() const;
         // Create the placeholder box.
         sf::FloatRect compute_placeholder_box() const;
 
         // Draw the box when a LSystemView is selected.
         void draw_select_box(sf::RenderTarget& target, const sf::FloatRect& bounding_box) const;
-        
+
+        // Safeguard the computation of vertices when the size is too big.
+        // Flag the opening of the size warning popup if the size is higher than
+        // TODO, otherwise, simply call 'compute_vertices()'
+        void size_safeguard();
+        // Display the size warning popup and call 'compute_vertices()' if the
+        // user confirms the computation.
+        void open_size_warning_popup();
+
         // The managers of unique identifiers and colors for each instance of
-        // LSystemView. 
+        // LSystemView.
         static UniqueId unique_ids_;
         static colors::UniqueColor unique_colors_;
         // Unique identifier for each instance. Used in procgui.
         int id_;
         // Unique color for each instance. Linked to 'id_'.
         sf::Color color_id_;
-        
+
         // The window's name.
         std::string name_;
 
         // true if the LSystem is modified from the last save
         bool is_modified_;
 
-        // The LSystem's buffer. It has shared ownership of a
-        // shared_ptr<LSystem> with the associated Observable.
-        LSystemBuffer lsys_buff_;
+        // // The LSystem's buffer. It has shared ownership of a
+        // // shared_ptr<LSystem> with the associated Observable.
+        // LSystemBuffer lsys_buff_;
 
-        // The InterpretationMap's buffer. It has shared ownership of a
-        // shared_ptr<InterpretationMap> with the associated Observable.
-        InterpretationMapBuffer interpretation_buff_;
+        // // The InterpretationMap's buffer. It has shared ownership of a
+        // // shared_ptr<InterpretationMap> with the associated Observable.
+        // InterpretationMapBuffer interpretation_buff_;
 
         // The vertices of the View and their iteration count. Computed at each
         // modification.
         std::vector<sf::Vertex> vertices_;
         std::vector<int> iteration_of_vertices_;
         int max_iteration_;
-        
+
         // The global bounding box of the drawing. It is a "raw" bounding box:
         // its position is fixed. The rendering at the correct position as well
         // as getters are correctly translated with 'get_transform()'.
@@ -177,6 +189,14 @@ namespace procgui
         // True if the bounding box must be visible
         bool bounding_box_is_visible_;
 
+        // RAM size of the data the user want to compute
+        drawing::Matrix::number approximate_mem_size_ = 0;
+        drawing::Matrix::number max_mem_size_ = 0;
+
+        // Ids list of all created popups, existing or deleted.
+        std::vector<int> popups_ids_;
+
+
         // Serialization
         friend class cereal::access;
 
@@ -184,9 +204,9 @@ namespace procgui
         void save (Archive& ar, const std::uint32_t) const
             {
                 ar(cereal::make_nvp("name", name_),
-                   cereal::make_nvp("LSystem", *OLSys::get_target()),
+                   cereal::make_nvp("LSystem", *OLSys::get_target()->get_rule_map()),
                    cereal::make_nvp("DrawingParameters", *OParams::get_target()),
-                   cereal::make_nvp("Interpretation Map", *OMap::get_target()));
+                   cereal::make_nvp("Interpretation Map", *OMap::get_target()->get_rule_map()));
 
                 auto painter_serializer  = colors::VertexPainterSerializer(OPainter::get_target()->unwrap());
                 ar(cereal::make_nvp("VertexPainter", painter_serializer));
@@ -200,14 +220,14 @@ namespace procgui
                 drawing::DrawingParameters params;
                 drawing::InterpretationMap map;
                 colors::VertexPainterSerializer painter_serializer;
-                
+
                 ar(name,
                    cereal::make_nvp("LSystem", lsys),
                    cereal::make_nvp("DrawingParameters", params),
                    cereal::make_nvp("Interpretation Map", map),
                    cereal::make_nvp("VertexPainter", painter_serializer));
 
-                
+
                 *this = LSystemView(name,
                                     std::make_shared<LSystem>(lsys),
                                     std::make_shared<drawing::InterpretationMap>(map),

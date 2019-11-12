@@ -113,6 +113,34 @@ TEST(DrawingParametersTest, set_n_iter)
 
 //---------------------------------------------------------------------------------------
 
+TEST(DrawingParametersTest, revert_n_iter)
+{
+    constexpr int base_iter = 5;
+    DrawingParameters params ({0, 0}, 0, 0, 10, /*n_iter*/ base_iter);
+    constexpr int new_iter = 7;
+    
+    params.set_n_iter(new_iter);
+    params.revert();
+
+    ASSERT_EQ(base_iter, params.get_n_iter());
+}
+
+
+TEST(DrawingParametersTest, validate_n_iter)
+{
+    DrawingParameters params ({0, 0}, 0, 0, 10, /*n_iter*/ 5);
+    const int new_iter = 7;
+    
+    params.set_n_iter(new_iter);
+    params.validate();
+    params.revert();
+
+    ASSERT_EQ(new_iter, params.get_n_iter());
+}
+
+
+//---------------------------------------------------------------------------------------
+
 TEST(DrawingParametersTest, serialization)
 {
     DrawingParameters oparams { {100,100}, 1, 1, 10, 3};

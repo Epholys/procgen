@@ -10,7 +10,7 @@
 #include "cereal/types/vector.hpp"
 #include "cereal/archives/json.hpp"
 #include "Observable.h"
-#include "WindowController.h"
+#include "LoadMenu.h"
 
 namespace cereal
 {
@@ -281,7 +281,7 @@ namespace colors
                 if (loaded_keys.size() < 2)
                 {
                     loaded_keys = {{sf::Color::White, 0} , {sf::Color::White, 1.}};
-                    controller::WindowController::add_loading_error_message("There was less than 2 keys in LinearGradient, so it is set to a default state.");
+                    controller::LoadMenu::add_loading_error_message("There was less than 2 keys in LinearGradient, so it is set to a default state.");
                 }
 
                 bool out_of_bound = false;
@@ -296,7 +296,7 @@ namespace colors
 
                 if (out_of_bound)
                 {
-                    controller::WindowController::add_loading_error_message("One or more key in LinearGradient were out of bound, so they are clamped.");
+                    controller::LoadMenu::add_loading_error_message("One or more key in LinearGradient were out of bound, so they are clamped.");
                 }
                 
                 set_keys(keys);
@@ -385,7 +385,7 @@ namespace colors
                 if (loaded_keys.size() < 2)
                 {
                     loaded_keys = {{sf::Color::White, 0} , {sf::Color::White, 1}};
-                    controller::WindowController::add_loading_error_message("There was less than 2 keys in DiscreteGradient, so it is set to a default state.");
+                    controller::LoadMenu::add_loading_error_message("There was less than 2 keys in DiscreteGradient, so it is set to a default state.");
                 }
 
                 bool out_of_bound = false;
@@ -400,19 +400,19 @@ namespace colors
 
                 if (out_of_bound)
                 {
-                    controller::WindowController::add_loading_error_message("One or more key in DiscreteGradient were negative, so they are clamped.");
+                    controller::LoadMenu::add_loading_error_message("One or more key in DiscreteGradient were negative, so they are clamped.");
                 }
 
                 if (!std::is_sorted(begin(keys), end(keys),
-                                   [](const auto& a, const auto& b)
+                                    [](const auto& a, const auto& b)
                                     {return a.index < b.index;}))
                 {
-                    controller::WindowController::add_loading_error_message("DiscreteGradient's keys were not sorted, so they are now.");
+                    controller::LoadMenu::add_loading_error_message("DiscreteGradient's keys were not sorted, so they are now.");
                 }
 
                 if (keys_.front().index != 0)
                 {
-                    controller::WindowController::add_loading_error_message("DiscreteGradient's keys didn't have a first element, so one is designated now.");
+                    controller::LoadMenu::add_loading_error_message("DiscreteGradient's keys didn't have a first element, so one is designated now.");
                 }
 
                 set_keys(keys);

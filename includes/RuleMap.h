@@ -25,19 +25,19 @@ public:
     
     RuleMap() = default;
     virtual ~RuleMap() {}
-    explicit RuleMap(const rule_map& rules);
+    explicit RuleMap(const rule_map &rules);
     RuleMap(std::initializer_list<typename rule_map::value_type> init);
-    RuleMap(const RuleMap& other) = default;
-    RuleMap(RuleMap&& other) = default;
-    RuleMap& operator=(const RuleMap& other) = default;
-    RuleMap& operator=(RuleMap&& other) = default;
+    RuleMap(const RuleMap &other) = default;
+    RuleMap(RuleMap &&other) = default;
+    RuleMap &operator=(const RuleMap &other) = default;
+    RuleMap &operator=(RuleMap &&other) = default;
 
     // --- Getters and setters ---
     // Check if 'predecessor' exists in the rules.
     bool has_predecessor(char predecessor) const;
 
     // Check if the rule "predecessor -> successor" exists.
-    bool has_rule(char predecessor, const Successor& successor) const;
+    bool has_rule(char predecessor, const Successor &successor) const;
 
     // Get the rule associated with 'predecessor'
     // Exceptions:
@@ -46,15 +46,15 @@ public:
     rule get_rule(char predecessor) const;
 
     // Get all the rules
-    const rule_map&  get_rules() const;
+    const rule_map &get_rules() const;
 
     // Get the size
     std::size_t size() const;
-    
+
     // Add the rule "predecessor -> successor"
     // Note: replace the successor of an existing rule if 'predecessor' has
     // already a rule associated.
-    virtual void add_rule(char predecessor, const Successor& successor);
+    virtual void add_rule(char predecessor, const Successor &successor);
 
     // Remove the rule associated to 'predecessor'
     // Exception:
@@ -64,8 +64,10 @@ public:
     // Clear the rules
     virtual void clear_rules();
 
-protected:
+    // Replace 'rules_' by 'new_rules'
+    virtual void replace_rules(const rule_map& new_rules);
 
+  protected:
     rule_map rules_ = {};
 };
 

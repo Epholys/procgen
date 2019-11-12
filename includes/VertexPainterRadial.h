@@ -5,7 +5,7 @@
 #include "VertexPainter.h"
 #include "helper_cereal.hpp"
 #include "ColorsGeneratorSerializer.h"
-#include "WindowController.h"
+#include "LoadMenu.h"
 
 namespace colors
 {
@@ -74,7 +74,7 @@ namespace colors
                 {
                     center_.x = std::clamp(center_.x, 0.f, 1.f);
                     center_.y = std::clamp(center_.y, 0.f, 1.f);
-                    controller::WindowController::add_loading_error_message("VertexPainterRadial's center's coordinates weren't in the [0,1] range, so they are clamped.");
+                    controller::LoadMenu::add_loading_error_message("VertexPainterRadial's center's coordinates weren't in the [0,1] range, so they are clamped.");
                 }
 
                 ColorGeneratorSerializer serializer;

@@ -65,9 +65,22 @@ namespace drawing
     }
     void DrawingParameters::set_n_iter(int n_iter)
     {
+        previous_n_iter_ = n_iter_;
         n_iter_ = n_iter;
         notify();
     }
 
-}
+    void DrawingParameters::revert()
+    {
+        if (previous_n_iter_ >= 0)
+        {
+            n_iter_ = previous_n_iter_;
+            previous_n_iter_ = -1;
+        }
+    }
 
+    void DrawingParameters::validate()
+    {
+        previous_n_iter_ = -1;
+    }
+}

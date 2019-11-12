@@ -21,7 +21,7 @@ namespace drawing
 
     std::tuple<std::vector<sf::Vertex>, std::vector<int>, int>
         compute_vertices(LSystem& lsys,
-                         InterpretationMap& interpretation,
+                         const InterpretationMap& interpretation,
                          const DrawingParameters& parameters)
 
     {

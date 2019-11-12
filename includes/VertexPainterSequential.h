@@ -5,7 +5,7 @@
 #include "VertexPainter.h"
 #include "ColorsGeneratorSerializer.h"
 #include "helper_math.h"
-#include "WindowController.h"
+#include "LoadMenu.h"
 
 namespace colors
 {
@@ -64,7 +64,7 @@ namespace colors
                 if (factor_ < 0 || factor_ > math::double_max_limit)
                 {
                     factor_ = std::clamp(factor_, 0.f, float(math::double_max_limit));
-                    controller::WindowController::add_loading_error_message("VertexPainterSequential's repetition_factor was negative or too big, so it is clamped.");
+                    controller::LoadMenu::add_loading_error_message("VertexPainterSequential's repetition_factor was negative or too big, so it is clamped.");
                 }
                                 
                 

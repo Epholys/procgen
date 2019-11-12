@@ -91,7 +91,7 @@ namespace drawing
     // value is the maximum number of iteration count.
     std::tuple<std::vector<sf::Vertex>, std::vector<int>, int>
         compute_vertices(LSystem& lsys,
-                         InterpretationMap& interpretation,
+                         const InterpretationMap& interpretation,
                          const DrawingParameters& parameters);
 }
 

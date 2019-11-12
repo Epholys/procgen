@@ -65,7 +65,14 @@ void LSystem::clear_rules()
     production_cache_ = { {0, get_axiom()} };
     iteration_count_cache_ = { {0, {{std::vector<int>(get_axiom().size(), 0)}, 0}}};
     RuleMap::clear_rules();
-}                             
+}
+
+void LSystem::replace_rules(const rule_map& new_rules)
+{
+    production_cache_ = { {0, get_axiom()} };
+    iteration_count_cache_ = { {0, {{std::vector<int>(get_axiom().size(), 0)}, 0}}};
+    RuleMap::replace_rules(new_rules);
+}
 
 void LSystem::set_iteration_predecessors(const std::string& predecessors)
 {
