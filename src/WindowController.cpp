@@ -22,7 +22,7 @@ namespace controller
     float WindowController::zoom_level_ {1.f};
 
     sf::Vector2i WindowController::mouse_position_ {};
-    
+
     bool WindowController::has_focus_ {true};
 
     bool WindowController::view_can_move_ {false};
@@ -33,14 +33,14 @@ namespace controller
 
     ext::sf::Vector2d WindowController::load_position_ { 0, 0 };
 
-    const double WindowController::default_step_ {25.f}; 
-    
+    const double WindowController::default_step_ {25.f};
+
     const fs::path WindowController::save_dir_ = fs::u8path(u8"saves");
 
     SaveMenu WindowController::save_menu_;
     LoadMenu WindowController::load_menu_;
-    
-    
+
+
     sf::Vector2f WindowController::real_mouse_position(sf::Vector2i mouse_click)
     {
         return window.mapPixelToCoords(mouse_click);
@@ -51,7 +51,7 @@ namespace controller
         return window.mapCoordsToPixel(mouse_click);
     }
 
-    
+
     sf::Vector2i WindowController::get_mouse_position()
     {
         return mouse_position_;
@@ -66,7 +66,7 @@ namespace controller
     {
         save_menu_open_ = true;
     }
-    
+
     void WindowController::paste_view(std::list<procgui::LSystemView>& lsys_views,
                                       const std::optional<procgui::LSystemView>& view,
                                       const sf::Vector2f& position)
@@ -88,7 +88,7 @@ namespace controller
         lsys_views.front().select();
         lsys_views.front().finish_loading();
     }
-    
+
     void WindowController::right_click_menu(sf::RenderWindow& window, std::list<procgui::LSystemView>& lsys_views)
     {
         if (ImGui::BeginPopupContextVoid())
@@ -97,7 +97,7 @@ namespace controller
             {
                 lsys_views.emplace_front(procgui::LSystemView(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))),
                                                               default_step_ * zoom_level_));
-                lsys_views.front().select(); 
+                lsys_views.front().select();
             }
             if (ImGui::MenuItem("Load LSystem", "Ctrl+O"))
             {
@@ -113,12 +113,12 @@ namespace controller
         }
     }
 
-    
+
     void WindowController::handle_input(std::vector<sf::Event> events,
                                         std::list<procgui::LSystemView>& lsys_views)
     {
         ImGuiIO& imgui_io = ImGui::GetIO();
-        
+
         sf::Keyboard::Key key_to_menus = sf::Keyboard::Unknown;
         sf::Uint32 unicode_to_load_window = 0;
         for(const auto& event : events)
@@ -134,7 +134,7 @@ namespace controller
                                                [](const auto& view){return view.is_modified();});
                 if (!quit_popup_open_)
                 {
-                    window.close();
+                    sfml_window::close_window = true;
                 }
                 else
                 {
@@ -147,14 +147,14 @@ namespace controller
                           false, "Yes, quit", "No, stay",
                           []()
                           {
-                              window.close();
+                              sfml_window::close_window = true;
                           }
                         };
                     procgui::push_popup(quit_popup);
                 }
             }
 
-            // Paste, Create, Load LSystemView 
+            // Paste, Create, Load LSystemView
             else if (!imgui_io.WantCaptureKeyboard &&
                      event.type == sf::Event::KeyPressed &&
                      (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
@@ -182,7 +182,7 @@ namespace controller
 
                 }
             }
-            
+
             else if ((load_menu_open_ || save_menu_open_ || !procgui::popup_empty()) &&
                      event.type == sf::Event::KeyPressed)
             {
@@ -254,7 +254,7 @@ namespace controller
         if (!procgui::popup_empty())
         {
             procgui::display_popups(key_to_menus);
-        }        
+        }
         if (save_menu_open_)
         {
             save_menu_open_ = !save_menu_.open(key_to_menus);
@@ -266,7 +266,7 @@ namespace controller
                                                key_to_menus,
                                                unicode_to_load_window);
         }
-        
+
         // The right-click menu depends on the location of the mouse.
         // We do not check if the mouse's right button was clicked, imgui takes
         // care of that.
@@ -302,8 +302,7 @@ namespace controller
                 mouse_position_ = new_position;
             }
         }
-    
+
         window.setView(view_);
     }
 }
- 
