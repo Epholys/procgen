@@ -205,8 +205,6 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
 
         if (old_duplicate == buffer_.end()) // Case 4.
         {
-            // Note: it is not necessary to call 'this->remove_rule()' as we
-            // already checked that the old rule did not have a duplicate.
             rule_map->remove_rule(previous_pred);
         }
         else // Case 5.

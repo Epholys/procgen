@@ -37,7 +37,7 @@ namespace
             --embedded_level;
         }
     }
-    
+
     // The two next function are shared with the 'display()' and
     // 'interact_with()' functions. They manage window creation and integration.
 
@@ -77,7 +77,7 @@ namespace
             return is_active;
         }
     }
-    
+
     // Concludes the window or CollapsingHeader
     void conclude()
     {
@@ -113,13 +113,13 @@ namespace procgui
 
         ImGui::Text(lsys.get_axiom().c_str());
 
-        ImGui::Unindent(); 
+        ImGui::Unindent();
 
 
         // --- Production Rules ---
         ImGui::Text("Production rules:");
 
-        ImGui::Indent(); 
+        ImGui::Indent();
         for (const auto& rule : lsys.get_rules())
         {
             std::ostringstream oss;
@@ -127,7 +127,7 @@ namespace procgui
             std::string str = oss.str();
             ImGui::Text(str.c_str());
         }
-        ImGui::Unindent(); 
+        ImGui::Unindent();
 
         // --- Iteration Predecessors ---
         ImGui::Text("Iteration predecessors:");
@@ -136,13 +136,13 @@ namespace procgui
 
         ImGui::Text(lsys.get_iteration_predecessors().c_str());
 
-        ImGui::Unindent(); 
+        ImGui::Unindent();
 
-        
+
         conclude();
     }
 
-    
+
     void display(const drawing::DrawingParameters& parameters, const std::string& name)
     {
         if( !set_up(name) )
@@ -150,9 +150,9 @@ namespace procgui
             // Early out if the display zone is collapsed.
             return;
         }
-    
+
         // Arbitrary value to align neatly every members.
-        const int align = 150;   
+        const int align = 150;
 
         // --- Starting Position ---
         ImGui::Text("Starting Position:"); ImGui::SameLine(align);
@@ -163,7 +163,7 @@ namespace procgui
         ImGui::Text("Starting Angle:"); ImGui::SameLine(align);
         ImGui::Text("%.lf", math::rad_to_degree(parameters.get_starting_angle())); ImGui::SameLine();
         ImGui::Text("degree");
-            
+
         // --- Angle Delta ---
         ImGui::Text("Angle Delta:"); ImGui::SameLine(align);
         ImGui::Text("%.lf", math::rad_to_degree(parameters.get_delta_angle())); ImGui::SameLine();
@@ -190,11 +190,11 @@ namespace procgui
             ImGui::Text("%c -> %s", interpretation.first, name.c_str());
 
         }
-        
+
         conclude();
     }
 
-    
+
 
     void interact_with(drawing::DrawingParameters& parameters, const std::string& name)
     {
@@ -268,10 +268,10 @@ namespace procgui
 
         // The LSystem itelf
         auto lsys = buffer.ref_rule_map();
-        
+
         // --- Axiom ---
         auto buf = string_to_array<lsys_successor_size>(lsys->get_axiom());
-                        
+
         if (ImGui::InputText("Axiom", buf.data(), lsys_successor_size))
         {
             lsys->set_axiom(array_to_string(buf));
@@ -293,14 +293,14 @@ namespace procgui
                                      updated = true;
                                  }
                              });
-        
+
         // --- Iteration Predecessors ---
         buf = string_to_array<lsys_successor_size>(lsys->get_iteration_predecessors());
         if (ImGui::InputText("Iteration predecessors", buf.data(), lsys_successor_size))
         {
             lsys->set_iteration_predecessors(array_to_string(buf));
         }
-        
+
         conclude();
     }
 
@@ -313,7 +313,7 @@ namespace procgui
         }
 
         using namespace drawing;
-        
+
         interact_with_buffer(buffer,
             [&buffer](auto it, bool& updated)
             {
@@ -323,7 +323,7 @@ namespace procgui
 
                 // As 'all_orders_name' has the exact same order as
                 // 'all_orders', the index is common.
-                // 
+                //
                 // The index is calculated by finding in the vector the order
                 // and using the distance between the first element and the
                 // current one.
@@ -356,7 +356,7 @@ namespace
         {
             painter.set_display_flag(display_helper);
         }
-        
+
         // --- Gradient angle ---
         float angle = painter.get_angle();
         if (ImGui::DragFloat("Gradient Angle", &angle,
@@ -390,7 +390,7 @@ namespace
             center[1] = clamp(center[1], 0.f, 1.f);
             painter.set_center(sf::Vector2f(center[0], center[1]));
         }
-        
+
         if (!from_composite)
         {
             ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
@@ -415,25 +415,25 @@ namespace
             painter.randomize();
         }
         ImGui::PopStyleColor(3);
-        
+
         if (!from_composite)
         {
             ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
                                      ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
-    
+
     void interact_with(colors::VertexPainterSequential& painter, bool from_composite=false)
     {
         float factor = painter.get_factor();
-        
+
         if (ImGui::DragFloat("Repetition factor", &factor,
                              0.01f, 0.f, double_max_limit, "%.2f") )
         {
             factor = clamp(factor, 0.f, float(double_max_limit));
             painter.set_factor(factor);
         }
-            
+
         if (!from_composite)
         {
             ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
@@ -455,7 +455,7 @@ namespace
         // Composite of composite will have ImGui's widget ID collision issue.
         static int nested_id = 0;
         ImGui::PushID(nested_id++);
-        
+
         // ImGui's ID for the several child painters.
         int index = 0;
         auto child_painters = painter.get_child_painters();
@@ -467,7 +467,7 @@ namespace
         bool add_new_painter = false;
         // If true, we add the copied painter at 'to_add'.
         bool add_copied_painter = false;
-        
+
         ImGui::Separator();
 
         // Button to add a new painter at the beginning.
@@ -483,7 +483,7 @@ namespace
         ::ext::ImGui::PushStyleColoredButton<ext::ImGui::Turquoise>();
         if (colors::VertexPainterComposite::has_copied_painter() &&
             ImGui::Button("Paste copied Painter here"))
-        { 
+        {
             to_add = begin(child_painters);
             add_copied_painter = true;
         }
@@ -515,7 +515,7 @@ namespace
             // Button to remove the previous painter.
             if (child_painters.size() > 1)
             {
-                ImGui::SameLine();                
+                ImGui::SameLine();
                 ::ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
                 if (ImGui::Button("Remove previous Painter"))
                 {
@@ -544,7 +544,7 @@ namespace
                 }
                 ImGui::PopStyleColor(3);
             }
-            
+
             ImGui::Separator();
             ImGui::PopID();
             index++;
@@ -596,15 +596,15 @@ namespace
         }
 
         switch(index)
-        {   
+        {
         case 0:
             painter = std::make_shared<colors::VertexPainterConstant>(next_generator);
             break;
-            
+
         case 1:
             painter = std::make_shared<colors::VertexPainterLinear>(next_generator);
             break;
-            
+
         case 2:
             painter = std::make_shared<colors::VertexPainterRadial>(next_generator);
             break;
@@ -628,13 +628,13 @@ namespace
 
         wrapper.wrap(painter);
     }
-    
+
     int vertex_painter_list(colors::VertexPainterWrapper& painter_wrapper)
     {
         auto painter = painter_wrapper.unwrap();
-        
+
         // Represents the index of the next ListBox. Set by inspecting the
-        // polyphormism. 
+        // polyphormism.
         int index = 0;
         const auto& info = typeid(*painter).hash_code();
         if (info == typeid(colors::VertexPainterConstant).hash_code())
@@ -670,13 +670,13 @@ namespace
         const char* generators[6] = {"Constant", "Linear", "Radial",
                                      "Random", "Sequential", "Iterative"};
         bool new_generator = ImGui::ListBox("Vertex Painter", &index, generators, 6) && index != old_index;
-        
+
         // Create a new VertexPainter
         if (new_generator)
         {
             create_new_vertex_painter(painter_wrapper, painter, index, old_index);
         }
-        
+
         return index;
     }
 }
@@ -701,7 +701,7 @@ namespace procgui
         std::shared_ptr<colors::VertexPainterComposite> composite;
         int index = -1; // Index defining the type of 'painter'. Values are
                         // defined in 'vertex_painter_list()'.
-        
+
         auto info = typeid(*painter).hash_code();
         bool is_composite = info == typeid(colors::VertexPainterComposite).hash_code();
         if (is_composite)
@@ -724,7 +724,7 @@ namespace procgui
 
         // Check if the new/main painter is a VertexPainterConstant
         bool is_constant = index == 0;
-        
+
         // If not, composite features are shown
         if (!is_constant)
         {
@@ -768,7 +768,7 @@ namespace procgui
             ::interact_with(*constant);
             break;
         }
-            
+
         case 1:
         {
             auto linear = std::dynamic_pointer_cast<colors::VertexPainterLinear>(painter);
@@ -852,7 +852,7 @@ namespace
         static bool was_focusing_previous_frame = false;
         bool is_focusing_this_frame = false;
         // Persistent keys to freely modify them here without perverting the
-        // pure ones of LinearGradient. 
+        // pure ones of LinearGradient.
         static colors::LinearGradient::keys keys_buffer;
         // Hacky pointer to make 'keys_buffer' and 'was_focusing_previous_frame'
         // exclusive to one generator. This function is called for each existing
@@ -861,7 +861,7 @@ namespace
         static colors::LinearGradient* generator_address = nullptr;
 
         bool is_modified = false;
-        
+
         colors::LinearGradient::keys keys;
         if (generator_address &&
             generator_address == &gen &&
@@ -944,7 +944,7 @@ namespace
 
             ImGui::EndGroup();
             block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
-            
+
             ImGui::PopID();
 
             block_size *= 2; // I'm bad with the imgui layout system, so here's
@@ -989,7 +989,7 @@ namespace
                 auto ultimate_it = prev(end(keys));
                 auto penultimate_it = prev(ultimate_it);
                 ultimate_it->position = (1 + penultimate_it->position) / 2.;
-                keys.push_back({sf::Color::White, 1.f});                
+                keys.push_back({sf::Color::White, 1.f});
             }
             else
             {
@@ -1031,7 +1031,7 @@ namespace
             generator_address = nullptr;
         }
 
-        
+
         // Preview the color gradient
         auto k = gen.get_keys();
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -1069,7 +1069,7 @@ namespace
     void interact_with(colors::DiscreteGradient& gen)
     {
         bool is_modified = false;
-        
+
         auto keys = gen.get_keys();
         bool will_insert = false;
         bool insert_before = false;
@@ -1120,7 +1120,7 @@ namespace
             ImGui::PopStyleColor(3);
             ImGui::SameLine();
             ImGui::PopID();
-            
+
             // Key Color
             ImVec4 imcolor = it->imcolor;
             if(ImGui::ColorEdit4("Color", (float*)&imcolor,ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreviewHalf|ImGuiColorEditFlags_AlphaBar))
@@ -1151,7 +1151,7 @@ namespace
             ImGui::SameLine();
             ImGui::BeginGroup();
             ImGui::Text(" "); // '\n'
-            
+
             // Number of transitional colors.
             int diff = next(it)->index - it->index - 1;
             int diff_copy = diff;
@@ -1160,7 +1160,7 @@ namespace
             if (ImGui::InputInt("", &diff, 1, 1) && diff >= 0)
             {
                 is_modified = true;
-                modifier += diff - diff_copy; 
+                modifier += diff - diff_copy;
             }
             ImGui::PopItemWidth();
 
@@ -1231,7 +1231,7 @@ namespace
         ImGui::PopStyleColor(3);
         ImGui::PopID();
 
-        
+
         if (will_insert && insert_before)
         {
             is_modified = true;
@@ -1275,8 +1275,8 @@ namespace
                 keys.erase(to_remove);
             }
         }
-        
-        
+
+
         // Preview the color gradient
         std::vector<sf::Color> colors = gen.get_colors();
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -1313,9 +1313,9 @@ namespace
             gen.set_keys(keys);
         }
     }
-} // namespace 
+} // namespace
 namespace procgui
-{ 
+{
     void interact_with(colors::ColorGeneratorWrapper& color_wrapper,
                        const std::string&,
                        color_wrapper_mode mode)
@@ -1324,9 +1324,9 @@ namespace procgui
         Expects(embedded_level > 0);
 
         auto gen = color_wrapper.unwrap();
-        
+
         // Represents the index of the next ListBox. Set by inspecting the
-        // polyphormism. 
+        // polyphormism.
         int index = 0;
         const auto& info = typeid(*gen).hash_code();
         if (info == typeid(colors::ConstantColor).hash_code())
@@ -1391,7 +1391,7 @@ namespace procgui
                 Ensures(false);
             }
             // Updates ColorGeneratorWrapper and VertexPainter and a 'notify()'
-            // waterfall. 
+            // waterfall.
             color_wrapper.wrap(gen);
         }
 
@@ -1418,7 +1418,7 @@ namespace procgui
         }
     }
 
-    void interact_with_graphics_parameters(bool& box_is_visible)
+    void interact_with_global_parameters(bool& box_is_visible)
     {
         const std::string name = "Application parameters";
         if (!set_up(name))
@@ -1437,28 +1437,32 @@ namespace procgui
 
         ImGui::Checkbox("LSystem's box visibility", &box_is_visible);
 
-        static constexpr drawing::Matrix::number max_size_limit = 1024 * 1024;
-        drawing::Matrix::number max_size = config::sys_max_size / (1024 * 1024);
+        // Maximum size of complete L-System. Part of the configuration file.
+        static constexpr drawing::Matrix::number max_size_limit = 1024 * 1024; // 1 TiB
+        drawing::Matrix::number max_size = config::sys_max_size / (1024 * 1024); // -->MiB
         if (ext::ImGui::InputUnsignedLongLong("Maximum size in memory of L-System before warning, in MegaBytes", &max_size))
         {
-            if (max_size < 1)
+            if (max_size == 0)
             {
                 max_size = 1;
             }
             else if (max_size > max_size_limit)
             {
+                // Avoid too big numbers but also hacky way to limit the size
+                // explosion for negative number underflow.
+                // A patch for imgui for InputScalar would be ideal.
                 max_size = max_size_limit;
             }
 
-            config::sys_max_size = max_size * 1024 * 1024;
+            config::sys_max_size = max_size * 1024 * 1024; // --> Bytes
         }
-        
-        
-        
+
+
+
         conclude();
     }
 
-    
+
     void interact_with(LSystemView& lsys_view,
                        const std::string& name,
                        bool is_modified,
@@ -1498,7 +1502,7 @@ namespace procgui
 
             sf::Vector2i pos = controller::WindowController::get_mouse_position();
             auto bounding_box = lsys_view.get_bounding_box();
-            
+
             // Shift the window to the right.
             auto absolute_right_side = controller::WindowController::absolute_mouse_position({bounding_box.left + bounding_box.width,0});
             pos.x = absolute_right_side.x + 50;
@@ -1520,7 +1524,7 @@ namespace procgui
             // If the window is too far up or down, shift it down or up.
             pos.y = pos.y < 0 ? 0 : pos.y;
             pos.y = pos.y + next_window_size.y > sfml_windowY ? sfml_windowY-next_window_size.y : pos.y;
-            
+
             ImGui::SetNextWindowPos(sf::Vector2i{pos.x,pos.y}, ImGuiSetCond_Appearing);
 
             // The window's title background is set to the unique color
@@ -1549,7 +1553,7 @@ namespace procgui
         interact_with(lsys_view.ref_vertex_painter_wrapper(), "Painter##"+str_ID.str());
 
         bool bounding_box_visibility = lsys_view.box_is_visible();
-        interact_with_graphics_parameters(bounding_box_visibility);
+        interact_with_global_parameters(bounding_box_visibility);
         lsys_view.set_box_visibility(bounding_box_visibility);
         pop_embedded();
 
