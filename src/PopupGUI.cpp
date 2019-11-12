@@ -24,7 +24,7 @@ namespace procgui
     void PopupGUI::operator()(sf::Keyboard::Key& key) const
     {
         ImGui::OpenPopup(name.c_str());
-        if (ImGui::BeginPopupModal(name.c_str()))
+        if (ImGui::BeginPopupModal(name.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize))
         {
             if (message)
             {
