@@ -18,7 +18,7 @@ class Observer
 {
 public:
     static_assert(std::is_base_of<Observable, T>::value, "An observer must watch an Observable");
-        
+
 
     // An Observer must have a observable target.
     // Exception:
@@ -36,12 +36,12 @@ public:
     // of calling 'add_callback()'.
     Observer(const Observer& other) = delete;
     Observer& operator=(const Observer& other) = delete;
-    Observer(const Observer&& other) = delete;
-    Observer& operator=(const Observer&& other) = delete;
+    Observer(Observer&& other) = delete;
+    Observer& operator=(Observer&& other) = delete;
 
 
     // If the callback exists, remove it from the target observable. Else, do
-    // nothing. 
+    // nothing.
     virtual ~Observer()
         {
             if (target_ && id_.second)
@@ -69,7 +69,7 @@ public:
                 id_.second = true;
             }
         }
-    
+
     void set_target(std::shared_ptr<T> t)
         {
             if (target_ && id_.second)
@@ -85,7 +85,7 @@ public:
         {
             return target_;
         }
-    
+
 private:
     // The target observable.
     std::shared_ptr<T> target_;
