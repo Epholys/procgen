@@ -70,7 +70,7 @@ namespace procgui
         LSystemView(LSystemView&& other);
         LSystemView& operator=(const LSystemView& other);
         LSystemView& operator=(LSystemView&& other);
-        
+
         // Reference Getters
         drawing::DrawingParameters& ref_parameters();
         LSystemBuffer& ref_lsystem_buffer();
@@ -85,7 +85,7 @@ namespace procgui
         const colors::VertexPainterWrapper& get_vertex_painter_wrapper() const;
         int get_id() const;
         sf::Color get_color() const;
-        
+
         std::string get_name() const;
         void set_name(const std::string& name);
 
@@ -97,9 +97,9 @@ namespace procgui
         // the LSystemView on screen. But optimization is possible, and will be
         // done. So TODO.
         void finish_loading();
-        
+
         // Translation transform to correct screen-space position of the
-        // LSystem. 
+        // LSystem.
         sf::Transform get_transform() const;
 
         // Getter to is_selected_.
@@ -112,7 +112,7 @@ namespace procgui
         void set_box_visibility(bool is_visible);
 
         // Check if 'click' is inside one of the correctly translated
-        // 'bounding_box_'. 
+        // 'bounding_box_'.
         bool is_inside(const sf::Vector2f& click) const;
 
 
@@ -124,12 +124,12 @@ namespace procgui
         // Draw the vertices.
         void draw(sf::RenderTarget &target);
 
-                
+
     private:
         void update_callbacks();
 
         // Draw a placeholder box if the LSystem does not have enough vertices
-        // or does not have any size. 
+        // or does not have any size.
         void draw_missing_placeholder() const;
         // Create the placeholder box.
         sf::FloatRect compute_placeholder_box() const;
@@ -144,16 +144,16 @@ namespace procgui
         // Display the size warning popup and call 'compute_vertices()' if the
         // user confirms the computation.
         void open_size_warning_popup();
-        
+
         // The managers of unique identifiers and colors for each instance of
-        // LSystemView. 
+        // LSystemView.
         static UniqueId unique_ids_;
         static colors::UniqueColor unique_colors_;
         // Unique identifier for each instance. Used in procgui.
         int id_;
         // Unique color for each instance. Linked to 'id_'.
         sf::Color color_id_;
-        
+
         // The window's name.
         std::string name_;
 
@@ -173,7 +173,7 @@ namespace procgui
         std::vector<sf::Vertex> vertices_;
         std::vector<int> iteration_of_vertices_;
         int max_iteration_;
-        
+
         // The global bounding box of the drawing. It is a "raw" bounding box:
         // its position is fixed. The rendering at the correct position as well
         // as getters are correctly translated with 'get_transform()'.
@@ -192,10 +192,10 @@ namespace procgui
         // RAM size of the data the user want to compute
         drawing::Matrix::number approximate_mem_size_ = 0;
         drawing::Matrix::number max_mem_size_ = 0;
-        
+
         // Ids list of all created popups, existing or deleted.
         std::vector<int> popups_ids_;
-        
+
 
         // Serialization
         friend class cereal::access;
@@ -220,14 +220,14 @@ namespace procgui
                 drawing::DrawingParameters params;
                 drawing::InterpretationMap map;
                 colors::VertexPainterSerializer painter_serializer;
-                
+
                 ar(name,
                    cereal::make_nvp("LSystem", lsys),
                    cereal::make_nvp("DrawingParameters", params),
                    cereal::make_nvp("Interpretation Map", map),
                    cereal::make_nvp("VertexPainter", painter_serializer));
 
-                
+
                 *this = LSystemView(name,
                                     std::make_shared<LSystem>(lsys),
                                     std::make_shared<drawing::InterpretationMap>(map),

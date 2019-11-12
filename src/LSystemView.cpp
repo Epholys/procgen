@@ -49,9 +49,9 @@ namespace procgui
         , popups_ids_{}
     {
         // Invariant respected: cohesion between the LSystem/InterpretationMap
-        // and the vertices.             
+        // and the vertices.
         update_callbacks();
-        
+
         size_safeguard();
     }
 
@@ -155,9 +155,9 @@ namespace procgui
             sub_boxes_ = other.sub_boxes_;
             is_selected_ = false;
             bounding_box_is_visible_ = true;
-            max_mem_size_ = other.max_mem_size_;           
+            max_mem_size_ = other.max_mem_size_;
             popups_ids_ = {};
-            
+
             update_callbacks();
 
             size_safeguard();
@@ -196,7 +196,7 @@ namespace procgui
             other.OMap::set_target(nullptr);
             other.OParams::set_target(nullptr);
             other.OPainter::set_target(nullptr);
-            
+
             // the 'other' object must not matter in the 'color_gen_' anymore.
             other.id_ = -1;
             other.color_id_ = sf::Color::Black;
@@ -225,7 +225,7 @@ namespace procgui
         {
             procgui::remove_popup(id);
         }
-    }    
+    }
 
     DrawingParameters& LSystemView::ref_parameters()
     {
@@ -296,7 +296,7 @@ namespace procgui
         is_modified_ = false;
     }
 
-    
+
     void LSystemView::size_safeguard()
     {
         auto max_size = std::max(max_mem_size_, config::sys_max_size);
@@ -316,7 +316,7 @@ namespace procgui
             OParams::get_target()->validate();
             OLSys::get_target()->validate();
             OMap::get_target()->validate();
-            
+
             compute_vertices();
         }
     }
@@ -333,7 +333,7 @@ namespace procgui
                       ImGui::Text("You are trying to compute a big L-System of a size bigger than 16 exabytes");
                       ImGui::Text("(bigger than the data stored by Google in 2013).");
                       ImGui::Text("You still have the choice to proceed if you have alien tech,");
-                      ImGui::Text("but otherwise the application or your");                  
+                      ImGui::Text("but otherwise the application or your");
                   }
                   else
                   {
@@ -367,7 +367,7 @@ namespace procgui
                   OMap::get_target()->validate();
 
                   max_mem_size_ = approximate_mem_size_;
-                  
+
                   compute_vertices();
               },
               [this]()
@@ -385,8 +385,8 @@ namespace procgui
     void LSystemView::compute_vertices()
     {
         // Invariant respected: cohesion between the vertices and the bounding
-        // boxes. 
-        
+        // boxes.
+
         std::tie(vertices_, iteration_of_vertices_, max_iteration_) =
             drawing::compute_vertices(*OLSys::get_target()->ref_rule_map(),
                                       *OMap::get_target()->get_rule_map(),
@@ -408,7 +408,7 @@ namespace procgui
         is_modified_ = true;
     }
 
-    
+
     void LSystemView::draw(sf::RenderTarget &target)
     {
         // Interact with the models.
@@ -417,7 +417,7 @@ namespace procgui
         sf::FloatRect visible_bounding_box = get_transform().transformRect(bounding_box_);
 
         // Draw a placeholder if the LSystem does not have enough vertices or
-        // does not have any size. 
+        // does not have any size.
         if (vertices_.size() < 2 ||
             (bounding_box_.width < std::numeric_limits<float>::epsilon() &&
              bounding_box_.height < std::numeric_limits<float>::epsilon()))
@@ -446,7 +446,7 @@ namespace procgui
         //            {{ box.left + box.width, box.top + box.height}, sf::Color(255,0,0,50)},
         //            {{ box.left + box.width, box.top}, sf::Color(255,0,0,50)}}};
         //     target.draw(rect.data(), rect.size(), sf::Quads, get_transform());
-        // } 
+        // }
     }
 
     void LSystemView::draw_missing_placeholder() const
@@ -458,7 +458,8 @@ namespace procgui
         const auto& height = placeholder_box.height;
 
         sf::Color placeholder_color = bw_contrast_color(sfml_window::background_color);
-        
+        placeholder_color.a = 150;
+
         std::vector<sf::Vertex> vertices =
             { {{left, top}, placeholder_color},
               {{left+width, top}, placeholder_color},
@@ -480,14 +481,14 @@ namespace procgui
         placeholder_box.height = placeholder_size;
         return placeholder_box;
     }
-    
+
     void LSystemView::draw_select_box(sf::RenderTarget& target, const sf::FloatRect& bounding_box) const
     {
         auto box = bounding_box;
         auto margin = (box.width*.05f > box.height*.05f) ? box.height*.05f : box.width*.05f;
         float zoom = controller::WindowController::get_zoom_level();
         margin = margin > 7.5*zoom ? margin : 7.5*zoom;
-            
+
         // Draw the global bounding boxes (with a little scaled margin) with
         // the unique color.
         std::array<sf::Vertex, 5> rect =
@@ -498,7 +499,7 @@ namespace procgui
                {{ box.left - margin, box.top - margin}, color_id_}}};
         target.draw(rect.data(), rect.size(), sf::LineStrip);
     }
-    
+
     bool LSystemView::is_selected() const
     {
         return is_selected_;
@@ -508,9 +509,9 @@ namespace procgui
     {
         //  If no placeholder is necessary, checks if 'click' is inside one of
         //  the sub-boxes.
-        if (vertices_.size() > 1 ||
-            (bounding_box_.width  < std::numeric_limits<float>::epsilon() &&
-             bounding_box_.height < std::numeric_limits<float>::epsilon()))
+        if (vertices_.size() >= 2 &&
+            (bounding_box_.width  >= std::numeric_limits<float>::epsilon() ||
+             bounding_box_.height >= std::numeric_limits<float>::epsilon()))
         {
             decltype(sub_boxes_) subs;
             for (const auto& box : sub_boxes_)
@@ -531,7 +532,7 @@ namespace procgui
             return compute_placeholder_box().contains(sf::Vector2f(click));
         }
     }
-    
+
     void LSystemView::select()
     {
         is_selected_ = true;
