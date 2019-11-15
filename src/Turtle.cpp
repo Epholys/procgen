@@ -3,7 +3,7 @@
 namespace drawing
 {
     using namespace impl;
-    
+
     Turtle::Turtle(const DrawingParameters& params,
                    const std::vector<int>& iteration_vec)
         : parameters { params }
@@ -27,7 +27,8 @@ namespace drawing
     {
         const auto [str, rec, max] = lsys.produce(parameters.get_n_iter());
         Turtle turtle (parameters, rec);
-        
+        std::cout << "LSys derivation over\n";
+
         for (auto c : str)
         {
             if (interpretation.has_predecessor(c))
