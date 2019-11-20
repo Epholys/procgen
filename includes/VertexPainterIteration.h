@@ -19,12 +19,12 @@ namespace colors
         VertexPainterIteration(VertexPainterIteration&& other) = delete;
         VertexPainterIteration& operator=(const VertexPainterIteration& other) = delete;
         VertexPainterIteration& operator=(VertexPainterIteration&& other) = delete;
-        
+
         // Paint 'vertices' according to its iteration value: simply divide the
         // current iteration by the max iteration.
         // 'bounding_box' is not used.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<int>& vertices_iteration,
+                                    const std::vector<std::uint8_t>& vertices_iteration,
                                     int max_iteration,
                                     sf::FloatRect bounding_box) override;
 
@@ -32,7 +32,7 @@ namespace colors
         virtual std::shared_ptr<VertexPainter> clone() const override;
 
         friend class VertexPainterSerializer;
-        virtual std::string type_name() const override;        
+        virtual std::string type_name() const override;
 
     private:
         friend class cereal::access;

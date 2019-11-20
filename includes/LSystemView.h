@@ -170,8 +170,7 @@ namespace procgui
 
         // The vertices of the View and their iteration count. Computed at each
         // modification.
-        std::vector<sf::Vertex> vertices_;
-        std::vector<int> iteration_of_vertices_;
+        drawing::impl::Turtle turtle_;
         int max_iteration_;
 
         // The global bounding box of the drawing. It is a "raw" bounding box:

@@ -28,7 +28,7 @@ namespace colors
         clone->set_target(std::make_shared<ColorGeneratorWrapper>(*get_target()));
         return clone;
     }
-    
+
     float VertexPainterLinear::get_angle() const
     {
         return angle_;
@@ -37,7 +37,7 @@ namespace colors
     {
         return display_helper_;
     }
-    
+
     void VertexPainterLinear::set_angle(float angle)
     {
         angle_ = angle;
@@ -49,7 +49,7 @@ namespace colors
     }
 
     void VertexPainterLinear::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                             const std::vector<int>&,
+                                             const std::vector<std::uint8_t>&,
                                              int,
                                              sf::FloatRect bounding_box)
     {
@@ -62,12 +62,12 @@ namespace colors
         // Find the two points on the bounding boxes that intersect the axis.
         sf::Vector2f direction = {std::cos(math::degree_to_rad(angle_)), -std::sin(math::degree_to_rad(angle_))};
         sf::Vector2f center = {bounding_box.left + bounding_box.width/2,
-                               bounding_box.top + bounding_box.height/2}; 
+                               bounding_box.top + bounding_box.height/2};
        const auto axis_intersections = geometry::intersection_with_bounding_box({center, direction}, bounding_box);
         sf::Vector2f axis_intersection = axis_intersections.first;
         sf::Vector2f axis_opposite_intersection = axis_intersections.second;
 
-        
+
         // Creates the two lines between each the lerping factor will be computed.
         float normal_angle = angle_+90;
         sf::Vector2f normal_direction = {std::cos(math::degree_to_rad(normal_angle)), -std::sin(math::degree_to_rad(normal_angle))};
@@ -101,10 +101,10 @@ namespace colors
         {
             return;
         }
-        
+
         sf::Vector2f normal_direction = {-std::sin(math::degree_to_rad(angle_)), -std::cos(math::degree_to_rad(angle_))};
         sf::Vector2f center = {bounding_box.left + bounding_box.width/2,
-                               bounding_box.top + bounding_box.height/2}; 
+                               bounding_box.top + bounding_box.height/2};
        const auto axis_intersections = geometry::intersection_with_bounding_box({center, normal_direction}, bounding_box);
        sf::Color indicator_color = colors::bw_contrast_color(sfml_window::background_color);
 
@@ -114,7 +114,7 @@ namespace colors
 
        procgui::SupplementaryRendering::add_draw_call({indicator});
     }
-    
+
     std::string VertexPainterLinear::type_name() const
     {
         return "VertexPainterLinear";

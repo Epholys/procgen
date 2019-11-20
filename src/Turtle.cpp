@@ -4,38 +4,46 @@ namespace drawing
 {
     using namespace impl;
 
-    Turtle::Turtle(const DrawingParameters& params,
-                   const std::vector<int>& iteration_vec)
-        : parameters { params }
-        , iteration_vec {iteration_vec}
-        , iteration_of_vertices {}
-          // The other members are set in header as they all derives from
-          // 'parameters' or 'iteration_vec'.
+    void Turtle::init_from_parameters (const DrawingParameters& parameters)
     {
-        if (!iteration_vec.empty())
-        {
-            vertices.push_back(sf::Vector2f(state.position));
-            iteration_of_vertices.push_back(iteration_vec.at(iteration_index));
-        }
+        cos = std::cos(parameters.get_delta_angle());
+        sin = std::sin(parameters.get_delta_angle());
+        step = parameters.get_step();
+        state = {{0,0},
+                 {std::cos(parameters.get_starting_angle()),
+                  std::sin(parameters.get_starting_angle())}};
     }
 
-    std::tuple<std::vector<sf::Vertex>, std::vector<int>, int>
-        compute_vertices(LSystem& lsys,
-                         const InterpretationMap& interpretation,
-                         const DrawingParameters& parameters)
-
+    Turtle::Turtle(const DrawingParameters& parameters)
     {
-        const auto [str, rec, max] = lsys.produce(parameters.get_n_iter());
-        Turtle turtle (parameters, rec);
-        std::cout << "LSys derivation over\n";
+        init_from_parameters(parameters);
+    }
 
-        for (auto c : str)
+    Turtle::TurtleProduction Turtle::compute_vertices(const std::string& lsystem_production,
+                                                      const std::vector<std::uint8_t>& iterations,
+                                                      const DrawingParameters& parameters,
+                                                      const InterpretationMap& interpretation)
+    {
+        init_from_parameters(parameters);
+        vertices.clear();
+        iteration_of_vertices.clear();
+        iteration_index = 0;
+        iteration = 1;
+
+        if (!iterations.empty())
+        {
+            vertices.push_back(sf::Vector2f(state.position));
+            iteration_of_vertices.push_back(iterations.at(0));
+            iteration = iterations.at(0);
+        }
+
+        for (auto c : lsystem_production)
         {
             if (interpretation.has_predecessor(c))
             {
                 // If an interpretation of the character 'c' is found,
                 // applies it to the current turtle.
-                interpretation.get_rule(c).second(turtle);
+                interpretation.get_rule(c).second(*this);
             }
             else
             {
@@ -44,11 +52,12 @@ namespace drawing
             }
             // Increment the iteration index: each character has an iteration
             // count. Can not be in the orders, otherwise characters without
-            // orders will not increment this index.
-            ++turtle.iteration_index;
+            // orders will not increment this index. // TODO COMMENT
+            iteration = iterations.at(iteration_index++);
         }
 
-        Ensures(turtle.vertices.size() == turtle.iteration_of_vertices.size());
-        return {turtle.vertices, turtle.iteration_of_vertices, max};
+        Ensures(vertices.size() == iteration_of_vertices.size());
+        TurtleProduction production {vertices, iteration_of_vertices};
+        return production;
     }
 }

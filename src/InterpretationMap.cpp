@@ -4,15 +4,15 @@
 namespace drawing
 {
     using namespace impl;
-    
+
     void go_forward_fn(Turtle& turtle)
     {
         // Go forward following the direction vector.
-        double dx = turtle.parameters.get_step() * turtle.state.direction.x;
-        double dy = turtle.parameters.get_step() * -turtle.state.direction.y;
+        double dx = turtle.step * turtle.state.direction.x;
+        double dy = turtle.step * -turtle.state.direction.y;
         turtle.state.position += {dx, dy};
         turtle.vertices.push_back(sf::Vector2f(turtle.state.position));
-        turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
+        turtle.iteration_of_vertices.push_back(turtle.iteration);
     }
 
     void turn_left_fn(Turtle& turtle)
@@ -50,9 +50,9 @@ namespace drawing
             turtle.state = turtle.stack.top();
             turtle.vertices.push_back( {sf::Vector2f(turtle.state.position), sf::Color::Transparent} );
             turtle.vertices.push_back( {sf::Vector2f(turtle.state.position)} );
-            turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-            turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
-            turtle.iteration_of_vertices.push_back(turtle.iteration_vec.at(turtle.iteration_index));
+            turtle.iteration_of_vertices.push_back(turtle.iteration);
+            turtle.iteration_of_vertices.push_back(turtle.iteration);
+            turtle.iteration_of_vertices.push_back(turtle.iteration);
 
             turtle.stack.pop();
         }
@@ -64,6 +64,6 @@ namespace drawing
     }
     InterpretationMap::InterpretationMap(std::initializer_list<typename rule_map::value_type> init)
         : RuleMap<Order>(init)
-    {        
+    {
     }
 }

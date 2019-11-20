@@ -42,14 +42,15 @@ void opt(int argc, char* argv[])
         std::cout << "TESTING VERTICES INTERPRETATION\n";
 
         LSystem serpinski = LSystem({"F", { { 'F', "G[-F-GFFFF" }, { 'G', "F]]+G+F" }}, "G" });
-        //const auto& [str, rec, _] = serpinski.produce(10);
         DrawingParameters params;
         params.set_n_iter(10);
         auto map = drawing::default_interpretation_map;
-        //drawing::impl::Turtle turtle (params, rec);
+        drawing::impl::Turtle turtle (params);
+
+        const auto& [str, rec, _] = serpinski.produce(10);
         for (int i=0; i<5; ++i)
         {
-            compute_vertices(serpinski, map, params);
+            turtle.compute_vertices(str, rec, params, map);
             std::cout << i << std::endl;
         }
     }
@@ -63,18 +64,18 @@ void opt(int argc, char* argv[])
         DrawingParameters params;
         auto map = drawing::default_interpretation_map;
         params.set_n_iter(10);
-        drawing::impl::Turtle turtle (params, rec);
+        drawing::impl::Turtle turtle (params);
         ConstantColor cc (sf::Color::Red);
         auto wcc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<ConstantColor>(cc));
         VertexPainterConstant vp (wcc);
 
-        auto tuple = compute_vertices(serpinski, map, params);
-        auto box = geometry::bounding_box(std::get<0>(tuple));
+        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map);
+        auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<20; ++i)
         {
-            vp.paint_vertices(std::get<0>(tuple), std::get<1>(tuple), max, box);
+            vp.paint_vertices(vx, vx_iter, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -88,22 +89,20 @@ void opt(int argc, char* argv[])
         params.set_n_iter(10);
 
         auto map = drawing::default_interpretation_map;
-
-        drawing::impl::Turtle turtle (params, rec);
-
+        drawing::impl::Turtle turtle (params);
         LinearGradient lc({{sf::Color::Red, 0}, {sf::Color::Blue, 1}});
         auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
         VertexPainterLinear vp (wlc);
         vp.set_angle(25);
         vp.set_display_flag(false);
 
-        auto tuple = compute_vertices(serpinski, map, params);
-        auto box = geometry::bounding_box(std::get<0>(tuple));
+        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map);
+        auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<9; ++i)
         {
-            vp.paint_vertices(std::get<0>(tuple), std::get<1>(tuple), max, box);
+            vp.paint_vertices(vx, vx_iter, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -119,20 +118,20 @@ void opt(int argc, char* argv[])
 
         auto map = drawing::default_interpretation_map;
 
-        drawing::impl::Turtle turtle (params, rec);
+        drawing::impl::Turtle turtle (params);
 
         LinearGradient lc({{sf::Color::Red, 0}, {sf::Color::Blue, 1}});
         auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
         VertexPainterRadial vr (wlc);
         vr.set_display_flag(false);
 
-        auto tuple = compute_vertices(serpinski, map, params);
-        auto box = geometry::bounding_box(std::get<0>(tuple));
+        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map);
+        auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<9; ++i)
         {
-            vr.paint_vertices(std::get<0>(tuple), std::get<1>(tuple), max, box);
+            vr.paint_vertices(vx, vx_iter, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -148,20 +147,20 @@ void opt(int argc, char* argv[])
 
         auto map = drawing::default_interpretation_map;
 
-        drawing::impl::Turtle turtle (params, rec);
+        drawing::impl::Turtle turtle (params);
 
         LinearGradient lc({{sf::Color::Red, 0}, {sf::Color::Blue, 1}});
         auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
         VertexPainterRandom vr (wlc);
         vr.set_block_size(500);
 
-        auto tuple = compute_vertices(serpinski, map, params);
-        auto box = geometry::bounding_box(std::get<0>(tuple));
+        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map);
+        auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<9; ++i)
         {
-            vr.paint_vertices(std::get<0>(tuple), std::get<1>(tuple), max, box);
+            vr.paint_vertices(vx, vx_iter, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -177,20 +176,20 @@ void opt(int argc, char* argv[])
 
         auto map = drawing::default_interpretation_map;
 
-        drawing::impl::Turtle turtle (params, rec);
+        drawing::impl::Turtle turtle (params);
 
         LinearGradient lc({{sf::Color::Red, 0}, {sf::Color::Blue, 1}});
         auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
         VertexPainterSequential vs (wlc);
         vs.set_factor(2);
 
-        auto tuple = compute_vertices(serpinski, map, params);
-        auto box = geometry::bounding_box(std::get<0>(tuple));
+        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map);
+        auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<9; ++i)
         {
-            vs.paint_vertices(std::get<0>(tuple), std::get<1>(tuple), max, box);
+            vs.paint_vertices(vx, vx_iter, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -206,19 +205,19 @@ void opt(int argc, char* argv[])
 
         auto map = drawing::default_interpretation_map;
 
-        drawing::impl::Turtle turtle (params, rec);
+        drawing::impl::Turtle turtle (params);
 
         LinearGradient lc({{sf::Color::Red, 0}, {sf::Color::Blue, 1}});
         auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
         VertexPainterIteration vi (wlc);
 
-        auto tuple = compute_vertices(serpinski, map, params);
-        auto box = geometry::bounding_box(std::get<0>(tuple));
+        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map);
+        auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<9; ++i)
         {
-            vi.paint_vertices(std::get<0>(tuple), std::get<1>(tuple), max, box);
+            vi.paint_vertices(vx, vx_iter, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -234,7 +233,7 @@ void opt(int argc, char* argv[])
 
         auto map = drawing::default_interpretation_map;
 
-        drawing::impl::Turtle turtle (params, rec);
+        drawing::impl::Turtle turtle (params);
 
         ConstantColor c (sf::Color::Red);
         std::shared_ptr<VertexPainterWrapper> w =
@@ -253,13 +252,13 @@ void opt(int argc, char* argv[])
         auto wc1 = std::make_shared<VertexPainterComposite>();
         wc1->set_child_painters(depth3);
 
-        auto tuple = compute_vertices(serpinski, map, params);
-        auto box = geometry::bounding_box(std::get<0>(tuple));
+        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map);
+        auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<5; ++i)
         {
-            wc1->paint_vertices(std::get<0>(tuple), std::get<1>(tuple), max, box);
+            wc1->paint_vertices(vx, vx_iter, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -275,19 +274,19 @@ void opt(int argc, char* argv[])
 
         auto map = drawing::default_interpretation_map;
 
-        drawing::impl::Turtle turtle (params, rec);
+        drawing::impl::Turtle turtle (params);
 
         LinearGradient lc({{sf::Color::Red, 0}, {sf::Color::Green, 0.5}, {sf::Color::Yellow, 0.75}, {sf::Color::Blue, 1}});
         auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
         VertexPainterSequential vs (wlc);
 
-        auto tuple = compute_vertices(serpinski, map, params);
-        auto box = geometry::bounding_box(std::get<0>(tuple));
+        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map);
+        auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<9; ++i)
         {
-            vs.paint_vertices(std::get<0>(tuple), std::get<1>(tuple), max, box);
+            vs.paint_vertices(vx, vx_iter, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -303,20 +302,20 @@ void opt(int argc, char* argv[])
 
         auto map = drawing::default_interpretation_map;
 
-        drawing::impl::Turtle turtle (params, rec);
+        drawing::impl::Turtle turtle (params);
 
         DiscreteGradient dc({{sf::Color::Red, 0}, {sf::Color::Blue, 500}, {sf::Color::Green, 1000}});
         auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<DiscreteGradient>(dc));
         VertexPainterSequential vs (wlc);
         vs.set_factor(2);
 
-        auto tuple = compute_vertices(serpinski, map, params);
-        auto box = geometry::bounding_box(std::get<0>(tuple));
+        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map);
+        auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<9; ++i)
         {
-            vs.paint_vertices(std::get<0>(tuple), std::get<1>(tuple), max, box);
+            vs.paint_vertices(vx, vx_iter, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -350,8 +349,11 @@ void opt(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    opt(argc, argv);
-    return 0;
+    if (argc > 1)
+    {
+        opt(argc, argv);
+        return 0;
+    }
 
     // Load config file
     bool load_config_failed = false;

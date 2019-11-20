@@ -11,21 +11,21 @@ namespace colors
         : VertexPainter{wrapper}
     {
     }
-    
+
     std::shared_ptr<VertexPainter> VertexPainterIteration::clone() const
     {
         auto color_wrapper = std::make_shared<ColorGeneratorWrapper>(*get_target());
         return std::make_shared<VertexPainterIteration>(color_wrapper);
     }
-    
+
     void VertexPainterIteration::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                                const std::vector<int>& vertices_iteration,
+                                                const std::vector<std::uint8_t>& vertices_iteration,
                                                 int max_iteration,
                                                 sf::FloatRect)
 
     {
         Expects(vertices.size() == vertices_iteration.size());
-        
+
         auto generator = get_target()->unwrap();
         if (!generator)
         {
@@ -58,5 +58,5 @@ namespace colors
     {
         return "VertexPainterIteration";
     }
-   
+
 }

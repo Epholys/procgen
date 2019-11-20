@@ -21,18 +21,18 @@ namespace colors
         VertexPainterSequential(VertexPainterSequential&& other) = delete;
         VertexPainterSequential& operator=(const VertexPainterSequential& other) = delete;
         VertexPainterSequential& operator=(VertexPainterSequential&& other) = delete;
-        
+
         // Getters
         float get_factor() const;
 
         // Setter
         void set_factor(float factor);
-        
+
         // Paint 'vertices' according to the order of the vertices in the
         // 'vertices' vector.
         // 'bounding_box', 'iteration_of_vertices' and 'max_recursion' are not used.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<int>& iteration_of_vertices,
+                                    const std::vector<std::uint8_t>& iteration_of_vertices,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 
@@ -40,7 +40,7 @@ namespace colors
         virtual std::shared_ptr<VertexPainter> clone() const override;
 
         friend class VertexPainterSerializer;
-        virtual std::string type_name() const override;        
+        virtual std::string type_name() const override;
 
     private:
         float factor_ {0};
@@ -66,8 +66,8 @@ namespace colors
                     factor_ = std::clamp(factor_, 0.f, float(math::double_max_limit));
                     controller::LoadMenu::add_loading_error_message("VertexPainterSequential's repetition_factor was negative or too big, so it is clamped.");
                 }
-                                
-                
+
+
                 ColorGeneratorSerializer serializer;
                 ar(cereal::make_nvp("ColorGenerator", serializer));
                 set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));

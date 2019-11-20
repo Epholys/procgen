@@ -6,7 +6,7 @@ namespace drawing
                       double starting_angle,
                       double delta_angle,
                       double step,
-                      int n_iter)
+                      std::uint8_t n_iter)
         : starting_position_ {starting_position}
         , starting_angle_ {starting_angle}
         , delta_angle_ {delta_angle}
@@ -37,7 +37,7 @@ namespace drawing
     {
         return step_;
     }
-    int DrawingParameters::get_n_iter() const
+    std::uint8_t DrawingParameters::get_n_iter() const
     {
         return n_iter_;
     }
@@ -63,7 +63,7 @@ namespace drawing
         step_ = step;
         notify();
     }
-    void DrawingParameters::set_n_iter(int n_iter)
+    void DrawingParameters::set_n_iter(std::uint8_t n_iter)
     {
         std::cout << "set n_iter\n";
         previous_n_iter_ = n_iter_;

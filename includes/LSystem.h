@@ -40,7 +40,7 @@ namespace cereal
 
             if(!namePtr)
                 break;
-            
+
             std::string loaded_key = namePtr;
             std::string value; ar(value);
             char key = ' ';
@@ -58,7 +58,7 @@ namespace cereal
                 void_key = true;
             }
         }
-        
+
         if (key_too_big)
         {
             controller::LoadMenu::add_loading_error_message("One or more LSystem's key was too big, it is now cropped.");
@@ -99,9 +99,9 @@ namespace cereal
 //   - If an axiom is defined at construction, 'production_cache_.at(0)'
 //   contains it at all time. And 'iteration_count_cache_.at(0)' is 0.
 //   - 'iteration_count_cache_' is coherent with
-//  'iteraction_count_predecessors_' 
+//  'iteraction_count_predecessors_'
 //   - 'production_cache_' and 'iteration_count_cache_' are coherent with the
-//  'rules_'. 
+//  'rules_'.
 //   - As a consequence, 'iteration_count_cache_' and 'production_cache_' are
 //   coherent BUT 'iteration_count_cache_' may have less elements than
 //   'production_cache_'. In any case, 'iteration_count_cache_' has always less
@@ -116,7 +116,7 @@ public:
     // contained in a hashmap for quick access during an
     // iteration.
     using production_rules = RuleMap::rule_map;
-        
+
     // Constructors
     LSystem() = default;
     virtual ~LSystem() = default;
@@ -128,9 +128,9 @@ public:
 
     // Getters and setters
     std::string get_axiom() const;
-    const std::unordered_map<int, std::string>& get_production_cache() const;
+    const std::unordered_map<std::uint8_t, std::string>& get_production_cache() const;
     std::string get_iteration_predecessors() const;
-    const std::unordered_map<int, std::pair<std::vector<int>, int>>& get_iteration_cache() const;
+    const std::unordered_map<std::uint8_t, std::pair<std::vector<std::uint8_t>, std::uint8_t>>& get_iteration_cache() const;
 
     // Set the axiom to 'axiom'
     void set_axiom(const std::string& axiom);
@@ -150,24 +150,32 @@ public:
 
     // Replace the rules by 'new_rules'
     void replace_rules(const rule_map& new_rules) override;
-    
+
     // Set the symbols flagging the iteration count 'iteration_predecessors_' to
     // 'predecessors'.
     void set_iteration_predecessors(const std::string& predecessors);
 
-    // Returns from the first part the result of the 'n'-th iteration of the
-    // L-System and cache it as well as the transitional iterations. For the
-    // second part, returns the array indicating the derivation number of rules
-    // having for predecessors any character from 'iteration_predecessors_'. For
-    // the third part, return the maximum number of iteration.
+    // The result of the LSystem 'produce()' computation.
+    struct LSystemProduction
+    {
+        const std::string& production;    // The array of character derived from the axiom and rules.
+        const std::vector<std::uint8_t> iteration; // The array of the iteration number
+        std::uint8_t max_iteration; // The maximum number of iteration
+    };
+    // Returns for 'production' the first part the result of the 'n'-th
+    // iteration of the L-System and cache it as well as the transitional
+    // iterations. For the 'iteration', returns the array indicating the
+    // derivation number of rules having for predecessors any character from
+    // 'iteration_predecessors_'. For the thir'max_iteration', return the
+    // maximum number of iteration.
     //
     // Exceptions:
     //   - Precondition: n positive.
     //   - Ensures coherence of 'production_rules
     //   - Throw in case of allocation problem.
     //   - Throw at '.at()' if code is badly refactored.
-    std::tuple<std::string, std::vector<int>, int> produce(int n);
-       
+    LSystemProduction produce(std::uint8_t n);
+
 private:
 
     // The predecessors indicating than, at their next derivation, the iteration
@@ -180,14 +188,14 @@ private:
     // usage. However, this project emphasizes interactivity so
     // quickly swapping between different iterations of the same
     // L-System.
-    std::unordered_map<int, std::string> production_cache_ = {};
+    std::unordered_map<std::uint8_t, std::string> production_cache_ = {};
     // The cache of all computed iteration values. The second element in the pair
     // is the maximum number of iteration for this iteration.
-    std::unordered_map<int, std::pair<std::vector<int>, int>> iteration_count_cache_ = {};
+    std::unordered_map<std::uint8_t, std::pair<std::vector<std::uint8_t>, std::uint8_t>> iteration_count_cache_ = {};
 
-    
+
     friend class cereal::access;
-    
+
     template <class Archive>
     void save (Archive& ar, const std::uint32_t) const
         {
@@ -195,16 +203,15 @@ private:
                cereal::make_nvp("production_rules", rules_),
                cereal::make_nvp("iteration_predecessors", iteration_predecessors_));
         }
-    
+
     template <class Archive>
     void load (Archive& ar, const std::uint32_t)
         {
             ar(cereal::make_nvp("axiom", production_cache_[0]),
                cereal::make_nvp("production_rules", rules_),
                cereal::make_nvp("iteration_predecessors", iteration_predecessors_));
-            iteration_count_cache_[0] = {std::vector<int>(production_cache_.at(0).size(), 0), 0};
+            iteration_count_cache_[0] = {std::vector<std::uint8_t>(production_cache_.at(0).size(), 0), 0};
         }
 };
 
 #endif
-

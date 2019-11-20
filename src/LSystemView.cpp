@@ -39,8 +39,7 @@ namespace procgui
         , color_id_{unique_colors_.get_color(id_)}
         , name_ {name}
         , is_modified_{false}
-        , vertices_ {}
-        , iteration_of_vertices_ {}
+        , turtle_{*params}
         , max_iteration_ {0}
         , bounding_box_ {}
         , sub_boxes_ {}
@@ -75,8 +74,7 @@ namespace procgui
         , color_id_{unique_colors_.get_color(id_)}
         , name_ {other.name_}
         , is_modified_{other.is_modified_}
-        , vertices_ {other.vertices_}
-        , iteration_of_vertices_ {other.iteration_of_vertices_}
+        , turtle_{other.turtle_}
         , max_iteration_ {other.max_iteration_}
         , bounding_box_ {other.bounding_box_}
         , sub_boxes_ {other.sub_boxes_}
@@ -100,8 +98,7 @@ namespace procgui
         , color_id_{std::move(other.color_id_)}
         , name_ {std::move(other.name_)}
         , is_modified_{other.is_modified_}
-        , vertices_ {std::move(other.vertices_)}
-        , iteration_of_vertices_ {std::move(other.iteration_of_vertices_)}
+        , turtle_{other.turtle_}
         , max_iteration_ {other.max_iteration_}
         , bounding_box_ {std::move(other.bounding_box_)}
         , sub_boxes_ {std::move(other.sub_boxes_)}
@@ -148,8 +145,7 @@ namespace procgui
             color_id_ = unique_colors_.get_color(id_);
             name_ = other.name_;
             is_modified_ = other.is_modified_;
-            vertices_ = other.vertices_;
-            iteration_of_vertices_ = other.iteration_of_vertices_;
+            turtle_ = other.turtle_;
             max_iteration_ = other.max_iteration_;
             bounding_box_ = other.bounding_box_;
             sub_boxes_ = other.sub_boxes_;
@@ -178,8 +174,7 @@ namespace procgui
             color_id_ = other.color_id_;
             name_ = std::move(other.name_);
             is_modified_ = other.is_modified_;
-            vertices_ = std::move(other.vertices_);
-            iteration_of_vertices_ = std::move(other.iteration_of_vertices_);
+            turtle_ = other.turtle_;
             max_iteration_ = other.max_iteration_;
             bounding_box_ = std::move(other.bounding_box_);
             sub_boxes_ = std::move(other.sub_boxes_);
@@ -388,12 +383,11 @@ namespace procgui
         // Invariant respected: cohesion between the vertices and the bounding
         // boxes.
 
-        std::tie(vertices_, iteration_of_vertices_, max_iteration_) =
-            drawing::compute_vertices(*OLSys::get_target()->ref_rule_map(),
-                                      *OMap::get_target()->get_rule_map(),
-                                      *OParams::get_target());
-        bounding_box_ = geometry::bounding_box(vertices_);
-        sub_boxes_ = geometry::sub_boxes(vertices_, MAX_SUB_BOXES);
+        const auto& [str, iterations, max_iteration] = OLSys::get_target()->ref_rule_map()->produce(OParams::get_target()->get_n_iter());
+        max_iteration_ = max_iteration;
+        turtle_.compute_vertices(str, iterations, *OParams::get_target(), *OMap::get_target()->get_rule_map());
+        bounding_box_ = geometry::bounding_box(turtle_.vertices);
+        sub_boxes_ = geometry::sub_boxes(turtle_.vertices, MAX_SUB_BOXES);
         geometry::expand_boxes(sub_boxes_); // Add some margin
 
         paint_vertices();
@@ -402,8 +396,8 @@ namespace procgui
     void LSystemView::paint_vertices()
     {
         // un-transformed vertices and bounding box
-        OPainter::get_target()->get_target()->paint_vertices(vertices_,
-                                                             iteration_of_vertices_,
+        OPainter::get_target()->get_target()->paint_vertices(turtle_.vertices,
+                                                             turtle_.iteration_of_vertices,
                                                              max_iteration_,
                                                              bounding_box_);
         is_modified_ = true;
@@ -419,7 +413,7 @@ namespace procgui
 
         // Draw a placeholder if the LSystem does not have enough vertices or
         // does not have any size.
-        if (vertices_.size() < 2 ||
+        if (turtle_.vertices.size() < 2 ||
             (bounding_box_.width < std::numeric_limits<float>::epsilon() &&
              bounding_box_.height < std::numeric_limits<float>::epsilon()))
         {
@@ -428,7 +422,7 @@ namespace procgui
         }
         else // Draw the vertices.
         {
-            target.draw(vertices_.data(), vertices_.size(), sf::LineStrip, get_transform());
+            target.draw(turtle_.vertices.data(), turtle_.vertices.size(), sf::LineStrip, get_transform());
             OPainter::get_target()->unwrap()->supplementary_drawing(visible_bounding_box);
         }
 
@@ -510,7 +504,7 @@ namespace procgui
     {
         //  If no placeholder is necessary, checks if 'click' is inside one of
         //  the sub-boxes.
-        if (vertices_.size() >= 2 &&
+        if (turtle_.vertices.size() >= 2 &&
             (bounding_box_.width  >= std::numeric_limits<float>::epsilon() ||
              bounding_box_.height >= std::numeric_limits<float>::epsilon()))
         {

@@ -19,18 +19,18 @@ namespace colors
         VertexPainterConstant(VertexPainterConstant&& other) = delete;
         VertexPainterConstant& operator=(const VertexPainterConstant& other) = delete;
         VertexPainterConstant& operator=(VertexPainterConstant&& other) = delete;
-        
+
         // Paint 'vertices' according to a constant real number.
         // 'bounding_box', 'iteration_of_vertices' and 'max_recursion' are not used.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<int>& iteration_of_vertices,
+                                    const std::vector<std::uint8_t>& iteration_of_vertices,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
         // Implements the deep-copy cloning.
         virtual std::shared_ptr<VertexPainter> clone() const override;
 
         friend class VertexPainterSerializer;
-        virtual std::string type_name() const override;        
+        virtual std::string type_name() const override;
 
     private:
         friend class cereal::access;

@@ -17,8 +17,8 @@ namespace drawing
     constexpr int vx_per_goforward = 1;
     constexpr int vx_per_loadposition = 3;
     constexpr int bytes_per_predecessor = sizeof(char);
-    constexpr int bytes_per_vertex = sizeof(sf::Vertex) + sizeof(int); // Vertex + Iteration
-    
+    constexpr int bytes_per_vertex = sizeof(sf::Vertex) + sizeof(std::uint8_t); // Vertex + Iteration
+
     // Struct containing the number of element of a complete system and a overflow flag;
     struct system_size
     {
@@ -37,7 +37,7 @@ namespace drawing
     public:
         using number = unsigned long long;
         static constexpr number MAX = std::numeric_limits<number>::max();
-        
+
         // Default rule-of-five ctors
         Matrix() = default;
         ~Matrix() = default;
@@ -65,9 +65,9 @@ namespace drawing
         static bool add_overflow(number a, number b);
         // Return true if a*b overflows.
         static bool mult_overflow(number a, number b);
-        
+
     private:
-        
+
         // Easiest data structure to implement the Matrix.
         // The innermost vectors<number> represents the rows, the outermost
         // vector<number> is a collection of rows.
@@ -85,7 +85,7 @@ namespace drawing
     // Returns the linear algebra Matrix interpretation of 'lsystem'.
     // In this matrix, a row represents the rule associated with a predecessor,
     // and each value on this row is the number of predecessor in this rule.
-    // 
+    //
     // Precondition:
     //   - 'predecessors' must be sorted. The coherence of the predecessors in
     //   the matrix and with the map_matrix depends on this.
@@ -94,23 +94,23 @@ namespace drawing
     // Returns the linear algebra Matrix interpretation of 'lsystem'.
     // In this matrix, the unique row represents the rule the number of
     // predecessors in the 'lsystem's axiom.
-    // 
+    //
     // Precondition:
     //   - 'predecessors' must be sorted. The coherence of the predecessors in
     //   the matrix and with the map_matrix depends on this.
     Matrix lsys_axiom_matrix (const LSystem& lsystem, const std::string& predecessors);
-    
+
     // Returns the linear algebra Matrix interpretation of 'map'
     // In this matrix, each row represents a predecessor, and its value
     // represent the number of vertices produced.
-    // 
+    //
     // Precondition:
     //   - 'predecessors' must be sorted. The coherence of the predecessors in
     //   the matrix and with the lsys_*_matrices depends on this.
     Matrix map_matrix (const drawing::InterpretationMap& map, const std::string& predecessors);
 
     // Returns the size of the system 'lsystem'-'map' at iteration 'n_iter'.
-    // 
+    //
     // If the resulting LSystem string is not balanced regarding the
     // 'save_position' and 'load_position', the returned size will be higher
     // than the real one. As the use case of the function is to warn for large

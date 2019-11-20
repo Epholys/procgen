@@ -21,7 +21,7 @@ namespace colors
         VertexPainterRadial(VertexPainterRadial&& other) = delete;
         VertexPainterRadial& operator=(const VertexPainterRadial& other) = delete;
         VertexPainterRadial& operator=(VertexPainterRadial&& other) = delete;
-        
+
         // Getters
         sf::Vector2f get_center() const;
         bool get_display_flag() const;
@@ -32,13 +32,13 @@ namespace colors
 
         // Display a circle representing the position of 'circle_'
         virtual void supplementary_drawing(sf::FloatRect bounding_box) const override;
-        
+
         // Paint 'vertices' in a 'center_' centered distance-bases radial
         // fashion with the informations of 'bounding_box' according to the rule
         // with the colors from the ColorGenerator.
         // 'iteration_of_vertices' and 'max_recursion' are not used.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<int>& iteration_of_vertices,
+                                    const std::vector<std::uint8_t>& iteration_of_vertices,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 
@@ -46,13 +46,13 @@ namespace colors
         virtual std::shared_ptr<VertexPainter> clone() const override;
 
         friend class VertexPainterSerializer;
-        virtual std::string type_name() const override;        
-        
+        virtual std::string type_name() const override;
+
     private:
         // [0, 1] center: 0 is the left/up of the bounding_box and 1 the right/down.
         sf::Vector2f center_ {0, 0};
         bool display_helper_ {true};
-        
+
         friend class cereal::access;
         template<class Archive>
         void save(Archive& ar, const std::uint32_t) const
@@ -67,7 +67,7 @@ namespace colors
         template<class Archive>
         void load(Archive& ar, const std::uint32_t)
             {
-                ar(cereal::make_nvp("center", center_));             
+                ar(cereal::make_nvp("center", center_));
 
                 if (center_.x < 0. || center_.x > 1. ||
                     center_.y < 0. || center_.y > 1.)

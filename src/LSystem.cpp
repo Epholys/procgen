@@ -6,7 +6,7 @@ LSystem::LSystem(const std::string& axiom, const production_rules& prod, const s
     : RuleMap<std::string>(prod)
     , iteration_predecessors_ {preds}
     , production_cache_{ {0, axiom} }
-    , iteration_count_cache_ { {0, {std::vector<int>(axiom.size(), 0), 0} } }
+    , iteration_count_cache_ { {0, {std::vector<std::uint8_t>(axiom.size(), 0), 0} } }
     {
     }
 
@@ -23,7 +23,7 @@ std::string LSystem::get_axiom() const
     }
 }
 
-const std::unordered_map<int, std::string>& LSystem::get_production_cache() const
+const std::unordered_map<std::uint8_t, std::string>& LSystem::get_production_cache() const
 {
     return production_cache_;
 }
@@ -34,7 +34,7 @@ std::string LSystem::get_iteration_predecessors() const
 }
 
 
-const std::unordered_map<int, std::pair<std::vector<int>, int>>& LSystem::get_iteration_cache() const
+const std::unordered_map<std::uint8_t, std::pair<std::vector<std::uint8_t>, std::uint8_t>>& LSystem::get_iteration_cache() const
 {
     return iteration_count_cache_;
 }
@@ -42,41 +42,41 @@ const std::unordered_map<int, std::pair<std::vector<int>, int>>& LSystem::get_it
 void LSystem::set_axiom(const std::string& axiom)
 {
     production_cache_ = { {0, axiom} };
-    iteration_count_cache_ = { {0, {std::vector<int>(axiom.size(), 0), 0} } };
+    iteration_count_cache_ = { {0, {std::vector<std::uint8_t>(axiom.size(), 0), 0} } };
     notify();
-} 
+}
 
 void LSystem::add_rule(char predecessor, const RuleMap::successor& successor)
 {
     production_cache_ = { {0, get_axiom()} };
-    iteration_count_cache_ = { {0, {std::vector<int>(get_axiom().size(), 0), 0} } };
-    RuleMap::add_rule(predecessor, successor);    
+    iteration_count_cache_ = { {0, {std::vector<std::uint8_t>(get_axiom().size(), 0), 0} } };
+    RuleMap::add_rule(predecessor, successor);
 }
 
 void LSystem::remove_rule(char predecessor)
 {
     production_cache_ = { {0, get_axiom()} };
-    iteration_count_cache_ = { {0, {std::vector<int>(get_axiom().size(), 0), 0} } };
+    iteration_count_cache_ = { {0, {std::vector<std::uint8_t>(get_axiom().size(), 0), 0} } };
     RuleMap::remove_rule(predecessor);
 }
 
 void LSystem::clear_rules()
 {
     production_cache_ = { {0, get_axiom()} };
-    iteration_count_cache_ = { {0, {{std::vector<int>(get_axiom().size(), 0)}, 0}}};
+    iteration_count_cache_ = { {0, {{std::vector<std::uint8_t>(get_axiom().size(), 0)}, 0}}};
     RuleMap::clear_rules();
 }
 
 void LSystem::replace_rules(const rule_map& new_rules)
 {
     production_cache_ = { {0, get_axiom()} };
-    iteration_count_cache_ = { {0, {{std::vector<int>(get_axiom().size(), 0)}, 0}}};
+    iteration_count_cache_ = { {0, {{std::vector<std::uint8_t>(get_axiom().size(), 0)}, 0}}};
     RuleMap::replace_rules(new_rules);
 }
 
 void LSystem::set_iteration_predecessors(const std::string& predecessors)
 {
-    iteration_count_cache_ = { {0, {std::vector<int>(get_axiom().size(), 0), 0} } };
+    iteration_count_cache_ = { {0, {std::vector<std::uint8_t>(get_axiom().size(), 0), 0} } };
     iteration_predecessors_ = predecessors;
     notify();
 }
@@ -86,7 +86,7 @@ void LSystem::set_iteration_predecessors(const std::string& predecessors)
 //   - If 'production_cache_' is empty so does not contains the axiom, simply
 //   returns an empty string.
 //   - If the axiom is an empty string, early-out.
-std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
+LSystem::LSystemProduction LSystem::produce(std::uint8_t n)
 {
     Expects(n >= 0);
 
@@ -96,7 +96,7 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
         Expects(production_cache_.count(0) == production_cache_.count(0));
         return {"", {}, 0};
     }
-        
+
     if (production_cache_.count(n) > 0 && iteration_count_cache_.count(n) > 0)
     {
         // A solution was already computed.
@@ -119,18 +119,18 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
     // Invariant check: the production cache element count must be equal or
     // greater than the iteration one.
     Expects(highest_production->first >= highest_iteration->first);
-    
+
     // We start iterating from the iteration's highest iteration.
     std::string base_production = production_cache_.at(highest_iteration->first);
     auto [base_iteration, max_iteration] = highest_iteration->second;
-    
-    
+
+
     // We use temporary results: we can't iterate "in place".
     std::string tmp_production;
-    std::vector<int> tmp_iteration;    
+    std::vector<std::uint8_t> tmp_iteration;
 
-    int n_iter = n - highest_iteration->first;
-    for (int i=0; i<n_iter; ++i) {
+    std::uint8_t n_iter = n - highest_iteration->first;
+    for (std::uint8_t i=0; i<n_iter; ++i) {
         tmp_production.clear();
         tmp_iteration.clear();
 
@@ -166,7 +166,7 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
             {
                 // Add only one element.
                 successor_count = 1;
-                    
+
                 if (!only_iteration)
                 {
                     // The symbol is a terminal: replace it by itself.
@@ -197,7 +197,7 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
 
         base_iteration = tmp_iteration;
         iteration_count_cache_[highest_iteration->first + i + 1] =
-                                 {tmp_iteration, new_iteration ? max_iteration+1 : max_iteration};
+            {tmp_iteration, new_iteration ? max_iteration+1 : max_iteration};
         max_iteration = iteration_count_cache_.at(highest_iteration->first + i + 1).second;
     }
 
@@ -207,7 +207,7 @@ std::tuple<std::string, std::vector<int>, int> LSystem::produce(int n)
     // 'drawing::compute_vertices()' function.
 
     Ensures(production_cache_.size() >= iteration_count_cache_.size());
-    
-    return {production_cache_.at(n), iteration_count_cache_.at(n).first, iteration_count_cache_.at(n).second};
-}
 
+    LSystemProduction production {production_cache_.at(n), iteration_count_cache_.at(n).first, iteration_count_cache_.at(n).second};
+    return production;
+}

@@ -37,7 +37,7 @@ namespace colors
         // Clone method to do a deep copy of the 'this' object with the correct
         // child wrapped in this polymorphic pointer.
         virtual std::shared_ptr<VertexPainter> clone() const = 0;
-        
+
         // Getters/Setters
         std::shared_ptr<ColorGeneratorWrapper> get_generator_wrapper() const;
         void set_generator_wrapper(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper);
@@ -47,12 +47,12 @@ namespace colors
         // 'bounding_box' is the only necessary information for now, but all
         // other parameters of 'paint_vertices()' could be used in the future.
         virtual void supplementary_drawing(sf::FloatRect bounding_box) const;
-        
+
         // Paint 'vertices' with the informations of 'bounding_box' and
         // 'iteration_of_vertices' according to a rule with the colors from
         // 'ColorGeneratorWrapper::ColorGenerator'.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<int>& iteration_of_vertices,
+                                    const std::vector<std::uint8_t>& iteration_of_vertices,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) = 0;
 

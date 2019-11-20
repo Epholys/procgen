@@ -17,7 +17,7 @@ namespace colors
         , random_generator_(random_seed_)
     {
     }
-    
+
     std::shared_ptr<VertexPainter> VertexPainterRandom::clone() const
     {
         auto clone = std::make_shared<VertexPainterRandom>();
@@ -34,13 +34,13 @@ namespace colors
         random_generator_.seed(random_seed_);
         notify();
     }
-    
+
     int VertexPainterRandom::get_block_size() const
     {
         return block_size_;
     }
-        
-    
+
+
     void VertexPainterRandom::set_block_size(int block_size)
     {
         Expects(block_size > 0);
@@ -48,9 +48,9 @@ namespace colors
         notify();
     }
 
-    
+
     void VertexPainterRandom::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                             const std::vector<int>&,
+                                             const std::vector<std::uint8_t>&,
                                              int,
                                              sf::FloatRect)
 
@@ -61,7 +61,7 @@ namespace colors
             return;
         }
 
-        random_generator_.seed(random_seed_); 
+        random_generator_.seed(random_seed_);
 
         int block_index = 0;
         float rand = 0;
@@ -72,7 +72,7 @@ namespace colors
                 rand = math::random_real(random_generator_, 0, 1);
             }
             // We call 'get()' each time because we must interact nicely with
-            // 'VertexPainterComposite'. 
+            // 'VertexPainterComposite'.
             sf::Color color = generator->get(rand);
             if (v.color != sf::Color::Transparent)
             {
@@ -87,4 +87,3 @@ namespace colors
         return "VertexPainterRandom";
     }
 }
-

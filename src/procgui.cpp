@@ -244,14 +244,22 @@ namespace procgui
         // Arbitrary value to avoid resource depletion happening with higher
         // number of iterations (several GiB of memory usage and huge CPU
         // load).
-        const int n_iter_max = 10;
-        int n_iter = parameters.get_n_iter();
+        constexpr int n_iter_max = 10;
+        constexpr int absolute_max = 255; // uint8_t max.
+        const int current_n_iter = parameters.get_n_iter();
+        int n_iter = current_n_iter;
         if(ImGui::SliderInt("Iterations", &n_iter, 0, n_iter_max))
         {
-            if (n_iter >= 0)
+            if (n_iter < 0)
             {
-                parameters.set_n_iter(n_iter);
+                n_iter = current_n_iter;
             }
+            else if (n_iter > absolute_max)
+            {
+                n_iter = absolute_max;
+            }
+            parameters.set_n_iter(n_iter);
+
         }
         ImGui::SameLine(); ext::ImGui::ShowHelpMarker("CTRL+click and click to directly input values. Higher values will use all of your memory and CPU");
 

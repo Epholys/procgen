@@ -30,7 +30,7 @@ namespace drawing
                           double starting_angle,
                           double delta_angle,
                           double step,
-                          int n_iter);
+                          std::uint8_t n_iter);
         DrawingParameters(const DrawingParameters& params) = default;
         DrawingParameters(DrawingParameters&& params) = default;
         DrawingParameters& operator=(const DrawingParameters& params) = default;
@@ -41,16 +41,16 @@ namespace drawing
         double get_starting_angle() const;
         double get_delta_angle() const;
         double get_step() const;
-        int get_n_iter() const;
+        std::uint8_t get_n_iter() const;
 
         // Setters
         // The starting position is only used when rendering the LSystem, so it
         // does not 'notify()' to avoid re-calculating for nothing.
-        void set_starting_position(const ext::sf::Vector2d starting_position); 
+        void set_starting_position(const ext::sf::Vector2d starting_position);
         void set_starting_angle(double starting_angle);
         void set_delta_angle(double delta_angle);
         void set_step(double step);
-        void set_n_iter(int n_iter);
+        void set_n_iter(std::uint8_t n_iter);
 
         // Revert to previous 'n_iter'.
         // Useful when cancelling computatoin of too big LSys.
@@ -58,7 +58,7 @@ namespace drawing
 
         // Validate modification of 'n_iter'.
         void validate();
-        
+
     private:
         // The starting position and angle of the Turtle.
         ext::sf::Vector2d starting_position_ { 0, 0 };
@@ -71,20 +71,20 @@ namespace drawing
 
         // When 'move_forward' order is executed, the Turtle will move
         // forward 'step' pixels (at default zoom level). Initialized
-        // at an arbitrary value. 
+        // at an arbitrary value.
         double step_ { 20 };
 
         // The number of iterations done by the L-system.
-        int n_iter_ { 0 };
+        std::uint8_t n_iter_ { 0 };
 
         // The previous number of iterations.
         // Used in 'revert()' and 'validate()'.
         int previous_n_iter_ { -1 };
-        
+
     private:
         // Serialization
         friend class cereal::access;
-        
+
         template <class Archive>
         void save (Archive& ar, const std::uint32_t) const
             {
@@ -92,7 +92,7 @@ namespace drawing
                    cereal::make_nvp("delta_angle", math::rad_to_degree(delta_angle_)),
                    cereal::make_nvp("n_iter", n_iter_));
             }
-        
+
         template <class Archive>
         void load (Archive& ar, const std::uint32_t)
             {

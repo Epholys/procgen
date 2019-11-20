@@ -22,7 +22,7 @@ namespace colors
         clone->set_target(std::make_shared<ColorGeneratorWrapper>(*get_target()));
         return clone;
     }
-    
+
     float VertexPainterSequential::get_factor() const
     {
         return factor_;
@@ -35,7 +35,7 @@ namespace colors
     }
 
     void VertexPainterSequential::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                                 const std::vector<int>&,
+                                                 const std::vector<std::uint8_t>&,
                                                  int,
                                                  sf::FloatRect)
 
@@ -64,4 +64,3 @@ namespace colors
         return "VertexPainterSequential";
     }
 }
-

@@ -20,7 +20,7 @@ namespace colors
         , display_helper_{true}
     {
     }
-    
+
     std::shared_ptr<VertexPainter> VertexPainterRadial::clone() const
     {
         auto clone = std::make_shared<VertexPainterRadial>();
@@ -28,7 +28,7 @@ namespace colors
         clone->set_target(std::make_shared<ColorGeneratorWrapper>(*get_target()));
         return clone;
     }
-    
+
     sf::Vector2f VertexPainterRadial::get_center() const
     {
         return center_;
@@ -47,10 +47,10 @@ namespace colors
     {
         display_helper_ = flag;
     }
-    
+
 
     void VertexPainterRadial::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                             const std::vector<int>&, 
+                                             const std::vector<std::uint8_t>&,
                                              int,
                                              sf::FloatRect bounding_box)
     {
@@ -112,12 +112,12 @@ namespace colors
         {
             return;
         }
-        
+
         constexpr float ratio = 1/16.f;
         float half_indicator_size = bounding_box.width < bounding_box.height ? ratio*bounding_box.width/2. : ratio*bounding_box.height/2.;
         sf::Vector2f center = {bounding_box.left+bounding_box.width*center_.x, bounding_box.top+bounding_box.height*(1-center_.y)};
         sf::Color indicator_color = colors::bw_contrast_color(sfml_window::background_color);
-        
+
         auto draw_circle = [](sf::Vector2f center, float radius, int n_point)
             {
                 std::vector<sf::Vertex> circle;
@@ -131,19 +131,18 @@ namespace colors
                 circle.push_back(circle.front());
                 return circle;
             };
-                
+
         std::vector<sf::Vertex> circle = draw_circle(center, half_indicator_size, 10);
         for (sf::Vertex& v : circle)
         {
             v.color = indicator_color;
         }
-            
+
         procgui::SupplementaryRendering::add_draw_call({circle, sf::LineStrip});
     }
-    
+
     std::string VertexPainterRadial::type_name() const
     {
         return "VertexPainterRadial";
     }
 }
-
