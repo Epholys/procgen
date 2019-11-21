@@ -295,12 +295,12 @@ namespace procgui
     void LSystemView::size_safeguard()
     {
         // // TO TEST
-        // auto max_size = std::max(max_mem_size_, config::sys_max_size);
-
-        // drawing::system_size size = compute_max_size(*OLSys::get_target()->get_rule_map(),
-        //                                              *OMap::get_target()->get_rule_map(),
-        //                                              OParams::get_target()->get_n_iter());
-        // approximate_mem_size_ = drawing::memory_size(size);
+        drawing::system_size size = compute_max_size(*OLSys::get_target()->get_rule_map(),
+                                                     *OMap::get_target()->get_rule_map(),
+                                                      OParams::get_target()->get_n_iter());
+        system_size_ = size;
+        //auto approximate_mem_size_ = drawing::memory_size(size);
+        //auto max_size = std::max(max_mem_size_, config::sys_max_size);
 
         // if (approximate_mem_size_ > max_size)
         // {
@@ -323,8 +323,9 @@ namespace procgui
               [this]()
               {
                   constexpr drawing::Matrix::number megabyte = 1024 * 1024;
+                  const auto approximate_mem_size = drawing::memory_size(system_size_);
                   ImGui::TextColored(ImVec4(1.f, 0.5f, 0.f, 1.f), "WARNING\n");
-                  if (approximate_mem_size_ == drawing::Matrix::MAX)
+                  if (approximate_mem_size == drawing::Matrix::MAX)
                   {
                       ImGui::Text("You are trying to compute a big L-System of a size bigger than 16 exabytes");
                       ImGui::Text("(bigger than the data stored by Google in 2013).");
@@ -333,7 +334,7 @@ namespace procgui
                   }
                   else
                   {
-                      ImGui::Text("You are trying to compute a big L-System of size %llu MB, do you want to continue?", approximate_mem_size_/megabyte);
+                      ImGui::Text("You are trying to compute a big L-System of size %llu MB, do you want to continue?", approximate_mem_size/megabyte);
                       ImGui::Text("For big L-System, the application may take a long time to compute it.");
                       ImGui::Text("For bigger L-System, the application or your");
                   }
@@ -362,7 +363,7 @@ namespace procgui
                   OLSys::get_target()->validate();
                   OMap::get_target()->validate();
 
-                  max_mem_size_ = approximate_mem_size_;
+                  max_mem_size_ = drawing::memory_size(system_size_);
 
                   compute_vertices();
               },
@@ -383,7 +384,7 @@ namespace procgui
         // Invariant respected: cohesion between the vertices and the bounding
         // boxes.
 
-        const auto& [str, iterations, max_iteration] = OLSys::get_target()->ref_rule_map()->produce(OParams::get_target()->get_n_iter());
+        const auto& [str, iterations, max_iteration] = OLSys::get_target()->ref_rule_map()->produce(OParams::get_target()->get_n_iter(), system_size_.lsystem_size);
         max_iteration_ = max_iteration;
         turtle_.compute_vertices(str, iterations, *OParams::get_target(), *OMap::get_target()->get_rule_map());
         bounding_box_ = geometry::bounding_box(turtle_.vertices);

@@ -86,7 +86,7 @@ void LSystem::set_iteration_predecessors(const std::string& predecessors)
 //   - If 'production_cache_' is empty so does not contains the axiom, simply
 //   returns an empty string.
 //   - If the axiom is an empty string, early-out.
-LSystem::LSystemProduction LSystem::produce(std::uint8_t n)
+LSystem::LSystemProduction LSystem::produce(std::uint8_t n, unsigned long long size)
 {
     Expects(n >= 0);
 
@@ -120,19 +120,17 @@ LSystem::LSystemProduction LSystem::produce(std::uint8_t n)
     // greater than the iteration one.
     Expects(highest_production->first >= highest_iteration->first);
 
-    // We start iterating from the iteration's highest iteration.
-    std::string base_production = production_cache_.at(highest_iteration->first);
-    auto [base_iteration, max_iteration] = highest_iteration->second;
-
-
-    // We use temporary results: we can't iterate "in place".
-    std::string tmp_production;
-    std::vector<std::uint8_t> tmp_iteration;
-
+    int max_iteration = highest_iteration->second.second;
     std::uint8_t n_iter = n - highest_iteration->first;
     for (std::uint8_t i=0; i<n_iter; ++i) {
-        tmp_production.clear();
-        tmp_iteration.clear();
+        // We start iterating from the iteration's highest iteration.
+        const std::string& base_production = production_cache_.at(highest_iteration->first + i);
+        const auto& [base_iteration, _] = iteration_count_cache_.at(highest_iteration->first + i);
+        // We use temporary results: we can't iterate "in place".
+        std::string tmp_production;
+        std::vector<std::uint8_t> tmp_iteration;
+        tmp_production.reserve(size);
+        tmp_iteration.reserve(size);
 
         // If 'true', computes only the iteration vector and not the resulting
         // production string.
@@ -187,17 +185,17 @@ LSystem::LSystemProduction LSystem::produce(std::uint8_t n)
 
         if(only_iteration)
         {
-            base_production = production_cache_.at(highest_iteration->first + i + 1);
+            // base_production = production_cache_.at(highest_iteration->first + i + 1);
         }
         else
         {
-            base_production = tmp_production;
-            production_cache_.emplace(highest_iteration->first + i + 1, tmp_production);
+            // base_production = tmp_production;
+            production_cache_.emplace(highest_iteration->first + i + 1, std::move(tmp_production));
         }
 
-        base_iteration = tmp_iteration;
+        // base_iteration = tmp_iteration;
         iteration_count_cache_[highest_iteration->first + i + 1] =
-            {tmp_iteration, new_iteration ? max_iteration+1 : max_iteration};
+            {std::move(tmp_iteration), new_iteration ? max_iteration+1 : max_iteration};
         max_iteration = iteration_count_cache_.at(highest_iteration->first + i + 1).second;
     }
 

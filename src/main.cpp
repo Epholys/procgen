@@ -33,7 +33,8 @@ void opt(int argc, char* argv[])
 
         for (int i = 0; i < 5; ++i) {
             serpinski.add_rule('F', {serpinski.get_rule('F').second+"F"});
-            serpinski.produce(10);
+            auto size = drawing::compute_max_size(serpinski, drawing::default_interpretation_map, 10);
+            serpinski.produce(10, size.lsystem_size);
             std::cout << serpinski.get_production_cache().at(10).size() << std::endl;
         }
     }
@@ -47,7 +48,8 @@ void opt(int argc, char* argv[])
         auto map = drawing::default_interpretation_map;
         drawing::impl::Turtle turtle (params);
 
-        const auto& [str, rec, _] = serpinski.produce(10);
+        auto size = drawing::compute_max_size(serpinski, drawing::default_interpretation_map, 10);
+        const auto& [str, rec, _] = serpinski.produce(10, size.lsystem_size);
         for (int i=0; i<5; ++i)
         {
             turtle.compute_vertices(str, rec, params, map);
@@ -59,7 +61,8 @@ void opt(int argc, char* argv[])
         std::cout << "TESTING VERTEXPAINTER CONSTANT\n";
 
         LSystem serpinski = LSystem({"F", { { 'F', "G[-F-GFFFF" }, { 'G', "F]]+G+F" }}, "G" });
-        const auto& [str, rec, max] = serpinski.produce(10);
+        auto size = drawing::compute_max_size(serpinski, drawing::default_interpretation_map, 10);
+        const auto& [str, rec, max] = serpinski.produce(10, size.lsystem_size);
 
         DrawingParameters params;
         auto map = drawing::default_interpretation_map;
@@ -83,7 +86,8 @@ void opt(int argc, char* argv[])
     {
         std::cout << "TESTING VERTEXPAINTER LINEAR\n";
         LSystem serpinski = LSystem({"F", { { 'F', "G[-F-GFFFF" }, { 'G', "F]]+G+F" }}, "G" });
-        const auto& [str, rec, max] = serpinski.produce(10);
+        auto size = drawing::compute_max_size(serpinski, drawing::default_interpretation_map, 10);
+        const auto& [str, rec, max] = serpinski.produce(10, size.lsystem_size);
 
         DrawingParameters params;
         params.set_n_iter(10);
@@ -111,7 +115,8 @@ void opt(int argc, char* argv[])
         std::cout << "TESTING VERTEXPAINTER RADIAL\n";
 
         LSystem serpinski = LSystem({"F", { { 'F', "G[-F-GFFFF" }, { 'G', "F]]+G+F" }}, "G" });
-        const auto& [str, rec, max] = serpinski.produce(10);
+        auto size = drawing::compute_max_size(serpinski, drawing::default_interpretation_map, 10);
+        const auto& [str, rec, max] = serpinski.produce(10, size.lsystem_size);
 
         DrawingParameters params;
         params.set_n_iter(10);
@@ -140,7 +145,8 @@ void opt(int argc, char* argv[])
         std::cout << "TESTING VERTEXPAINTER RANDOM\n";
 
         LSystem serpinski = LSystem({"F", { { 'F', "G[-F-GFFFF" }, { 'G', "F]]+G+F" }}, "G" });
-        const auto& [str, rec, max] = serpinski.produce(10);
+        auto size = drawing::compute_max_size(serpinski, drawing::default_interpretation_map, 10);
+        const auto& [str, rec, max] = serpinski.produce(10, size.lsystem_size);
 
         DrawingParameters params;
         params.set_n_iter(10);
@@ -169,7 +175,8 @@ void opt(int argc, char* argv[])
         std::cout << "TESTING VERTEXPAINTER SEQUENTIAL\n";
 
         LSystem serpinski = LSystem({"F", { { 'F', "G[-F-GFFFF" }, { 'G', "F]]+G+F" }}, "G" });
-        const auto& [str, rec, max] = serpinski.produce(10);
+        auto size = drawing::compute_max_size(serpinski, drawing::default_interpretation_map, 10);
+        const auto& [str, rec, max] = serpinski.produce(10, size.lsystem_size);
 
         DrawingParameters params;
         params.set_n_iter(10);
@@ -198,7 +205,8 @@ void opt(int argc, char* argv[])
         std::cout << "TESTING VERTEXPAINTER ITERATION\n";
 
         LSystem serpinski = LSystem({"F", { { 'F', "G[-F-GFFFF" }, { 'G', "F]]+G+F" }}, "G" });
-        const auto& [str, rec, max] = serpinski.produce(10);
+        auto size = drawing::compute_max_size(serpinski, drawing::default_interpretation_map, 10);
+        const auto& [str, rec, max] = serpinski.produce(10, size.lsystem_size);
 
         DrawingParameters params;
         params.set_n_iter(10);
@@ -226,7 +234,8 @@ void opt(int argc, char* argv[])
         std::cout << "TESTING VERTEXPAINTER COMPOSITE\n";
 
         LSystem serpinski = LSystem({"F", { { 'F', "G[-F-GFFFF" }, { 'G', "F]]+G+F" }}, "G" });
-        const auto& [str, rec, max] = serpinski.produce(10);
+        auto size = drawing::compute_max_size(serpinski, drawing::default_interpretation_map, 10);
+        const auto& [str, rec, max] = serpinski.produce(10, size.lsystem_size);
 
         DrawingParameters params;
         params.set_n_iter(10);
@@ -267,7 +276,8 @@ void opt(int argc, char* argv[])
         std::cout << "TESTING COLORGENERATOR LINEAR\n";
 
         LSystem serpinski = LSystem({"F", { { 'F', "G[-F-GFFFF" }, { 'G', "F]]+G+F" }}, "G" });
-        const auto& [str, rec, max] = serpinski.produce(10);
+        auto size = drawing::compute_max_size(serpinski, drawing::default_interpretation_map, 10);
+        const auto& [str, rec, max] = serpinski.produce(10, size.lsystem_size);
 
         DrawingParameters params;
         params.set_n_iter(10);
@@ -295,7 +305,8 @@ void opt(int argc, char* argv[])
         std::cout << "TESTING COLORGENERATOR DISCRETE\n";
 
         LSystem serpinski = LSystem({"F", { { 'F', "G[-F-GFFFF" }, { 'G', "F]]+G+F" }}, "G" });
-        const auto& [str, rec, max] = serpinski.produce(10);
+        auto size = drawing::compute_max_size(serpinski, drawing::default_interpretation_map, 10);
+        const auto& [str, rec, max] = serpinski.produce(10, size.lsystem_size);
 
         DrawingParameters params;
         params.set_n_iter(10);

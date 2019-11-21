@@ -174,7 +174,7 @@ public:
     //   - Ensures coherence of 'production_rules
     //   - Throw in case of allocation problem.
     //   - Throw at '.at()' if code is badly refactored.
-    LSystemProduction produce(std::uint8_t n);
+    LSystemProduction produce(std::uint8_t n, unsigned long long size=0);
 
 private:
 
