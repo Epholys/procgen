@@ -47,7 +47,7 @@ namespace colors
 
             // Dummy color (BUT NOT TRANSPARENT (Transparent is a special value
             // for save/load position))
-            return sf::Color(0,0,0,1);
+            return sf::Color(255,255,255,255);
         }
 
         void ColorGeneratorComposite::reset_index()
@@ -191,19 +191,22 @@ namespace colors
                                                 sf::FloatRect bounding_box)
 
     {
-        auto vertices_copy = vertices;
-        auto iteration_of_vertices_copy = iteration_of_vertices;
+//        auto vertices_copy = vertices;
+//        auto iteration_of_vertices_copy = iteration_of_vertices;
 
         // Prepare the variable for ColorGeneratorComposite
+        const auto n_vertices = vertices.size();
+        const auto n_child = child_painters_observers_.size();
         color_distributor_->reset_index();
         vertex_indices_pools_.clear();
-        for(auto i=0u; i<child_painters_observers_.size(); ++i)
+        for(auto i=0u; i<n_child; ++i)
         {
             vertex_indices_pools_.push_back({});
+            vertex_indices_pools_.back().reserve(n_vertices); // overkill ?
         }
 
         // Fill the pools by making paint the main painter through 'color_distributor_'.
-        main_painter_observer_.get_painter_wrapper()->unwrap()->paint_vertices(vertices_copy,
+        main_painter_observer_.get_painter_wrapper()->unwrap()->paint_vertices(vertices,
                                                                                iteration_of_vertices,
                                                                                max_recursion,
                                                                                bounding_box);
@@ -213,20 +216,23 @@ namespace colors
         std::vector<std::vector<sf::Vertex>> vertices_pools;
         std::vector<std::vector<std::uint8_t>> iteration_of_vertices_pools;
 
+        // TODO use indices to avoid reserve everywhere
         for(const auto& v : vertex_indices_pools_)
         {
             // For each indices pools...
             std::vector<sf::Vertex> vertices_part;
             std::vector<std::uint8_t> iteration_of_vertices_part;
+            vertices_part.reserve(n_vertices);
+            iteration_of_vertices_part.reserve(n_vertices);
             for(auto idx : v)
             {
                 // ... get each index and get from the '*_copy' the vertex and
                 // its iteration.
-                vertices_part.push_back(vertices_copy.at(idx));
-                iteration_of_vertices_part.push_back(iteration_of_vertices_copy.at(idx));
+                vertices_part.push_back(vertices.at(idx));
+                iteration_of_vertices_part.push_back(iteration_of_vertices.at(idx));
             }
-            vertices_pools.push_back(vertices_part);
-            iteration_of_vertices_pools.push_back(iteration_of_vertices_part);
+            vertices_pools.emplace_back(vertices_part);
+            iteration_of_vertices_pools.emplace_back(iteration_of_vertices_part);
         }
 
         auto idx = 0u;
@@ -240,33 +246,41 @@ namespace colors
             ++idx;
         }
 
-        // Flatten 'vertices_pools' into a single vertex std::vector.
-        std::vector<sf::Vertex> flattened_pool;
-        std::size_t total_size = 0;
-        for (const auto& sub : vertices_pools)
-        {
-            total_size += sub.size();
-        }
-        flattened_pool.reserve(total_size);
-        for (const auto& sub : vertices_pools)
-        {
-            flattened_pool.insert(flattened_pool.end(), sub.begin(), sub.end());
-        }
+        // // Flatten 'vertices_pools' into a single vertex std::vector.
+        // std::vector<sf::Vertex> flattened_pool;
+        // std::size_t total_size = 0;
+        // for (const auto& sub : vertices_pools)
+        // {
+        //     total_size += sub.size();
+        // }
+        // flattened_pool.reserve(total_size);
+        // for (const auto& sub : vertices_pools)
+        // {
+        //     flattened_pool.insert(flattened_pool.end(), sub.begin(), sub.end());
+        // }
 
         // By construction, the n-th vertex in 'flatten_pool' correspond to the
         // n-th index in the flattened 'vertex_indices_pools_'. This index is
         // the position in the global 'vertices' vector. So, this code put in
         // order the painted vertices in 'vertices'.
         auto i = 0u;
+        auto j = 0u;
         for (const auto& v : vertex_indices_pools_)
         {
             for (auto idx : v)
             {
-                vertices_copy.at(idx) = flattened_pool.at(i++);
+                // vertices.at(idx) = flattened_pool.at(i++);
+                //vertices.at(idx) = vertices_pools.at(i).at(j++);
+                vertices.at(idx) = vertices_pools[i][j++];
+            }
+            if (j == vertices_pools[i].size())
+            {
+                ++i;
+                j = 0;
             }
         }
 
-        vertices = vertices_copy;
+//        vertices = vertices_copy;
     }
 
     void VertexPainterComposite::supplementary_drawing(sf::FloatRect bounding_box) const
