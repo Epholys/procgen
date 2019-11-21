@@ -22,13 +22,17 @@ namespace drawing
     Turtle::TurtleProduction Turtle::compute_vertices(const std::string& lsystem_production,
                                                       const std::vector<std::uint8_t>& iterations,
                                                       const DrawingParameters& parameters,
-                                                      const InterpretationMap& interpretation)
+                                                      const InterpretationMap& interpretation,
+                                                      unsigned long long size)
     {
         init_from_parameters(parameters);
         vertices.clear();
         iteration_of_vertices.clear();
         iteration_index = 0;
         iteration = 1;
+
+        vertices.reserve(size);
+        iteration_of_vertices.reserve(size);
 
         if (!iterations.empty())
         {

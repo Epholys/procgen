@@ -88,7 +88,8 @@ namespace drawing
             TurtleProduction compute_vertices(const std::string& lsystem_production,
                                               const std::vector<std::uint8_t>& iterations,
                                               const DrawingParameters& parameters,
-                                              const InterpretationMap& interpretation);
+                                              const InterpretationMap& interpretation,
+                                              unsigned long long size = 0);
 
         private:
             std::size_t iteration_index {0};

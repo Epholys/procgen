@@ -386,7 +386,11 @@ namespace procgui
 
         const auto& [str, iterations, max_iteration] = OLSys::get_target()->ref_rule_map()->produce(OParams::get_target()->get_n_iter(), system_size_.lsystem_size);
         max_iteration_ = max_iteration;
-        turtle_.compute_vertices(str, iterations, *OParams::get_target(), *OMap::get_target()->get_rule_map());
+        turtle_.compute_vertices(str,
+                                 iterations,
+                                 *OParams::get_target(),
+                                 *OMap::get_target()->get_rule_map(),
+                                 system_size_.vertices_size);
         bounding_box_ = geometry::bounding_box(turtle_.vertices);
         sub_boxes_ = geometry::sub_boxes(turtle_.vertices, MAX_SUB_BOXES);
         geometry::expand_boxes(sub_boxes_); // Add some margin
