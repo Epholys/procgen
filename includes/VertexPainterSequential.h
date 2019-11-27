@@ -33,6 +33,7 @@ namespace colors
         // 'bounding_box', 'iteration_of_vertices' and 'max_recursion' are not used.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<std::uint8_t>& iteration_of_vertices,
+                                    const std::vector<bool>& transparent,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 

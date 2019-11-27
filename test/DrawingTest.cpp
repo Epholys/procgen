@@ -126,7 +126,7 @@ TEST_F(DrawingTest, compute_paths)
 
     parameters.set_n_iter(1);
     auto [str, iter, _] = lsys.produce(1);
-    auto [vx, vx_iter] = turtle.compute_vertices(str, iter, parameters, interpretation);
+    auto [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, iter, parameters, interpretation);
 
     ASSERT_EQ(vx, norm);
 

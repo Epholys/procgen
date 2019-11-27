@@ -92,9 +92,9 @@ namespace colors
             VertexPainterWrapperObserver() = delete;
             VertexPainterWrapperObserver(std::shared_ptr<VertexPainterWrapper> painter_wrapper,
                                          VertexPainterComposite* painter_composite);
-            VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other);
+            VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other) = delete;
             VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other);
-            VertexPainterWrapperObserver& operator=(const VertexPainterWrapperObserver& other);
+            VertexPainterWrapperObserver& operator=(const VertexPainterWrapperObserver& other) = delete;
             VertexPainterWrapperObserver& operator=(VertexPainterWrapperObserver&& other);
 
             std::shared_ptr<VertexPainterWrapper> get_painter_wrapper() const;
@@ -139,6 +139,7 @@ namespace colors
 
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<std::uint8_t>& iteration_of_vertices,
+                                    const std::vector<bool>& transparent,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 

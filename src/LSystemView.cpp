@@ -403,6 +403,7 @@ namespace procgui
         // un-transformed vertices and bounding box
         OPainter::get_target()->get_target()->paint_vertices(turtle_.vertices,
                                                              turtle_.iteration_of_vertices,
+                                                             turtle_.transparent,
                                                              max_iteration_,
                                                              bounding_box_);
         is_modified_ = true;

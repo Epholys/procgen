@@ -36,12 +36,23 @@ std::vector<std::uint8_t> generate_iterations (int size)
     return iterations;
 }
 
+std::vector<bool> generate_transparency (int size)
+{
+    std::vector<bool> transparent;
+    for(int i=0; i<size*size; ++i)
+    {
+        transparent.push_back(false);
+    }
+    return transparent;
+}
+
 
 struct default_vertices
 {
     static constexpr int grid_size = 4;
     std::vector<sf::Vertex> grid = generate_grid(grid_size);
     std::vector<std::uint8_t> iterations = generate_iterations(grid_size);
+    std::vector<bool> transparent = generate_transparency(grid_size);
     int max_iter = grid_size-1;
     sf::FloatRect bounding_box {0, 0, grid_size-1, grid_size-1};
 } vertices;
@@ -53,7 +64,11 @@ TEST(VertexPainter, Constant)
             std::make_shared<ConstantColor>(sf::Color::Red));
     VertexPainterConstant painter (colors);
     std::vector<sf::Vertex> grid = vertices.grid;
-    painter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    painter.paint_vertices(grid,
+                           vertices.iterations,
+                           vertices.transparent,
+                           vertices.max_iter,
+                           vertices.bounding_box);
 
     for (auto v : grid)
     {
@@ -79,7 +94,12 @@ TEST(VertexPainter, ConstantSerialization)
     }
 
     std::vector<sf::Vertex> grid = vertices.grid;
-    ipainter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    ipainter.paint_vertices(grid,
+                            vertices.iterations,
+                            vertices.transparent,
+                            vertices.max_iter,
+                            vertices.bounding_box);
+
     for (auto v : grid)
     {
         ASSERT_EQ(sf::Color::Red, v.color);
@@ -96,7 +116,11 @@ TEST(VertexPainter, Sequential)
     VertexPainterSequential painter (colors_gen);
     painter.set_factor(2);
     std::vector<sf::Vertex> grid = vertices.grid;
-    painter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    painter.paint_vertices(grid,
+                           vertices.iterations,
+                           vertices.transparent,
+                           vertices.max_iter,
+                           vertices.bounding_box);
 
     int size = vertices.grid_size;
     int size_2 = size * size;
@@ -128,7 +152,12 @@ TEST(VertexPainter, SequentialSerialization)
     }
 
     std::vector<sf::Vertex> grid = vertices.grid;
-    ipainter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    ipainter.paint_vertices(grid,
+                            vertices.iterations,
+                            vertices.transparent,
+                            vertices.max_iter,
+                            vertices.bounding_box);
+
     int size = vertices.grid_size;
     int size_2 = size * size;
     for (int i=0; i<size_2; ++i)
@@ -147,7 +176,11 @@ TEST(VertexPainter, Iteration)
                 DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2},{colors[3], 3}})));
     VertexPainterIteration painter (colors_gen);
     std::vector<sf::Vertex> grid = vertices.grid;
-    painter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    painter.paint_vertices(grid,
+                           vertices.iterations,
+                           vertices.transparent,
+                           vertices.max_iter,
+                           vertices.bounding_box);
 
     int size = vertices.grid_size;
     int size_2 = size * size;
@@ -177,7 +210,12 @@ TEST(VertexPainter, IterationSerialization)
     }
 
     std::vector<sf::Vertex> grid = vertices.grid;
-    ipainter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    ipainter.paint_vertices(grid,
+                            vertices.iterations,
+                            vertices.transparent,
+                            vertices.max_iter,
+                            vertices.bounding_box);
+
     int size = vertices.grid_size;
     int size_2 = size * size;
     for (int i=0; i<size_2; ++i)
@@ -196,7 +234,11 @@ TEST(VertexPainter, Linear)
     VertexPainterLinear painter (colors_gen);
     painter.set_angle(90);
     std::vector<sf::Vertex> grid = vertices.grid;
-    painter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    painter.paint_vertices(grid,
+                           vertices.iterations,
+                           vertices.transparent,
+                           vertices.max_iter,
+                           vertices.bounding_box);
 
     std::vector<sf::Color> expected_colors =
         { sf::Color::Yellow, sf::Color::Yellow, sf::Color::Yellow, sf::Color::Yellow,
@@ -232,7 +274,12 @@ TEST(VertexPainter, LinearSerialization)
     }
 
     std::vector<sf::Vertex> grid = vertices.grid;
-    ipainter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    ipainter.paint_vertices(grid,
+                            vertices.iterations,
+                            vertices.transparent,
+                            vertices.max_iter,
+                            vertices.bounding_box);
+
     std::vector<sf::Color> expected_colors =
         { sf::Color::Yellow, sf::Color::Yellow, sf::Color::Yellow, sf::Color::Yellow,
           sf::Color::Green , sf::Color::Green , sf::Color::Green , sf::Color::Green ,
@@ -256,7 +303,11 @@ TEST(VertexPainter, Radial)
     VertexPainterRadial painter (colors_gen);
     painter.set_center({1/3., 2/3.});
     std::vector<sf::Vertex> grid = vertices.grid;
-    painter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    painter.paint_vertices(grid,
+                           vertices.iterations,
+                           vertices.transparent,
+                           vertices.max_iter,
+                           vertices.bounding_box);
 
     std::vector<sf::Color> expected_colors =
         { sf::Color::Blue , sf::Color::Blue , sf::Color::Blue , sf::Color::Green,
@@ -294,7 +345,12 @@ TEST(VertexPainter, RadialSerialization)
 
 
     std::vector<sf::Vertex> grid = vertices.grid;
-    ipainter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    ipainter.paint_vertices(grid,
+                            vertices.iterations,
+                            vertices.transparent,
+                            vertices.max_iter,
+                            vertices.bounding_box);
+
     std::vector<sf::Color> expected_colors =
         { sf::Color::Blue , sf::Color::Blue , sf::Color::Blue , sf::Color::Green,
           sf::Color::Blue , sf::Color::Red  , sf::Color::Blue , sf::Color::Green,
@@ -318,7 +374,11 @@ TEST(VertexPainter, Random)
     VertexPainterRandom painter (colors_gen);
     painter.set_block_size(vertices.grid_size);
     std::vector<sf::Vertex> grid = vertices.grid;
-    painter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    painter.paint_vertices(grid,
+                           vertices.iterations,
+                           vertices.transparent,
+                           vertices.max_iter,
+                           vertices.bounding_box);
 
     int size = vertices.grid_size;
     for (int i=0; i<size; ++i)
@@ -359,7 +419,12 @@ TEST(VertexPainter, RandomSerialization)
 
 
     std::vector<sf::Vertex> grid = vertices.grid;
-    ipainter.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    ipainter.paint_vertices(grid,
+                            vertices.iterations,
+                            vertices.transparent,
+                            vertices.max_iter,
+                            vertices.bounding_box);
+
     int size = vertices.grid_size;
     for (int i=0; i<size; ++i)
     {
@@ -408,7 +473,11 @@ TEST(VertexPainter, Composite)
     VertexPainterComposite composite;
     composite.set_main_painter(std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterIteration>()));
     composite.set_child_painters({constant_wrapper, radial_wrapper, linear_wrapper, sequential_wrapper});
-    composite.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    composite.paint_vertices(grid,
+                             vertices.iterations,
+                             vertices.transparent,
+                             vertices.max_iter,
+                             vertices.bounding_box);
 
     std::vector<sf::Color> expected_colors =
         { sf::Color::Red   , sf::Color::Red    , sf::Color::Red    , sf::Color::Red,
@@ -469,7 +538,12 @@ TEST(VertexPainter, CompositeSerialization)
 
 
     std::vector<sf::Vertex> grid = vertices.grid;
-    icomposite.paint_vertices(grid, vertices.iterations, vertices.max_iter, vertices.bounding_box);
+    icomposite.paint_vertices(grid,
+                              vertices.iterations,
+                              vertices.transparent,
+                              vertices.max_iter,
+                              vertices.bounding_box);
+
     std::vector<sf::Color> expected_colors =
         { sf::Color::Red   , sf::Color::Red    , sf::Color::Red    , sf::Color::Red,
           sf::Color::Blue  , sf::Color::Green  , sf::Color::Green  , sf::Color::Blue,

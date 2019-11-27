@@ -53,6 +53,7 @@ namespace colors
         // 'ColorGeneratorWrapper::ColorGenerator'.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<std::uint8_t>& iteration_of_vertices,
+                                    const std::vector<bool>& transparent,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) = 0;
 

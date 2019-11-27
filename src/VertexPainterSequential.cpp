@@ -36,6 +36,7 @@ namespace colors
 
     void VertexPainterSequential::paint_vertices(std::vector<sf::Vertex>& vertices,
                                                  const std::vector<std::uint8_t>&,
+                                                 const std::vector<bool>& transparent,
                                                  int,
                                                  sf::FloatRect)
 
@@ -47,12 +48,12 @@ namespace colors
         }
 
         auto size = vertices.size();
-        for (auto i = 0u; i < vertices.size(); ++i)
+        for (auto i = 0ull; i < vertices.size(); ++i)
         {
             float integral;
             float lerp = std::modf((i * factor_) / size, &integral);
             sf::Color color = generator->get(lerp);
-            if (vertices[i].color != sf::Color::Transparent)
+            if (!transparent[i])
             {
                 vertices[i].color = color;
             }

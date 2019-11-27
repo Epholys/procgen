@@ -51,6 +51,7 @@ namespace colors
 
     void VertexPainterRandom::paint_vertices(std::vector<sf::Vertex>& vertices,
                                              const std::vector<std::uint8_t>&,
+                                             const std::vector<bool>& transparent,
                                              int,
                                              sf::FloatRect)
 
@@ -65,7 +66,7 @@ namespace colors
 
         int block_index = 0;
         float rand = 0;
-        for (auto& v : vertices)
+        for (auto i=0ull; i<vertices.size(); ++i)
         {
             if (block_index % block_size_ == 0)
             {
@@ -74,9 +75,9 @@ namespace colors
             // We call 'get()' each time because we must interact nicely with
             // 'VertexPainterComposite'.
             sf::Color color = generator->get(rand);
-            if (v.color != sf::Color::Transparent)
+            if (!transparent[i])
             {
-                v.color = color;
+                vertices[i].color = color;
             }
             ++block_index;
         }

@@ -76,10 +76,13 @@ namespace drawing
             // vector corresponding to the vertices.
             std::vector<std::uint8_t> iteration_of_vertices;
 
+            std::vector<bool> transparent;
+
             struct TurtleProduction
             {
                 std::vector<sf::Vertex>& vertices;
-                std::vector<std::uint8_t>& iterations;
+                const std::vector<std::uint8_t>& iterations;
+                const std::vector<bool>& transparent;
             };
             // Compute all vertices and their iteration count of a turtle interpretation
             // of a L-system.  First, this function iterates 'parameters.n_iter' times

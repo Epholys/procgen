@@ -50,6 +50,7 @@ namespace colors
 
     void VertexPainterLinear::paint_vertices(std::vector<sf::Vertex>& vertices,
                                              const std::vector<std::uint8_t>&,
+                                             const std::vector<bool>& transparent,
                                              int,
                                              sf::FloatRect bounding_box)
     {
@@ -82,15 +83,17 @@ namespace colors
             distance = 1.f;
         }
 
-        for (auto& v : vertices)
+        for (auto i=0ull; i<vertices.size(); ++i)
         {
-            sf::Vector2f projection = geometry::project(opposite_intersection_line.first, opposite_intersection_line.second, v.position);
-            float lerp = geometry::distance(projection, v.position) / distance;
+            sf::Vector2f projection = geometry::project(opposite_intersection_line.first,
+                                                        opposite_intersection_line.second,
+                                                        vertices[i].position);
+            float lerp = geometry::distance(projection, vertices[i].position) / distance;
 
             sf::Color color = generator->get(lerp);
-            if (v.color != sf::Color::Transparent)
+            if (!transparent[i])
             {
-                v.color = color;
+                vertices[i].color = color;
             }
         }
     }

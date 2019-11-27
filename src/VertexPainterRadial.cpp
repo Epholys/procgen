@@ -51,6 +51,7 @@ namespace colors
 
     void VertexPainterRadial::paint_vertices(std::vector<sf::Vertex>& vertices,
                                              const std::vector<std::uint8_t>&,
+                                             const std::vector<bool>& transparent,
                                              int,
                                              sf::FloatRect bounding_box)
     {
@@ -86,13 +87,13 @@ namespace colors
             // Avoid division by 0.
             greatest_distance = 1.f;
         }
-        for (auto& v : vertices)
+        for (auto i=0ull; i<vertices.size(); ++i)
         {
-            float lerp = geometry::distance(v.position, relative_center) / greatest_distance;
+            float lerp = geometry::distance(vertices[i].position, relative_center) / greatest_distance;
             sf::Color color = generator->get(lerp);
-            if (v.color != sf::Color::Transparent)
+            if (!transparent[i])
             {
-                v.color = color;
+                vertices[i].color = color;
             }
         }
 

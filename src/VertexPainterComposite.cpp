@@ -85,28 +85,38 @@ namespace colors
         }
 
 
-        VertexPainterWrapperObserver::VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other)
-            : OWrapper(std::make_shared<VertexPainterWrapper>(other.get_target()->unwrap()->clone()))
-        {
-        }
+        // VertexPainterWrapperObserver::VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other)
+        //     : OWrapper(std::make_shared<VertexPainterWrapper>(other.get_target()->unwrap()->clone()))
+        //     , painter_ {other.painter_}
+        // {
+        //     add_callback([this](){painter_->notify();});
+        // }
         VertexPainterWrapperObserver::VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other)
             : OWrapper(other.get_target())
+            , painter_{other.painter_}
         {
+            add_callback([this](){painter_->notify();});
         }
-        VertexPainterWrapperObserver& VertexPainterWrapperObserver::operator=(const VertexPainterWrapperObserver& other)
-        {
-            if (this != &other)
-            {
-                set_painter_wrapper(other.get_target());
-            }
-            return *this;
-        }
+        // VertexPainterWrapperObserver& VertexPainterWrapperObserver::operator=(const VertexPainterWrapperObserver& other)
+        // {
+        //     if (this != &other)
+        //     {
+        //         set_painter_wrapper(other.get_target());
+
+        //         add_callback([this](){painter_->notify();});
+        //     }
+        //     return *this;
+        // }
         VertexPainterWrapperObserver& VertexPainterWrapperObserver::operator=(VertexPainterWrapperObserver&& other)
         {
             if (this != &other)
             {
                 set_painter_wrapper(other.get_target());
+                painter_ = other.painter_;
+                add_callback([this](){painter_->notify();});
+
                 other.set_target(nullptr);
+                other.painter_ = nullptr;
             }
             return *this;
         }
@@ -221,6 +231,7 @@ namespace colors
 
     void VertexPainterComposite::paint_vertices(std::vector<sf::Vertex>& vertices,
                                                 const std::vector<std::uint8_t>& iteration_of_vertices,
+                                                const std::vector<bool>& transparent,
                                                 int max_recursion,
                                                 sf::FloatRect bounding_box)
 
@@ -242,42 +253,42 @@ namespace colors
         // Fill the pools by making paint the main painter through 'color_distributor_'.
         main_painter_observer_.get_painter_wrapper()->unwrap()->paint_vertices(vertices,
                                                                                iteration_of_vertices,
+                                                                               transparent,
                                                                                max_recursion,
                                                                                bounding_box);
 
-        // -- Get the vertices and their iteration from the indices in
-        // 'vertex_indices_pools_'.
-        std::vector<std::vector<sf::Vertex>> vertices_pools;
-        std::vector<std::vector<std::uint8_t>> iteration_of_vertices_pools;
+        // // -- Get the vertices and their iteration from the indices in
+        // // 'vertex_indices_pools_'.
+        // std::vector<std::vector<sf::Vertex>> vertices_pools;
+        // std::vector<std::vector<std::uint8_t>> iteration_of_vertices_pools;
+        // std::vector<std::vector<bool>> transparent_pools;
 
-        // TODO use indices to avoid reserve everywhere
-        for(const auto& v : vertex_indices_pools_)
+        for(auto i=0ull; i<child_painters_observers_.size(); ++i)
         {
             // For each indices pools...
             std::vector<sf::Vertex> vertices_part;
             std::vector<std::uint8_t> iteration_of_vertices_part;
+            std::vector<bool> transparent_part;
             vertices_part.reserve(n_vertices);
             iteration_of_vertices_part.reserve(n_vertices);
-            for(auto idx : v)
+            transparent_part.reserve(n_vertices);
+            for(auto idx : vertex_indices_pools_.at(i))
             {
                 // ... get each index and get from the '*_copy' the vertex and
                 // its iteration.
                 vertices_part.push_back(vertices[idx]);
                 iteration_of_vertices_part.push_back(iteration_of_vertices[idx]);
+                transparent_part.push_back(transparent[idx]);
             }
-            vertices_pools.emplace_back(vertices_part);
-            iteration_of_vertices_pools.emplace_back(iteration_of_vertices_part);
-        }
-
-        auto idx = 0u;
-        for(auto& painter_it : child_painters_observers_)
-        {
-            // Call each child painter with its part of vertices with their index.
-            painter_it.get_painter_wrapper()->unwrap()->paint_vertices(vertices_pools.at(idx),
-                                                                       iteration_of_vertices_pools.at(idx),
-                                                                       max_recursion,
-                                                                       bounding_box);
-            ++idx;
+            child_painters_observers_.at(i).get_painter_wrapper()->unwrap()->paint_vertices(vertices_part,
+                                                                                            iteration_of_vertices_part,
+                                                                                            transparent_part,
+                                                                                            max_recursion,
+                                                                                            bounding_box);
+            for (auto j=0ull; j<vertices_part.size(); ++j)
+            {
+                vertices[vertex_indices_pools_[i][j]] = vertices_part[j];
+            }
         }
 
         // // Flatten 'vertices_pools' into a single vertex std::vector.
@@ -293,26 +304,26 @@ namespace colors
         //     flattened_pool.insert(flattened_pool.end(), sub.begin(), sub.end());
         // }
 
-        // By construction, the n-th vertex in 'flatten_pool' correspond to the
-        // n-th index in the flattened 'vertex_indices_pools_'. This index is
-        // the position in the global 'vertices' vector. So, this code put in
-        // order the painted vertices in 'vertices'.
-        auto i = 0u;
-        auto j = 0u;
-        for (const auto& v : vertex_indices_pools_)
-        {
-            for (auto idx : v)
-            {
-                // vertices.at(idx) = flattened_pool.at(i++);
-                //vertices.at(idx) = vertices_pools.at(i).at(j++);
-                vertices.at(idx) = vertices_pools[i][j++];
-            }
-            if (j == vertices_pools[i].size())
-            {
-                ++i;
-                j = 0;
-            }
-        }
+        // // By construction, the n-th vertex in 'flatten_pool' correspond to the
+        // // n-th index in the flattened 'vertex_indices_pools_'. This index is
+        // // the position in the global 'vertices' vector. So, this code put in
+        // // order the painted vertices in 'vertices'.
+        // auto i = 0u;
+        // auto j = 0u;
+        // for (const auto& v : vertex_indices_pools_)
+        // {
+        //     for (auto idx : v)
+        //     {
+        //         // vertices.at(idx) = flattened_pool.at(i++);
+        //         //vertices.at(idx) = vertices_pools.at(i).at(j++);
+        //         vertices[idx] = vertices_pools[i][j++];
+        //     }
+        //     if (j == vertices_pools[i].size())
+        //     {
+        //         ++i;
+        //         j = 0;
+        //     }
+        // }
 
 //        vertices = vertices_copy;
     }

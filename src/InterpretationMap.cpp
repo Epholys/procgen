@@ -13,6 +13,7 @@ namespace drawing
         turtle.state.position += {dx, dy};
         turtle.vertices.push_back(sf::Vector2f(turtle.state.position));
         turtle.iteration_of_vertices.push_back(turtle.iteration);
+        turtle.transparent.push_back(false);
     }
 
     void turn_left_fn(Turtle& turtle)
@@ -47,9 +48,12 @@ namespace drawing
         else
         {
             turtle.vertices.push_back( {turtle.vertices.back().position, sf::Color::Transparent} );
+            turtle.transparent.push_back(true);
             turtle.state = turtle.stack.top();
             turtle.vertices.push_back( {sf::Vector2f(turtle.state.position), sf::Color::Transparent} );
+            turtle.transparent.push_back(true);
             turtle.vertices.push_back( {sf::Vector2f(turtle.state.position)} );
+            turtle.transparent.push_back(false);
             turtle.iteration_of_vertices.push_back(turtle.iteration);
             turtle.iteration_of_vertices.push_back(turtle.iteration);
             turtle.iteration_of_vertices.push_back(turtle.iteration);

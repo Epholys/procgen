@@ -72,13 +72,13 @@ void opt(int argc, char* argv[])
         auto wcc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<ConstantColor>(cc));
         VertexPainterConstant vp (wcc);
 
-        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
+        const auto& [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
         auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<20; ++i)
         {
-            vp.paint_vertices(vx, vx_iter, max, box);
+            vp.paint_vertices(vx, vx_iter, vx_tr, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -100,13 +100,13 @@ void opt(int argc, char* argv[])
         vp.set_angle(25);
         vp.set_display_flag(false);
 
-        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
+        const auto& [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
         auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<9; ++i)
         {
-            vp.paint_vertices(vx, vx_iter, max, box);
+            vp.paint_vertices(vx, vx_iter, vx_tr, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -130,13 +130,13 @@ void opt(int argc, char* argv[])
         VertexPainterRadial vr (wlc);
         vr.set_display_flag(false);
 
-        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
+        const auto& [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
         auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<9; ++i)
         {
-            vr.paint_vertices(vx, vx_iter, max, box);
+            vr.paint_vertices(vx, vx_iter, vx_tr, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -160,13 +160,13 @@ void opt(int argc, char* argv[])
         VertexPainterRandom vr (wlc);
         vr.set_block_size(500);
 
-        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
+        const auto& [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
         auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<9; ++i)
         {
-            vr.paint_vertices(vx, vx_iter, max, box);
+            vr.paint_vertices(vx, vx_iter, vx_tr, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -190,13 +190,13 @@ void opt(int argc, char* argv[])
         VertexPainterSequential vs (wlc);
         vs.set_factor(2);
 
-        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
+        const auto& [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
         auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<9; ++i)
         {
-            vs.paint_vertices(vx, vx_iter, max, box);
+            vs.paint_vertices(vx, vx_iter, vx_tr, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -219,13 +219,13 @@ void opt(int argc, char* argv[])
         auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
         VertexPainterIteration vi (wlc);
 
-        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
+        const auto& [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
         auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<9; ++i)
         {
-            vi.paint_vertices(vx, vx_iter, max, box);
+            vi.paint_vertices(vx, vx_iter, vx_tr, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -261,13 +261,13 @@ void opt(int argc, char* argv[])
         auto wc1 = std::make_shared<VertexPainterComposite>();
         wc1->set_child_painters(depth3);
 
-        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
+        const auto& [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
         auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<5; ++i)
         {
-            wc1->paint_vertices(vx, vx_iter, max, box);
+            wc1->paint_vertices(vx, vx_iter, vx_tr, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -290,13 +290,13 @@ void opt(int argc, char* argv[])
         auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
         VertexPainterSequential vs (wlc);
 
-        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
+        const auto& [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
         auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<9; ++i)
         {
-            vs.paint_vertices(vx, vx_iter, max, box);
+            vs.paint_vertices(vx, vx_iter, vx_tr, max, box);
             std::cout << i << std::endl;
         }
     }
@@ -320,13 +320,13 @@ void opt(int argc, char* argv[])
         VertexPainterSequential vs (wlc);
         vs.set_factor(2);
 
-        const auto& [vx, vx_iter] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
+        const auto& [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, rec, params, map, size.vertices_size);
         auto box = geometry::bounding_box(vx);
 
         std::cout << "BeginPainting\n";
         for (int i=0; i<9; ++i)
         {
-            vs.paint_vertices(vx, vx_iter, max, box);
+            vs.paint_vertices(vx, vx_iter, vx_tr, max, box);
             std::cout << i << std::endl;
         }
     }

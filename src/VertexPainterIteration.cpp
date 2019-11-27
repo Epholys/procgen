@@ -20,6 +20,7 @@ namespace colors
 
     void VertexPainterIteration::paint_vertices(std::vector<sf::Vertex>& vertices,
                                                 const std::vector<std::uint8_t>& vertices_iteration,
+                                                const std::vector<bool>& transparent,
                                                 int max_iteration,
                                                 sf::FloatRect)
 
@@ -46,8 +47,8 @@ namespace colors
 #else
             sf::Color color = generator->get((vertices_iteration.at(i)) / (float(max_iteration)));
 #endif
-            sf::Vertex& v = vertices.at(i);
-            if (v.color != sf::Color::Transparent)
+            sf::Vertex& v = vertices[i];
+            if (!transparent[i])
             {
                 v.color = color;
             }

@@ -19,9 +19,10 @@ namespace colors
     }
 
     void VertexPainterConstant::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                             const std::vector<std::uint8_t>&,
-                                             int,
-                                             sf::FloatRect)
+                                               const std::vector<std::uint8_t>&,
+                                               const std::vector<bool>& transparent,
+                                               int,
+                                               sf::FloatRect)
 
     {
         auto generator = get_target()->unwrap();
@@ -31,12 +32,12 @@ namespace colors
         }
 
 
-        for (auto& v : vertices)
+        for (auto i=0ull; i<vertices.size(); ++i)
         {
             sf::Color color = generator->get(.5);
-            if (v.color != sf::Color::Transparent)
+            if (!transparent[i])
             {
-                v.color = color;
+                vertices[i].color = color;
             }
         }
     }

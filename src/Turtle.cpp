@@ -28,16 +28,19 @@ namespace drawing
         init_from_parameters(parameters);
         vertices.clear();
         iteration_of_vertices.clear();
+        transparent.clear();
         iteration_index = 0;
         iteration = 1;
 
         vertices.reserve(size);
         iteration_of_vertices.reserve(size);
+        transparent.reserve(size);
 
         if (!iterations.empty())
         {
             vertices.push_back(sf::Vector2f(state.position));
             iteration_of_vertices.push_back(iterations.at(0));
+            transparent.push_back(false);
             iteration = iterations.at(0);
         }
 
@@ -61,7 +64,7 @@ namespace drawing
         }
 
         Ensures(vertices.size() == iteration_of_vertices.size());
-        TurtleProduction production {vertices, iteration_of_vertices};
+        TurtleProduction production {vertices, iteration_of_vertices, transparent};
         return production;
     }
 }
