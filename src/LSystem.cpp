@@ -120,6 +120,12 @@ LSystem::LSystemProduction LSystem::produce(std::uint8_t n, unsigned long long s
     // greater than the iteration one.
     Expects(highest_production->first >= highest_iteration->first);
 
+    std::unordered_map<char, bool> preds;
+    for (char c : iteration_predecessors_)
+    {
+        preds[c] = true;
+    }
+
     int max_iteration = highest_iteration->second.second;
     std::uint8_t n_iter = n - highest_iteration->first;
     for (std::uint8_t i=0; i<n_iter; ++i) {
@@ -175,7 +181,8 @@ LSystem::LSystemProduction LSystem::produce(std::uint8_t n, unsigned long long s
             // If the current predecessor must be counted, add 1 to each element
             // of the successor.
             char order = base_iteration.at(j);
-            if (iteration_predecessors_.find(c) != std::string::npos)
+            if (preds[c])
+//            if (iteration_predecessors_.find(c) != std::string::npos)
             {
                 order += 1;
                 new_iteration = true;
