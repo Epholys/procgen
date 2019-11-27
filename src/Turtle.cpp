@@ -19,6 +19,31 @@ namespace drawing
         init_from_parameters(parameters);
     }
 
+    void execute_order(const OrderID& order, Turtle& turtle)
+    {
+        switch (order)
+        {
+        case OrderID::GO_FORWARD:
+            go_forward_fn(turtle);
+            break;
+        case OrderID::TURN_RIGHT:
+            turn_right_fn(turtle);
+            break;
+        case OrderID::TURN_LEFT:
+            turn_left_fn(turtle);
+            break;
+        case OrderID::SAVE_POSITION:
+            save_position_fn(turtle);
+            break;
+        case OrderID::LOAD_POSITION:
+            load_position_fn(turtle);
+            break;
+        default:
+            // NOTHING
+            break;
+        }
+    }
+
     Turtle::TurtleProduction Turtle::compute_vertices(const std::string& lsystem_production,
                                                       const std::vector<std::uint8_t>& iterations,
                                                       const DrawingParameters& parameters,
@@ -50,7 +75,8 @@ namespace drawing
             {
                 // If an interpretation of the character 'c' is found,
                 // applies it to the current turtle.
-                interpretation.get_rule(c).second(*this);
+                execute_order(interpretation.get_rule(c).second.id, *this);
+                //interpretation.get_rule(c).second(*this);
             }
             else
             {
