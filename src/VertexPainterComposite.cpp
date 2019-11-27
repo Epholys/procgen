@@ -35,15 +35,22 @@ namespace colors
             // Compute which child painter is concerned by this vertex.
             unsigned which_painter = static_cast<unsigned>(f * size);
 
-            // Get the correct pool
-            auto it = painter_->vertex_indices_pools_.begin();
-            for (auto i=0u; i<which_painter; ++i)
-            {
-                ++it;
-            }
+            // OPTIMIZATION
+            //painter_->vertex_indices_pools_.at(which_painter).push_back(global_index_++);
+            painter_->vertex_indices_pools_[which_painter].push_back(global_index_++);
+            //END
 
-            // Add the index of the current vertex in the correct pool.
-            it->push_back(global_index_++);
+            // // Get the correct pool
+            // auto it = painter_->vertex_indices_pools_.begin();
+            // for (auto i=0u; i<which_painter; ++i)
+            // {
+            //     ++it;
+            // }
+
+            // // Add the index of the current vertex in the correct pool.
+            // it->push_back(global_index_++);
+
+
 
             // Dummy color (BUT NOT TRANSPARENT (Transparent is a special value
             // for save/load position))
@@ -75,6 +82,33 @@ namespace colors
         {
             Expects(painter_);
             add_callback([this](){painter_->notify();});
+        }
+
+
+        VertexPainterWrapperObserver::VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other)
+            : OWrapper(std::make_shared<VertexPainterWrapper>(other.get_target()->unwrap()->clone()))
+        {
+        }
+        VertexPainterWrapperObserver::VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other)
+            : OWrapper(other.get_target())
+        {
+        }
+        VertexPainterWrapperObserver& VertexPainterWrapperObserver::operator=(const VertexPainterWrapperObserver& other)
+        {
+            if (this != &other)
+            {
+                set_painter_wrapper(other.get_target());
+            }
+            return *this;
+        }
+        VertexPainterWrapperObserver& VertexPainterWrapperObserver::operator=(VertexPainterWrapperObserver&& other)
+        {
+            if (this != &other)
+            {
+                set_painter_wrapper(other.get_target());
+                other.set_target(nullptr);
+            }
+            return *this;
         }
 
         std::shared_ptr<VertexPainterWrapper> VertexPainterWrapperObserver::get_painter_wrapper() const
@@ -143,14 +177,14 @@ namespace colors
         return clone;
     }
 
-    std::list<std::shared_ptr<VertexPainterWrapper>> VertexPainterComposite::get_child_painters() const
+    std::vector<std::shared_ptr<VertexPainterWrapper>> VertexPainterComposite::get_child_painters() const
     {
-        std::list<std::shared_ptr<VertexPainterWrapper>> list;
+        std::vector<std::shared_ptr<VertexPainterWrapper>> vector;
         for (const auto& observer : child_painters_observers_)
         {
-            list.push_back(observer.get_target());
+            vector.push_back(observer.get_target());
         }
-        return list;
+        return vector;
     }
 
     std::shared_ptr<VertexPainterWrapper> VertexPainterComposite::get_main_painter() const
@@ -175,7 +209,7 @@ namespace colors
     }
 
 
-    void VertexPainterComposite::set_child_painters(const std::list<std::shared_ptr<VertexPainterWrapper>> painters)
+    void VertexPainterComposite::set_child_painters(const std::vector<std::shared_ptr<VertexPainterWrapper>> painters)
     {
         child_painters_observers_.clear();
         for (const auto& painter : painters)

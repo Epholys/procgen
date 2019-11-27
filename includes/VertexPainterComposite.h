@@ -2,7 +2,7 @@
 #define VERTEX_PAINTER_COMPOSITE_H
 
 
-#include <list>
+#include <vector>
 #include "VertexPainterWrapper.h"
 
 namespace colors
@@ -90,12 +90,12 @@ namespace colors
             using OWrapper = Observer<VertexPainterWrapper>;
 
             VertexPainterWrapperObserver() = delete;
-            explicit VertexPainterWrapperObserver(std::shared_ptr<VertexPainterWrapper> painter_wrapper,
-                                                 VertexPainterComposite* painter_composite);
-            VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other) = delete;
-            VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other) = delete;
-            VertexPainterWrapperObserver& operator=(const VertexPainterWrapperObserver& other) = delete;
-            VertexPainterWrapperObserver& operator=(VertexPainterWrapperObserver&& other) = delete;
+            VertexPainterWrapperObserver(std::shared_ptr<VertexPainterWrapper> painter_wrapper,
+                                         VertexPainterComposite* painter_composite);
+            VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other);
+            VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other);
+            VertexPainterWrapperObserver& operator=(const VertexPainterWrapperObserver& other);
+            VertexPainterWrapperObserver& operator=(VertexPainterWrapperObserver&& other);
 
             std::shared_ptr<VertexPainterWrapper> get_painter_wrapper() const;
             void set_painter_wrapper(std::shared_ptr<VertexPainterWrapper> painter_buff);
@@ -132,10 +132,10 @@ namespace colors
         VertexPainterComposite& operator=(VertexPainterComposite&& other) = delete;;
 
         // Getters/Setters
-        std::list<std::shared_ptr<VertexPainterWrapper>> get_child_painters() const;
+        std::vector<std::shared_ptr<VertexPainterWrapper>> get_child_painters() const;
         std::shared_ptr<VertexPainterWrapper> get_main_painter() const;
         void set_main_painter(std::shared_ptr<VertexPainterWrapper> painter_buff);
-        void set_child_painters(const std::list<std::shared_ptr<VertexPainterWrapper>> painters);
+        void set_child_painters(const std::vector<std::shared_ptr<VertexPainterWrapper>> painters);
 
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<std::uint8_t>& iteration_of_vertices,
@@ -175,9 +175,9 @@ namespace colors
         // vertices that will be painted by painter by the child painter. The
         // index i corresponds to the i-th vertex in the 'vertices' parameters
         // in 'paint_vertices()'.
-        std::list<std::vector<std::size_t>> vertex_indices_pools_;
+        std::vector<std::vector<std::size_t>> vertex_indices_pools_;
 
-        std::list<impl::VertexPainterWrapperObserver> child_painters_observers_;
+        std::vector<impl::VertexPainterWrapperObserver> child_painters_observers_;
 
         // Hack to avoid circular dependency between VertexPainterSerializer and
         // VertexPainterComposite. The VertexPainterSerializer is never included
@@ -211,7 +211,7 @@ namespace colors
                 main_wrapper->wrap(main_painter_serializer.get_serialized());
                 set_main_painter(main_wrapper);
 
-                std::list<std::shared_ptr<VertexPainterWrapper>> child_wrappers;
+                std::vector<std::shared_ptr<VertexPainterWrapper>> child_wrappers;
                 for(const auto& painter_serializer : child_painters_serializers)
                 {
                     std::shared_ptr<VertexPainterWrapper> wrapper = std::make_shared<VertexPainterWrapper>();;

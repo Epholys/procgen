@@ -250,7 +250,7 @@ void opt(int argc, char* argv[])
                 std::make_shared<VertexPainterConstant>(
                     std::make_shared<ColorGeneratorWrapper>(
                         std::make_shared<ConstantColor>(c))));
-        std::list<std::shared_ptr<VertexPainterWrapper>> depth3 = {w, w, w};
+        std::vector<std::shared_ptr<VertexPainterWrapper>> depth3 = {w, w, w};
 
         // auto wc2 =
         //     std::make_shared<VertexPainterWrapper>(
