@@ -10,7 +10,7 @@ namespace colors
     }
 
 
-    
+
     ConstantColor::ConstantColor(const sf::Color& color)
         : ColorGenerator()
         , color_{color}
@@ -31,7 +31,7 @@ namespace colors
     {
         return color_;
     }
-    
+
     void ConstantColor::set_imcolor(const ImVec4& color)
     {
         color_ = color;
@@ -50,7 +50,7 @@ namespace colors
     }
 
     //------------------------------------------------------------
-    
+
     LinearGradient::LinearGradient()
         : LinearGradient({{imwhite, 0.},{imwhite, 1.}})
     {
@@ -63,7 +63,7 @@ namespace colors
         // Sanitize
         set_keys(keys);
     }
- 
+
     const LinearGradient::keys& LinearGradient::get_keys() const
     {
         return keys_;
@@ -84,29 +84,33 @@ namespace colors
         // Sort the elements.
         std::sort(begin(keys_), end(keys_),
                   [](const auto& p1, const auto& p2){return p1.position < p2.position;});
-        
+
         // The highest key is at 1 and the lowest at 0.
         keys_.front().position = 0.f;
         keys_.back().position = 1.f;
 
-        
+
         notify();
     }
 
     sf::Color LinearGradient::get(float f)
     {
-        // Clamp 'f'.
-        f = f < 0. ? 0. : f;
-        f = f > 1. ? 1. : f;
+        f = std::clamp(f, 0.f, 1.f);
 
         // Find the upper-bound key...
         auto superior_it = std::find_if(begin(keys_), end(keys_),
                                 [f](const auto& p){return f <= p.position;});
-        Expects(superior_it != end(keys_)); // (should never happen if correctly sanitized)
+        // OPTIMIZATION
+        //Expects(superior_it != end(keys_)); // (should never happen if correctly sanitized)
+        // END
         auto superior_index = std::distance(begin(keys_), superior_it);
         auto inferior_index = superior_index == 0 ? 0 : superior_index-1; // ...and the lower-bound one.
-        const auto& superior = keys_.at(superior_index);
-        const auto& inferior = keys_.at(inferior_index);
+        //  OPTIMIZATION
+        // const auto& superior = keys_.at(superior_index);
+        // const auto& inferior = keys_.at(inferior_index);
+        const auto& superior = keys_[superior_index];
+        const auto& inferior = keys_[inferior_index];
+        // END
 
         float factor = 0.f;
         if (superior_index == inferior_index)
@@ -161,11 +165,10 @@ namespace colors
 
     sf::Color DiscreteGradient::get(float f)
     {
-        f = f < 0. ? 0. : f;
         // We do not clamp to 1 as it would be a out-of-bound call. So we clamp
         // it to just before 1.
-        f = f >= 1. ? 1.-std::numeric_limits<float>::epsilon() : f;
-        
+        f = std::clamp(f, 0.f, 1.f-std::numeric_limits<float>::epsilon());
+
         return colors_.at(static_cast<size_t>(f * colors_.size()));
     }
 
@@ -203,7 +206,7 @@ namespace colors
         keys_.front().index = 0;
 
         // If two indices are the same, increment one of them and propagate this
-        // change to all next indices. 
+        // change to all next indices.
         int gap = 0;
         for (auto it = next(begin(keys_)); it != end(keys_); ++it)
         {
@@ -221,13 +224,13 @@ namespace colors
         Ensures(keys_.at(0).index == 0);
         Ensures(std::is_sorted(begin(keys_), end(keys_),
                                [](const auto& a, const auto& b)
-                               {return a.index < b.index;}));      
+                               {return a.index < b.index;}));
     }
 
     void DiscreteGradient::generate_colors()
     {
         Expects(keys_.size() > 1);
-        
+
         colors_.clear();
 
         auto inferior = keys_.begin();
