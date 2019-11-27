@@ -22,18 +22,18 @@ namespace colors
 
         sf::Color ColorGeneratorComposite::get(float f)
         {
-            // Should never happen.
-            Expects(painter_);
-            Expects(!painter_->vertex_indices_pools_.empty());
+            // OPTIMIZATION
+            // // Should never happen.
+            // Expects(painter_);
+            // Expects(!painter_->vertex_indices_pools_.empty());
+            // END
 
-            f = f < 0. ? 0. : f;
             // We do not clamp to 1 as it would be an out-of-bound call. So we clamp
             // it to just before 1.
-            f = f >= 1. ? 1.-std::numeric_limits<float>::epsilon() : f;
-
+            f = std::clamp(f, 0.f, 1.f-std::numeric_limits<float>::epsilon());
             auto size = painter_->child_painters_observers_.size();
             // Compute which child painter is concerned by this vertex.
-            unsigned which_painter = std::floor(f * size);
+            unsigned which_painter = static_cast<unsigned>(f * size);
 
             // Get the correct pool
             auto it = painter_->vertex_indices_pools_.begin();
@@ -47,7 +47,7 @@ namespace colors
 
             // Dummy color (BUT NOT TRANSPARENT (Transparent is a special value
             // for save/load position))
-            return sf::Color(255,255,255,255);
+            return sf::Color::White;
         }
 
         void ColorGeneratorComposite::reset_index()
@@ -228,8 +228,8 @@ namespace colors
             {
                 // ... get each index and get from the '*_copy' the vertex and
                 // its iteration.
-                vertices_part.push_back(vertices.at(idx));
-                iteration_of_vertices_part.push_back(iteration_of_vertices.at(idx));
+                vertices_part.push_back(vertices[idx]);
+                iteration_of_vertices_part.push_back(iteration_of_vertices[idx]);
             }
             vertices_pools.emplace_back(vertices_part);
             iteration_of_vertices_pools.emplace_back(iteration_of_vertices_part);
