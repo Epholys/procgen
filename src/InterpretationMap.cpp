@@ -11,7 +11,7 @@ namespace drawing
         double dx = turtle.step * turtle.state.direction.x;
         double dy = turtle.step * -turtle.state.direction.y;
         turtle.state.position += {dx, dy};
-        turtle.vertices.push_back(sf::Vector2f(turtle.state.position));
+        turtle.vertices.emplace_back(sf::Vector2f(turtle.state.position));
         turtle.iteration_of_vertices.push_back(turtle.iteration);
         turtle.transparent.push_back(false);
     }
@@ -47,16 +47,18 @@ namespace drawing
         }
         else
         {
-            turtle.vertices.push_back( {turtle.vertices.back().position, sf::Color::Transparent} );
-            turtle.transparent.push_back(true);
+            turtle.vertices.emplace_back(turtle.vertices.back().position, sf::Color::Transparent);
             turtle.state = turtle.stack.top();
-            turtle.vertices.push_back( {sf::Vector2f(turtle.state.position), sf::Color::Transparent} );
+            turtle.vertices.emplace_back(sf::Vector2f(turtle.state.position), sf::Color::Transparent);
+            turtle.vertices.emplace_back(sf::Vector2f(turtle.state.position));
+
+            turtle.iteration_of_vertices.push_back(turtle.iteration);
+            turtle.iteration_of_vertices.push_back(turtle.iteration);
+            turtle.iteration_of_vertices.push_back(turtle.iteration);
+
             turtle.transparent.push_back(true);
-            turtle.vertices.push_back( {sf::Vector2f(turtle.state.position)} );
+            turtle.transparent.push_back(true);
             turtle.transparent.push_back(false);
-            turtle.iteration_of_vertices.push_back(turtle.iteration);
-            turtle.iteration_of_vertices.push_back(turtle.iteration);
-            turtle.iteration_of_vertices.push_back(turtle.iteration);
 
             turtle.stack.pop();
         }
