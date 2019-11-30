@@ -17,7 +17,7 @@ namespace drawing
     constexpr int vx_per_goforward = 1;
     constexpr int vx_per_loadposition = 3;
     constexpr int bytes_per_predecessor = sizeof(char);
-    constexpr int bytes_per_vertex = sizeof(sf::Vertex) + sizeof(std::uint8_t); // Vertex + Iteration
+    constexpr float bytes_per_vertex = sizeof(sf::Vertex) + sizeof(std::uint8_t) + 1/8.; // Vertex + Iteration + transparent
 
     // Struct containing the number of element of a complete system and a overflow flag;
     struct system_size
