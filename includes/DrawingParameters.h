@@ -2,9 +2,6 @@
 #define DRAWING_PARAMETERS_H
 
 
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
-
 #include "cereal/cereal.hpp"
 
 #include "types.h"
@@ -53,7 +50,7 @@ namespace drawing
         void set_n_iter(u8 n_iter);
 
         // Revert to previous 'n_iter'.
-        // Useful when cancelling computatoin of too big LSys.
+        // Useful when cancelling computatoin of too big L-Systems.
         void revert();
 
         // Validate modification of 'n_iter'.
@@ -64,17 +61,17 @@ namespace drawing
         ext::sf::Vector2d starting_position_ { 0, 0 };
         double starting_angle_ { 0 };
 
-        // When 'turn_left' or 'turn_right' orders are executed, the
-        // Turtle pivot at a 'delta_angle' angle (in
-        // radian). Initialized at an arbitrary value.
+        // When 'turn_left' or 'turn_right' orders are executed, the Turtle
+        // pivot at a 'delta_angle' angle (in radian).
+        // Initialized to an arbitrary value.
         double delta_angle_ {math::pi / 2 };
 
-        // When 'move_forward' order is executed, the Turtle will move
-        // forward 'step' pixels (at default zoom level). Initialized
-        // at an arbitrary value.
+        // When 'move_forward' order is executed, the Turtle will move forward
+        // 'step' pixels (at default zoom level).
+        // Initialized to an arbitrary value.
         double step_ { 20 };
 
-        // The number of iterations done by the L-system.
+        // The number of iterations computed by the L-system.
         u8 n_iter_ { 0 };
 
         // The previous number of iterations.

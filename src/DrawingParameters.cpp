@@ -65,7 +65,6 @@ namespace drawing
     }
     void DrawingParameters::set_n_iter(u8 n_iter)
     {
-        std::cout << "set n_iter\n";
         previous_n_iter_ = n_iter_;
         n_iter_ = n_iter;
         notify();
