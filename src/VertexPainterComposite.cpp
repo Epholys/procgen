@@ -242,12 +242,13 @@ namespace colors
         // Prepare the variable for ColorGeneratorComposite
         const auto n_vertices = vertices.size();
         const auto n_child = child_painters_observers_.size();
+        const auto approx_size = n_vertices/n_child;
         color_distributor_->reset_index();
         vertex_indices_pools_.clear();
         for(auto i=0u; i<n_child; ++i)
         {
             vertex_indices_pools_.push_back({});
-            vertex_indices_pools_.back().reserve(n_vertices); // overkill ?
+            vertex_indices_pools_.back().reserve(approx_size);
         }
 
         // Fill the pools by making paint the main painter through 'color_distributor_'.
@@ -269,9 +270,10 @@ namespace colors
             std::vector<sf::Vertex> vertices_part;
             std::vector<std::uint8_t> iteration_of_vertices_part;
             std::vector<bool> transparent_part;
-            vertices_part.reserve(n_vertices);
-            iteration_of_vertices_part.reserve(n_vertices);
-            transparent_part.reserve(n_vertices);
+            const auto pool_size = vertex_indices_pools_.at(i).size();
+            vertices_part.reserve(pool_size);
+            iteration_of_vertices_part.reserve(pool_size);
+            transparent_part.reserve(pool_size);
             for(auto idx : vertex_indices_pools_.at(i))
             {
                 // ... get each index and get from the '*_copy' the vertex and
