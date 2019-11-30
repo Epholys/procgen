@@ -3,6 +3,8 @@
 
 
 #include <vector>
+
+#include "types.h"
 #include "VertexPainterWrapper.h"
 
 namespace colors
@@ -71,11 +73,11 @@ namespace colors
 
             friend class cereal::access;
             template<class Archive>
-            void save(Archive&, const std::uint32_t) const
+            void save(Archive&, const u32) const
                 {
                 }
             template<class Archive>
-            void load(Archive&, const std::uint32_t)
+            void load(Archive&, const u32)
                 {
                 }
         };
@@ -138,7 +140,7 @@ namespace colors
         void set_child_painters(const std::vector<std::shared_ptr<VertexPainterWrapper>> painters);
 
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<std::uint8_t>& iteration_of_vertices,
+                                    const std::vector<u8>& iteration_of_vertices,
                                     const std::vector<bool>& transparent,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
@@ -185,7 +187,7 @@ namespace colors
         // in this file, but is used as a template parameter that will be
         // compiled later.
         template<class Archive, class Serializer>
-        void save_impl(Archive& ar, const std::uint32_t) const
+        void save_impl(Archive& ar, const u32) const
             {
                 static_assert(std::is_same<Serializer, VertexPainterSerializer>::value);
 
@@ -199,7 +201,7 @@ namespace colors
                    cereal::make_nvp("child_painters", child_painters));
             }
         template<class Archive, class Serializer>
-        void load_impl(Archive& ar, const std::uint32_t)
+        void load_impl(Archive& ar, const u32)
             {
                 static_assert(std::is_same<Serializer, VertexPainterSerializer>::value);
 
@@ -224,15 +226,15 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void save(Archive& ar, const std::uint32_t) const
+        void save(Archive& ar, const u32) const
             {
-                std::uint32_t unused = 0;
+                u32 unused = 0;
                 save_impl<Archive, VertexPainterSerializer>(ar, unused);
             }
         template<class Archive>
-        void load(Archive& ar, const std::uint32_t)
+        void load(Archive& ar, const u32)
             {
-                std::uint32_t unused = 0;
+                u32 unused = 0;
                 load_impl<Archive, VertexPainterSerializer>(ar, unused);
             }
     };

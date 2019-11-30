@@ -3,9 +3,13 @@
 
 
 #include <memory>
+
 #include <SFML/Graphics.hpp>
+
 #include "cereal/cereal.hpp"
 #include "cereal/types/polymorphic.hpp"
+
+#include "types.h"
 #include "Observable.h"
 #include "Observer.h"
 #include "ColorsGeneratorWrapper.h"
@@ -52,7 +56,7 @@ namespace colors
         // 'iteration_of_vertices' according to a rule with the colors from
         // 'ColorGeneratorWrapper::ColorGenerator'.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<std::uint8_t>& iteration_of_vertices,
+                                    const std::vector<u8>& iteration_of_vertices,
                                     const std::vector<bool>& transparent,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) = 0;

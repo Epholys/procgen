@@ -32,7 +32,7 @@ namespace colors
         // 'vertices' vector.
         // 'bounding_box', 'iteration_of_vertices' and 'max_recursion' are not used.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<std::uint8_t>& iteration_of_vertices,
+                                    const std::vector<u8>& iteration_of_vertices,
                                     const std::vector<bool>& transparent,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
@@ -48,7 +48,7 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void save(Archive& ar, const std::uint32_t) const
+        void save(Archive& ar, const u32) const
             {
                 ar(cereal::make_nvp("repetition_factor", factor_));
 
@@ -58,7 +58,7 @@ namespace colors
 
             }
         template<class Archive>
-        void load(Archive& ar, const std::uint32_t)
+        void load(Archive& ar, const u32)
             {
                 ar(cereal::make_nvp("repetition_factor", factor_));
 

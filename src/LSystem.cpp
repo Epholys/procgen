@@ -6,7 +6,7 @@ LSystem::LSystem(const std::string& axiom, const production_rules& prod, const s
     : RuleMap<std::string>(prod)
     , iteration_predecessors_ {preds}
     , production_cache_{ {0, axiom} }
-    , iteration_count_cache_ { {0, {std::vector<std::uint8_t>(axiom.size(), 0), 0} } }
+    , iteration_count_cache_ { {0, {std::vector<u8>(axiom.size(), 0), 0} } }
     {
     }
 
@@ -23,7 +23,7 @@ std::string LSystem::get_axiom() const
     }
 }
 
-const std::unordered_map<std::uint8_t, std::string>& LSystem::get_production_cache() const
+const std::unordered_map<u8, std::string>& LSystem::get_production_cache() const
 {
     return production_cache_;
 }
@@ -34,7 +34,7 @@ std::string LSystem::get_iteration_predecessors() const
 }
 
 
-const std::unordered_map<std::uint8_t, std::pair<std::vector<std::uint8_t>, std::uint8_t>>& LSystem::get_iteration_cache() const
+const std::unordered_map<u8, std::pair<std::vector<u8>, u8>>& LSystem::get_iteration_cache() const
 {
     return iteration_count_cache_;
 }
@@ -42,41 +42,41 @@ const std::unordered_map<std::uint8_t, std::pair<std::vector<std::uint8_t>, std:
 void LSystem::set_axiom(const std::string& axiom)
 {
     production_cache_ = { {0, axiom} };
-    iteration_count_cache_ = { {0, {std::vector<std::uint8_t>(axiom.size(), 0), 0} } };
+    iteration_count_cache_ = { {0, {std::vector<u8>(axiom.size(), 0), 0} } };
     notify();
 }
 
 void LSystem::add_rule(char predecessor, const RuleMap::successor& successor)
 {
     production_cache_ = { {0, get_axiom()} };
-    iteration_count_cache_ = { {0, {std::vector<std::uint8_t>(get_axiom().size(), 0), 0} } };
+    iteration_count_cache_ = { {0, {std::vector<u8>(get_axiom().size(), 0), 0} } };
     RuleMap::add_rule(predecessor, successor);
 }
 
 void LSystem::remove_rule(char predecessor)
 {
     production_cache_ = { {0, get_axiom()} };
-    iteration_count_cache_ = { {0, {std::vector<std::uint8_t>(get_axiom().size(), 0), 0} } };
+    iteration_count_cache_ = { {0, {std::vector<u8>(get_axiom().size(), 0), 0} } };
     RuleMap::remove_rule(predecessor);
 }
 
 void LSystem::clear_rules()
 {
     production_cache_ = { {0, get_axiom()} };
-    iteration_count_cache_ = { {0, {{std::vector<std::uint8_t>(get_axiom().size(), 0)}, 0}}};
+    iteration_count_cache_ = { {0, {{std::vector<u8>(get_axiom().size(), 0)}, 0}}};
     RuleMap::clear_rules();
 }
 
 void LSystem::replace_rules(const rule_map& new_rules)
 {
     production_cache_ = { {0, get_axiom()} };
-    iteration_count_cache_ = { {0, {{std::vector<std::uint8_t>(get_axiom().size(), 0)}, 0}}};
+    iteration_count_cache_ = { {0, {{std::vector<u8>(get_axiom().size(), 0)}, 0}}};
     RuleMap::replace_rules(new_rules);
 }
 
 void LSystem::set_iteration_predecessors(const std::string& predecessors)
 {
-    iteration_count_cache_ = { {0, {std::vector<std::uint8_t>(get_axiom().size(), 0), 0} } };
+    iteration_count_cache_ = { {0, {std::vector<u8>(get_axiom().size(), 0), 0} } };
     iteration_predecessors_ = predecessors;
     notify();
 }
@@ -86,7 +86,7 @@ void LSystem::set_iteration_predecessors(const std::string& predecessors)
 //   - If 'production_cache_' is empty so does not contains the axiom, simply
 //   returns an empty string.
 //   - If the axiom is an empty string, early-out.
-LSystem::LSystemProduction LSystem::produce(std::uint8_t n, unsigned long long size)
+LSystem::LSystemProduction LSystem::produce(u8 n, unsigned long long size)
 {
     Expects(n >= 0);
 
@@ -127,14 +127,14 @@ LSystem::LSystemProduction LSystem::produce(std::uint8_t n, unsigned long long s
     }
 
     int max_iteration = highest_iteration->second.second;
-    std::uint8_t n_iter = n - highest_iteration->first;
-    for (std::uint8_t i=0; i<n_iter; ++i) {
+    u8 n_iter = n - highest_iteration->first;
+    for (u8 i=0; i<n_iter; ++i) {
         // We start iterating from the iteration's highest iteration.
         const std::string& base_production = production_cache_.at(highest_iteration->first + i);
         const auto& [base_iteration, _] = iteration_count_cache_.at(highest_iteration->first + i);
         // We use temporary results: we can't iterate "in place".
         std::string tmp_production;
-        std::vector<std::uint8_t> tmp_iteration;
+        std::vector<u8> tmp_iteration;
         tmp_production.reserve(size);
         tmp_iteration.reserve(size);
 

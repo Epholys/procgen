@@ -68,20 +68,20 @@ namespace drawing
             std::vector<sf::Vertex> vertices { };
 
             // Index indicating the position in 'iteration_vec'.
-            std::uint8_t iteration {0};
+            u8 iteration {0};
 
             // For each new vertex created, its iteration count is saved. The
             // iteration count is produced by the LSystem and saved in
             // 'iteration_vec', the operation is simply to copy it in this
             // vector corresponding to the vertices.
-            std::vector<std::uint8_t> iteration_of_vertices;
+            std::vector<u8> iteration_of_vertices;
 
             std::vector<bool> transparent;
 
             struct TurtleProduction
             {
                 std::vector<sf::Vertex>& vertices;
-                const std::vector<std::uint8_t>& iterations;
+                const std::vector<u8>& iterations;
                 const std::vector<bool>& transparent;
             };
             // Compute all vertices and their iteration count of a turtle interpretation
@@ -89,7 +89,7 @@ namespace drawing
             // the LSystem 'lsys', using and modifying its cache. Then, it interprates
             // the result with 'interpretation' and 'parameters' // TODO COMMENT.
             TurtleProduction compute_vertices(const std::string& lsystem_production,
-                                              const std::vector<std::uint8_t>& iterations,
+                                              const std::vector<u8>& iterations,
                                               const DrawingParameters& parameters,
                                               const InterpretationMap& interpretation,
                                               unsigned long long size = 0);

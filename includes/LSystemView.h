@@ -200,7 +200,7 @@ namespace procgui
         friend class cereal::access;
 
         template<class Archive>
-        void save (Archive& ar, const std::uint32_t) const
+        void save (Archive& ar, const u32) const
             {
                 ar(cereal::make_nvp("name", name_),
                    cereal::make_nvp("LSystem", *OLSys::get_target()->get_rule_map()),
@@ -212,7 +212,7 @@ namespace procgui
             }
 
         template<class Archive>
-        void load (Archive& ar, const std::uint32_t)
+        void load (Archive& ar, const u32)
             {
                 std::string name;
                 LSystem lsys;

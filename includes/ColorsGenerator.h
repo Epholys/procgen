@@ -3,12 +3,16 @@
 
 #include <cstdio>
 #include <vector>
+
 #include <SFML/Graphics.hpp>
+
 #include "imgui/imgui.h"
 #include "cereal/types/polymorphic.hpp"
 #include "cereal/cereal.hpp"
 #include "cereal/types/vector.hpp"
 #include "cereal/archives/json.hpp"
+
+#include "types.h"
 #include "Observable.h"
 #include "LoadMenu.h"
 
@@ -76,7 +80,7 @@ namespace cereal
         imcolor = color;
     }
 
-    
+
     template<class Archive, class N,
              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
     void save(Archive& ar, const std::pair<sf::Color, N>& pair)
@@ -104,7 +108,7 @@ namespace cereal
             save(ar, p);
         }
     }
-    
+
     template<class Archive, class N,
              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
     void load(Archive& ar, std::vector<std::pair<sf::Color, N>>& color_keys)
@@ -121,16 +125,16 @@ namespace cereal
             load(ar, key);
             color_keys.emplace_back(key);
         }
-    }    
+    }
 }
 
 namespace colors
 {
     static const ImVec4 imwhite {1, 1, 1, 1};
-    
+
     bool is_transparent(ImVec4 imcolor);
 
-    
+
     // ColorGenerator is an simple abstract class.
     // From a single float between 0 and 1, returns a color.
     // As a polymorphic class, it is generally used as a
@@ -141,7 +145,7 @@ namespace colors
     public:
         ColorGenerator() = default;
         virtual ~ColorGenerator() = default;
-        
+
         // Interface: returns a color from a float between 0 and 1.
         virtual sf::Color get(float f) = 0;
 
@@ -150,11 +154,11 @@ namespace colors
         // when copying or copy-constructing an object havino a 'ColorGenerator'
         // as an attribute.
         virtual std::shared_ptr<ColorGenerator> clone() const = 0;
-        
+
         virtual std::string type_name() const = 0;
     };
 
-    
+
     //------------------------------------------------------------
 
 
@@ -169,7 +173,7 @@ namespace colors
         ConstantColor(ConstantColor&& other) = default;
         ConstantColor& operator=(const ConstantColor& other) = default;
         ConstantColor& operator=(ConstantColor&& other) = default;
-        
+
         explicit ConstantColor(const sf::Color& color);
 
         // For every float 'f', returns 'color_'
@@ -179,9 +183,9 @@ namespace colors
         sf::Color get_color() const;            // sf::Color getter for the painters
         const ImVec4& get_imcolor() const;      // ImVec4 getter for the GUI
         void set_imcolor(const ImVec4& color);
-        
+
         friend class ColorGeneratorSerializer;
-        virtual std::string type_name() const override;        
+        virtual std::string type_name() const override;
 
     private:
         // Clone 'this' and returns it as a 'shared_ptr'.
@@ -193,12 +197,12 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void save(Archive& ar, const std::uint32_t) const
+        void save(Archive& ar, const u32) const
             {
                 ar(cereal::make_nvp("color", color_));
             }
         template<class Archive>
-        void load(Archive& ar, const std::uint32_t)
+        void load(Archive& ar, const u32)
             {
                 ar(cereal::make_nvp("color", color_));
             }
@@ -222,7 +226,7 @@ namespace colors
             ImVec4 imcolor {imwhite};
             float position {0.f};
         };
-        
+
         // A key is a color associated to a position defined by a float. On the
         // gradient, at the key's position there will be the key's
         // color. Between two keys, at any position the color returned will be
@@ -249,7 +253,7 @@ namespace colors
         void set_keys(const keys& keys);
 
         friend class ColorGeneratorSerializer;
-        virtual std::string type_name() const override;        
+        virtual std::string type_name() const override;
 
     private:
         // Clone 'this' and returns it as a 'shared_ptr'.
@@ -261,7 +265,7 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void save(Archive& ar, std::uint32_t) const
+        void save(Archive& ar, u32) const
             {
                 std::vector<std::pair<sf::Color, float>> keys;
                 for (const auto& k : keys_)
@@ -272,7 +276,7 @@ namespace colors
             }
 
         template<class Archive>
-        void load(Archive& ar, std::uint32_t)
+        void load(Archive& ar, u32)
             {
                 std::vector<std::pair<sf::Color, float>> loaded_keys;
                 std::vector<Key> keys;
@@ -298,7 +302,7 @@ namespace colors
                 {
                     controller::LoadMenu::add_loading_error_message("One or more key in LinearGradient were out of bound, so they are clamped.");
                 }
-                
+
                 set_keys(keys);
             }
     };
@@ -344,9 +348,9 @@ namespace colors
         // Setter
         // Set 'keys_' to 'keys' and generate the 'colors_'.
         void set_keys(keys keys);
-        
+
         friend class ColorGeneratorSerializer;
-        virtual std::string type_name() const override;        
+        virtual std::string type_name() const override;
 
     private:
         // Generate 'colors_' from 'keys_'.
@@ -356,7 +360,7 @@ namespace colors
         // Clone 'this' and returns it as a 'shared_ptr'.
         std::shared_ptr<ColorGenerator> clone() const override;
 
-        
+
         // The keys. Always respect the relevant invariant.
         keys keys_;
         // The colors. Always respect the relevant invariant.
@@ -365,7 +369,7 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void save(Archive& ar, std::uint32_t) const
+        void save(Archive& ar, u32) const
             {
                 std::vector<std::pair<sf::Color, float>> keys;
                 for (const auto& k : keys_)
@@ -376,7 +380,7 @@ namespace colors
             }
 
         template<class Archive>
-        void load(Archive& ar, std::uint32_t)
+        void load(Archive& ar, u32)
             {
                 std::vector<std::pair<sf::Color, int>> loaded_keys;
                 std::vector<Key> keys;

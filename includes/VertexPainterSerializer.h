@@ -63,11 +63,11 @@ namespace colors
     private:
         friend class cereal::access;
         template<class Archive>
-        void save(Archive& ar, const std::uint32_t) const
+        void save(Archive& ar, const u32) const
             {
                 Expects(serialized_);
 
-                std::uint32_t version = 0; // ignored
+                u32 version = 0; // ignored
                 
                 std::string type = serialized_->type_name();
                 ar(cereal::make_nvp("type", type));
@@ -96,9 +96,9 @@ namespace colors
             }
     
         template<class Archive>
-        void load(Archive& ar, const std::uint32_t)
+        void load(Archive& ar, const u32)
             {
-                std::uint32_t version = 0; // ignored
+                u32 version = 0; // ignored
 
                 std::string type;
                 ar(cereal::make_nvp("type", type));

@@ -132,7 +132,7 @@ namespace drawing
         friend class cereal::access;
 
         template<class Archive>
-        void save (Archive& ar, const std::uint32_t) const
+        void save (Archive& ar, const u32) const
             {
                 // Custom save to have a pretty map between predecessors and
                 // orders.
@@ -141,7 +141,7 @@ namespace drawing
             }
 
         template<class Archive>
-        void load (Archive& ar, const std::uint32_t)
+        void load (Archive& ar, const u32)
             {
                 // Complex loading as we do not save the 'map' in a standard
                 // way.

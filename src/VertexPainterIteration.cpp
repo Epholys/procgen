@@ -19,7 +19,7 @@ namespace colors
     }
 
     void VertexPainterIteration::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                                const std::vector<std::uint8_t>& vertices_iteration,
+                                                const std::vector<u8>& vertices_iteration,
                                                 const std::vector<bool>& transparent,
                                                 int max_iteration,
                                                 sf::FloatRect)

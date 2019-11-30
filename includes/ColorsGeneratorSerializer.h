@@ -7,8 +7,8 @@
 #include <string>
 #include <functional>
 
+#include "types.h"
 #include "helper_cereal.hpp"
-
 #include "ColorsGenerator.h"
 #include "VertexPainterComposite.h"
 
@@ -21,7 +21,7 @@ namespace colors
     // calsses. However, the end result is not "pretty", meaning that generating
     // save files becomes complicated. As such, this class implements (in a dirty way)
     // the following format:
-    // 
+    //
     // ColorGenerator": {
     //     "cereal_class_version": 0,
     //     "type": "ConstantColor",
@@ -53,16 +53,16 @@ namespace colors
 
         // Getter
         std::shared_ptr<ColorGenerator> get_serialized() const;
-        
+
     private:
         friend class cereal::access;
         template<class Archive>
-        void save(Archive& ar, const std::uint32_t) const
+        void save(Archive& ar, const u32) const
             {
                 Expects(serialized_);
 
-                std::uint32_t version = 0; // ignored
-                
+                u32 version = 0; // ignored
+
                 std::string type = serialized_->type_name();
                 ar(cereal::make_nvp("type", type));
 
@@ -84,15 +84,15 @@ namespace colors
                 SERIALIZE_COLORGEN_CHILD(ColorGeneratorComposite);
 #undef SERIALIZE_COLORGEN_CHILD
             }
-    
+
         template<class Archive>
-        void load(Archive& ar, const std::uint32_t)
+        void load(Archive& ar, const u32)
             {
-                std::uint32_t version = 0; // ignored
-            
+                u32 version = 0; // ignored
+
                 std::string type;
                 ar(cereal::make_nvp("type", type));
-            
+
 #define DESERIALIZE_COLORGEN_CHILD(Child)                               \
                 do {                                                    \
                     if (type == #Child)                                 \
@@ -103,7 +103,7 @@ namespace colors
                     }                                                   \
                 }                                                       \
                 while(false)
-            
+
                 DESERIALIZE_COLORGEN_CHILD(ConstantColor);
                 DESERIALIZE_COLORGEN_CHILD(LinearGradient);
                 DESERIALIZE_COLORGEN_CHILD(DiscreteGradient);

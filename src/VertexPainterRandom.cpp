@@ -50,7 +50,7 @@ namespace colors
 
 
     void VertexPainterRandom::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                             const std::vector<std::uint8_t>&,
+                                             const std::vector<u8>&,
                                              const std::vector<bool>& transparent,
                                              int,
                                              sf::FloatRect)

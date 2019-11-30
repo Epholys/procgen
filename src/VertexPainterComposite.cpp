@@ -230,7 +230,7 @@ namespace colors
     }
 
     void VertexPainterComposite::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                                const std::vector<std::uint8_t>& iteration_of_vertices,
+                                                const std::vector<u8>& iteration_of_vertices,
                                                 const std::vector<bool>& transparent,
                                                 int max_recursion,
                                                 sf::FloatRect bounding_box)
@@ -261,14 +261,14 @@ namespace colors
         // // -- Get the vertices and their iteration from the indices in
         // // 'vertex_indices_pools_'.
         // std::vector<std::vector<sf::Vertex>> vertices_pools;
-        // std::vector<std::vector<std::uint8_t>> iteration_of_vertices_pools;
+        // std::vector<std::vector<u8>> iteration_of_vertices_pools;
         // std::vector<std::vector<bool>> transparent_pools;
 
         for(auto i=0ull; i<child_painters_observers_.size(); ++i)
         {
             // For each indices pools...
             std::vector<sf::Vertex> vertices_part;
-            std::vector<std::uint8_t> iteration_of_vertices_part;
+            std::vector<u8> iteration_of_vertices_part;
             std::vector<bool> transparent_part;
             const auto pool_size = vertex_indices_pools_.at(i).size();
             vertices_part.reserve(pool_size);

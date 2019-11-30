@@ -24,7 +24,7 @@ namespace colors
         // current iteration by the max iteration.
         // 'bounding_box' is not used.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<std::uint8_t>& vertices_iteration,
+                                    const std::vector<u8>& vertices_iteration,
                                     const std::vector<bool>& transparent,
                                     int max_iteration,
                                     sf::FloatRect bounding_box) override;
@@ -38,14 +38,14 @@ namespace colors
     private:
         friend class cereal::access;
         template<class Archive>
-        void save(Archive& ar, const std::uint32_t) const
+        void save(Archive& ar, const u32) const
             {
                 auto color_generator = get_generator_wrapper()->unwrap();
                 auto serializer = ColorGeneratorSerializer(color_generator);
                 ar(cereal::make_nvp("ColorGenerator", serializer));
             }
         template<class Archive>
-        void load(Archive& ar, const std::uint32_t)
+        void load(Archive& ar, const u32)
             {
                 ColorGeneratorSerializer serializer;
                 ar(cereal::make_nvp("ColorGenerator", serializer));
