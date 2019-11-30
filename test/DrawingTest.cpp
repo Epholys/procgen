@@ -136,6 +136,13 @@ TEST_F(DrawingTest, compute_paths)
     // ASSERT_EQ(vx_iter, expected_iter);
 }
 
+namespace drawing
+{
+    bool operator==(const Order& o1, const Order& o2)
+    {
+        return o1.id == o2.id;
+    }
+}
 // Also test 'Order' save/load
 TEST_F(DrawingTest, serialization)
 {

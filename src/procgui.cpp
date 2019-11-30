@@ -335,9 +335,10 @@ namespace procgui
                 // The index is calculated by finding in the vector the order
                 // and using the distance between the first element and the
                 // current one.
-                auto selected_interpretation_it = std::find(all_orders.begin(),
-                                                            all_orders.end(),
-                                                            it->successor);
+                auto selected_interpretation_it = std::find_if(all_orders.begin(),
+                                                               all_orders.end(),
+                                                               [&it](const auto& o)
+                                                               { return o.id == it->successor.id; });
                 int index = std::distance(all_orders.begin(), selected_interpretation_it);
                 if(ImGui::ListBox("##order", &index, all_orders_name.data(), all_orders_name.size()) &&
                     !updated)

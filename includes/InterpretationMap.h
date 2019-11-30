@@ -1,12 +1,11 @@
 #ifndef DRAWING_INTERPRETATION_H
 #define DRAWING_INTERPRETATION_H
 
-#include <functional>
 
 #include "cereal/cereal.hpp"
 #include "cereal/types/unordered_map.hpp"
 
-#include "DrawingParameters.h"
+#include "types.h"
 #include "RuleMap.h"
 #include "helper_string.h"
 #include "LoadMenu.h"
@@ -20,10 +19,6 @@ namespace drawing
         struct Turtle;
     }
 
-    // An 'order_fn' is a function modifying a 'Turtle'. Semantically it is an
-    // instruction like "move forward" or "turn left".
-    using order_fn = std::function<void(impl::Turtle& turtle)>;
-
     // All the orders currently defined.
     enum class OrderID {
         GO_FORWARD,
@@ -33,6 +28,7 @@ namespace drawing
         LOAD_POSITION,
     };
 
+    // The order functions, applying the order to 'turtle'.
     void go_forward_fn(impl::Turtle& turtle);
     // "Turn right" means "turn clockwise" AS SEEN ON THE SCREEN.
     void turn_right_fn(impl::Turtle& turtle);
@@ -40,41 +36,42 @@ namespace drawing
     void save_position_fn(impl::Turtle& turtle);
     void load_position_fn(impl::Turtle& turtle);
 
-    // An 'Order' is the association of an 'order_fn', an identifier to allow
-    // equality comparison between orders (as 'std::function<>' does not have
-    // it) and a name used in the GUI and the serialization.
-    struct Order {
-        Order() : Order(OrderID::GO_FORWARD,/*go_forward_fn,*/ "Go forward") {}
-        Order(OrderID id, /*const order_fn& fn,*/ const std::string& name)
-            : id{id},/* order{fn},*/ name{name} {}
-
-        OrderID id;
-//        order_fn order;
-        std::string name;
-//        void operator() (impl::Turtle& t) { order(t); }
-    };
-    inline bool operator== (const Order& lhs, const Order& rhs)
+    // An 'Order' is simply an OrderID with an associated name.
+    //
+    // The OrderID is used in Turtle.cpp to link it to one of the order function
+    // above. A 'std::function<>' could have been useful to avoid repetition,
+    // but this class is heavy-weight, and there is a slight speedup when simply
+    // using a 'switch' construct.
+    // The name is used in the GUI.
+    struct Order
     {
-        return lhs.id == rhs.id;
-    }
+        OrderID id;
+        std::string name;
+    };
 
-    const Order go_forward    { OrderID::GO_FORWARD,    /*go_forward_fn,*/ "Go forward" };
-    const Order turn_right    { OrderID::TURN_RIGHT,    /*turn_right_fn,*/ "Turn right" };
-    const Order turn_left     { OrderID::TURN_LEFT,     /*turn_left_fn,*/ "Turn left"  };
-    const Order save_position { OrderID::SAVE_POSITION, /*save_position_fn,*/ "Save position" };
-    const Order load_position { OrderID::LOAD_POSITION, /*load_position_fn,*/ "Load position" };
+    const Order go_forward    { OrderID::GO_FORWARD,    "Go forward" };
+    const Order turn_right    { OrderID::TURN_RIGHT,    "Turn right" };
+    const Order turn_left     { OrderID::TURN_LEFT,     "Turn left"  };
+    const Order save_position { OrderID::SAVE_POSITION, "Save position" };
+    const Order load_position { OrderID::LOAD_POSITION, "Load position" };
+    const Order default_order = go_forward;
 
     // All the orders available.
-    const std::vector<Order> all_orders { go_forward, turn_right, turn_left,
-                                          save_position, load_position };
+    const std::vector<Order> all_orders { go_forward,
+                                          turn_right,
+                                          turn_left,
+                                          save_position,
+                                          load_position };
     // All the names of the orders (used in the GUI).
-    // Note: They must be in the same strict order as 'all_orders'.
+    // Note: They must be in the same strict order as 'all_orders', as their
+    // index is used to separate them.
     const std::vector<const char*> all_orders_name =
         [](){ std::vector<const char*> v;
               for(const auto& o : all_orders)
                   v.push_back(o.name.c_str());
               return v; }();
 
+    // All the names of the order, used in the save files
     const std::vector<std::string> all_orders_json_name =
         [](){ std::vector<std::string> v;
               for(const auto& o : all_orders)
@@ -137,7 +134,9 @@ namespace drawing
                 // Custom save to have a pretty map between predecessors and
                 // orders.
                 for(const auto& i : rules_)
+                {
                     ar(cereal::make_nvp(std::string()+i.first, i.second));
+                }
             }
 
         template<class Archive>
