@@ -240,7 +240,7 @@ void RuleMapBuffer<Target>::remove_predecessor(RuleMapBuffer<Target>::const_iter
 
 
 template<typename Target>
-void RuleMapBuffer<Target>::change_successor(const_iterator cit, const succ& succ)
+void RuleMapBuffer<Target>::change_successor(const_iterator cit, const Successor& succ)
 {
     Expects(cit != buffer_.end());
 
@@ -298,9 +298,9 @@ void RuleMapBuffer<Target>::remove_rule(char pred)
 }
 
 template<typename Target>
-typename Target::rule_map RuleMapBuffer<Target>::generate_rule_map()
+typename Target::Rules RuleMapBuffer<Target>::generate_rule_map()
 {
-    typename Target::rule_map map;
+    typename Target::Rules map;
 
     for (const auto& rule : buffer_)
     {

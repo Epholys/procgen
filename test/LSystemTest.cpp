@@ -6,7 +6,7 @@
 
 
 using LSysPtr = std::shared_ptr<LSystem>;
-using Rules = LSystem::production_rules;
+using Rules = LSystem::Rules;
 using ProductionCache = std::unordered_map<std::uint8_t, std::string>;
 using IterationCache = std::unordered_map<std::uint8_t, std::pair<std::vector<std::uint8_t>, std::uint8_t>>;
 
@@ -36,7 +36,7 @@ TEST(LSystemTest, default_ctor)
 {
     LSystem lsys;
 
-    LSystem::production_rules empty_rules;
+    LSystem::Rules empty_rules;
     std::string empty_str;
     ProductionCache empty_prod_cache;
     IterationCache empty_rec_cache;
@@ -51,7 +51,7 @@ TEST(LSystemTest, default_ctor)
 TEST(LSystemTest, complete_ctor)
 {
     LSystem lsys { "F", { { 'F', "F+F" } }, "F" };
-    LSystem::production_rules expected_rules = { { 'F', "F+F" } };
+    LSystem::Rules expected_rules = { { 'F', "F+F" } };
     IterationCache expected_iteration_cache = { {0, {{0}, 0}} };
 
     ASSERT_EQ(lsys.get_axiom(), "F");
@@ -89,7 +89,7 @@ TEST(LSystemTest, add_rule)
 {
     LSysPtr lsys = std::make_shared<LSystem>("F", Rules({ }), "F");
     LSysObs obs (lsys);
-    LSystem::production_rules expected_rules = { { 'F', "F+F" } };
+    LSystem::Rules expected_rules = { { 'F', "F+F" } };
     ProductionCache base_prod_cache { { 0, "F" } };
     IterationCache base_iter_cache { {0, {{0}, 0 }} };
     lsys->add_rule('F', "F+F");
@@ -104,7 +104,7 @@ TEST(LSystemTest, remove_rule)
 {
     LSysPtr lsys = std::make_shared<LSystem>("F", Rules({ { 'F', "F+F" } }), "F");
     LSysObs obs (lsys);
-    LSystem::production_rules empty_rules;
+    LSystem::Rules empty_rules;
     ProductionCache base_prod_cache { { 0, "F" } };
     IterationCache base_iter_cache { {0, {{0}, 0 }} };
 
@@ -123,7 +123,7 @@ TEST(LSystemTest, clear_rules)
 {
     LSysPtr lsys = std::make_shared<LSystem>("F", Rules({ { 'F', "F+F" }, { 'G', "GG" } }), "F");
     LSysObs obs (lsys);
-    LSystem::production_rules empty_rules;
+    LSystem::Rules empty_rules;
     ProductionCache base_cache { { 0, "F" } };
 
     lsys->clear_rules();
@@ -138,7 +138,7 @@ TEST(LSystemTest, replace_rules)
 {
     LSysPtr lsys = std::make_shared<LSystem>("F", Rules({ { 'F', "FF" }, { 'G', "GG" } }), "F");
     LSysObs obs (lsys);
-    LSystem::production_rules new_rules {{'H', "HH"},{'I', "II"}};;
+    LSystem::Rules new_rules {{'H', "HH"},{'I', "II"}};;
     ProductionCache base_prod_cache { { 0, "F" } };
     IterationCache base_iter_cache { {0, {{0}, 0 }} };
 

@@ -35,11 +35,11 @@ class RuleBufferTest :  public ::testing::Test
 {
 public:
     using const_iterator = IntBuffer::const_iterator;
-    using successor = IntBuffer::succ;
-    using rule = IntBuffer::Rule;
+    using Successor = IntBuffer::Successor;
+    using Rule = IntBuffer::Rule;
 
     RuleBufferTest()
-        : map(std::make_shared<IntMap>(IntMap::rule_map()))
+        : map(std::make_shared<IntMap>(IntMap::Rules()))
         , buffer(std::make_shared<IntBuffer>(map))
         {
             buffer->add_rule();
@@ -175,7 +175,7 @@ TEST_F(RuleBufferTest, add_rule)
     buffer->add_rule();
 
     // Check if the last rule is an empty one
-    ASSERT_EQ(*std::prev(buffer->end()), rule({}));
+    ASSERT_EQ(*std::prev(buffer->end()), Rule({}));
 
     ASSERT_FALSE(*obs);
 }
@@ -202,7 +202,7 @@ TEST_F(RuleBufferTest, change_predecessor_simple)
 
 TEST_F(RuleBufferTest, change_predecessor_old_duplicated)
 {
-    IntMap::rule_map rules = {};
+    IntMap::Rules rules = {};
     std::shared_ptr<IntMap> map = std::make_shared<IntMap>(rules);
     IntBufferPtr buffer = std::make_shared<IntBuffer>(map);
     IntBufferObs obs (buffer);

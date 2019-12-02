@@ -27,7 +27,7 @@ namespace procgui
     //   If a rule does not have a predecessor (a null character), it is
     // considered as a scratch buffer. They are not synchronized with the
     // Target or others 'RuleMapBuffer'.
-    // 
+    //
     //   - duplication:
     //   Several rules can be duplicated. If one of these rule is removed, the
     // other one must take its place and be synchronized.
@@ -42,17 +42,17 @@ namespace procgui
     {
     public:
         // must be a derived class of RuleMap
-        static_assert(std::is_base_of<RuleMap<typename Target::successor>, Target>::value, "RuleMapBuffer must refer to a derived class of RuleMap");
+        static_assert(std::is_base_of<RuleMap<typename Target::Successor>, Target>::value, "RuleMapBuffer must refer to a derived class of RuleMap");
 
-        using succ = typename Target::successor;
+        using Successor = typename Target::Successor;
 
-        // A production rule: 
+        // A production rule:
         struct Rule
         {
             bool is_active {true};    // If a Rule is a duplicate of an already existing
                                      // rule, it is not active.
             char predecessor {'\0'};
-            succ successor {}; // If the successor is a basic type like 'int',
+            Successor successor {}; // If the successor is a basic type like 'int',
                                // it will be not be initialized. Do not forget
                                // to override 'add_rule' if this is the case.
             inline bool operator== (const Rule& other) const
@@ -72,12 +72,12 @@ namespace procgui
         // Constructor
         explicit RuleMapBuffer(std::shared_ptr<Target> rule_map_);
         virtual ~RuleMapBuffer();
-        
+
         RuleMapBuffer(const RuleMapBuffer& other);
         RuleMapBuffer(RuleMapBuffer&& other);
         RuleMapBuffer& operator=(const RuleMapBuffer& other);
         RuleMapBuffer& operator=(RuleMapBuffer&& other);
-        
+
         // Access the underlying buffer without allowing modifications. Every
         // modification should be done with the associated functions.
         const_iterator begin() const;
@@ -89,10 +89,10 @@ namespace procgui
         // Get target
         std::shared_ptr<const Target> get_rule_map() const;
         std::shared_ptr<Target> ref_rule_map() const;
-        
+
         // Set target
         void set_rule_map(std::shared_ptr<Target> new_rule_map);
-                    
+
         // Add an empty rule: a scratch buffer.
         // Do not forget to override it if there is not a default initialization
         // for the successor.
@@ -130,7 +130,7 @@ namespace procgui
         //
         // Exception:
         //  - Precondition: 'cit' must be valid and derenferenceable.
-        void change_successor(const_iterator cit, const succ& succ);
+        void change_successor(const_iterator cit, const Successor& succ);
 
         // Reverse the last modification by setting all rules of the target by
         // the rules of 'previous_buffer_'.
@@ -138,19 +138,19 @@ namespace procgui
 
         // Confirms the change, clear 'previous_buffer_'
         void validate();
-        
+
     private:
         // Remove a rule from the buffer.
         // Take care of updating the Target according to the existence of
         // duplicate rules in this buffer.
         void remove_rule(char pred);
-               
+
         // Remove the constness from 'cit'. Can only be used inside this class
         // to modify 'buffer_'.
         iterator remove_const(const_iterator cit);
 
         // Generate a rule map for the target.
-        typename Target::rule_map generate_rule_map();
+        typename Target::Rules generate_rule_map();
 
         // The target
         Observer<Target> target_observer_{nullptr};
