@@ -13,11 +13,7 @@
 // Main explanation of drawing in Turtle.h
 namespace drawing
 {
-    // Forward declaration
-    namespace impl
-    {
-        struct Turtle;
-    }
+    struct Turtle;
 
     // All the orders currently defined.
     enum class OrderID {
@@ -29,12 +25,12 @@ namespace drawing
     };
 
     // The order functions, applying the order to 'turtle'.
-    void go_forward_fn(impl::Turtle& turtle);
+    void go_forward_fn(Turtle& turtle);
     // "Turn right" means "turn clockwise" AS SEEN ON THE SCREEN.
-    void turn_right_fn(impl::Turtle& turtle);
-    void turn_left_fn(impl::Turtle& turtle);
-    void save_position_fn(impl::Turtle& turtle);
-    void load_position_fn(impl::Turtle& turtle);
+    void turn_right_fn(Turtle& turtle);
+    void turn_left_fn(Turtle& turtle);
+    void save_position_fn(Turtle& turtle);
+    void load_position_fn(Turtle& turtle);
 
     // An 'Order' is simply an OrderID with an associated name.
     //

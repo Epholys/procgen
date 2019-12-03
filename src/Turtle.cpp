@@ -2,23 +2,8 @@
 
 namespace drawing
 {
-    using namespace impl;
-
-    void Turtle::init_from_parameters (const DrawingParameters& parameters)
-    {
-        cos = std::cos(parameters.get_delta_angle());
-        sin = std::sin(parameters.get_delta_angle());
-        step = parameters.get_step();
-        state = {{0,0},
-                 {std::cos(parameters.get_starting_angle()),
-                  std::sin(parameters.get_starting_angle())}};
-    }
-
-    Turtle::Turtle(const DrawingParameters& parameters)
-    {
-        init_from_parameters(parameters);
-    }
-
+    // Switch case to apply the order function associated to 'order' to
+    // 'turtle'.
     void execute_order(const OrderID& order, Turtle& turtle)
     {
         switch (order)
@@ -39,34 +24,52 @@ namespace drawing
             load_position_fn(turtle);
             break;
         default:
-            // NOTHING
+            Expects(false);
             break;
         }
     }
 
+
+    void Turtle::init_from_parameters (const DrawingParameters& parameters)
+    {
+        cos_ = std::cos(parameters.get_delta_angle());
+        sin_ = std::sin(parameters.get_delta_angle());
+        step_ = parameters.get_step();
+        state_ = {{0,0},
+                 {std::cos(parameters.get_starting_angle()),
+                  std::sin(parameters.get_starting_angle())}};
+    }
+
+    Turtle::Turtle(const DrawingParameters& parameters)
+    {
+        init_from_parameters(parameters);
+    }
+
     Turtle::TurtleProduction Turtle::compute_vertices(const std::string& lsystem_production,
-                                                      const std::vector<u8>& iterations,
-                                                      const DrawingParameters& parameters,
+                                                      const std::vector<u8>& lsystem_iterations,
                                                       const InterpretationMap& interpretation,
                                                       unsigned long long size)
     {
-        init_from_parameters(parameters);
-        vertices.clear();
-        iteration_of_vertices.clear();
-        transparent.clear();
-        iteration_index = 0;
-        iteration = 1;
+        // Reset the members
+        vertices_.clear();
+        iterations_.clear();
+        transparency_.clear();
+        iteration_index_ = 0;
+        iteration_depth_ = 0;
 
-        vertices.reserve(size);
-        iteration_of_vertices.reserve(size);
-        transparent.reserve(size);
+        // Reserve memory
+        vertices_.reserve(size);
+        iterations_.reserve(size);
+        transparency_.reserve(size);
 
-        if (!iterations.empty())
+        // If there is at least one vertex, create manually the first one at the
+        // origin.
+        if (!lsystem_production.empty())
         {
-            vertices.push_back(sf::Vector2f(state.position));
-            iteration_of_vertices.push_back(iterations.at(0));
-            transparent.push_back(false);
-            iteration = iterations.at(0);
+            vertices_.push_back(sf::Vector2f(state_.position));
+            iterations_.push_back(lsystem_iterations.at(0));
+            transparency_.push_back(false);
+            iteration_depth_ = iterations_.at(0);
         }
 
         for (auto c : lsystem_production)
@@ -76,21 +79,22 @@ namespace drawing
                 // If an interpretation of the character 'c' is found,
                 // applies it to the current turtle.
                 execute_order(interpretation.get_rule(c).second.id, *this);
-                //interpretation.get_rule(c).second(*this);
             }
             else
             {
                 // Do nothing: if 'c' does not have an associated
                 // order, it has no effects.
             }
-            // Increment the iteration index: each character has an iteration
-            // count. Can not be in the orders, otherwise characters without
-            // orders will not increment this index. // TODO COMMENT
-            iteration = iterations.at(iteration_index++);
+
+            // Update the iteration depth for the vertices of the next symbol.
+            // Operation that apply the invariant
+            iteration_depth_ = lsystem_iterations.at(iteration_index_++);
         }
 
-        Ensures(vertices.size() == iteration_of_vertices.size());
-        TurtleProduction production {vertices, iteration_of_vertices, transparent};
+        // Ensures the invariant
+        Ensures(vertices_.size() == iterations_.size());
+        Ensures(vertices_.size() == transparency_.size());
+        TurtleProduction production {vertices_, iterations_, transparency_};
         return production;
     }
 }

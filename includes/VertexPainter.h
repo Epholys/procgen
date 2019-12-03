@@ -52,8 +52,8 @@ namespace colors
         // other parameters of 'paint_vertices()' could be used in the future.
         virtual void supplementary_drawing(sf::FloatRect bounding_box) const;
 
-        // Paint 'vertices' with the informations of 'bounding_box' and
-        // 'iteration_of_vertices' according to a rule with the colors from
+        // Paint 'vertices' with the informations of all the other parameters
+        // according to a rule with the colors from
         // 'ColorGeneratorWrapper::ColorGenerator'.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
                                     const std::vector<u8>& iteration_of_vertices,

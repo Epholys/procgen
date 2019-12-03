@@ -3,64 +3,62 @@
 
 namespace drawing
 {
-    using namespace impl;
-
     void go_forward_fn(Turtle& turtle)
     {
         // Go forward following the direction vector.
-        double dx = turtle.step * turtle.state.direction.x;
-        double dy = turtle.step * -turtle.state.direction.y;
-        turtle.state.position += {dx, dy};
-        turtle.vertices.emplace_back(sf::Vector2f(turtle.state.position));
-        turtle.iteration_of_vertices.push_back(turtle.iteration);
-        turtle.transparent.push_back(false);
+        double dx = turtle.step_ * turtle.state_.direction.x;
+        double dy = turtle.step_ * -turtle.state_.direction.y;
+        turtle.state_.position += {dx, dy};
+        turtle.vertices_.emplace_back(sf::Vector2f(turtle.state_.position));
+        turtle.iterations_.push_back(turtle.iteration_depth_);
+        turtle.transparency_.push_back(false);
     }
 
     void turn_left_fn(Turtle& turtle)
     {
         // Updates the direction vector.
         ext::sf::Vector2d v
-        {turtle.state.direction.x * turtle.cos - turtle.state.direction.y * turtle.sin,
-         turtle.state.direction.x * turtle.sin + turtle.state.direction.y * turtle.cos};
-        turtle.state.direction = v;
+        {turtle.state_.direction.x * turtle.cos_ - turtle.state_.direction.y * turtle.sin_,
+         turtle.state_.direction.x * turtle.sin_ + turtle.state_.direction.y * turtle.cos_};
+        turtle.state_.direction = v;
     }
 
     void turn_right_fn(Turtle& turtle)
     {
         // Updates the direction vector.
         ext::sf::Vector2d v
-        {turtle.state.direction.x * turtle.cos - turtle.state.direction.y * (-turtle.sin),
-         turtle.state.direction.x * (-turtle.sin) + turtle.state.direction.y * turtle.cos};
-        turtle.state.direction = v;
+        {turtle.state_.direction.x * turtle.cos_ - turtle.state_.direction.y * (-turtle.sin_),
+         turtle.state_.direction.x * (-turtle.sin_) + turtle.state_.direction.y * turtle.cos_};
+        turtle.state_.direction = v;
     }
 
     void save_position_fn(Turtle& turtle)
     {
-        turtle.stack.push(turtle.state);
+        turtle.stack_.push(turtle.state_);
     }
 
     void load_position_fn(Turtle& turtle)
     {
-        if (turtle.stack.empty() || turtle.vertices.size() == 0)
+        if (turtle.stack_.empty() || turtle.vertices_.size() == 0)
         {
             // Do nothing
         }
         else
         {
-            turtle.vertices.emplace_back(turtle.vertices.back().position, sf::Color::Transparent);
-            turtle.state = turtle.stack.top();
-            turtle.vertices.emplace_back(sf::Vector2f(turtle.state.position), sf::Color::Transparent);
-            turtle.vertices.emplace_back(sf::Vector2f(turtle.state.position));
+            turtle.vertices_.emplace_back(turtle.vertices_.back().position, sf::Color::Transparent);
+            turtle.state_ = turtle.stack_.top();
+            turtle.vertices_.emplace_back(sf::Vector2f(turtle.state_.position), sf::Color::Transparent);
+            turtle.vertices_.emplace_back(sf::Vector2f(turtle.state_.position));
 
-            turtle.iteration_of_vertices.push_back(turtle.iteration);
-            turtle.iteration_of_vertices.push_back(turtle.iteration);
-            turtle.iteration_of_vertices.push_back(turtle.iteration);
+            turtle.iterations_.push_back(turtle.iteration_depth_);
+            turtle.iterations_.push_back(turtle.iteration_depth_);
+            turtle.iterations_.push_back(turtle.iteration_depth_);
 
-            turtle.transparent.push_back(true);
-            turtle.transparent.push_back(true);
-            turtle.transparent.push_back(false);
+            turtle.transparency_.push_back(true);
+            turtle.transparency_.push_back(true);
+            turtle.transparency_.push_back(false);
 
-            turtle.stack.pop();
+            turtle.stack_.pop();
         }
     }
 

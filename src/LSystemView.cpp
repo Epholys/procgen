@@ -386,13 +386,13 @@ namespace procgui
 
         const auto& [str, iterations, max_iteration] = OLSys::get_target()->ref_rule_map()->produce(OParams::get_target()->get_n_iter(), system_size_.lsystem_size);
         max_iteration_ = max_iteration;
+        turtle_.init_from_parameters(*OParams::get_target());
         turtle_.compute_vertices(str,
                                  iterations,
-                                 *OParams::get_target(),
                                  *OMap::get_target()->get_rule_map(),
                                  system_size_.vertices_size);
-        bounding_box_ = geometry::bounding_box(turtle_.vertices);
-        sub_boxes_ = geometry::sub_boxes(turtle_.vertices, MAX_SUB_BOXES);
+        bounding_box_ = geometry::bounding_box(turtle_.vertices_);
+        sub_boxes_ = geometry::sub_boxes(turtle_.vertices_, MAX_SUB_BOXES);
         geometry::expand_boxes(sub_boxes_); // Add some margin
 
         paint_vertices();
@@ -401,9 +401,9 @@ namespace procgui
     void LSystemView::paint_vertices()
     {
         // un-transformed vertices and bounding box
-        OPainter::get_target()->get_target()->paint_vertices(turtle_.vertices,
-                                                             turtle_.iteration_of_vertices,
-                                                             turtle_.transparent,
+        OPainter::get_target()->get_target()->paint_vertices(turtle_.vertices_,
+                                                             turtle_.iterations_,
+                                                             turtle_.transparency_,
                                                              max_iteration_,
                                                              bounding_box_);
         is_modified_ = true;
@@ -419,7 +419,7 @@ namespace procgui
 
         // Draw a placeholder if the LSystem does not have enough vertices or
         // does not have any size.
-        if (turtle_.vertices.size() < 2 ||
+        if (turtle_.vertices_.size() < 2 ||
             (bounding_box_.width < std::numeric_limits<float>::epsilon() &&
              bounding_box_.height < std::numeric_limits<float>::epsilon()))
         {
@@ -428,7 +428,9 @@ namespace procgui
         }
         else // Draw the vertices.
         {
-            target.draw(turtle_.vertices.data(), turtle_.vertices.size(), sf::LineStrip, get_transform());
+            target.draw(turtle_.vertices_.data(),
+                        turtle_.vertices_.size(),
+                        sf::LineStrip, get_transform());
             OPainter::get_target()->unwrap()->supplementary_drawing(visible_bounding_box);
         }
 
@@ -510,7 +512,7 @@ namespace procgui
     {
         //  If no placeholder is necessary, checks if 'click' is inside one of
         //  the sub-boxes.
-        if (turtle_.vertices.size() >= 2 &&
+        if (turtle_.vertices_.size() >= 2 &&
             (bounding_box_.width  >= std::numeric_limits<float>::epsilon() ||
              bounding_box_.height >= std::numeric_limits<float>::epsilon()))
         {

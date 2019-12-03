@@ -236,9 +236,9 @@ TEST_F(size_computer_test, compute_max_size)
     DrawingParameters params;
     params.set_n_iter(n_iter);
 
-    drawing::impl::Turtle turtle (params);
+    drawing::Turtle turtle (params);
     const auto& [str, iters, _1] = no_const_lsys.produce(n_iter);
-    const auto& [vx, _2, _3] = turtle.compute_vertices(str, iters, params, map);
+    const auto& [vx, _2, _3] = turtle.compute_vertices(str, iters, map);
 
     const number expected_lsys_size = str.size();
     const number expected_vx_size = vx.size();
@@ -271,9 +271,9 @@ TEST_F(size_computer_test, compute_max_size_unbalanced)
     DrawingParameters params;
     params.set_n_iter(n_iter);
 
-    drawing::impl::Turtle turtle (params);
+    drawing::Turtle turtle (params);
     const auto& [str, iters, _1] = unbalanced_lsys.produce(n_iter);
-    const auto& [vx, _2, _3] = turtle.compute_vertices(str, iters, params, map);
+    const auto& [vx, _2, _3] = turtle.compute_vertices(str, iters, map);
 
     number lsys_size = str.size();
     number vx_size = vx.size();

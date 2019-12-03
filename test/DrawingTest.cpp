@@ -30,7 +30,7 @@ public:
                                         { ']', load_position } };
     // starting_position, starting_angle, delta_angle, step, n_iter
     DrawingParameters parameters { { 100, 100 }, 0, degree_to_rad(90.), 10, 0 };
-    impl::Turtle turtle {parameters};
+    Turtle turtle {parameters};
 };
 
 // SFML does not provide an equality operator for sf::Vertex. It is
@@ -63,7 +63,7 @@ TEST_F(DrawingTest, go_forward)
 
     go_forward_fn(turtle);
 
-    ASSERT_EQ(turtle.vertices.at(0), end);
+    ASSERT_EQ(turtle.vertices_.at(0), end);
     //ASSERT_EQ(turtle.vertices.at(1), end);
     // CAN'T TEST ITERS WITH NEW SYSTEM
     // ASSERT_EQ(turtle.iteration_of_vertices, expected_iter);
@@ -75,8 +75,8 @@ TEST_F(DrawingTest, turn_right)
     turn_right_fn(turtle);
 
     ext::sf::Vector2d direction { 0, -1 };
-    ASSERT_NEAR(turtle.state.direction.x, direction.x, 1e-10);
-    ASSERT_NEAR(turtle.state.direction.y, direction.y, 1e-10);
+    ASSERT_NEAR(turtle.state_.direction.x, direction.x, 1e-10);
+    ASSERT_NEAR(turtle.state_.direction.y, direction.y, 1e-10);
 }
 
 // Test the turn_left order.
@@ -85,23 +85,23 @@ TEST_F(DrawingTest, turn_left)
     turn_left_fn(turtle);
 
     ext::sf::Vector2d direction { 0, 1 };
-    ASSERT_NEAR(turtle.state.direction.x, direction.x, 1e-10);
-    ASSERT_NEAR(turtle.state.direction.y, direction.y, 1e-10);
+    ASSERT_NEAR(turtle.state_.direction.x, direction.x, 1e-10);
+    ASSERT_NEAR(turtle.state_.direction.y, direction.y, 1e-10);
 }
 
 // Test the save_position and load_position order.
 TEST_F(DrawingTest, stack_test)
 {
     save_position_fn(turtle);
-    const auto& saved_state = turtle.stack.top();
-    ASSERT_EQ(saved_state.position, turtle.state.position);
-    ASSERT_EQ(saved_state.direction, turtle.state.direction);
+    const auto& saved_state = turtle.stack_.top();
+    ASSERT_EQ(saved_state.position, turtle.state_.position);
+    ASSERT_EQ(saved_state.direction, turtle.state_.direction);
 
     go_forward_fn(turtle);
     load_position_fn(turtle);
 
-    ASSERT_EQ(saved_state.position, turtle.state.position);
-    ASSERT_EQ(saved_state.direction, turtle.state.direction);
+    ASSERT_EQ(saved_state.position, turtle.state_.position);
+    ASSERT_EQ(saved_state.direction, turtle.state_.direction);
 
     // 1 at creation, 1 at go_forward, 3 at load_position_fn
     std::vector<std::uint8_t> expected_iter {1,1,1,1,1};
@@ -121,12 +121,13 @@ TEST_F(DrawingTest, compute_paths)
     go_forward_fn(turtle);
 
     std::vector<sf::Vertex> norm { sf::Vertex({0, 0}),
-                                   turtle.vertices.at(0),
-                                   turtle.vertices.at(1) };
+                                   turtle.vertices_.at(0),
+                                   turtle.vertices_.at(1) };
 
     parameters.set_n_iter(1);
     auto [str, iter, _] = lsys.produce(1);
-    auto [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, iter, parameters, interpretation);
+    turtle.init_from_parameters(parameters);
+    auto [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, iter, interpretation);
 
     ASSERT_EQ(vx, norm);
 
