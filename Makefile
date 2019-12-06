@@ -19,8 +19,8 @@ LFLAGS     += -lsfml-system -lsfml-window -lsfml-graphics -lGL -lstdc++fs
 IFLAGS     += -isystem . -I$(INCLUDE_DIR)
 
 # Other flags
-debug : CXXFLAGS = -std=c++17 -g -O0 -Wall -Wextra -pthread
-debug : MACROFLAGS += -DDEBUG_CHECKS
+main : CXXFLAGS = -std=c++17 -g -O0 -Wall -Wextra -pthread
+main : MACROFLAGS += -DDEBUG_CHECKS
 profiling : CXXFLAGS += -g
 optimized : CXXFLAGS += -march=native
 
