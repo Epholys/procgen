@@ -27,17 +27,11 @@ namespace procgui
     //     boxes.
     //
     // Invariant:
-    //     - The 'vertices_' and 'iteration_of_vertices_' must correspond to the
-    //     LSystem, InterpretationMap, and DrawingParameters.
-    //     - The 'vertices_' are at any time painted with VertexPainter.
+    //     - The 'turtle_' is in a coherent state with the LSystem,
+    //     InterpretationMap, DrawingParameter, and VertexPainter.
     //     - The 'bounding_box_' and 'sub_boxes_' must correspond with the
     //     'vertices_'.
     //     - Each instance as a unique 'id_' and 'color_id_'
-    //
-    // Note:
-    //    - LSystemView contain a shared ownership of the LSystem and the
-    //    InterpretationMap via the corresponding Observer. As a consequence, a
-    //    copy of LSystemView will share the same LSystem and Map.
     //
     // TODO: simplifies ctor by initializing some attribute here.
     class LSystemView : public Observer<procgui::LSystemBuffer>,
@@ -52,6 +46,7 @@ namespace procgui
         using OPainter = Observer<colors::VertexPainterWrapper>;
 
         // Too many moving pieces to serenely have a default constructor.
+        // TODO: bite the bullet and do it
         LSystemView() = delete;
         virtual ~LSystemView();
         LSystemView(const std::string& name,
@@ -63,7 +58,7 @@ namespace procgui
         LSystemView(const ext::sf::Vector2d& position, double step);
         // Deep copy;
         //   - All Observers' pointers are cloned or moved
-        //   - These pointers are set to the RuleMapBuffers (LSys and Map)
+        //   - 'turtle_' is copied
         //   - Id and colors are created or moved
         //   - Selection is reset
         LSystemView(const LSystemView& other);
@@ -71,12 +66,12 @@ namespace procgui
         LSystemView& operator=(const LSystemView& other);
         LSystemView& operator=(LSystemView&& other);
 
-        // Reference Getters
+        // -- Reference Getters
         drawing::DrawingParameters& ref_parameters();
         LSystemBuffer& ref_lsystem_buffer();
         InterpretationMapBuffer& ref_interpretation_buffer();
         colors::VertexPainterWrapper& ref_vertex_painter_wrapper();
-        // Getters
+        // -- Getters:
         // Correctly translated to screen-space bounding_box.
         sf::FloatRect get_bounding_box() const;
         const drawing::DrawingParameters& get_parameters() const;
@@ -115,7 +110,6 @@ namespace procgui
         // 'bounding_box_'.
         bool is_inside(const sf::Vector2f& click) const;
 
-
         // Compute the vertices of the turtle interpretation of the LSystem.
         void compute_vertices();
         // Paint the vertices.
@@ -126,6 +120,7 @@ namespace procgui
 
 
     private:
+        // Update the callbacks of the Observers
         void update_callbacks();
 
         // Draw a placeholder box if the LSystem does not have enough vertices
@@ -139,7 +134,6 @@ namespace procgui
 
         // Safeguard the computation of vertices when the size is too big.
         // Flag the opening of the size warning popup if the size is higher than
-        // TODO, otherwise, simply call 'compute_vertices()'
         void size_safeguard();
         // Display the size warning popup and call 'compute_vertices()' if the
         // user confirms the computation.
@@ -160,18 +154,13 @@ namespace procgui
         // true if the LSystem is modified from the last save
         bool is_modified_;
 
-        // // The LSystem's buffer. It has shared ownership of a
-        // // shared_ptr<LSystem> with the associated Observable.
-        // LSystemBuffer lsys_buff_;
-
-        // // The InterpretationMap's buffer. It has shared ownership of a
-        // // shared_ptr<InterpretationMap> with the associated Observable.
-        // InterpretationMapBuffer interpretation_buff_;
-
-        // The vertices of the View and their iteration count. Computed at each
-        // modification.
+        // The turtle containing the vertices, interations, and max_iteration.
+        // Must be coherent with the Observers.
         drawing::Turtle turtle_;
-        int max_iteration_;
+
+        // The maximum number of iteration of the LSystem for the iteration
+        // predecessors.
+        u8 max_iteration_;
 
         // The global bounding box of the drawing. It is a "raw" bounding box:
         // its position is fixed. The rendering at the correct position as well
