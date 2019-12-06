@@ -294,27 +294,26 @@ namespace procgui
 
     void LSystemView::size_safeguard()
     {
-        // // TO TEST
         drawing::system_size size = compute_max_size(*OLSys::get_target()->get_rule_map(),
                                                      *OMap::get_target()->get_rule_map(),
                                                       OParams::get_target()->get_n_iter());
         system_size_ = size;
-        //auto approximate_mem_size_ = drawing::memory_size(size);
-        //auto max_size = std::max(max_mem_size_, config::sys_max_size);
+        auto approximate_mem_size_ = drawing::memory_size(size);
+        auto max_size = std::max(max_mem_size_, config::sys_max_size);
 
-        // if (approximate_mem_size_ > max_size)
-        // {
-        //     open_size_warning_popup();
-        // }
-        // else
-        // {
+        if (approximate_mem_size_ > max_size)
+        {
+            open_size_warning_popup();
+        }
+        else
+        {
             // Validate all changes.
             OParams::get_target()->validate();
             OLSys::get_target()->validate();
             OMap::get_target()->validate();
 
             compute_vertices();
-        // }
+        }
     }
     void LSystemView::open_size_warning_popup()
     {
