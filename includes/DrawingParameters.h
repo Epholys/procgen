@@ -69,7 +69,10 @@ namespace drawing
         // When 'move_forward' order is executed, the Turtle will move forward
         // 'step' pixels (at default zoom level).
         // Initialized to an arbitrary value.
-        // TODO COMMENT
+        // In reality, this is a scale value: the dimension on screen of the
+        // L-System is done by a graphic transform that is very efficient, so
+        // 'step_' is simply the zoom level (the transform is scaled as
+        // 'DrawingParameters::get_step() / Turtle::step_', which is 1.
         double step_ { 10 };
 
         // The number of iterations computed by the L-system.

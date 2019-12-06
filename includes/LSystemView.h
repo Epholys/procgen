@@ -85,13 +85,6 @@ namespace procgui
         void set_name(const std::string& name);
 
         bool is_modified() const;
-        // Should be called externally when a LSystemView is fully loaded.
-        // It shows a bad design, because loading a LSystemView should just take
-        // one step by constructing it. However, for now, loading a LSystem is
-        // done in two steps as repositionning and scaling are necessary to put
-        // the LSystemView on screen. But optimization is possible, and will be
-        // done. So TODO.
-        void finish_loading();
 
         // Translation transform to correct screen-space position of the
         // LSystem.

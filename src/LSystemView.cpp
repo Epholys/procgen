@@ -52,6 +52,8 @@ namespace procgui
         update_callbacks();
 
         size_safeguard();
+
+        is_modified_ = false;
     }
 
     LSystemView::LSystemView(const ext::sf::Vector2d& position, double step)
@@ -87,6 +89,8 @@ namespace procgui
         update_callbacks();
 
         size_safeguard();
+
+        is_modified_ = false;
     }
 
     LSystemView::LSystemView(LSystemView&& other)
@@ -157,6 +161,8 @@ namespace procgui
             update_callbacks();
 
             size_safeguard();
+
+            is_modified_ = false;
         }
 
         return *this;
@@ -288,11 +294,6 @@ namespace procgui
     {
         return is_modified_;
     }
-    void LSystemView::finish_loading()
-    {
-        is_modified_ = false;
-    }
-
 
     void LSystemView::size_safeguard()
     {
