@@ -61,7 +61,8 @@ namespace drawing
     void DrawingParameters::set_step(double step)
     {
         step_ = step;
-        notify();
+        // The step is only used when rendering the LSystem, so it does not
+        // 'notify()' to avoid re-calculating for nothing.
     }
     void DrawingParameters::set_n_iter(u8 n_iter)
     {

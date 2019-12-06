@@ -69,7 +69,8 @@ namespace drawing
         // When 'move_forward' order is executed, the Turtle will move forward
         // 'step' pixels (at default zoom level).
         // Initialized to an arbitrary value.
-        double step_ { 20 };
+        // TODO COMMENT
+        double step_ { 10 };
 
         // The number of iterations computed by the L-system.
         u8 n_iter_ { 0 };

@@ -34,7 +34,6 @@ namespace drawing
     {
         cos_ = std::cos(parameters.get_delta_angle());
         sin_ = std::sin(parameters.get_delta_angle());
-        step_ = parameters.get_step();
         state_ = {{0,0},
                  {std::cos(parameters.get_starting_angle()),
                   std::sin(parameters.get_starting_angle())}};

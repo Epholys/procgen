@@ -270,6 +270,8 @@ namespace procgui
     {
         sf::Transform transform;
         transform.translate(sf::Vector2f(OParams::get_target()->get_starting_position()));
+        const auto scale_factor = OParams::get_target()->get_step() / Turtle::step_;
+        transform.scale(scale_factor, scale_factor);
         return transform;
     }
     std::string LSystemView::get_name() const

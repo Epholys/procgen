@@ -51,7 +51,7 @@ namespace drawing
         double cos_ {0};
         double sin_ {1};
         // Taken from the DrawingParameters
-        double step_ {10};
+        static constexpr double step_ {1};
 
         // The current position and direction of the Turtle.
         struct State {
