@@ -13,15 +13,16 @@ INCLUDE_DIR = includes
 SRC_DIR = src
 
 ### Flags passed to the C++ compiler: common, macros, include and linking flags.
-CXXFLAGS   += -std=c++17 -g -O0 -Wall -Wextra -pthread
+CXXFLAGS = -std=c++17 -O3 -ffast-math -Wall -Wextra -pthread
 MACROFLAGS += -DGSL_THROW_ON_CONTRACT_VIOLATION
 LFLAGS     += -lsfml-system -lsfml-window -lsfml-graphics -lGL -lstdc++fs
 IFLAGS     += -isystem . -I$(INCLUDE_DIR)
 
-# Special optimization flags for release and profiling
-release : CXXFLAGS = -std=c++17 -O3 -ffast-math -Wall -Wextra -pthread
-profiling : CXXFLAGS = -g -std=c++17 -O3 -ffast-math -Wall -Wextra -pthread
-optimized : CXXFLAGS = -std=c++17 -O3 -ffast-math -march=native -Wall -Wextra -pthread
+# Other flags
+debug : CXXFLAGS = -std=c++17 -g -O0 -Wall -Wextra -pthread
+debug : MACROFLAGS += -DDEBUG_CHECKS
+profiling : CXXFLAGS += -g
+optimized : CXXFLAGS += -march=native
 
 ### Source files, Object Files, Directories, Targets, ...
 # Core object files to compile for every target.
@@ -64,7 +65,7 @@ GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 
 
 
-all : main test
+all : debug main test
 
 # Cleans all intermediate compilation files.
 clean :
@@ -120,5 +121,3 @@ $(TEST_DIR)/gtest_main.a : $(TEST_DIR)/gtest-all.o $(TEST_DIR)/gtest_main.o
 # Compiles every *Test.cpp.
 # $(TEST_DIR)/%Test.o : $(TEST_DIR)/%Test.cpp
 #	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -c $^ -o $@ $(IFLAGS)
-
-

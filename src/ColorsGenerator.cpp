@@ -100,16 +100,18 @@ namespace colors
         // Find the upper-bound key...
         auto superior_it = std::find_if(begin(keys_), end(keys_),
                                 [f](const auto& p){return f <= p.position;});
-        // OPTIMIZATION
-        //Expects(superior_it != end(keys_)); // (should never happen if correctly sanitized)
-        // END
+#ifdef DEBUG_CHECKS
+        Expects(superior_it != end(keys_)); // (should never happen if correctly sanitized)
         auto superior_index = std::distance(begin(keys_), superior_it);
         auto inferior_index = superior_index == 0 ? 0 : superior_index-1; // ...and the lower-bound one.
-        //  OPTIMIZATION
-        // const auto& superior = keys_.at(superior_index);
-        // const auto& inferior = keys_.at(inferior_index);
+        const auto& superior = keys_.at(superior_index);
+        const auto& inferior = keys_.at(inferior_index);
+#else
+        auto superior_index = std::distance(begin(keys_), superior_it);
+        auto inferior_index = superior_index == 0 ? 0 : superior_index-1; // ...and the lower-bound one.
         const auto& superior = keys_[superior_index];
         const auto& inferior = keys_[inferior_index];
+#endif
         // END
 
         float factor = 0.f;
