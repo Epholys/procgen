@@ -264,8 +264,6 @@ TEST_F(RuleBufferTest, change_predecessor_is_duplicated)
     ASSERT_TRUE(has_rule(buffer, first_pred, succ3));
     ASSERT_TRUE(has_duplicate(buffer, begin));
     ASSERT_TRUE(duplicates_marked(buffer));
-
-//    ASSERT_TRUE(*obs);
 }
 
 TEST_F(RuleBufferTest, change_predecessor_remove_rule)
@@ -580,8 +578,6 @@ TEST_F(RuleBufferTest, change2_predecessors_new_dup_old_dup)
     ASSERT_TRUE(map->has_rule(pred1, succ1));
     ASSERT_TRUE(map->has_rule(pred2, succ2));
     ASSERT_EQ(2, map->size());
-
-//    ASSERT_TRUE(*obs);
 }
 
 // diuplicate ?
@@ -737,8 +733,6 @@ TEST_F(RuleBufferTest, remove_predecessor_from_duplicate)
     ASSERT_FALSE(has_rule(buffer, first_pred, succ3));
 
     ASSERT_TRUE(map->has_rule(first_pred, succ1));
-
-//    ASSERT_TRUE(*obs);
 }
 
 
@@ -772,8 +766,6 @@ TEST_F(RuleBufferTest, change_successor_duplicate)
     ASSERT_TRUE(has_rule(buffer, first_pred, first_succ));
     ASSERT_TRUE(has_rule(buffer, first_pred, succ3));
     ASSERT_TRUE(duplicates_marked(buffer));
-
-//    ASSERT_TRUE(*obs);
 }
 
 TEST_F(RuleBufferTest, erase_simple)
@@ -825,8 +817,6 @@ TEST_F(RuleBufferTest, erase_to_duplicate)
     ASSERT_EQ(size, buffer->size());
 
     ASSERT_EQ(size, buffer->size());
-
-//    ASSERT_TRUE(*obs);
 }
 
 

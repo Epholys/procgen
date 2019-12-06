@@ -37,6 +37,10 @@ namespace procgui
     //
     // Invariant:
     //   - The Target and the buffer must be synchronized
+    //
+    // Note:
+    //   - This is an Observable, but it simply foward the notification from its
+    //   Observer, and does not notify from its internal modifications.
     template<typename Target>
     class RuleMapBuffer : public Observable
     {
