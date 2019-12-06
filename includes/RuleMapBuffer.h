@@ -2,9 +2,6 @@
 #define RULE_MAP_BUFFER_H
 
 
-// TODO remove
-#include <iostream>
-
 #include <list>
 
 #include "Observer.h"

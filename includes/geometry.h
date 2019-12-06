@@ -29,7 +29,6 @@ namespace geometry
     // Computes the angle between the x axis and the vector 'vec' (in radian).
     float angle_from_vector(const sf::Vector2f vec);
 
-    // TODO
     sf::Vector2f project(sf::Vector2f A, sf::Vector2f B, sf::Vector2f p);
     // First projects the point A on the straight line (AB) then clamp it to A
     // or B if the projected point is not in the segment [AB].

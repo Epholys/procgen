@@ -36,7 +36,7 @@ namespace drawing
     //   'IntepretationMap' functions
     //   - 'iteration_index_' and 'iteration_depth_' are correctly associated.
     //
-    struct Turtle  // TODO CLASS
+    struct Turtle
     {
         Turtle() = default;
         explicit Turtle(const DrawingParameters& parameters);
