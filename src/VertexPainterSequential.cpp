@@ -53,10 +53,17 @@ namespace colors
             float integral;
             float lerp = std::modf((i * factor_) / size, &integral);
             sf::Color color = generator->get(lerp);
+#ifdef DEBUG_CHECKS
+            if (!transparent.at(i))
+            {
+                vertices.at(i).color = color;
+            }
+#else
             if (!transparent[i])
             {
                 vertices[i].color = color;
             }
+#endif
         }
     }
 

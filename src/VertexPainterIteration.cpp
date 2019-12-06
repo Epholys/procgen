@@ -40,6 +40,7 @@ namespace colors
         }
 
 
+#ifdef DEBUG_CHECKS
         for (auto i=0u; i<vertices_iteration.size(); ++i)
         {
 #ifdef VERTEX_PAINTER_ITERATION_BUGGY
@@ -47,12 +48,27 @@ namespace colors
 #else
             sf::Color color = generator->get((vertices_iteration.at(i)) / (float(max_iteration)));
 #endif
+            sf::Vertex& v = vertices.at(i);
+            if (!transparent.at(i))
+            {
+                v.color = color;
+            }
+        }
+#else
+        for (auto i=0u; i<vertices_iteration.size(); ++i)
+        {
+#ifdef VERTEX_PAINTER_ITERATION_BUGGY
+            sf::Color color = generator->get((vertices_iteration[i]-1) / (float(max_iteration)-1));
+#else
+            sf::Color color = generator->get((vertices_iteration[i]) / (float(max_iteration)));
+#endif
             sf::Vertex& v = vertices[i];
             if (!transparent[i])
             {
                 v.color = color;
             }
         }
+#endif
     }
 
     std::string VertexPainterIteration::type_name() const

@@ -83,6 +83,21 @@ namespace colors
             distance = 1.f;
         }
 
+#ifdef DEBUG_CHECKS
+        for (auto i=0ull; i<vertices.size(); ++i)
+        {
+            sf::Vector2f projection = geometry::project(opposite_intersection_line.first,
+                                                        opposite_intersection_line.second,
+                                                        vertices.at(i).position);
+            float lerp = geometry::distance(projection, vertices.at(i).position) / distance;
+
+            sf::Color color = generator->get(lerp);
+            if (!transparent.at(i))
+            {
+                vertices.at(i).color = color;
+            }
+        }
+#else
         for (auto i=0ull; i<vertices.size(); ++i)
         {
             sf::Vector2f projection = geometry::project(opposite_intersection_line.first,
@@ -96,6 +111,7 @@ namespace colors
                 vertices[i].color = color;
             }
         }
+#endif
     }
 
     void VertexPainterLinear::supplementary_drawing(sf::FloatRect bounding_box) const

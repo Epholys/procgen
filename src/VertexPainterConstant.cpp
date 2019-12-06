@@ -32,6 +32,16 @@ namespace colors
         }
 
 
+#ifdef DEBUG_CHECKS
+        for (auto i=0ull; i<vertices.size(); ++i)
+        {
+            sf::Color color = generator->get(.5);
+            if (!transparent.at(i))
+            {
+                vertices.at(i).color = color;
+            }
+        }
+#else
         for (auto i=0ull; i<vertices.size(); ++i)
         {
             sf::Color color = generator->get(.5);
@@ -40,6 +50,7 @@ namespace colors
                 vertices[i].color = color;
             }
         }
+#endif
     }
 
     std::string VertexPainterConstant::type_name() const

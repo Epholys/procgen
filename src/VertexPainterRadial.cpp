@@ -87,6 +87,19 @@ namespace colors
             // Avoid division by 0.
             greatest_distance = 1.f;
         }
+
+
+#ifdef DEBUG_CHECKS
+        for (auto i=0ull; i<vertices.size(); ++i)
+        {
+            float lerp = geometry::distance(vertices.at(i).position, relative_center) / greatest_distance;
+            sf::Color color = generator->get(lerp);
+            if (!transparent.at(i))
+            {
+                vertices.at(i).color = color;
+            }
+        }
+#else
         for (auto i=0ull; i<vertices.size(); ++i)
         {
             float lerp = geometry::distance(vertices[i].position, relative_center) / greatest_distance;
@@ -96,7 +109,7 @@ namespace colors
                 vertices[i].color = color;
             }
         }
-
+#endif
         // // DEBUG
         // vertices.push_back({vertices.back().position, sf::Color::Transparent});
         // vertices.push_back({{relative_center.x - 5, relative_center.y - 5}, sf::Color::Transparent});

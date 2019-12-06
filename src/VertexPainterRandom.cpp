@@ -75,10 +75,17 @@ namespace colors
             // We call 'get()' each time because we must interact nicely with
             // 'VertexPainterComposite'.
             sf::Color color = generator->get(rand);
+#ifdef DEBUG_CHECKS
+            if (!transparent.at(i))
+            {
+                vertices.at(i).color = color;
+            }
+#else
             if (!transparent[i])
             {
                 vertices[i].color = color;
             }
+#endif
             ++block_index;
         }
     }
