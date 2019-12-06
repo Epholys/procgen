@@ -37,14 +37,14 @@ TEST_F(size_computer_test, MatrixDataCtor)
 {
     std::vector<std::vector<number>> data{{1, 2}, {3, 4}};
     Matrix mat (data);
-    
+
     ASSERT_EQ(data, mat.get_data());
 }
 TEST_F(size_computer_test, Matrix0Ctor)
 {
     std::vector<std::vector<number>> data{{0, 0}, {0, 0}, {0, 0}};
     Matrix mat(3, 2);
-    
+
     ASSERT_EQ(data, mat.get_data());
 }
 TEST_F(size_computer_test, MatrixCtorKOFullEmpty)
@@ -74,11 +74,11 @@ TEST_F(size_computer_test, MatrixMult)
     Matrix mat1(data1);
     Matrix mat2(data2);
     Matrix result = mat1 * mat2;
-    
+
     std::vector<std::vector<number>> expected_result{{22, 28}, {14, 20}, {22, 28}};
 
     ASSERT_EQ(expected_result, result.get_data());
-    ASSERT_FALSE(result.has_overflowed()); 
+    ASSERT_FALSE(result.has_overflowed());
 }
 TEST_F(size_computer_test, MatrixMultOverflow){
     std::vector<std::vector<number>> data{{1 << 16, 2 << 16}, {3 << 16, 4 << 16}};
@@ -115,14 +115,14 @@ TEST_F(size_computer_test, MatrixGrandSumOverflow)
     Matrix mat (data);
 
     number UNUSED = mat.grand_sum();
-    
+
     ASSERT_TRUE(mat.has_overflowed());
 }
 
 TEST_F(size_computer_test, all_predecessors)
 {
     const std::string predecessors = all_predecessors(lsys, map);
-    
+
     ASSERT_EQ(expected_predecessors, predecessors);
 }
 TEST_F(size_computer_test, lsys_rules_matrix)
@@ -203,7 +203,7 @@ TEST_F(size_computer_test, map_matrix)
     //  [1]  : F
     //  [1]  : G
     //  [0]  : [
-    //  [3]  : ] 
+    //  [3]  : ]
     //  [0]  : x
     //  [1]  : y
     //  [1]] : z
@@ -236,17 +236,18 @@ TEST_F(size_computer_test, compute_max_size)
     DrawingParameters params;
     params.set_n_iter(n_iter);
 
-    const auto [str, _1, _2] = no_const_lsys.produce(n_iter);
-    const auto& [vx, _3, _4] = drawing::compute_vertices(no_const_lsys, no_const_map, params);    
-   
+    drawing::Turtle turtle (params);
+    const auto& [str, iters, _1] = no_const_lsys.produce(n_iter);
+    const auto& [vx, _2, _3] = turtle.compute_vertices(str, iters, map);
+
     const number expected_lsys_size = str.size();
     const number expected_vx_size = vx.size();
-    
+
     auto sizes = compute_max_size(lsys, map, n_iter);
 
     ASSERT_EQ(expected_lsys_size, sizes.lsystem_size);
     ASSERT_EQ(expected_vx_size, sizes.vertices_size);
-    ASSERT_FALSE(sizes.overflow); 
+    ASSERT_FALSE(sizes.overflow);
 }
 TEST_F(size_computer_test, compute_max_size_overflow)
 {
@@ -255,7 +256,7 @@ TEST_F(size_computer_test, compute_max_size_overflow)
     InterpretationMap no_const_map = map;
     DrawingParameters params;
     params.set_n_iter(n_iter);
-    
+
     auto sizes = compute_max_size(lsys, map, n_iter);
 
     ASSERT_TRUE(sizes.overflow);
@@ -269,13 +270,14 @@ TEST_F(size_computer_test, compute_max_size_unbalanced)
     InterpretationMap no_const_map = map;
     DrawingParameters params;
     params.set_n_iter(n_iter);
-    
-    const auto [str, _1, _2] = unbalanced_lsys.produce(n_iter);
-    const auto& [vx, _3, _4] = drawing::compute_vertices(unbalanced_lsys, no_const_map, params);
+
+    drawing::Turtle turtle (params);
+    const auto& [str, iters, _1] = unbalanced_lsys.produce(n_iter);
+    const auto& [vx, _2, _3] = turtle.compute_vertices(str, iters, map);
 
     number lsys_size = str.size();
     number vx_size = vx.size();
-    
+
     auto sizes = compute_max_size(lsys, map, n_iter);
 
     ASSERT_GE(sizes.lsystem_size, lsys_size);
@@ -305,4 +307,3 @@ TEST_F(size_computer_test, memory_size_overflow)
 
     ASSERT_EQ(Matrix::MAX, memory_size(sizes));
 }
-

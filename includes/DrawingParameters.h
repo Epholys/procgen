@@ -2,11 +2,9 @@
 #define DRAWING_PARAMETERS_H
 
 
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
-
 #include "cereal/cereal.hpp"
 
+#include "types.h"
 #include "helper_math.h"
 #include "Observable.h"
 #include "LoadMenu.h"
@@ -17,8 +15,7 @@ namespace drawing
     // This data structure contains all constant informations necessary to
     // interpret the result of a L-system. Each attribute can be freely
     // initialized and modified via getters and setters, there are no invariant.
-    // During an interpretation, this structure will not be
-    // modified.
+    // During an interpretation, this structure will not be modified.
     class DrawingParameters : public Observable
     {
     public:
@@ -30,7 +27,7 @@ namespace drawing
                           double starting_angle,
                           double delta_angle,
                           double step,
-                          int n_iter);
+                          u8 n_iter);
         DrawingParameters(const DrawingParameters& params) = default;
         DrawingParameters(DrawingParameters&& params) = default;
         DrawingParameters& operator=(const DrawingParameters& params) = default;
@@ -41,60 +38,60 @@ namespace drawing
         double get_starting_angle() const;
         double get_delta_angle() const;
         double get_step() const;
-        int get_n_iter() const;
+        u8 get_n_iter() const;
 
         // Setters
         // The starting position is only used when rendering the LSystem, so it
         // does not 'notify()' to avoid re-calculating for nothing.
-        void set_starting_position(const ext::sf::Vector2d starting_position); 
+        void set_starting_position(const ext::sf::Vector2d starting_position);
         void set_starting_angle(double starting_angle);
         void set_delta_angle(double delta_angle);
         void set_step(double step);
-        void set_n_iter(int n_iter);
+        void set_n_iter(u8 n_iter);
 
         // Revert to previous 'n_iter'.
-        // Useful when cancelling computatoin of too big LSys.
+        // Useful when cancelling computatoin of too big L-Systems.
         void revert();
 
         // Validate modification of 'n_iter'.
         void validate();
-        
+
     private:
         // The starting position and angle of the Turtle.
         ext::sf::Vector2d starting_position_ { 0, 0 };
         double starting_angle_ { 0 };
 
-        // When 'turn_left' or 'turn_right' orders are executed, the
-        // Turtle pivot at a 'delta_angle' angle (in
-        // radian). Initialized at an arbitrary value.
+        // When 'turn_left' or 'turn_right' orders are executed, the Turtle
+        // pivot at a 'delta_angle' angle (in radian).
+        // Initialized to an arbitrary value.
         double delta_angle_ {math::pi / 2 };
 
-        // When 'move_forward' order is executed, the Turtle will move
-        // forward 'step' pixels (at default zoom level). Initialized
-        // at an arbitrary value. 
+        // When 'move_forward' order is executed, the Turtle will move forward
+        // 'step' pixels (at default zoom level).
+        // Initialized to an arbitrary value.
         double step_ { 20 };
 
-        // The number of iterations done by the L-system.
-        int n_iter_ { 0 };
+        // The number of iterations computed by the L-system.
+        u8 n_iter_ { 0 };
 
         // The previous number of iterations.
         // Used in 'revert()' and 'validate()'.
         int previous_n_iter_ { -1 };
-        
+
     private:
         // Serialization
         friend class cereal::access;
-        
+
         template <class Archive>
-        void save (Archive& ar, const std::uint32_t) const
+        void save (Archive& ar, const u32) const
             {
                 ar(cereal::make_nvp("starting_angle", math::rad_to_degree(starting_angle_)),
                    cereal::make_nvp("delta_angle", math::rad_to_degree(delta_angle_)),
                    cereal::make_nvp("n_iter", n_iter_));
             }
-        
+
         template <class Archive>
-        void load (Archive& ar, const std::uint32_t)
+        void load (Archive& ar, const u32)
             {
                 ar(starting_angle_, delta_angle_, n_iter_);
                 if (starting_angle_ < 0 || starting_angle_ > 360)

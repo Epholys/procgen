@@ -6,7 +6,7 @@
 namespace drawing
 {
     using number = Matrix::number;
-    
+
     Matrix::Matrix(const std::vector<std::vector<number>> & data)
         : data_{data}
     {
@@ -25,7 +25,7 @@ namespace drawing
         std::vector<std::vector<number>> data (i, inners);
         data_ = data;
     }
-    
+
     Matrix& Matrix::operator*=(const Matrix& rhs)
     {
         const size_t this_column_dim = data_.size();
@@ -35,7 +35,7 @@ namespace drawing
         Expects(this_row_dim == rhs_column_dim);
 
         Matrix mult (this_column_dim, rhs_row_dim);
-        
+
         for (auto i=0ull; i<this_column_dim; ++i)
         {
             for (auto j=0ull; j<rhs_row_dim; ++j)
@@ -55,7 +55,7 @@ namespace drawing
                     {
                         tmp = ik * kj;
                     }
-                    
+
                     if (add_overflow(ij, tmp))
                     {
                         ij = MAX;
@@ -72,18 +72,18 @@ namespace drawing
         *this = mult;
         return *this;
     }
-    
+
     Matrix operator*(Matrix lhs, const Matrix& rhs)
     {
         lhs *= rhs;
         return lhs;
     }
-    
+
     const std::vector<std::vector<number>>& Matrix::get_data() const
     {
         return data_;
     }
-    
+
     number Matrix::grand_sum()
     {
         number sum = 0;
@@ -128,7 +128,7 @@ namespace drawing
 
         return false;
     }
-    
+
     std::string all_predecessors (const LSystem &lsystem, const drawing::InterpretationMap &map)
     {
         std::string predecessors;
@@ -152,7 +152,7 @@ namespace drawing
     Matrix lsys_axiom_matrix (const LSystem& lsystem, const std::string& predecessors)
     {
         Expects(std::is_sorted(begin(predecessors), end(predecessors)));
-        
+
         const auto n = predecessors.size();
         std::vector<number> inner (n, 0);
 
@@ -167,7 +167,7 @@ namespace drawing
     Matrix lsys_rules_matrix (const LSystem& lsystem, const std::string& predecessors)
     {
         Expects(std::is_sorted(begin(predecessors), end(predecessors)));
-        
+
         // Please see the documentation to understand the matrix.
         const auto n = predecessors.size();
         std::vector<number> inner (n, 0);
@@ -176,11 +176,11 @@ namespace drawing
         const auto& rules = lsystem.get_rules();
         for (auto i=0ull; i<n; ++i)
         {
-            // For each 'row' representing the rule of 'row_pred', 
+            // For each 'row' representing the rule of 'row_pred',
             auto& row = data.at(i);
             char row_pred = predecessors.at(i);
 
-            // Check if a 'rule' exists, 
+            // Check if a 'rule' exists,
             if (rules.count(row_pred) > 0)
             {
                 const auto& rule = rules.at(row_pred);
@@ -196,7 +196,7 @@ namespace drawing
                 row.at(i) = 1;
             }
         }
-        
+
         return Matrix(data);
     }
     Matrix map_matrix (const drawing::InterpretationMap& map, const std::string& predecessors)
@@ -243,7 +243,7 @@ namespace drawing
         Expects(n_iter >= 0);
 
         system_size sizes;
-      
+
         const auto predecessors = all_predecessors(lsystem, map);
         const auto axiom_mat = lsys_axiom_matrix(lsystem, predecessors);
         const auto lsys_mat = lsys_rules_matrix(lsystem, predecessors);
@@ -259,7 +259,7 @@ namespace drawing
         {
             sizes.overflow = true;
         }
-        
+
         Matrix vertices_interpretation = lsys_production * map_mat;
         sizes.vertices_size = vertices_interpretation.grand_sum();
         if (vertices_interpretation.has_overflowed() ||
@@ -271,7 +271,7 @@ namespace drawing
         {
             sizes.vertices_size += 1; // first vertex
         }
-        
+
         return sizes;
     }
 
@@ -314,4 +314,3 @@ namespace drawing
         return total_size;
     }
 }
-

@@ -21,7 +21,7 @@ namespace colors
         VertexPainterRandom(VertexPainterRandom&& other) = delete;
         VertexPainterRandom& operator=(const VertexPainterRandom& other) = delete;
         VertexPainterRandom& operator=(VertexPainterRandom&& other) = delete;
-        
+
         // Generate a new seed.
         void randomize();
 
@@ -32,7 +32,8 @@ namespace colors
         // Paint 'vertices' according to a random real number.
         // 'bounding_box', 'iteration_of_vertices' and 'max_recursion' are not used.
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<int>& iteration_of_vertices,
+                                    const std::vector<u8>& iteration_of_vertices,
+                                    const std::vector<bool>& transparent,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 
@@ -40,7 +41,7 @@ namespace colors
         virtual std::shared_ptr<VertexPainter> clone() const override;
 
         friend class VertexPainterSerializer;
-        virtual std::string type_name() const override;        
+        virtual std::string type_name() const override;
 
     private:
 
@@ -53,7 +54,7 @@ namespace colors
 
         friend class cereal::access;
         template<class Archive>
-        void save(Archive& ar, const std::uint32_t) const
+        void save(Archive& ar, const u32) const
             {
                 // ar(cereal::make_nvp("block_size", block_size_),
                 //    cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
@@ -64,7 +65,7 @@ namespace colors
                 ar(cereal::make_nvp("ColorGenerator", serializer));
             }
         template<class Archive>
-        void load(Archive& ar, const std::uint32_t)
+        void load(Archive& ar, const u32)
             {
                 ar(cereal::make_nvp("block_size", block_size_));
 
@@ -73,7 +74,7 @@ namespace colors
                     block_size_ = 1;
                     controller::LoadMenu::add_loading_error_message("VertexPainterRandom's block_size was smaller than 1, so it is set to 1.");
                 }
-                
+
                 ColorGeneratorSerializer serializer;
                 ar(cereal::make_nvp("ColorGenerator", serializer));
                 set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));

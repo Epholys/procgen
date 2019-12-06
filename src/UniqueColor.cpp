@@ -1,4 +1,3 @@
-#include <iostream>
 #include <cmath>
 #include <gsl/gsl>
 #include "imgui/imgui.h"
@@ -23,7 +22,7 @@ namespace colors
     sf::Color UniqueColor::new_color()
     {
         static const float golden_ratio = (std::sqrt(5) + 1) / 2.;
-        
+
         ++iter_;
         float hue = std::fmod(iter_ * golden_ratio, 1.);
 

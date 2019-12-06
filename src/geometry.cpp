@@ -6,15 +6,19 @@ namespace geometry
 {
     float distance (const sf::Vector2f& a, const sf::Vector2f& b)
     {
-        return std::sqrt(std::pow(b.x-a.x, 2)+std::pow(b.y-a.y, 2));
+        float x = b.x-a.x;
+        float y = b.y-a.y;
+        float x2 = x*x;
+        float y2 = y*y;
+        return std::sqrt(x2+y2);
     }
-    
+
     sf::Vector2f intersection(const Line& l1, const Line& l2)
     {
         sf::Vector2f a = l1.point, b = l2.point;
         sf::Vector2f u = l1.direction, v = l2.direction;
         sf::Vector2f intersection = a;
-        
+
         float dx = b.x - a.x;
         float dy = b.y - a.y;
         float det = v.x * u.y - v.y * u.x;
@@ -135,14 +139,14 @@ namespace geometry
         }
         return {left, top, right - left, down - top};
     }
-    
+
     std::vector<sf::FloatRect> sub_boxes(const std::vector<sf::Vertex>& vertices,
                                                  int max_boxes)
     {
         Expects(max_boxes > 0);
 
         // A 'max_boxes' of 1 and 2 are equivalent and correspond to a single
-        // bounding_box. 
+        // bounding_box.
         if (max_boxes == 1)
         {
             max_boxes = 2;
@@ -206,8 +210,8 @@ namespace geometry
             box.height += 2*expansion;
         }
     }
-    
-    
+
+
     std::pair<sf::Vector2f, sf::Vector2f> intersection_with_bounding_box(const Line& line,
                                                                          const sf::FloatRect& bounding_box)
     {
@@ -216,8 +220,8 @@ namespace geometry
         Expects(line.point.y <= bounding_box.top + bounding_box.height);
         Expects(line.point.x >= bounding_box.left);
         Expects(line.point.x <= bounding_box.left + bounding_box.width);
-        
-        // From the bounding box, define the four lines that make up the box. 
+
+        // From the bounding box, define the four lines that make up the box.
         enum bound { Upper=0, Rightmost, Bottom, Leftmost };
         std::vector<Line> bounds (4);
         bounds.at(Upper) = {{bounding_box.left, bounding_box.top}, {1,0}};
@@ -231,7 +235,7 @@ namespace geometry
         // forming the bounding box.
         // The '.first' represent the first possible line, and '.second' the other one.
         std::pair<Line, Line> possible_intersection_line; // at the direction pointed by the angle
-        std::pair<Line, Line> possible_opposite_intersection_line; // at the opposite direction 
+        std::pair<Line, Line> possible_opposite_intersection_line; // at the opposite direction
         if (angle >= 0. && angle < 180.)
         {
             possible_intersection_line.first = bounds.at(Bottom);

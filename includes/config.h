@@ -19,12 +19,12 @@ namespace config
     // Serialization
     // 'sys_max_size' is saved in Megabytes.
     template <class Archive>
-    void save(Archive& ar, std::uint32_t)
+    void save(Archive& ar, u32)
     {
         ar(cereal::make_nvp("sys_max_size", sys_max_size / (1024*1024)));
     }
     template <class Archive>
-    void load(Archive& ar, std::uint32_t)
+    void load(Archive& ar, u32)
     {
         ar(cereal::make_nvp("sys_max_size", sys_max_size));
         sys_max_size *= 1024 * 1024;

@@ -2,13 +2,15 @@
 #define VERTEX_PAINTER_COMPOSITE_H
 
 
-#include <list>
+#include <vector>
+
+#include "types.h"
 #include "VertexPainterWrapper.h"
 
 namespace colors
 {
     class ColorGeneratorSerializer;
-    
+
     // The VertexPainterComposite is a class allowing to compose other
     // VertexPainters. For example, for a VertexPainterLinear, one side of the
     // LSystemView could be managed with a VertexPainterRadial and the other by
@@ -31,7 +33,7 @@ namespace colors
         //
         // As such, this is an object exclusively created for the slave painter,
         // and it is managed by 'VertexPainterComposite' and linked to it by a
-        // pointer. 
+        // pointer.
         class ColorGeneratorComposite : public ColorGenerator
         {
         public:
@@ -42,7 +44,7 @@ namespace colors
             ColorGeneratorComposite(ColorGeneratorComposite&&) = delete;
             ColorGeneratorComposite& operator=(const ColorGeneratorComposite&) = delete;
             ColorGeneratorComposite& operator=(ColorGeneratorComposite&&) = delete;
-            
+
             // Returns a dummy sf::Color::Transparent but as a side-effect fills
             // 'vertex_indices_pools_' of VertexPainterComposite.
             //
@@ -51,9 +53,9 @@ namespace colors
             sf::Color get(float f) override;
 
             // Called by 'painter_' before painting, reset 'global_index_' to
-            // 0. 
+            // 0.
             void reset_index();
-            
+
             friend class ::colors::ColorGeneratorSerializer;
             virtual std::string type_name() const override;
 
@@ -62,20 +64,20 @@ namespace colors
             std::shared_ptr<ColorGenerator> clone() const override;
 
             // Pointer to the linked VertexPainterComposite.
-            // Dangerous, but allows nullptr. 
+            // Dangerous, but allows nullptr.
             VertexPainterComposite* painter_;
-            
+
             // The global 'index_' of the vertex array. Incremented at each
             // 'get()' call.
             std::size_t global_index_;
 
             friend class cereal::access;
             template<class Archive>
-            void save(Archive&, const std::uint32_t) const
+            void save(Archive&, const u32) const
                 {
                 }
             template<class Archive>
-            void load(Archive&, const std::uint32_t)
+            void load(Archive&, const u32)
                 {
                 }
         };
@@ -88,20 +90,20 @@ namespace colors
         {
         public:
             using OWrapper = Observer<VertexPainterWrapper>;
-            
+
             VertexPainterWrapperObserver() = delete;
-            explicit VertexPainterWrapperObserver(std::shared_ptr<VertexPainterWrapper> painter_wrapper,
-                                                 VertexPainterComposite* painter_composite);
+            VertexPainterWrapperObserver(std::shared_ptr<VertexPainterWrapper> painter_wrapper,
+                                         VertexPainterComposite* painter_composite);
             VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other) = delete;
-            VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other) = delete;
+            VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other);
             VertexPainterWrapperObserver& operator=(const VertexPainterWrapperObserver& other) = delete;
-            VertexPainterWrapperObserver& operator=(VertexPainterWrapperObserver&& other) = delete;
+            VertexPainterWrapperObserver& operator=(VertexPainterWrapperObserver&& other);
 
             std::shared_ptr<VertexPainterWrapper> get_painter_wrapper() const;
             void set_painter_wrapper(std::shared_ptr<VertexPainterWrapper> painter_buff);
 
             void set_composite_painter(VertexPainterComposite* painter);
-            
+
         private:
             // Pointer to the linked VertexPainterComposite
             VertexPainterComposite* painter_;
@@ -112,7 +114,7 @@ namespace colors
 namespace colors
 {
     class VertexPainterSerializer;
-    
+
     // The main class.
     // Also manages a painter which can be copied and pasted everywhere (as it
     // is static).
@@ -132,19 +134,20 @@ namespace colors
         VertexPainterComposite& operator=(VertexPainterComposite&& other) = delete;;
 
         // Getters/Setters
-        std::list<std::shared_ptr<VertexPainterWrapper>> get_child_painters() const;
+        std::vector<std::shared_ptr<VertexPainterWrapper>> get_child_painters() const;
         std::shared_ptr<VertexPainterWrapper> get_main_painter() const;
-        void set_main_painter(std::shared_ptr<VertexPainterWrapper> painter_buff);                
-        void set_child_painters(const std::list<std::shared_ptr<VertexPainterWrapper>> painters);
-       
+        void set_main_painter(std::shared_ptr<VertexPainterWrapper> painter_buff);
+        void set_child_painters(const std::vector<std::shared_ptr<VertexPainterWrapper>> painters);
+
         virtual void paint_vertices(std::vector<sf::Vertex>& vertices,
-                                    const std::vector<int>& iteration_of_vertices,
+                                    const std::vector<u8>& iteration_of_vertices,
+                                    const std::vector<bool>& transparent,
                                     int max_recursion,
                                     sf::FloatRect bounding_box) override;
 
         // Draw all the supplementary_drawing from the main and children painters.
         virtual void supplementary_drawing(sf::FloatRect bounding_box) const override;
-        
+
         // Static methods to manage the copy of the VertexPainter.
         static bool has_copied_painter();
         static std::shared_ptr<VertexPainter> get_copied_painter();
@@ -154,7 +157,7 @@ namespace colors
         virtual std::shared_ptr<VertexPainter> clone() const override;
 
         friend class VertexPainterSerializer;
-        virtual std::string type_name() const override;        
+        virtual std::string type_name() const override;
 
     private:
 
@@ -163,7 +166,7 @@ namespace colors
 
         // Easy access for 'ColorGeneratorComposite'.
         friend impl::ColorGeneratorComposite;
-        std::shared_ptr<impl::ColorGeneratorComposite> color_distributor_;        
+        std::shared_ptr<impl::ColorGeneratorComposite> color_distributor_;
 
         // The main painter.
         friend impl::VertexPainterWrapperObserver;
@@ -175,19 +178,19 @@ namespace colors
         // vertices that will be painted by painter by the child painter. The
         // index i corresponds to the i-th vertex in the 'vertices' parameters
         // in 'paint_vertices()'.
-        std::list<std::vector<std::size_t>> vertex_indices_pools_;
+        std::vector<std::vector<std::size_t>> vertex_indices_pools_;
 
-        std::list<impl::VertexPainterWrapperObserver> child_painters_observers_;
+        std::vector<impl::VertexPainterWrapperObserver> child_painters_observers_;
 
         // Hack to avoid circular dependency between VertexPainterSerializer and
         // VertexPainterComposite. The VertexPainterSerializer is never included
         // in this file, but is used as a template parameter that will be
         // compiled later.
         template<class Archive, class Serializer>
-        void save_impl(Archive& ar, const std::uint32_t) const
+        void save_impl(Archive& ar, const u32) const
             {
                 static_assert(std::is_same<Serializer, VertexPainterSerializer>::value);
-                
+
                 auto main_painter = Serializer(main_painter_observer_.get_painter_wrapper()->unwrap());
                 std::vector<Serializer> child_painters;
                 for(const auto& child : child_painters_observers_)
@@ -198,10 +201,10 @@ namespace colors
                    cereal::make_nvp("child_painters", child_painters));
             }
         template<class Archive, class Serializer>
-        void load_impl(Archive& ar, const std::uint32_t)
+        void load_impl(Archive& ar, const u32)
             {
                 static_assert(std::is_same<Serializer, VertexPainterSerializer>::value);
-                
+
                 auto main_painter_serializer = Serializer();
                 std::vector<Serializer> child_painters_serializers;
                 ar(cereal::make_nvp("main_painter", main_painter_serializer),
@@ -210,8 +213,8 @@ namespace colors
                 std::shared_ptr<VertexPainterWrapper> main_wrapper = std::make_shared<VertexPainterWrapper>();
                 main_wrapper->wrap(main_painter_serializer.get_serialized());
                 set_main_painter(main_wrapper);
-                
-                std::list<std::shared_ptr<VertexPainterWrapper>> child_wrappers;
+
+                std::vector<std::shared_ptr<VertexPainterWrapper>> child_wrappers;
                 for(const auto& painter_serializer : child_painters_serializers)
                 {
                     std::shared_ptr<VertexPainterWrapper> wrapper = std::make_shared<VertexPainterWrapper>();;
@@ -220,18 +223,18 @@ namespace colors
                 }
                 set_child_painters(child_wrappers);
             }
-        
+
         friend class cereal::access;
         template<class Archive>
-        void save(Archive& ar, const std::uint32_t) const
+        void save(Archive& ar, const u32) const
             {
-                std::uint32_t unused = 0;
+                u32 unused = 0;
                 save_impl<Archive, VertexPainterSerializer>(ar, unused);
             }
         template<class Archive>
-        void load(Archive& ar, const std::uint32_t)
+        void load(Archive& ar, const u32)
             {
-                std::uint32_t unused = 0;
+                u32 unused = 0;
                 load_impl<Archive, VertexPainterSerializer>(ar, unused);
             }
     };

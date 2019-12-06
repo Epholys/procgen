@@ -1,4 +1,3 @@
-#include <iostream> // TODO REMOVE
 #include <list>
 #include "imgui_extension.h"
 #include "PopupGUI.h"

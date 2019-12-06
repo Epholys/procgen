@@ -11,17 +11,18 @@ namespace colors
         : VertexPainter{wrapper}
     {
     }
-    
+
     std::shared_ptr<VertexPainter> VertexPainterConstant::clone() const
     {
         auto color_wrapper = std::make_shared<ColorGeneratorWrapper>(*get_target());
         return std::make_shared<VertexPainterConstant>(color_wrapper);
     }
-    
+
     void VertexPainterConstant::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                             const std::vector<int>&,
-                                             int,
-                                             sf::FloatRect)
+                                               const std::vector<u8>&,
+                                               const std::vector<bool>& transparent,
+                                               int,
+                                               sf::FloatRect)
 
     {
         auto generator = get_target()->unwrap();
@@ -31,14 +32,25 @@ namespace colors
         }
 
 
-        for (auto& v : vertices)
+#ifdef DEBUG_CHECKS
+        for (auto i=0ull; i<vertices.size(); ++i)
         {
             sf::Color color = generator->get(.5);
-            if (v.color != sf::Color::Transparent)
+            if (!transparent.at(i))
             {
-                v.color = color;
+                vertices.at(i).color = color;
             }
         }
+#else
+        for (auto i=0ull; i<vertices.size(); ++i)
+        {
+            sf::Color color = generator->get(.5);
+            if (!transparent[i])
+            {
+                vertices[i].color = color;
+            }
+        }
+#endif
     }
 
     std::string VertexPainterConstant::type_name() const

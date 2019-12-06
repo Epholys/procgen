@@ -19,7 +19,7 @@ public:
         {
             return notified_;
         }
-    
+
 private:
     Observer<IntMap> obs_ {nullptr};
     bool notified_ {false};
@@ -30,9 +30,9 @@ private:
 TEST(RuleMapTest, default_ctor)
 {
     IntMap map {};
-    
-    IntMap::rule_map empty_rules {};
-    
+
+    IntMap::Rules empty_rules {};
+
     ASSERT_EQ(map.get_rules(), empty_rules);
 }
 
@@ -40,7 +40,7 @@ TEST(RuleMapTest, complete_ctor)
 {
     IntMap map { { 'A', 0 } };
 
-    IntMap::rule_map expected_rules = { { 'A', 0 } };
+    IntMap::Rules expected_rules = { { 'A', 0 } };
 
     ASSERT_EQ(map.get_rules(), expected_rules);
 }
@@ -68,14 +68,14 @@ TEST(RuleMapTest, get_rule)
 {
     IntMap map { { 'A', 0 } };
     auto expected_rule = std::make_pair('A', 0);
-    
+
     ASSERT_EQ(expected_rule, map.get_rule('A'));
 }
 
 TEST(RuleMapTest, get_rules)
 {
     IntMap map { { 'A', 0 }, {'B', 1} };
-    IntMap::rule_map expected_map {{'A', 0}, {'B', 1}};
+    IntMap::Rules expected_map {{'A', 0}, {'B', 1}};
 
     ASSERT_EQ(expected_map, map.get_rules());
 }
@@ -92,8 +92,8 @@ TEST(RuleMapTest, add_rule)
     IntMapPtr map = std::make_shared<IntMap>();
     IntMapObs obs (map);
 
-    IntMap::rule_map expected_rules = { { 'A', 0 } };
-    
+    IntMap::Rules expected_rules = { { 'A', 0 } };
+
     map->add_rule('A', 0);
 
     ASSERT_EQ(map->get_rules(), expected_rules);
@@ -102,9 +102,9 @@ TEST(RuleMapTest, add_rule)
 
 TEST(RuleMapTest, remove_rule)
 {
-    IntMapPtr map = std::make_shared<IntMap>(IntMap::rule_map({ { 'A', 0 } }));
+    IntMapPtr map = std::make_shared<IntMap>(IntMap::Rules({ { 'A', 0 } }));
     IntMapObs obs (map);
-    IntMap::rule_map empty_rules;
+    IntMap::Rules empty_rules;
 
     map->remove_rule('A');
 
@@ -114,10 +114,10 @@ TEST(RuleMapTest, remove_rule)
 
 TEST(RuleMapTest, clear_rules)
 {
-    IntMapPtr map = std::make_shared<IntMap>(IntMap::rule_map({ { 'A', 0 }, { 'B', 1 } }));
+    IntMapPtr map = std::make_shared<IntMap>(IntMap::Rules({ { 'A', 0 }, { 'B', 1 } }));
     IntMapObs obs (map);
-    IntMap::rule_map empty_rules;
-    
+    IntMap::Rules empty_rules;
+
     map->clear_rules();
 
     ASSERT_EQ(map->get_rules(), empty_rules);
@@ -126,13 +126,12 @@ TEST(RuleMapTest, clear_rules)
 
 TEST(RuleMapTest, replace_rules)
 {
-    IntMapPtr map = std::make_shared<IntMap>(IntMap::rule_map({ { 'A', 0 }, { 'B', 1 } }));
+    IntMapPtr map = std::make_shared<IntMap>(IntMap::Rules({ { 'A', 0 }, { 'B', 1 } }));
     IntMapObs obs (map);
-    IntMap::rule_map new_rules {{'C', 2}, {'D', 3}};
+    IntMap::Rules new_rules {{'C', 2}, {'D', 3}};
 
     map->replace_rules(new_rules);
 
     ASSERT_EQ(new_rules, map->get_rules());
     ASSERT_TRUE(obs);
 }
-

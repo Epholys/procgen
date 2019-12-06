@@ -36,7 +36,6 @@ namespace controller
                 { "Error##PERM",
                   [this, trimmed_filename]()
                   {
-                      // TODO true name
                       std::string error_message = "Error: can't open file: "+trimmed_filename;
                       ImGui::Text(error_message.c_str());
                   }

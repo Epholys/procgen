@@ -6,9 +6,9 @@
 
 
 using LSysPtr = std::shared_ptr<LSystem>;
-using Rules = LSystem::production_rules;
-using ProductionCache = std::unordered_map<int, std::string>;
-using IterationCache = std::unordered_map<int, std::pair<std::vector<int>, int>>;
+using Rules = LSystem::Rules;
+using ProductionCache = std::unordered_map<std::uint8_t, std::string>;
+using IterationCache = std::unordered_map<std::uint8_t, std::pair<std::vector<std::uint8_t>, std::uint8_t>>;
 
 class LSysObs
 {
@@ -23,7 +23,7 @@ public:
         {
             return notified_;
         }
-    
+
 private:
     Observer<LSystem> obs_ {nullptr};
     bool notified_ {false};
@@ -35,12 +35,12 @@ private:
 TEST(LSystemTest, default_ctor)
 {
     LSystem lsys;
-    
-    LSystem::production_rules empty_rules;
+
+    LSystem::Rules empty_rules;
     std::string empty_str;
     ProductionCache empty_prod_cache;
     IterationCache empty_rec_cache;
-    
+
     ASSERT_EQ(lsys.get_axiom(), empty_str);
     ASSERT_EQ(lsys.get_rules(), empty_rules);
     ASSERT_EQ(lsys.get_production_cache(), empty_prod_cache);
@@ -51,7 +51,7 @@ TEST(LSystemTest, default_ctor)
 TEST(LSystemTest, complete_ctor)
 {
     LSystem lsys { "F", { { 'F', "F+F" } }, "F" };
-    LSystem::production_rules expected_rules = { { 'F', "F+F" } };
+    LSystem::Rules expected_rules = { { 'F', "F+F" } };
     IterationCache expected_iteration_cache = { {0, {{0}, 0}} };
 
     ASSERT_EQ(lsys.get_axiom(), "F");
@@ -75,7 +75,7 @@ TEST(LSystemTest, set_axiom)
     LSysObs obs (lsys);
     ProductionCache axiom_prod_cache { { 0, "FF" } };
     IterationCache axiom_iter_cache { {0, {{0, 0}, 0 }} };
-    
+
     lsys->set_axiom("FF");
 
     ASSERT_EQ(lsys->get_axiom(), "FF");
@@ -89,9 +89,9 @@ TEST(LSystemTest, add_rule)
 {
     LSysPtr lsys = std::make_shared<LSystem>("F", Rules({ }), "F");
     LSysObs obs (lsys);
-    LSystem::production_rules expected_rules = { { 'F', "F+F" } };
+    LSystem::Rules expected_rules = { { 'F', "F+F" } };
     ProductionCache base_prod_cache { { 0, "F" } };
-    IterationCache base_iter_cache { {0, {{0}, 0 }} };     
+    IterationCache base_iter_cache { {0, {{0}, 0 }} };
     lsys->add_rule('F', "F+F");
 
     ASSERT_EQ(lsys->get_rules(), expected_rules);
@@ -104,9 +104,9 @@ TEST(LSystemTest, remove_rule)
 {
     LSysPtr lsys = std::make_shared<LSystem>("F", Rules({ { 'F', "F+F" } }), "F");
     LSysObs obs (lsys);
-    LSystem::production_rules empty_rules;
+    LSystem::Rules empty_rules;
     ProductionCache base_prod_cache { { 0, "F" } };
-    IterationCache base_iter_cache { {0, {{0}, 0 }} }; 
+    IterationCache base_iter_cache { {0, {{0}, 0 }} };
 
     lsys->remove_rule('F');
 
@@ -115,7 +115,7 @@ TEST(LSystemTest, remove_rule)
     ASSERT_EQ(lsys->get_iteration_cache(), base_iter_cache);
 
     ASSERT_TRUE(obs);
-    
+
     ASSERT_THROW(lsys->remove_rule('G'), gsl::fail_fast);
 }
 
@@ -123,7 +123,7 @@ TEST(LSystemTest, clear_rules)
 {
     LSysPtr lsys = std::make_shared<LSystem>("F", Rules({ { 'F', "F+F" }, { 'G', "GG" } }), "F");
     LSysObs obs (lsys);
-    LSystem::production_rules empty_rules;
+    LSystem::Rules empty_rules;
     ProductionCache base_cache { { 0, "F" } };
 
     lsys->clear_rules();
@@ -138,7 +138,7 @@ TEST(LSystemTest, replace_rules)
 {
     LSysPtr lsys = std::make_shared<LSystem>("F", Rules({ { 'F', "FF" }, { 'G', "GG" } }), "F");
     LSysObs obs (lsys);
-    LSystem::production_rules new_rules {{'H', "HH"},{'I', "II"}};;
+    LSystem::Rules new_rules {{'H', "HH"},{'I', "II"}};;
     ProductionCache base_prod_cache { { 0, "F" } };
     IterationCache base_iter_cache { {0, {{0}, 0 }} };
 
@@ -174,14 +174,14 @@ TEST(LSystemTest, derivation)
     std::string prod_iter_1 = "F+G";
 //    std::string prod_iter_2 = "F+G + G-F";
     std::string prod_iter_3 = "F+G+G-F+G-F-F+G";
-    
-    std::vector<int> rec_iter_1 = {1, 1, 1};
-//    std::vector<int> rec_iter_2 = {2,2,2, 1, 1,1,1};
-    std::vector<int> rec_iter_3 = {3,3,3, 2, 2,2,2,  1,  1,1,1, 1, 2,2,2};
+
+    std::vector<std::uint8_t> rec_iter_1 = {1, 1, 1};
+//    std::vector<std::uint8_t> rec_iter_2 = {2,2,2, 1, 1,1,1};
+    std::vector<std::uint8_t> rec_iter_3 = {3,3,3, 2, 2,2,2,  1,  1,1,1, 1, 2,2,2};
 
     auto [prod1, rec1, max1] = lsys.produce(1);
     auto [prod3, rec3, max3] = lsys.produce(3);
-    
+
     ASSERT_EQ(prod1, prod_iter_1);
     ASSERT_EQ(rec1, rec_iter_1);
     ASSERT_EQ(max1, 1);
@@ -199,14 +199,14 @@ TEST(LSystemTest, wild_derivation)
     std::string prod_iter_3 = "F+++";
     std::string prod_iter_5 = "F+++++";
 
-    std::vector<int> rec_iter_1 {1,1};
-    std::vector<int> rec_iter_3 {3, 3, 2, 1};
-    std::vector<int> rec_iter_5 {5, 5, 4, 3, 2, 1};
+    std::vector<std::uint8_t> rec_iter_1 {1,1};
+    std::vector<std::uint8_t> rec_iter_3 {3, 3, 2, 1};
+    std::vector<std::uint8_t> rec_iter_5 {5, 5, 4, 3, 2, 1};
 
     auto [prod1, rec1, max1] = lsys.produce(1);
     auto [prod3, rec3, max3] = lsys.produce(3);
     auto [prod5, rec5, max5] = lsys.produce(5);
-    
+
     ASSERT_EQ(prod1, prod_iter_1);
     ASSERT_EQ(rec1, rec_iter_1);
     ASSERT_EQ(max1, 1);
@@ -226,7 +226,7 @@ TEST(LSystemTest, corner_iteration)
 
     std::string prod_iter_3 = "FGGGG";
 
-    std::vector<int> rec_iter_3 {0, 0, 1, 2, 3};
+    std::vector<std::uint8_t> rec_iter_3 {0, 0, 1, 2, 3};
 
     auto [prod3, rec3, max3] = lsys.produce(3);
 

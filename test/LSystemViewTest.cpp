@@ -28,7 +28,7 @@ struct parameters_example
 {
     std::string name {"Testing"};
     std::shared_ptr<LSystem> lsys = std::make_shared<LSystem>("X",
-                                                              LSystem::production_rules({{'F', "FF"}, {'X', "F[+X][-X]"}}),
+                                                              LSystem::Rules({{'F', "FF"}, {'X', "F[+X][-X]"}}),
                                                               "X");
     std::shared_ptr<InterpretationMap> map = std::make_shared<InterpretationMap>(default_interpretation_map);
     std::shared_ptr<DrawingParameters> params = std::make_shared<DrawingParameters>(ext::sf::Vector2d(10,10), 1, 1, 5, 3);

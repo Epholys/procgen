@@ -15,18 +15,18 @@
 // The rational behind its existence is to complete the classic methods of an
 // unordered_map with the Observable behaviour. Moreover, it is useful has a
 // base class for all '*Buffer' for the GUI.
-template<typename Successor>
+template<typename T>
 class RuleMap : public Observable
 {
 public:
-    using successor = Successor;
-    using rule = std::pair<char, Successor>;
-    using rule_map = std::unordered_map<char, Successor>;
-    
+    using Successor = T;
+    using Rule = std::pair<char, Successor>;
+    using Rules = std::unordered_map<char, Successor>;
+
     RuleMap() = default;
     virtual ~RuleMap() {}
-    explicit RuleMap(const rule_map &rules);
-    RuleMap(std::initializer_list<typename rule_map::value_type> init);
+    explicit RuleMap(const Rules &rules);
+    RuleMap(std::initializer_list<typename Rules::value_type> init);
     RuleMap(const RuleMap &other) = default;
     RuleMap(RuleMap &&other) = default;
     RuleMap &operator=(const RuleMap &other) = default;
@@ -43,10 +43,10 @@ public:
     // Exceptions:
     //   - Precondition: a production rule with 'predecessor' as a predecessor
     //   exists.
-    rule get_rule(char predecessor) const;
+    Rule get_rule(char predecessor) const;
 
     // Get all the rules
-    const rule_map &get_rules() const;
+    const Rules &get_rules() const;
 
     // Get the size
     std::size_t size() const;
@@ -58,17 +58,17 @@ public:
 
     // Remove the rule associated to 'predecessor'
     // Exception:
-    //   - Precondition: 'predecessor' must have a rule associated.
+    //   - Precondition: 'predecessor' must have an associated rule.
     virtual void remove_rule(char predecessor);
 
     // Clear the rules
     virtual void clear_rules();
 
     // Replace 'rules_' by 'new_rules'
-    virtual void replace_rules(const rule_map& new_rules);
+    virtual void replace_rules(const Rules& new_rules);
 
   protected:
-    rule_map rules_ = {};
+    Rules rules_ = {};
 };
 
 #include "RuleMap.tpp"
