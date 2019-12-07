@@ -22,9 +22,9 @@ namespace controller
     // A class implementing the load menu of the application.
     // Usage : simply call 'open()' and it manages the display and user inputs,
     // with the huge help of imgui.
-    // 
+    //
     // Warning: modifying permission on files or saves/ directory while the menu
-    // is open is not graceful, but works. 
+    // is open is not graceful, but works.
     class LoadMenu
     {
     public:
@@ -45,20 +45,20 @@ namespace controller
         // 'load_position' is the position on screen where to load the LSys
         // 'key' is the one part input management ("Enter" and "Escape")
         // 'unicode' is the other part: used to quick-select the save file on
-        // the list 
-        // 
+        // the list
+        //
         // Returns true if the menu has done its job and should be closed
         bool open(std::list<procgui::LSystemView>& lsys_views,
                   ext::sf::Vector2d load_position,
                   sf::Keyboard::Key key,
                   sf::Uint32 unicode);
-        
-        
+
+
         // Add a error message to be displayed at loading time.
         // This function should be called when an error occurs when
         // deserializing a LSystemView.
         static void add_loading_error_message(const std::string& message);
-        
+
     private:
         // A file entry with all its components
         struct file_entry {
@@ -105,28 +105,23 @@ namespace controller
                   ext::sf::Vector2d load_position,
                   std::ifstream& ifs);
 
-        // Just before loading, adjust size and position of the 'view'
-        void adjust_lsys(procgui::LSystemView& view,
-                         ext::sf::Vector2d load_position);
-        
-
         static constexpr int FILENAME_LENGTH_ = WindowController::FILENAME_LENGTH_;
         // File to save to.
         std::array<char, FILENAME_LENGTH_> file_to_load_;
         // Saves directory.
-        const std::filesystem::path save_dir_ = WindowController::save_dir_;        
+        const std::filesystem::path save_dir_ = WindowController::save_dir_;
 
         // Index of the selected file in the list
         int file_idx_ {0};
 
         // True if the file was selected twise (two clicks)
         bool double_selection_ { false };
-        
+
         // True if the load menu should be closed
         bool close_menu_ { false };
-        
+
         // Error messages to be displayed if necessary at loading time.
-        static std::vector<std::string> error_messages;        
+        static std::vector<std::string> error_messages;
 
         // Ids list of all created popups, existing or deleted.
         std::vector<int> popups_ids_ {};

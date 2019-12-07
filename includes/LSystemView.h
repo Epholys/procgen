@@ -111,10 +111,18 @@ namespace procgui
         // Draw the vertices.
         void draw(sf::RenderTarget &target);
 
+        // Should be called after creating a LSystemView:
+        //   - Compute vertices
+        //   - Call 'center()'
+        //   - 'is_modified_' is set to false
         void finish_loading();
 
     private:
-        void center();
+        // Adjust the LSystemView;
+        //    - Put its middle in 'starting_position'
+        //    - Adjust the scaling so that it takes a certain ratio of the
+        //    lowest dimension of the screen size
+        void adjust();
 
         // Update the callbacks of the Observers
         void update_callbacks();
@@ -180,7 +188,8 @@ namespace procgui
         // Ids list of all created popups, existing or deleted.
         std::vector<int> popups_ids_;
 
-        bool to_center = false;
+        // Flag to call 'center()'
+        bool to_adjust_ = false;
 
         // Serialization
         friend class cereal::access;

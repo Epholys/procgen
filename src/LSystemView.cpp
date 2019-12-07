@@ -51,8 +51,6 @@ namespace procgui
         // and the vertices.
         update_callbacks();
 
-        size_safeguard();
-
         is_modified_ = false;
     }
 
@@ -87,8 +85,6 @@ namespace procgui
     {
         // Manually managing Observer<> callbacks.
         update_callbacks();
-
-        size_safeguard();
 
         is_modified_ = false;
     }
@@ -159,8 +155,6 @@ namespace procgui
             popups_ids_ = {};
 
             update_callbacks();
-
-            size_safeguard();
 
             is_modified_ = false;
         }
@@ -276,9 +270,9 @@ namespace procgui
     {
         sf::Transform transform;
 
-        transform.translate(sf::Vector2f(OParams::get_target()->get_starting_position()));
+        transform.translate(sf::Vector2f(get_parameters().get_starting_position()));
 
-        const auto scale_factor = OParams::get_target()->get_step() / Turtle::step_;
+        const auto scale_factor = get_parameters().get_step() / Turtle::step_;
         transform.scale(scale_factor, scale_factor);
 
         return transform;
@@ -300,9 +294,9 @@ namespace procgui
 
     void LSystemView::size_safeguard()
     {
-        drawing::system_size size = compute_max_size(*OLSys::get_target()->get_rule_map(),
-                                                     *OMap::get_target()->get_rule_map(),
-                                                      OParams::get_target()->get_n_iter());
+        drawing::system_size size = compute_max_size(*get_lsystem_buffer().get_rule_map(),
+                                                     *get_interpretation_buffer().get_rule_map(),
+                                                      get_parameters().get_n_iter());
         system_size_ = size;
         auto approximate_mem_size_ = drawing::memory_size(size);
         auto max_size = std::max(max_mem_size_, config::sys_max_size);
@@ -314,9 +308,9 @@ namespace procgui
         else
         {
             // Validate all changes.
-            OParams::get_target()->validate();
-            OLSys::get_target()->validate();
-            OMap::get_target()->validate();
+            ref_parameters().validate();
+            ref_lsystem_buffer().validate();
+            ref_interpretation_buffer().validate();
 
             compute_vertices();
         }
@@ -364,9 +358,9 @@ namespace procgui
               [this]()
               {
                   // We do not know which one was modified, validate all.
-                  OParams::get_target()->validate();
-                  OLSys::get_target()->validate();
-                  OMap::get_target()->validate();
+                  ref_parameters().validate();
+                  ref_lsystem_buffer().validate();
+                  ref_interpretation_buffer().validate();
 
                   max_mem_size_ = drawing::memory_size(system_size_);
 
@@ -376,9 +370,9 @@ namespace procgui
               {
                   // Normally, only one was modified (or the user has a
                   // sub-frame auto-clicker), so only one will be reverted.
-                  OParams::get_target()->revert();
-                  OLSys::get_target()->revert();
-                  OMap::get_target()->revert();
+                  ref_parameters().validate();
+                  ref_lsystem_buffer().validate();
+                  ref_interpretation_buffer().validate();
               }
             };
         popups_ids_.push_back(procgui::push_popup(size_warning_popup));
@@ -389,22 +383,16 @@ namespace procgui
         // Invariant respected: cohesion between the vertices and the bounding
         // boxes.
 
-        const auto& [str, iterations, max_iteration] = OLSys::get_target()->ref_rule_map()->produce(OParams::get_target()->get_n_iter(), system_size_.lsystem_size);
+        const auto& [str, iterations, max_iteration] = ref_lsystem_buffer().ref_rule_map()->produce(OParams::get_target()->get_n_iter(), system_size_.lsystem_size);
         max_iteration_ = max_iteration;
-        turtle_.init_from_parameters(*OParams::get_target());
+        turtle_.init_from_parameters(get_parameters());
         turtle_.compute_vertices(str,
                                  iterations,
-                                 *OMap::get_target()->get_rule_map(),
+                                 *get_interpretation_buffer().get_rule_map(),
                                  system_size_.vertices_size);
         bounding_box_ = geometry::bounding_box(turtle_.vertices_);
         sub_boxes_ = geometry::sub_boxes(turtle_.vertices_, MAX_SUB_BOXES);
         geometry::expand_boxes(sub_boxes_); // Add some margin
-
-        if (to_center)
-        {
-            center();
-            to_center = false;
-        }
 
         paint_vertices();
     }
@@ -412,26 +400,33 @@ namespace procgui
     void LSystemView::paint_vertices()
     {
         // un-transformed vertices and bounding box
-        OPainter::get_target()->get_target()->paint_vertices(turtle_.vertices_,
+        get_vertex_painter_wrapper().unwrap()->paint_vertices(turtle_.vertices_,
                                                              turtle_.iterations_,
                                                              turtle_.transparency_,
                                                              max_iteration_,
                                                              bounding_box_);
         is_modified_ = true;
+
+        if (to_adjust_)
+        {
+            adjust();
+            to_adjust_ = false;
+            is_modified_ = false;
+        }
     }
 
     void LSystemView::finish_loading()
     {
-        to_center = true;
+        to_adjust_ = true;
         size_safeguard();
     }
 
-    void LSystemView::center()
+    void LSystemView::adjust()
     {
         // Redimension the L-System to take 2/3 of the lowest
         // screen. Double the load time, but it should be okay
         // except for huge L-Systems.
-        const double target_ratio = 2. / 3.;
+        constexpr double target_ratio = 2. / 3.;
         double step {0};
         auto box = get_bounding_box();
         auto window_size = sfml_window::window.getSize();
@@ -481,7 +476,7 @@ namespace procgui
             target.draw(turtle_.vertices_.data(),
                         turtle_.vertices_.size(),
                         sf::LineStrip, get_transform());
-            OPainter::get_target()->unwrap()->supplementary_drawing(visible_bounding_box);
+            get_vertex_painter_wrapper().unwrap()->supplementary_drawing(visible_bounding_box);
         }
 
         if (is_selected_ && bounding_box_is_visible_)

@@ -33,41 +33,6 @@ namespace controller
         error_messages.push_back(message);
     }
 
-    void LoadMenu::adjust_lsys(procgui::LSystemView& view,
-                               ext::sf::Vector2d load_position)
-    {
-        // Redimension the L-System to take 2/3 of the lowest
-        // screen. Double the load time, but it should be okay
-        // except for huge L-Systems.
-        const double target_ratio = 2. / 3.;
-        double step {0};
-        auto box = view.get_bounding_box();
-        auto window_size = sfml_window::window.getSize();
-        float xratio = window_size.x / box.width;
-        float yratio = window_size.y / box.height;
-        auto zoom_level = WindowController::get_zoom_level();
-        if(xratio < yratio)
-        {
-
-            double target_size = target_ratio * window_size.x;
-            double diff_ratio = box.width != 0 ? target_size / box.width : target_size;
-            step = view.get_parameters().get_step() * diff_ratio * zoom_level;
-        }
-        else
-        {
-            double target_size = target_ratio * window_size.y;
-            double diff_ratio = box.height != 0 ? target_size / box.height : target_size;
-            step = view.get_parameters().get_step() * diff_ratio * zoom_level;
-        }
-        view.ref_parameters().set_step(step);
-
-        box = view.get_bounding_box();
-        ext::sf::Vector2d middle = {box.left + box.width / 2,
-                                    box.top + box.height / 2};
-        middle = view.get_parameters().get_starting_position() - middle;
-        view.ref_parameters().set_starting_position(load_position + middle);
-    }
-
     void LoadMenu::load(std::list<procgui::LSystemView>& lsys_views,
                         ext::sf::Vector2d load_position,
                         std::ifstream& ifs)
@@ -101,9 +66,7 @@ namespace controller
         }
         if(no_error)
         {
-            //adjust_lsys(loaded_view, load_position);
-
-            lsys_views.emplace_front(loaded_view);
+            lsys_views.emplace_front(std::move(loaded_view));
             lsys_views.front().ref_parameters().set_starting_position(load_position);
             lsys_views.front().finish_loading();
             lsys_views.front().select();

@@ -72,7 +72,7 @@ int main(/*int argc, char* argv[]*/)
     auto map = std::make_shared<InterpretationMap>(default_interpretation_map);
 
     auto plant_param = std::make_shared<DrawingParameters>();
-    plant_param->set_starting_position({ 400, 800 });
+    plant_param->set_starting_position({ 400, 500 });
     plant_param->set_starting_angle(degree_to_rad(80.f));
     plant_param->set_delta_angle(degree_to_rad(25.f));
     plant_param->set_n_iter(6);
@@ -81,7 +81,8 @@ int main(/*int argc, char* argv[]*/)
     LSystemView plant_view ("Plant", plant, map, plant_param);
 
     std::list<LSystemView> views;
-    views.emplace_back(plant_view);
+    views.emplace_back(std::move(plant_view));
+    views.back().finish_loading();
     views.back().select();
 
 
