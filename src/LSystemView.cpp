@@ -275,13 +275,12 @@ namespace procgui
     sf::Transform LSystemView::get_transform() const
     {
         sf::Transform transform;
-        sf::Vector2f middle = {bounding_box_.left + bounding_box_.width  / 2,
-                               bounding_box_.top  + bounding_box_.height / 2};
 
-        transform.translate(sf::Vector2f(OParams::get_target()->get_starting_position())-middle);
+        transform.translate(sf::Vector2f(OParams::get_target()->get_starting_position()));
+
         const auto scale_factor = OParams::get_target()->get_step() / Turtle::step_;
+        transform.scale(scale_factor, scale_factor);
 
-        transform.scale(scale_factor, scale_factor, middle.x, middle.y);
         return transform;
     }
     std::string LSystemView::get_name() const
@@ -453,6 +452,12 @@ namespace procgui
             step = get_parameters().get_step() * diff_ratio * zoom_level;
         }
         ref_parameters().set_step(step);
+
+        box = get_bounding_box();
+        ext::sf::Vector2d middle = {box.left + box.width / 2,
+                                    box.top + box.height / 2};
+        middle = get_parameters().get_starting_position() - middle;
+        ref_parameters().set_starting_position(get_parameters().get_starting_position()+middle);
     }
 
     void LSystemView::draw(sf::RenderTarget &target)
