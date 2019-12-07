@@ -19,7 +19,8 @@ namespace controller
 {
     class SaveMenu;
     class LoadMenu;
-    
+    class ExportMenu;
+
     // WindowController is the hub for all the inputs. The main code in
     // 'handle_input()' manages the 'sf::View' of the window: resizing, zooming, and
     // dragging the view. All the others component of this application needing input
@@ -49,29 +50,32 @@ namespace controller
         // position in the application coordinates, returns the absolution
         // position in the window coordinate.
         static sf::Vector2i absolute_mouse_position(sf::Vector2f mouse_click);
-        
+
         // Get the absolute mouse position
         static sf::Vector2i get_mouse_position();
 
         // Getter for the zoom level
         static float get_zoom_level();
-        
+
         // Public method to message WindowController to open the save menu.
         static void open_save_menu();
+
+        // Public method to message WindowController to open the save menu.
+        static void open_export_menu();
 
         // Default step size at default zoom level TODO: remove when step optimization
         static const double default_step_;
 
         // Arbitrary value for the maximum length of the file name.
         static constexpr int FILENAME_LENGTH_ = 128;
-        
+
         // The fixed save directory of the application
         static const std::filesystem::path save_dir_;
 
     private:
-        
+
         // Helper method to paste 'view' at 'position' and add it to
-        // 'lsys_views'. 
+        // 'lsys_views'.
         static void paste_view(std::list<procgui::LSystemView>& lsys_views,
                                const std::optional<procgui::LSystemView>& view,
                                const sf::Vector2f& position);
@@ -90,18 +94,21 @@ namespace controller
         static bool load_menu_open_;
         static LoadMenu load_menu_;
         static ext::sf::Vector2d load_position_;
-        
+
+        static bool export_menu_open_;
+        static ExportMenu export_menu_;
+
         // Flag to let the quit popup open;
         static bool quit_popup_open_;
         // If at least one open LSystemView is not saved, open a quit warning popup.
         static void quit_popup(sf::Keyboard::Key key);
-        
+
         // The view modified by the user and given to the window.
         static sf::View view_;
 
         // The zoom level in the window.
         static float zoom_level_;
-        
+
         // Current mouse position
         static sf::Vector2i mouse_position_;
 

@@ -7,14 +7,14 @@
 namespace controller
 {
     procgui::LSystemView* LSystemController::under_mouse_ {nullptr};
-    
+
     std::optional<procgui::LSystemView> LSystemController::saved_view_ {};
 
     const std::chrono::duration<unsigned long long, std::milli> LSystemController::double_click_time_
     {std::chrono::milliseconds(300)};
 
     std::chrono::time_point<std::chrono::steady_clock> LSystemController::click_time_ {};
-    
+
     bool LSystemController::has_priority()
     {
         return under_mouse_ != nullptr;
@@ -47,7 +47,7 @@ namespace controller
                 }
                 click_time_ = std::chrono::steady_clock::now();
             }
-            
+
             // We want to have a specific behaviour : if a click is inside the
             // hitboxes of a LSystemView, we select it for 'under_mouse_' UNLESS
             // an other view is already selected at this click.
@@ -59,7 +59,7 @@ namespace controller
                                       {event.mouseButton.x,
                                        event.mouseButton.y})))
                 {
-                    // If the click is inside the hitboxes, select it... 
+                    // If the click is inside the hitboxes, select it...
                     to_select = it;
                     if (it->is_selected())
                     {
@@ -121,6 +121,10 @@ namespace controller
             {
                 WindowController::open_save_menu();
             }
+            else if (event.key.code == sf::Keyboard::E)
+            {
+                WindowController::open_export_menu();
+            }
         }
     }
 
@@ -142,7 +146,7 @@ namespace controller
 
         if (to_delete->is_modified())
         {
-        
+
             procgui::PopupGUI save_warning_popup =
                 { "Save Warning##LSysController",
                   []()
@@ -156,7 +160,7 @@ namespace controller
                       under_mouse_ = nullptr;
                   }
                 };
-            
+
             procgui::push_popup(save_warning_popup);
         }
         else
@@ -183,6 +187,10 @@ namespace controller
             if (ImGui::MenuItem("Save", "Ctrl+S"))
             {
                 WindowController::open_save_menu();
+            }
+            else if (ImGui::MenuItem("Export", "Ctrl+E"))
+            {
+                WindowController::open_export_menu();
             }
             ImGui::EndPopup();
         }

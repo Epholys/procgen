@@ -10,6 +10,7 @@
 #include "LSystemView.h"
 #include "SaveMenu.h"
 #include "LoadMenu.h"
+#include "ExportMenu.h"
 #include "PopupGUI.h"
 
 using sfml_window::window;
@@ -29,6 +30,7 @@ namespace controller
 
     bool WindowController::save_menu_open_ {false};
     bool WindowController::load_menu_open_ {false};
+    bool WindowController::export_menu_open_ {false};
     bool WindowController::quit_popup_open_ { false };
 
     ext::sf::Vector2d WindowController::load_position_ { 0, 0 };
@@ -39,6 +41,7 @@ namespace controller
 
     SaveMenu WindowController::save_menu_;
     LoadMenu WindowController::load_menu_;
+    ExportMenu WindowController::export_menu_;
 
 
     sf::Vector2f WindowController::real_mouse_position(sf::Vector2i mouse_click)
@@ -65,6 +68,11 @@ namespace controller
     void WindowController::open_save_menu()
     {
         save_menu_open_ = true;
+    }
+
+    void WindowController::open_export_menu()
+    {
+        export_menu_open_ = true;
     }
 
     void WindowController::paste_view(std::list<procgui::LSystemView>& lsys_views,
@@ -182,7 +190,8 @@ namespace controller
                 }
             }
 
-            else if ((load_menu_open_ || save_menu_open_ || !procgui::popup_empty()) &&
+            else if ((load_menu_open_ || save_menu_open_ || export_menu_open_ ||
+                      !procgui::popup_empty()) &&
                      event.type == sf::Event::KeyPressed)
             {
                 key_to_menus = event.key.code;
@@ -264,6 +273,14 @@ namespace controller
                 save_name = under_mouse->get_name();
             }
             save_menu_open_ = !save_menu_.open(key_to_menus, save_name);
+        }
+        if (export_menu_open_)
+        {
+            auto* under_mouse = LSystemController::under_mouse();
+            if (under_mouse)
+            {
+                export_menu_open_ = !export_menu_.open(key_to_menus);
+            }
         }
         else if (load_menu_open_)
         {
