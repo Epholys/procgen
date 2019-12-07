@@ -277,7 +277,9 @@ namespace procgui
         sf::Transform transform;
         transform.translate(sf::Vector2f(OParams::get_target()->get_starting_position()));
         const auto scale_factor = OParams::get_target()->get_step() / Turtle::step_;
-        transform.scale(scale_factor, scale_factor);
+        sf::Vector2f middle = {bounding_box_.left + bounding_box_.width  / 2,
+                               bounding_box_.top  + bounding_box_.height / 2};
+        transform.scale(scale_factor, scale_factor, middle.x, middle.y);
         return transform;
     }
     std::string LSystemView::get_name() const
@@ -397,6 +399,12 @@ namespace procgui
         sub_boxes_ = geometry::sub_boxes(turtle_.vertices_, MAX_SUB_BOXES);
         geometry::expand_boxes(sub_boxes_); // Add some margin
 
+        if (to_center)
+        {
+            center();
+            to_center = false;
+        }
+
         paint_vertices();
     }
 
@@ -411,6 +419,16 @@ namespace procgui
         is_modified_ = true;
     }
 
+    void LSystemView::finish_loading()
+    {
+        to_center = true;
+        size_safeguard();
+    }
+
+    void LSystemView::center()
+    {
+
+    }
 
     void LSystemView::draw(sf::RenderTarget &target)
     {

@@ -19,7 +19,7 @@ using sfml_window::window;
 
 void opt(int argc, char* argv[]);
 
-int main(int argc, char* argv[])
+int main(/*int argc, char* argv[]*/)
 {
     // if (argc > 1)
     // {
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
     auto map = std::make_shared<InterpretationMap>(default_interpretation_map);
 
     auto plant_param = std::make_shared<DrawingParameters>();
-    plant_param->set_starting_position({ 400, 800 });
+    plant_param->set_starting_position({ 400, 550 });
     plant_param->set_starting_angle(degree_to_rad(80.f));
     plant_param->set_delta_angle(degree_to_rad(25.f));
     plant_param->set_n_iter(6);

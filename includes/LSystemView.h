@@ -111,8 +111,11 @@ namespace procgui
         // Draw the vertices.
         void draw(sf::RenderTarget &target);
 
+        void finish_loading();
 
     private:
+        void center();
+
         // Update the callbacks of the Observers
         void update_callbacks();
 
@@ -177,6 +180,7 @@ namespace procgui
         // Ids list of all created popups, existing or deleted.
         std::vector<int> popups_ids_;
 
+        bool to_center = false;
 
         // Serialization
         friend class cereal::access;
