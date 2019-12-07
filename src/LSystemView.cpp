@@ -275,10 +275,12 @@ namespace procgui
     sf::Transform LSystemView::get_transform() const
     {
         sf::Transform transform;
-        transform.translate(sf::Vector2f(OParams::get_target()->get_starting_position()));
-        const auto scale_factor = OParams::get_target()->get_step() / Turtle::step_;
         sf::Vector2f middle = {bounding_box_.left + bounding_box_.width  / 2,
                                bounding_box_.top  + bounding_box_.height / 2};
+
+        transform.translate(sf::Vector2f(OParams::get_target()->get_starting_position())-middle);
+        const auto scale_factor = OParams::get_target()->get_step() / Turtle::step_;
+
         transform.scale(scale_factor, scale_factor, middle.x, middle.y);
         return transform;
     }
@@ -427,7 +429,30 @@ namespace procgui
 
     void LSystemView::center()
     {
+        // Redimension the L-System to take 2/3 of the lowest
+        // screen. Double the load time, but it should be okay
+        // except for huge L-Systems.
+        const double target_ratio = 2. / 3.;
+        double step {0};
+        auto box = get_bounding_box();
+        auto window_size = sfml_window::window.getSize();
+        float xratio = window_size.x / box.width;
+        float yratio = window_size.y / box.height;
+        auto zoom_level = controller::WindowController::get_zoom_level();
+        if(xratio < yratio)
+        {
 
+            double target_size = target_ratio * window_size.x;
+            double diff_ratio = box.width != 0 ? target_size / box.width : target_size;
+            step = get_parameters().get_step() * diff_ratio * zoom_level;
+        }
+        else
+        {
+            double target_size = target_ratio * window_size.y;
+            double diff_ratio = box.height != 0 ? target_size / box.height : target_size;
+            step = get_parameters().get_step() * diff_ratio * zoom_level;
+        }
+        ref_parameters().set_step(step);
     }
 
     void LSystemView::draw(sf::RenderTarget &target)

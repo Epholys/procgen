@@ -82,7 +82,7 @@ int main(/*int argc, char* argv[]*/)
 
     std::list<LSystemView> views;
     views.emplace_back(plant_view);
-    views.front().select();
+    views.back().select();
 
 
     sf::Clock delta_clock;

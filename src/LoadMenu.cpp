@@ -101,9 +101,11 @@ namespace controller
         }
         if(no_error)
         {
-            adjust_lsys(loaded_view, load_position);
+            //adjust_lsys(loaded_view, load_position);
 
             lsys_views.emplace_front(loaded_view);
+            lsys_views.front().ref_parameters().set_starting_position(load_position);
+            lsys_views.front().finish_loading();
             lsys_views.front().select();
 
             close_menu_ = true;
