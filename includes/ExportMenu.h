@@ -32,10 +32,16 @@ namespace controller
         bool open(sf::Keyboard::Key key);
 
     private:
-        std::vector<sf::Vertex> add_width(const std::vector<sf::Vertex>& v, float w) const;
+        void parameters();
+        void size_warning() const;
         void export_to_png() const;
+        std::vector<sf::Vertex> add_width(const std::vector<sf::Vertex>& v, float w) const;
 
         bool close_menu_ = false;
+
+        int n_iteration_ = 0;
+        int image_dim_ = 1000;
+        float ratio_ = 5.f;
     };
 }
 
