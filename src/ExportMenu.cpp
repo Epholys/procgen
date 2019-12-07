@@ -31,11 +31,72 @@ namespace controller
     bool ExportMenu::open(sf::Keyboard::Key key)
     {
         ImGui::SetNextWindowPosCenter();
-        if (ImGui::Begin("Export LSystem to PNG", NULL, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
+        if (ImGui::Begin("Export LSystem to PNG", NULL, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize))
         {
             // Avoid interaction with the background when exporting a LSytem.
             ImGui::CaptureKeyboardFromApp();
             ImGui::CaptureMouseFromApp();
+
+            // Text
+            ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.f), "WARNING: ");
+            ImGui::SameLine();
+            ImGui::Text("This is a ");
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(1.f, .5f, 0.f, 1.f), "BETA ");
+            ImGui::SameLine();
+            ImGui::Text("feature. It is stable, but not really polished and safe.");
+
+            ImGui::Text("Number of iteration for your LSystem: ");
+            ImGui::SameLine();
+            static int iteration = 5;
+            ImGui::InputInt("", &iteration, 1);
+
+            ImGui::Text("Biggest dimension of the exported image: ");
+            ImGui::SameLine();
+            static int image_dim = 1000;
+            ImGui::InputInt("", &image_dim, 10);
+
+            ImGui::Text("Ratio branch_length/branch_width: ");
+            ImGui::SameLine();
+            static float ratio = 5;
+            ImGui::InputFloat("", &ratio, 0.05);
+
+            constexpr unsigned long long megabyte = 1024 * 1024;
+            unsigned long long lsys_size = 10000000;
+            unsigned long long image_size = 100000;
+            ImGui::Text("You will compute a LSystem of size %llu MB and an image of size %llu MB",
+                        lsys_size/megabyte, image_size/megabyte);
+            ImGui::Text("For big L-System, the application may take a long time to compute it.");
+            ImGui::Text("For bigger L-System, the application or your");
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.8f, 0.f, 1.f, 1.f), "computer");
+            ImGui::SameLine();
+            ImGui::Text("will");
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.f, 0.5f, 1.f, 1.f), "freeze");
+            ImGui::SameLine();
+            ImGui::Text("or");
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.f), "CRASH");
+            ImGui::SameLine();
+            ImGui::Text(".");
+
+            std::string path = "saves/name.lsys.png";
+            ImGui::Text("The file will be saved as ");
+            ImGui::SameLine();
+            ImGui::Text(path.c_str());
+
+            ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
+            if (ImGui::Button("Export"))
+            {
+                export_to_png();
+                close_menu_ = true;
+            }
+            ImGui::PopStyleColor(3);
+            ImGui::SameLine();
+            // ~Text
+
+
 
             ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
             if (ImGui::Button("Cancel") || key == sf::Keyboard::Escape)
@@ -56,6 +117,9 @@ namespace controller
         return false;
     }
 
+    void ExportMenu::export_to_png() const
+    {
+    }
 
 // void tmp()
 // {

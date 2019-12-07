@@ -33,6 +33,7 @@ namespace controller
 
     private:
         std::vector<sf::Vertex> add_width(const std::vector<sf::Vertex>& v, float w) const;
+        void export_to_png() const;
 
         bool close_menu_ = false;
     };
