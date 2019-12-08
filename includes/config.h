@@ -15,7 +15,7 @@ namespace config
 
     // The configuration file path.
     static std::filesystem::path config_path = std::filesystem::u8path(u8"config/config.json");
-    
+
     // Serialization
     // 'sys_max_size' is saved in Megabytes.
     template <class Archive>
@@ -27,6 +27,10 @@ namespace config
     void load(Archive& ar, u32)
     {
         ar(cereal::make_nvp("sys_max_size", sys_max_size));
+        if (sys_max_size <= 0)
+        {
+            sys_max_size = 10;
+        }
         sys_max_size *= 1024 * 1024;
     }
 }
