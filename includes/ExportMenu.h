@@ -2,7 +2,9 @@
 #define EXPORT_MENU_H
 
 #include <vector>
+#include <filesystem>
 #include <SFML/Window/Keyboard.hpp>
+#include "WindowController.h"
 
 namespace sf
 {
@@ -21,7 +23,7 @@ namespace controller
     public:
 
         ExportMenu() = default;
-        ~ExportMenu() = default;
+        ~ExportMenu();
         // Simplify implementation by deleting these constructors/operator=. If
         // necessary, they will be implemented. For now it avoid wrong behavior.
         ExportMenu(const ExportMenu& other) = delete;
@@ -35,13 +37,18 @@ namespace controller
         void parameters();
         void size_warning() const;
         void export_to_png() const;
-        std::vector<sf::Vertex> add_width(const std::vector<sf::Vertex>& v, float w) const;
+        void save_file();
 
-        bool close_menu_ = false;
+        const std::filesystem::path save_dir_ = WindowController::save_dir_;
 
-        int n_iteration_ = 0;
-        int image_dim_ = 1000;
-        float ratio_ = 5.f;
+        bool close_menu_ {false};
+
+        int n_iteration_ {0};
+        int image_dim_ {1000};
+        float ratio_ {5.f};
+
+        // Ids list of all created popups, existing or deleted.
+        std::vector<int> popups_ids_ {};
     };
 }
 

@@ -1,36 +1,32 @@
 #include <cmath>
 #include <vector>
 #include <sstream>
+#include <fstream>
+
 #include <SFML/Graphics.hpp>
+
 #include "imgui/imgui.h"
+
 #include "ExportMenu.h"
-#include "imgui_extension.h"
+
 #include "size_computer.h"
 #include "LSystemController.h"
 #include "LSystemView.h"
+#include "PopupGUI.h"
+#include "export.h"
 
 namespace controller
 {
-    std::vector<sf::Vertex> ExportMenu::add_width(const std::vector<sf::Vertex>& v, float w) const
+    namespace fs = std::filesystem;
+
+    ExportMenu::~ExportMenu()
     {
-        std::vector<sf::Vertex> vw;
-        vw.reserve(v.size()*2);
-        auto normal = [](auto p1, auto p2){return sf::Vector2f(-(p2.y - p1.y), p2.x - p1.x);};
-        auto normalize = [](auto v){auto norm=std::sqrt(v.x*v.x + v.y*v.y); if(norm) return sf::Vector2f(v.x/norm, v.y/norm); else return v;};
-        for (auto i=1u; i<v.size(); ++i)
+        for (auto id : popups_ids_)
         {
-            auto n = normalize(normal(v[i-1].position, v[i].position));
-            auto p2 = v[i-1].position+w*n;
-            auto p4 = v[i].position+w*n;
-            sf::Vertex vx2 {p2, v[i-1].color};
-            sf::Vertex vx4 {p4, v[i].color};
-            vw.push_back(v[i-1]);
-            vw.push_back(vx2);
-            vw.push_back(v[i]);
-            vw.push_back(vx4);
+            procgui::remove_popup(id);
         }
-        return vw;
     }
+
 
     void ExportMenu::parameters()
     {
@@ -68,7 +64,7 @@ namespace controller
     {
         constexpr unsigned long long megabyte = 1024 * 1024;
 
-        const auto* lsystem = LSystemController::under_mouse();
+        const auto* const lsystem = LSystemController::under_mouse();
 
         Expects(lsystem);
 
@@ -111,6 +107,48 @@ namespace controller
 
     }
 
+    void ExportMenu::save_file()
+    {
+        const auto* const lsystem = LSystemController::under_mouse();
+        Expects(lsystem);
+
+        std::string save_file = save_dir_.string() + "/";
+        std::string lsys_name = lsystem->get_name();
+        if (lsys_name.empty())
+        {
+            lsys_name = "export";
+        }
+        save_file += lsys_name + ".png";
+
+        ImGui::Text("The LSystem will be exported to file : ");
+        ImGui::SameLine();
+        ImGui::Text(save_file.c_str());
+
+        ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
+        bool to_export = ImGui::Button("Export");
+        ImGui::PopStyleColor(3);
+        ImGui::SameLine();
+
+        if (to_export)
+        {
+            close_menu_ = true;
+            bool success = drawing::export_to_png(save_file);
+            if (!success)
+            {
+                // Open the file error popup if the export failed.
+                procgui::PopupGUI file_error_popup =
+                    { "Error##FILE",
+                      [save_file]()
+                      {
+                          std::string error_message = "Error: can't open file: "+save_file;
+                          ImGui::Text(error_message.c_str());
+                      }
+                    };
+                popups_ids_.push_back(procgui::push_popup(file_error_popup));
+            }
+        }
+    }
+
     bool ExportMenu::open(sf::Keyboard::Key key)
     {
         ImGui::SetNextWindowPosCenter();
@@ -129,22 +167,7 @@ namespace controller
 
             size_warning();
 
-            std::string path = "saves/name.lsys.png";
-            ImGui::Text("The file will be saved as ");
-            ImGui::SameLine();
-            ImGui::Text(path.c_str());
-
-            ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
-            if (ImGui::Button("Export"))
-            {
-                export_to_png();
-                close_menu_ = true;
-            }
-            ImGui::PopStyleColor(3);
-            ImGui::SameLine();
-            // ~Text
-
-
+            save_file();
 
             ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
             if (ImGui::Button("Cancel") || key == sf::Keyboard::Escape)
@@ -164,43 +187,4 @@ namespace controller
 
         return false;
     }
-
-    void ExportMenu::export_to_png() const
-    {
-    }
-
-// void tmp()
-// {
-//     auto box = view.get_bounding_box();
-//     auto size = std::atoi(argv[2]);
-//     auto s = box.width > box.height ? box.width : box.height;
-//     auto ratio = size / s;
-
-//     auto step = view.get_parameters().get_step();
-//     view.ref_parameters().set_step(step*ratio);
-//     box = view.get_bounding_box();
-//     const auto& v = view.get_vertices();
-//     std::vector<sf::Vertex> vertices;
-//     if (argc > 3)
-//     {
-//         float width = std::atof(argv[3]);
-//         vertices = add_width(v, step*ratio/width);
-//     }
-//     else
-//         vertices = v;
-//     sf::RenderTexture render;
-//     render.create(std::ceil(box.width), std::ceil(box.height));
-//     auto render_view = render.getView();
-//     render_view.move(box.left, box.top);
-//     render.setView(render_view);
-//     render.clear(sf::Color::Black);
-//     if (argc > 3)
-//         render.draw(vertices.data(), vertices.size(), sf::TriangleStrip);
-//     else
-//         render.draw(vertices.data(), vertices.size(), sf::LineStrip);
-//     const auto& texture = render.getTexture();
-//     auto image = texture.copyToImage();
-//     image.flipVertically();
-//     image.saveToFile(std::string(argv[1])+".png");
-// }
 }
