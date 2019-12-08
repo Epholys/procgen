@@ -9,6 +9,7 @@
 #include "WindowController.h"
 #include "config.h"
 #include "PopupGUI.h"
+#include "export.h"
 
 using namespace drawing;
 using namespace math;
@@ -18,14 +19,20 @@ using namespace colors;
 using sfml_window::window;
 
 void opt(int argc, char* argv[]);
+int export_mode(int argc, char* argv[]);
 
-int main(/*int argc, char* argv[]*/)
+int main(int argc, char* argv[])
 {
     // if (argc > 1)
     // {
     //     opt(argc, argv);
     //     return 0;
     // }
+
+    if (argc > 1)
+    {
+        return export_mode(argc, argv);
+    }
 
     // Load config file
     bool load_config_failed = false;
@@ -165,6 +172,69 @@ int main(/*int argc, char* argv[]*/)
     return 0;
 }
 
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+int export_mode(int argc, char* argv[])
+{
+    if (argc != 4)
+    {
+        std::cout << "Usage: procgen <filename> <image_dim> <ratio>\n";
+        return EXIT_SUCCESS;
+    }
+
+    std::cout << "WARNING: Exporting is a beta feature.\n";
+
+    const std::string filename = argv[1];
+    std::ifstream ifs (filename);
+    if (!ifs.is_open())
+    {
+        std::cerr << "Error: can't open file: " << filename << " ; exiting\n";
+        return EXIT_FAILURE;
+    }
+    procgui::LSystemView view({0,0}, WindowController::default_step_);
+    try
+    {
+        // Load it from the file.
+        cereal::JSONInputArchive archive (ifs);
+        archive(view);
+    }
+    catch (const cereal::RapidJSONException& e)
+    {
+        std::cerr << "Error: " << filename << " isn't a valid or complete JSON L-System file ; exiting\n";
+        return EXIT_FAILURE;
+    }
+
+
+    int image_dim = std::atoi(argv[2]);
+    if (image_dim <= 0)
+    {
+        std::cerr << "Error: <image_dim> is not a valid number ; exiting\n";
+        return EXIT_FAILURE;
+    }
+
+    double ratio = std::atof(argv[3]);
+    if (ratio <= 0)
+    {
+        std::cerr << "Error: <ratio> is not a valid number ; exiting\n";
+        return EXIT_FAILURE;
+    }
+
+    bool success = export_to_png(view,
+                                 filename+".png",
+                                 view.get_parameters().get_n_iter(),
+                                 image_dim,
+                                 ratio);
+
+    if (!success)
+    {
+        std::cerr << "Error: export failed ; exiting\n";
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void opt(int argc, char* argv[])
 {

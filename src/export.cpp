@@ -31,6 +31,8 @@ namespace drawing
                         int image_dim,
                         double ratio)
     {
+        std::cout << n_iter;
+
         view.set_headless(true);
         view.ref_parameters().set_n_iter(n_iter);
 
