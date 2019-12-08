@@ -41,6 +41,8 @@ namespace controller
 
         const std::filesystem::path save_dir_ = WindowController::save_dir_;
 
+        bool first_time_open_ {true};
+
         bool close_menu_ {false};
 
         int n_iteration_ {5};

@@ -155,10 +155,22 @@ namespace controller
 
     bool ExportMenu::open(sf::Keyboard::Key key)
     {
+        if (first_time_open_)
+        {
+            const auto* const lsys = controller::LSystemController::under_mouse();
+            Expects(lsys);
+            n_iteration_ = lsys->get_parameters().get_n_iter();
+            first_time_open_ = false;
+        }
+
         ImGui::SetNextWindowPosCenter();
         if (ImGui::Begin("Export LSystem to PNG", NULL, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize))
         {
-            // Text
+            // Avoid interaction with the background when saving a file.
+            ImGui::CaptureKeyboardFromApp();
+            ImGui::CaptureMouseFromApp();
+
+
             ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.f), "WARNING: ");
             ImGui::SameLine();
             ImGui::Text("This is a ");
@@ -186,6 +198,7 @@ namespace controller
         if (close_menu_)
         {
             close_menu_ = false;
+            first_time_open_ = true;
             return true;
         }
 
