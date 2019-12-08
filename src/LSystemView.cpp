@@ -258,6 +258,10 @@ namespace procgui
     {
         return *OPainter::get_target();
     }
+    const drawing::Turtle& LSystemView::get_turtle() const
+    {
+        return turtle_;
+    }
     int LSystemView::get_id() const
     {
         return id_;
@@ -287,6 +291,12 @@ namespace procgui
         is_modified_ = false;
     }
 
+    void LSystemView::set_headless(bool is_headless)
+    {
+        headless = is_headless;
+    }
+
+
     bool LSystemView::is_modified() const
     {
         return is_modified_;
@@ -301,7 +311,7 @@ namespace procgui
         auto approximate_mem_size_ = drawing::memory_size(size);
         auto max_size = std::max(max_mem_size_, config::sys_max_size);
 
-        if (approximate_mem_size_ > max_size)
+        if (!headless && approximate_mem_size_ > max_size)
         {
             open_size_warning_popup();
         }

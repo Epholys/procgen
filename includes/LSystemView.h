@@ -78,11 +78,14 @@ namespace procgui
         const LSystemBuffer& get_lsystem_buffer() const;
         const InterpretationMapBuffer& get_interpretation_buffer() const;
         const colors::VertexPainterWrapper& get_vertex_painter_wrapper() const;
+        const drawing::Turtle& get_turtle() const;
         int get_id() const;
         sf::Color get_color() const;
 
         std::string get_name() const;
         void set_name(const std::string& name);
+
+        void set_headless(bool is_headless);
 
         bool is_modified() const;
 
@@ -183,13 +186,15 @@ namespace procgui
 
         // RAM size of the data the user want to compute
         drawing::system_size system_size_ = {0, 0};
-        drawing::Matrix::number max_mem_size_ = 0;
+        drawing::Matrix::number max_mem_size_ {0};
 
         // Ids list of all created popups, existing or deleted.
         std::vector<int> popups_ids_;
 
         // Flag to call 'center()'
-        bool to_adjust_ = false;
+        bool to_adjust_ {false};
+
+        bool headless {false};
 
         // Serialization
         friend class cereal::access;

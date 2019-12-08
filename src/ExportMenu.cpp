@@ -52,8 +52,8 @@ namespace controller
 
         ImGui::Text("Ratio branch_length/branch_width: ");
         ImGui::SameLine();
-        float ratio_tmp = ratio_;
-        if (ImGui::InputFloat("##RATIO", &ratio_tmp, 0.05) &&
+        double ratio_tmp = ratio_;
+        if (ImGui::InputDouble("##RATIO", &ratio_tmp, 0.05) &&
             ratio_tmp > 0.f)
         {
             ratio_ = ratio_tmp;
@@ -132,7 +132,11 @@ namespace controller
         if (to_export)
         {
             close_menu_ = true;
-            bool success = drawing::export_to_png(save_file);
+            bool success = drawing::export_to_png(*lsystem,
+                                                  save_file,
+                                                  n_iteration_,
+                                                  image_dim_,
+                                                  ratio_);
             if (!success)
             {
                 // Open the file error popup if the export failed.
@@ -140,7 +144,7 @@ namespace controller
                     { "Error##FILE",
                       [save_file]()
                       {
-                          std::string error_message = "Error: can't open file: "+save_file;
+                          std::string error_message = "Error when exporting: "+save_file;
                           ImGui::Text(error_message.c_str());
                       }
                     };

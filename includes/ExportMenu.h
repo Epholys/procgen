@@ -43,9 +43,9 @@ namespace controller
 
         bool close_menu_ {false};
 
-        int n_iteration_ {0};
+        int n_iteration_ {5};
         int image_dim_ {1000};
-        float ratio_ {5.f};
+        double ratio_ {5.f};
 
         // Ids list of all created popups, existing or deleted.
         std::vector<int> popups_ids_ {};
