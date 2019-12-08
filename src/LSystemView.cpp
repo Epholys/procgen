@@ -380,9 +380,9 @@ namespace procgui
               {
                   // Normally, only one was modified (or the user has a
                   // sub-frame auto-clicker), so only one will be reverted.
-                  ref_parameters().validate();
-                  ref_lsystem_buffer().validate();
-                  ref_interpretation_buffer().validate();
+                  ref_parameters().revert();
+                  ref_lsystem_buffer().revert();
+                  ref_interpretation_buffer().revert();
               }
             };
         popups_ids_.push_back(procgui::push_popup(size_warning_popup));
