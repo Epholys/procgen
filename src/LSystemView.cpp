@@ -57,9 +57,15 @@ namespace procgui
     LSystemView::LSystemView(const ext::sf::Vector2d& position, double step)
         : LSystemView(
             "",
-            std::make_shared<LSystem>(LSystem("F+F+F+F", {}, "")),
+            std::make_shared<LSystem>(LSystem("X",
+                                              {{'F', "FF"}, {'X', "F[+X][-X]"}},
+                                              "X")),
             std::make_shared<InterpretationMap>(default_interpretation_map),
-            std::make_shared<DrawingParameters>(position, step))
+            std::make_shared<DrawingParameters>(position,
+                                                math::pi/2,
+                                                math::degree_to_rad(30),
+                                                step,
+                                                3))
     {
     }
 
