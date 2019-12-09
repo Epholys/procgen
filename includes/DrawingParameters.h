@@ -101,12 +101,12 @@ namespace drawing
                 if (starting_angle_ < 0 || starting_angle_ > 360)
                 {
                     starting_angle_ = math::clamp_angle(starting_angle_);
-                    controller::LoadMenu::add_loading_error_message("DrawingParameters' starting_angle wasn't in the [0,360] range, so it is clamped.");
+                    controller::LoadMenu::add_loading_error_message("DrawingParameters' starting_angle wasn't in the [0,360] range, so was clamped.");
                 }
                 if (delta_angle_ < 0 || delta_angle_ > 360)
                 {
                     delta_angle_ = math::clamp_angle(delta_angle_);
-                    controller::LoadMenu::add_loading_error_message("DrawingParameters' delta_angle wasn't in the [0,360] range, so it is clamped.");
+                    controller::LoadMenu::add_loading_error_message("DrawingParameters' delta_angle wasn't in the [0,360] range, so it was clamped.");
                 }
                 if (n_iter_ < 0)
                 {

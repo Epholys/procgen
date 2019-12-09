@@ -285,7 +285,7 @@ namespace colors
                 if (loaded_keys.size() < 2)
                 {
                     loaded_keys = {{sf::Color::White, 0} , {sf::Color::White, 1.}};
-                    controller::LoadMenu::add_loading_error_message("There was less than 2 keys in LinearGradient, so it is set to a default state.");
+                    controller::LoadMenu::add_loading_error_message("There was less than 2 keys in LinearGradient, so it is was to a default state.");
                 }
 
                 bool out_of_bound = false;
@@ -300,7 +300,7 @@ namespace colors
 
                 if (out_of_bound)
                 {
-                    controller::LoadMenu::add_loading_error_message("One or more key in LinearGradient were out of bound, so they are clamped.");
+                    controller::LoadMenu::add_loading_error_message("One or more key in LinearGradient were out of bound, so they were clamped.");
                 }
 
                 set_keys(keys);
@@ -389,7 +389,7 @@ namespace colors
                 if (loaded_keys.size() < 2)
                 {
                     loaded_keys = {{sf::Color::White, 0} , {sf::Color::White, 1}};
-                    controller::LoadMenu::add_loading_error_message("There was less than 2 keys in DiscreteGradient, so it is set to a default state.");
+                    controller::LoadMenu::add_loading_error_message("There was less than 2 keys in DiscreteGradient, so it is was to a default state.");
                 }
 
                 bool out_of_bound = false;
@@ -404,7 +404,7 @@ namespace colors
 
                 if (out_of_bound)
                 {
-                    controller::LoadMenu::add_loading_error_message("One or more key in DiscreteGradient were negative, so they are clamped.");
+                    controller::LoadMenu::add_loading_error_message("One or more key in DiscreteGradient were negative, so they were clamped.");
                 }
 
                 if (!std::is_sorted(begin(keys), end(keys),

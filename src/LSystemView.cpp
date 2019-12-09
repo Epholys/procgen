@@ -342,7 +342,7 @@ namespace procgui
                   ImGui::TextColored(ImVec4(1.f, 0.5f, 0.f, 1.f), "WARNING\n");
                   if (approximate_mem_size == drawing::Matrix::MAX)
                   {
-                      ImGui::Text("You are trying to compute a big L-System of a size bigger than 16 exabytes");
+                      ImGui::Text("You are trying to compute a big L-System with a size bigger than 16 exabytes");
                       ImGui::Text("(bigger than the data stored by Google in 2013).");
                       ImGui::Text("You still have the choice to proceed if you have alien tech,");
                       ImGui::Text("but otherwise the application or your");

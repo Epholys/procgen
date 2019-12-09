@@ -151,7 +151,7 @@ namespace controller
                 { "Save Warning##LSysController",
                   []()
                   {
-                      ImGui::Text("This L-System has unsaved modification, are you sure to delete it?");
+                      ImGui::Text("This L-System has unsaved modifications, are you sure to delete it?");
                   },
                   false, "Yes", "No",
                   [to_delete, &views]()

@@ -30,7 +30,7 @@ namespace controller
 
     void ExportMenu::parameters()
     {
-        ImGui::Text("Number of iteration for your LSystem: ");
+        ImGui::Text("Number of iterations for your LSystem: ");
         ImGui::SameLine();
         int iter_tmp = n_iteration_;
         if (ImGui::InputInt("##ITER", &iter_tmp, 1) && iter_tmp >= 0)
@@ -91,7 +91,7 @@ namespace controller
 
         ImGui::Text(warning_text.str().c_str());
         ImGui::Text("For big L-System, the application may take a long time to compute it.");
-        ImGui::Text("For bigger L-System, the application or your");
+        ImGui::Text("For bigger L-System, the application of your");
         ImGui::SameLine();
         ImGui::TextColored(ImVec4(0.8f, 0.f, 1.f, 1.f), "computer");
         ImGui::SameLine();
