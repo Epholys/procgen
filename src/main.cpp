@@ -9,6 +9,7 @@
 #include "WindowController.h"
 #include "config.h"
 #include "PopupGUI.h"
+#include "export.h"
 
 using namespace drawing;
 using namespace math;
@@ -18,6 +19,7 @@ using namespace colors;
 using sfml_window::window;
 
 void opt(int argc, char* argv[]);
+int export_mode(int argc, char* argv[]);
 
 int main(int argc, char* argv[])
 {
@@ -26,6 +28,11 @@ int main(int argc, char* argv[])
     //     opt(argc, argv);
     //     return 0;
     // }
+
+    if (argc > 1)
+    {
+        return export_mode(argc, argv);
+    }
 
     // Load config file
     bool load_config_failed = false;
@@ -67,23 +74,58 @@ int main(int argc, char* argv[])
     sfml_window::init_window();
     ImGui::SFML::Init(window);
 
+
     // Default L-System
-    auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[+X][X]F[+X]-FX" }, { 'F', "FF" } }, "X" });
-    auto map = std::make_shared<InterpretationMap>(default_interpretation_map);
-
-    auto plant_param = std::make_shared<DrawingParameters>();
-    plant_param->set_starting_position({ 400, 800 });
-    plant_param->set_starting_angle(degree_to_rad(80.f));
-    plant_param->set_delta_angle(degree_to_rad(25.f));
-    plant_param->set_n_iter(6);
-    plant_param->set_step(4);
-
-    LSystemView plant_view ("Plant", plant, map, plant_param);
-
     std::list<LSystemView> views;
-    views.emplace_back(plant_view);
-    views.front().select();
-    views.front().finish_loading();
+
+    std::ifstream ifs ("saves/fern.lsys");
+    if (!ifs.is_open())
+    {
+        auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[+X][-X]F[+X]-FX" }, { 'F', "FF" } }, "X" });
+        auto map = std::make_shared<InterpretationMap>(default_interpretation_map);
+
+        auto plant_param = std::make_shared<DrawingParameters>();
+        plant_param->set_starting_position({ 400, 500 });
+        plant_param->set_starting_angle(degree_to_rad(80.f));
+        plant_param->set_delta_angle(degree_to_rad(25.f));
+        plant_param->set_n_iter(6);
+
+        auto constant_color_gen = std::make_shared<ColorGeneratorWrapper>(
+            std::make_shared<ConstantColor>(sf::Color(183,71,71,255)));
+        auto constant_painter = std::make_shared<VertexPainterWrapper>(
+            std::make_shared<VertexPainterConstant>(constant_color_gen));
+
+        auto linear_color_gen = std::make_shared<ColorGeneratorWrapper>(
+            std::make_shared<LinearGradient>(LinearGradient::keys({{sf::Color(255,253,0,255), 0},
+                                                                   {sf::Color(255,25,0,255), 1}})));
+        auto sequential_painter = std::make_shared<VertexPainterSequential>(linear_color_gen);
+        sequential_painter->set_factor(5);
+        auto sequential_painter_wrapper = std::make_shared<VertexPainterWrapper>(sequential_painter);
+
+        auto main_painter = std::make_shared<VertexPainterWrapper>(
+            std::make_shared<VertexPainterIteration>());
+
+        auto composite_painter = std::make_shared<VertexPainterComposite>();
+        composite_painter->set_main_painter(main_painter);
+        composite_painter->set_child_painters({constant_painter, sequential_painter_wrapper});
+        auto composite_wrapper = std::make_shared<VertexPainterWrapper>(composite_painter);
+
+        LSystemView plant_view ("Plant", plant, map, plant_param, composite_wrapper);
+        views.emplace_back(std::move(plant_view));
+    }
+    else
+    {
+        procgui::LSystemView loaded_view({400,500}, WindowController::default_step_);
+        {
+            cereal::JSONInputArchive ar (ifs);
+            ar (loaded_view);
+        }
+        loaded_view.ref_parameters().set_starting_position({400,500});
+        views.emplace_back(std::move(loaded_view));
+    }
+
+    views.back().finish_loading();
+    views.back().select();
 
 
     sf::Clock delta_clock;
@@ -165,6 +207,69 @@ int main(int argc, char* argv[])
     return 0;
 }
 
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+int export_mode(int argc, char* argv[])
+{
+    if (argc != 4)
+    {
+        std::cout << "Usage: procgen <filename> <image_dim> <ratio>\n";
+        return EXIT_SUCCESS;
+    }
+
+    std::cout << "WARNING: Exporting is a beta feature.\n";
+
+    const std::string filename = argv[1];
+    std::ifstream ifs (filename);
+    if (!ifs.is_open())
+    {
+        std::cerr << "Error: can't open file: " << filename << " ; exiting\n";
+        return EXIT_FAILURE;
+    }
+    procgui::LSystemView view({0,0}, WindowController::default_step_);
+    try
+    {
+        // Load it from the file.
+        cereal::JSONInputArchive archive (ifs);
+        archive(view);
+    }
+    catch (const cereal::RapidJSONException& e)
+    {
+        std::cerr << "Error: " << filename << " isn't a valid or complete JSON L-System file ; exiting\n";
+        return EXIT_FAILURE;
+    }
+
+
+    int image_dim = std::atoi(argv[2]);
+    if (image_dim <= 0)
+    {
+        std::cerr << "Error: <image_dim> is not a valid number ; exiting\n";
+        return EXIT_FAILURE;
+    }
+
+    double ratio = std::atof(argv[3]);
+    if (ratio <= 0)
+    {
+        std::cerr << "Error: <ratio> is not a valid number ; exiting\n";
+        return EXIT_FAILURE;
+    }
+
+    bool success = export_to_png(view,
+                                 filename+".png",
+                                 view.get_parameters().get_n_iter(),
+                                 image_dim,
+                                 ratio);
+
+    if (!success)
+    {
+        std::cerr << "Error: export failed ; exiting\n";
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void opt(int argc, char* argv[])
 {

@@ -19,7 +19,7 @@ TEST(DrawingParametersTest, complete_ctor)
     ASSERT_FLOAT_EQ(expected_angle, params.get_starting_angle());
     ASSERT_FLOAT_EQ(expected_delta, params.get_delta_angle());
     ASSERT_FLOAT_EQ(expected_step, params.get_step());
-    ASSERT_EQ(expected_iter, params.get_n_iter());    
+    ASSERT_EQ(expected_iter, params.get_n_iter());
 }
 
 // Other constructors are defaulted, we assume the implementation is correct.
@@ -95,7 +95,6 @@ TEST(DrawingParametersTest, set_step)
     int expected {42};
     params_ptr->set_step(expected);
 
-    ASSERT_TRUE(params_obs);
     ASSERT_FLOAT_EQ(expected, params_ptr->get_step());
 }
 
@@ -118,7 +117,7 @@ TEST(DrawingParametersTest, revert_n_iter)
     constexpr int base_iter = 5;
     DrawingParameters params ({0, 0}, 0, 0, 10, /*n_iter*/ base_iter);
     constexpr int new_iter = 7;
-    
+
     params.set_n_iter(new_iter);
     params.revert();
 
@@ -130,7 +129,7 @@ TEST(DrawingParametersTest, validate_n_iter)
 {
     DrawingParameters params ({0, 0}, 0, 0, 10, /*n_iter*/ 5);
     const int new_iter = 7;
-    
+
     params.set_n_iter(new_iter);
     params.validate();
     params.revert();
@@ -145,7 +144,7 @@ TEST(DrawingParametersTest, serialization)
 {
     DrawingParameters oparams { {100,100}, 1, 1, 10, 3};
     DrawingParameters iparams;
-    
+
     std::stringstream ss;
     {
         cereal::JSONOutputArchive oarchive (ss);

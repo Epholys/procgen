@@ -10,6 +10,7 @@
 #include "LSystemView.h"
 #include "SaveMenu.h"
 #include "LoadMenu.h"
+#include "ExportMenu.h"
 #include "PopupGUI.h"
 
 using sfml_window::window;
@@ -29,6 +30,7 @@ namespace controller
 
     bool WindowController::save_menu_open_ {false};
     bool WindowController::load_menu_open_ {false};
+    bool WindowController::export_menu_open_ {false};
     bool WindowController::quit_popup_open_ { false };
 
     ext::sf::Vector2d WindowController::load_position_ { 0, 0 };
@@ -39,6 +41,7 @@ namespace controller
 
     SaveMenu WindowController::save_menu_;
     LoadMenu WindowController::load_menu_;
+    ExportMenu WindowController::export_menu_;
 
 
     sf::Vector2f WindowController::real_mouse_position(sf::Vector2i mouse_click)
@@ -67,6 +70,11 @@ namespace controller
         save_menu_open_ = true;
     }
 
+    void WindowController::open_export_menu()
+    {
+        export_menu_open_ = true;
+    }
+
     void WindowController::paste_view(std::list<procgui::LSystemView>& lsys_views,
                                       const std::optional<procgui::LSystemView>& view,
                                       const sf::Vector2f& position)
@@ -84,9 +92,8 @@ namespace controller
         ext::sf::Vector2d middle = {box.left + box.width/2, box.top + box.height/2};
         middle = pasted_view.get_parameters().get_starting_position() - middle;
         pasted_view.ref_parameters().set_starting_position(pos + middle);
-        lsys_views.emplace_front(pasted_view);
+        lsys_views.emplace_front(std::move(pasted_view));
         lsys_views.front().select();
-        lsys_views.front().finish_loading();
     }
 
     void WindowController::right_click_menu(sf::RenderWindow& window, std::list<procgui::LSystemView>& lsys_views)
@@ -95,8 +102,9 @@ namespace controller
         {
             if (ImGui::MenuItem("New LSystem", "Ctrl+N"))
             {
-                lsys_views.emplace_front(procgui::LSystemView(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))),
-                                                              default_step_ * zoom_level_));
+                lsys_views.emplace_front(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))),
+                                                              default_step_ * zoom_level_);
+                lsys_views.front().finish_loading();
                 lsys_views.front().select();
             }
             if (ImGui::MenuItem("Load LSystem", "Ctrl+O"))
@@ -168,9 +176,11 @@ namespace controller
                 }
                 else if (event.key.code == sf::Keyboard::N)
                 {
-                    lsys_views.emplace_front(procgui::LSystemView(ext::sf::Vector2d(real_mouse_position({int(sfml_window::window.getSize().x/2),
-                                            int(sfml_window::window.getSize().y/2)})),
-                            default_step_ * zoom_level_));
+                    lsys_views.emplace_front(ext::sf::Vector2d(real_mouse_position(
+                                                               {int(sfml_window::window.getSize().x/2),
+                                                                int(sfml_window::window.getSize().y/2)})),
+                                             default_step_ * zoom_level_);
+                    lsys_views.front().finish_loading();
                     lsys_views.front().select();
                 }
                 else if (event.key.code == sf::Keyboard::O)
@@ -183,7 +193,8 @@ namespace controller
                 }
             }
 
-            else if ((load_menu_open_ || save_menu_open_ || !procgui::popup_empty()) &&
+            else if ((load_menu_open_ || save_menu_open_ || export_menu_open_ ||
+                      !procgui::popup_empty()) &&
                      event.type == sf::Event::KeyPressed)
             {
                 key_to_menus = event.key.code;
@@ -265,6 +276,14 @@ namespace controller
                 save_name = under_mouse->get_name();
             }
             save_menu_open_ = !save_menu_.open(key_to_menus, save_name);
+        }
+        if (export_menu_open_)
+        {
+            auto* under_mouse = LSystemController::under_mouse();
+            if (under_mouse)
+            {
+                export_menu_open_ = !export_menu_.open(key_to_menus);
+            }
         }
         else if (load_menu_open_)
         {

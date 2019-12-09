@@ -50,8 +50,10 @@ namespace drawing
         // calculations.
         double cos_ {0};
         double sin_ {1};
-        // Taken from the DrawingParameters
-        double step_ {10};
+        // The absolute step. The visuals are scaled on screen with the
+        // DrawingParameters 'scale_'.
+        // The value is 1 as floating-point are really precise at this scale.
+        static constexpr double step_ {1};
 
         // The current position and direction of the Turtle.
         struct State {

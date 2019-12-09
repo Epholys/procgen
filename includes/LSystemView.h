@@ -78,20 +78,16 @@ namespace procgui
         const LSystemBuffer& get_lsystem_buffer() const;
         const InterpretationMapBuffer& get_interpretation_buffer() const;
         const colors::VertexPainterWrapper& get_vertex_painter_wrapper() const;
+        const drawing::Turtle& get_turtle() const;
         int get_id() const;
         sf::Color get_color() const;
 
         std::string get_name() const;
         void set_name(const std::string& name);
 
+        void set_headless(bool is_headless);
+
         bool is_modified() const;
-        // Should be called externally when a LSystemView is fully loaded.
-        // It shows a bad design, because loading a LSystemView should just take
-        // one step by constructing it. However, for now, loading a LSystem is
-        // done in two steps as repositionning and scaling are necessary to put
-        // the LSystemView on screen. But optimization is possible, and will be
-        // done. So TODO.
-        void finish_loading();
 
         // Translation transform to correct screen-space position of the
         // LSystem.
@@ -118,8 +114,19 @@ namespace procgui
         // Draw the vertices.
         void draw(sf::RenderTarget &target);
 
+        // Should be called after creating a LSystemView:
+        //   - Compute vertices
+        //   - Call 'center()'
+        //   - 'is_modified_' is set to false
+        void finish_loading();
 
     private:
+        // Adjust the LSystemView;
+        //    - Put its middle in 'starting_position'
+        //    - Adjust the scaling so that it takes a certain ratio of the
+        //    lowest dimension of the screen size
+        void adjust();
+
         // Update the callbacks of the Observers
         void update_callbacks();
 
@@ -179,11 +186,15 @@ namespace procgui
 
         // RAM size of the data the user want to compute
         drawing::system_size system_size_ = {0, 0};
-        drawing::Matrix::number max_mem_size_ = 0;
+        drawing::Matrix::number max_mem_size_ {0};
 
         // Ids list of all created popups, existing or deleted.
         std::vector<int> popups_ids_;
 
+        // Flag to call 'center()'
+        bool to_adjust_ {false};
+
+        bool headless {false};
 
         // Serialization
         friend class cereal::access;

@@ -44,7 +44,7 @@ namespace colors
         virtual std::string type_name() const override;
 
     private:
-        float factor_ {0};
+        double factor_ {0};
 
         friend class cereal::access;
         template<class Archive>
@@ -64,7 +64,7 @@ namespace colors
 
                 if (factor_ < 0 || factor_ > math::double_max_limit)
                 {
-                    factor_ = std::clamp(factor_, 0.f, float(math::double_max_limit));
+                    factor_ = std::clamp(factor_, 0., math::double_max_limit);
                     controller::LoadMenu::add_loading_error_message("VertexPainterSequential's repetition_factor was negative or too big, so it is clamped.");
                 }
 

@@ -69,7 +69,11 @@ namespace drawing
         // When 'move_forward' order is executed, the Turtle will move forward
         // 'step' pixels (at default zoom level).
         // Initialized to an arbitrary value.
-        double step_ { 20 };
+        // In reality, this is a scale value: the dimension on screen of the
+        // L-System is done by a graphic transform that is very efficient, so
+        // 'step_' is simply the zoom level (the transform is scaled as
+        // 'DrawingParameters::get_step() / Turtle::step_', which is 1.
+        double step_ { 10 };
 
         // The number of iterations computed by the L-system.
         u8 n_iter_ { 0 };
@@ -97,12 +101,12 @@ namespace drawing
                 if (starting_angle_ < 0 || starting_angle_ > 360)
                 {
                     starting_angle_ = math::clamp_angle(starting_angle_);
-                    controller::LoadMenu::add_loading_error_message("DrawingParameters' starting_angle wasn't in the [0,360] range, so it is clamped.");
+                    controller::LoadMenu::add_loading_error_message("DrawingParameters' starting_angle wasn't in the [0,360] range, so was clamped.");
                 }
                 if (delta_angle_ < 0 || delta_angle_ > 360)
                 {
                     delta_angle_ = math::clamp_angle(delta_angle_);
-                    controller::LoadMenu::add_loading_error_message("DrawingParameters' delta_angle wasn't in the [0,360] range, so it is clamped.");
+                    controller::LoadMenu::add_loading_error_message("DrawingParameters' delta_angle wasn't in the [0,360] range, so it was clamped.");
                 }
                 if (n_iter_ < 0)
                 {

@@ -26,54 +26,19 @@ namespace controller
             procgui::remove_popup(id);
         }
     }
-    
-    
+
+
     void LoadMenu::add_loading_error_message(const std::string& message)
     {
         error_messages.push_back(message);
     }
-    
-    void LoadMenu::adjust_lsys(procgui::LSystemView& view,
-                               ext::sf::Vector2d load_position)
-    {
-        // Redimension the L-System to take 2/3 of the lowest
-        // screen. Double the load time, but it should be okay
-        // except for huge L-Systems.
-        const double target_ratio = 2. / 3.;
-        double step {0};
-        auto box = view.get_bounding_box();
-        auto window_size = sfml_window::window.getSize();
-        float xratio = window_size.x / box.width;
-        float yratio = window_size.y / box.height;
-        auto zoom_level = WindowController::get_zoom_level();
-        if(xratio < yratio)
-        {
 
-            double target_size = target_ratio * window_size.x;
-            double diff_ratio = box.width != 0 ? target_size / box.width : target_size;
-            step = view.get_parameters().get_step() * diff_ratio * zoom_level;
-        }
-        else
-        {
-            double target_size = target_ratio * window_size.y;
-            double diff_ratio = box.height != 0 ? target_size / box.height : target_size;
-            step = view.get_parameters().get_step() * diff_ratio * zoom_level;
-        }
-        view.ref_parameters().set_step(step);
-
-        box = view.get_bounding_box();
-        ext::sf::Vector2d middle = {box.left + box.width / 2,
-                                    box.top + box.height / 2};
-        middle = view.get_parameters().get_starting_position() - middle;
-        view.ref_parameters().set_starting_position(load_position + middle);
-    }
-    
     void LoadMenu::load(std::list<procgui::LSystemView>& lsys_views,
                         ext::sf::Vector2d load_position,
                         std::ifstream& ifs)
     {
         bool no_error = true;
-        
+
         // Create a default LSystemView.
         procgui::LSystemView loaded_view({0,0}, WindowController::default_step_);
         try
@@ -85,7 +50,7 @@ namespace controller
         catch (const cereal::RapidJSONException& e)
         {
             // Open a popup if the save file is not in valid JSON format.
-            
+
             procgui::PopupGUI format_popup =
                 { "Error##FORMAT",
                   [this]()
@@ -101,22 +66,19 @@ namespace controller
         }
         if(no_error)
         {
-            // Load the LSys
-            
-            adjust_lsys(loaded_view, load_position);
-
-            lsys_views.emplace_front(loaded_view);
-            lsys_views.front().select();
+            lsys_views.emplace_front(std::move(loaded_view));
+            lsys_views.front().ref_parameters().set_starting_position(load_position);
             lsys_views.front().finish_loading();
-                                
+            lsys_views.front().select();
+
             close_menu_ = true;
         }
 
-                    
+
         if (!error_messages.empty())
         {
             // Open a final warning popup if there were error in the save file.
-            
+
             procgui::PopupGUI warning_popup =
                 { "Warning##ISSUE",
                   [this]()
@@ -150,22 +112,22 @@ namespace controller
                       }
                   }
                 };
-                    
+
             popups_ids_.push_back(procgui::push_popup(warning_popup));
         }
     }
-    
+
     void LoadMenu::load_button(std::list<procgui::LSystemView>& lsys_views,
                                ext::sf::Vector2d load_position,
                                sf::Keyboard::Key& key)
     {
-        ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();            
+        ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
         if (procgui::popup_empty() &&                                                     // If no popups are open &&
             (ImGui::Button("Load") || key == sf::Keyboard::Enter || double_selection_) && // If the user want to load &&
             !array_to_string(file_to_load_).empty())                                      // an existing file
         {
             double_selection_ = false;
-                
+
             // Open the input file.
             std::ifstream ifs (save_dir_/array_to_string(file_to_load_));
 
@@ -191,7 +153,7 @@ namespace controller
         }
         ImGui::PopStyleColor(3);
     }
-    
+
     LoadMenu::column_layout LoadMenu::list_layout(const std::vector<file_entry>& files)
     {
         // I'm bad at imgui's layout witchcraft, so there is a lot of
@@ -215,7 +177,7 @@ namespace controller
         // Number of files per column, taking care that only the last column has less element
         int file_per_column = files.size() / n_column;
         file_per_column = file_per_column % n_column != 0 ? file_per_column + 1 : file_per_column;
-                    
+
         float vertical_size = total_vertical_size / n_column;           // On-screen vertical size of the file list
         vertical_size = vertical_size == 0 ? 1 : vertical_size;         // '0' has a special value for imgui, put '1'
 
@@ -235,11 +197,11 @@ namespace controller
         total_horizontal_size = total_horizontal_size == 0 ? 1 : total_horizontal_size;               // '0' has a special value for imgui, put '1'
         float horizontal_size = total_horizontal_size < min_xsize ? min_xsize : total_horizontal_size;
         horizontal_size = horizontal_size < max_xsize ? horizontal_size : max_xsize;
-                
+
         // The size of the load window.
         // x is the clamped total horizontal size
         // y is the vertical size of the list + space for the bottom text
-        ImGui::SetWindowSize(ImVec2(horizontal_size, vertical_size + ymargin)); 
+        ImGui::SetWindowSize(ImVec2(horizontal_size, vertical_size + ymargin));
 
         // The virtual size of the files list. Virtual because it may not appear completely on screen, with scrollbar
         // x is the horizontal size of the columned files list
@@ -250,7 +212,7 @@ namespace controller
         //  x has the same size of the load window
         //  y has the same size of the content size
         ImGui::BeginChild("##ScrollingRegion", ImVec2(horizontal_size, vertical_size), false, ImGuiWindowFlags_HorizontalScrollbar);
-        
+
 
         return {n_column, file_per_column};
     }
@@ -261,7 +223,7 @@ namespace controller
                                    column_layout layout)
     {
         auto [n_column, file_per_column] = layout;
-        
+
         // Select the appropriate file if the user pressed a key
         if (unicode != 0)
         {
@@ -346,7 +308,7 @@ namespace controller
             }
         }
     }
-    
+
     void LoadMenu::list(std::vector<file_entry>& files,
                         sf::Keyboard::Key key,
                         sf::Uint32 unicode)
@@ -366,7 +328,7 @@ namespace controller
                                                   end(files),
                                                   [](const auto& f){return !fs::is_regular_file(f.file.path());});
             files.erase(to_remove, end(files));
-                                
+
             // ... sort them lexicographically, ...
             std::sort(begin(files), end(files),
                       [](const auto& left, const auto& right)
@@ -377,13 +339,13 @@ namespace controller
                           auto right_u32str = right.u32filename;
                           std::transform(begin(right_u32str), end(right_u32str), begin(right_u32str),
                                          [](auto c){return std::tolower(c);});
-                          return left_u32str < right_u32str;                          
+                          return left_u32str < right_u32str;
                       });
-                
+
             auto layout = list_layout(files);
 
             ImGui::Columns(layout.n_column);
-            
+
             list_navigation(files, key, unicode, layout);
 
 
@@ -393,17 +355,17 @@ namespace controller
 
                 // Displays the files in a selectable list
                 bool selectable_clicked = ImGui::Selectable(file.filename.c_str(), file_idx_ == i);
-                
+
                 if (selectable_clicked && file_idx_ == i && !double_selection_)
                 {
-                    // Double click : the selectable was previously selected, 
+                    // Double click : the selectable was previously selected,
                     double_selection_ = true;
                 }
                 if (selectable_clicked || file_idx_ == i)
                 {
                     // If the file was selected by clicking on the Selectable, update the file_idx_
                     file_idx_ = i;
-                        
+
                     file_to_load_ = string_to_array<FILENAME_LENGTH_>(file.filename);
                 }
                 if ((i+1) % layout.file_per_column == 0)
@@ -428,7 +390,7 @@ namespace controller
             close_menu_ = true;
         }
     }
-    
+
     bool LoadMenu::open(std::list<procgui::LSystemView>& lsys_views,
                         ext::sf::Vector2d load_position,
                         sf::Keyboard::Key key,
@@ -438,9 +400,9 @@ namespace controller
         if (ImGui::Begin("Load LSystem from file", NULL, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoSavedSettings))
         {
             error_messages.clear();
-                    
+
             std::vector<file_entry> files;
-            
+
             // Avoid interaction with the background when saving a file.
             ImGui::CaptureKeyboardFromApp();
             ImGui::CaptureMouseFromApp();
@@ -448,7 +410,7 @@ namespace controller
             ImGui::Separator();
 
             list(files, key, unicode);
-            
+
             ImGui::Separator();
 
             // Simple informative text
@@ -465,7 +427,7 @@ namespace controller
                 close_menu_ = true;
             }
             ImGui::PopStyleColor(3);
-            
+
             ImGui::End();
         }
 

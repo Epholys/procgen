@@ -14,14 +14,14 @@ namespace math
 
 
     template<typename N>
-    constexpr N degree_to_rad (N deg)
+    constexpr double degree_to_rad (N deg)
     {
         static_assert(std::is_arithmetic<N>::value, "degree_to_rad() must be called with an arithmetic argument");
 
         return deg * pi / 180;
     }
     template<typename N>
-    constexpr N rad_to_degree (N rad)
+    constexpr double rad_to_degree (N rad)
     {
         static_assert(std::is_arithmetic<N>::value, "rad_to_degree() must be called with an arithmetic argument");
 

@@ -55,8 +55,8 @@ namespace sf
 TEST_F(DrawingTest, go_forward)
 {
     sf::Vertex begin ( {0.f, 0.f} );
-    float newx = parameters.get_step() * std::cos(parameters.get_starting_angle());
-    float newy = parameters.get_step() * std::sin(parameters.get_starting_angle());
+    float newx = Turtle::step_* std::cos(parameters.get_starting_angle());
+    float newy = Turtle::step_ * std::sin(parameters.get_starting_angle());
     sf::Vector2f end_pos = begin.position + sf::Vector2f (newx, newy);
     sf::Vertex end { end_pos };
     std::vector<std::uint8_t> expected_iter {1,1};

@@ -13,7 +13,7 @@ INCLUDE_DIR = includes
 SRC_DIR = src
 
 ### Flags passed to the C++ compiler: common, macros, include and linking flags.
-CXXFLAGS = -std=c++17 -O3 -ffast-math -Wall -Wextra -pthread
+CXXFLAGS = -std=c++17 -O3 -Wall -Wextra -pthread
 MACROFLAGS += -DGSL_THROW_ON_CONTRACT_VIOLATION
 LFLAGS     += -lsfml-system -lsfml-window -lsfml-graphics -lGL -lstdc++fs
 IFLAGS     += -isystem . -I$(INCLUDE_DIR)
@@ -65,14 +65,13 @@ GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 
 
 
-all : debug main test
+all : debug test
 
 # Cleans all intermediate compilation files.
 clean :
 	rm -f $(addprefix $(SRC_DIR)/,*.o *.a *.out) \
 	$(addprefix  $(TEST_DIR)/, *.o *.a *.out) \
 	$(addprefix $(IMGUI_DIR)/, *.o *.a *.out)
-
 
 # main: Links all the .o file from MAIN to TARGET.
 main : $(ALL_OBJECTS)
@@ -82,6 +81,9 @@ main : $(ALL_OBJECTS)
 #       suite TEST_TARGET.
 test : $(OBJECTS) $(TEST_OBJ) $(TEST_DIR)/gtest_main.a
 	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -o $(TEST_TARGET) $^ $(IFLAGS) $(LFLAGS) -lpthread
+
+# debug: only main but with debug flags
+debug : main
 
 # release: Same as main with optimization flags (see above).
 release : main test

@@ -51,15 +51,21 @@ namespace procgui
         // and the vertices.
         update_callbacks();
 
-        size_safeguard();
+        is_modified_ = false;
     }
 
     LSystemView::LSystemView(const ext::sf::Vector2d& position, double step)
         : LSystemView(
             "",
-            std::make_shared<LSystem>(LSystem("F+F+F+F", {}, "")),
+            std::make_shared<LSystem>(LSystem("X",
+                                              {{'F', "FF"}, {'X', "F[+X][-X]"}},
+                                              "X")),
             std::make_shared<InterpretationMap>(default_interpretation_map),
-            std::make_shared<DrawingParameters>(position, step))
+            std::make_shared<DrawingParameters>(position,
+                                                math::pi/2,
+                                                math::degree_to_rad(30),
+                                                step,
+                                                3))
     {
     }
 
@@ -86,7 +92,7 @@ namespace procgui
         // Manually managing Observer<> callbacks.
         update_callbacks();
 
-        size_safeguard();
+        is_modified_ = false;
     }
 
     LSystemView::LSystemView(LSystemView&& other)
@@ -156,7 +162,7 @@ namespace procgui
 
             update_callbacks();
 
-            size_safeguard();
+            is_modified_ = false;
         }
 
         return *this;
@@ -258,6 +264,10 @@ namespace procgui
     {
         return *OPainter::get_target();
     }
+    const drawing::Turtle& LSystemView::get_turtle() const
+    {
+        return turtle_;
+    }
     int LSystemView::get_id() const
     {
         return id_;
@@ -269,7 +279,12 @@ namespace procgui
     sf::Transform LSystemView::get_transform() const
     {
         sf::Transform transform;
-        transform.translate(sf::Vector2f(OParams::get_target()->get_starting_position()));
+
+        transform.translate(sf::Vector2f(get_parameters().get_starting_position()));
+
+        const auto scale_factor = get_parameters().get_step() / Turtle::step_;
+        transform.scale(scale_factor, scale_factor);
+
         return transform;
     }
     std::string LSystemView::get_name() const
@@ -282,35 +297,36 @@ namespace procgui
         is_modified_ = false;
     }
 
+    void LSystemView::set_headless(bool is_headless)
+    {
+        headless = is_headless;
+    }
+
+
     bool LSystemView::is_modified() const
     {
         return is_modified_;
     }
-    void LSystemView::finish_loading()
-    {
-        is_modified_ = false;
-    }
-
 
     void LSystemView::size_safeguard()
     {
-        drawing::system_size size = compute_max_size(*OLSys::get_target()->get_rule_map(),
-                                                     *OMap::get_target()->get_rule_map(),
-                                                      OParams::get_target()->get_n_iter());
+        drawing::system_size size = compute_max_size(*get_lsystem_buffer().get_rule_map(),
+                                                     *get_interpretation_buffer().get_rule_map(),
+                                                      get_parameters().get_n_iter());
         system_size_ = size;
         auto approximate_mem_size_ = drawing::memory_size(size);
         auto max_size = std::max(max_mem_size_, config::sys_max_size);
 
-        if (approximate_mem_size_ > max_size)
+        if (!headless && approximate_mem_size_ > max_size)
         {
             open_size_warning_popup();
         }
         else
         {
             // Validate all changes.
-            OParams::get_target()->validate();
-            OLSys::get_target()->validate();
-            OMap::get_target()->validate();
+            ref_parameters().validate();
+            ref_lsystem_buffer().validate();
+            ref_interpretation_buffer().validate();
 
             compute_vertices();
         }
@@ -326,7 +342,7 @@ namespace procgui
                   ImGui::TextColored(ImVec4(1.f, 0.5f, 0.f, 1.f), "WARNING\n");
                   if (approximate_mem_size == drawing::Matrix::MAX)
                   {
-                      ImGui::Text("You are trying to compute a big L-System of a size bigger than 16 exabytes");
+                      ImGui::Text("You are trying to compute a big L-System with a size bigger than 16 exabytes");
                       ImGui::Text("(bigger than the data stored by Google in 2013).");
                       ImGui::Text("You still have the choice to proceed if you have alien tech,");
                       ImGui::Text("but otherwise the application or your");
@@ -358,9 +374,9 @@ namespace procgui
               [this]()
               {
                   // We do not know which one was modified, validate all.
-                  OParams::get_target()->validate();
-                  OLSys::get_target()->validate();
-                  OMap::get_target()->validate();
+                  ref_parameters().validate();
+                  ref_lsystem_buffer().validate();
+                  ref_interpretation_buffer().validate();
 
                   max_mem_size_ = drawing::memory_size(system_size_);
 
@@ -370,9 +386,9 @@ namespace procgui
               {
                   // Normally, only one was modified (or the user has a
                   // sub-frame auto-clicker), so only one will be reverted.
-                  OParams::get_target()->revert();
-                  OLSys::get_target()->revert();
-                  OMap::get_target()->revert();
+                  ref_parameters().revert();
+                  ref_lsystem_buffer().revert();
+                  ref_interpretation_buffer().revert();
               }
             };
         popups_ids_.push_back(procgui::push_popup(size_warning_popup));
@@ -383,12 +399,12 @@ namespace procgui
         // Invariant respected: cohesion between the vertices and the bounding
         // boxes.
 
-        const auto& [str, iterations, max_iteration] = OLSys::get_target()->ref_rule_map()->produce(OParams::get_target()->get_n_iter(), system_size_.lsystem_size);
+        const auto& [str, iterations, max_iteration] = ref_lsystem_buffer().ref_rule_map()->produce(OParams::get_target()->get_n_iter(), system_size_.lsystem_size);
         max_iteration_ = max_iteration;
-        turtle_.init_from_parameters(*OParams::get_target());
+        turtle_.init_from_parameters(get_parameters());
         turtle_.compute_vertices(str,
                                  iterations,
-                                 *OMap::get_target()->get_rule_map(),
+                                 *get_interpretation_buffer().get_rule_map(),
                                  system_size_.vertices_size);
         bounding_box_ = geometry::bounding_box(turtle_.vertices_);
         sub_boxes_ = geometry::sub_boxes(turtle_.vertices_, MAX_SUB_BOXES);
@@ -400,14 +416,60 @@ namespace procgui
     void LSystemView::paint_vertices()
     {
         // un-transformed vertices and bounding box
-        OPainter::get_target()->get_target()->paint_vertices(turtle_.vertices_,
+        get_vertex_painter_wrapper().unwrap()->paint_vertices(turtle_.vertices_,
                                                              turtle_.iterations_,
                                                              turtle_.transparency_,
                                                              max_iteration_,
                                                              bounding_box_);
         is_modified_ = true;
+
+        if (to_adjust_)
+        {
+            adjust();
+            to_adjust_ = false;
+            is_modified_ = false;
+        }
     }
 
+    void LSystemView::finish_loading()
+    {
+        to_adjust_ = true;
+        size_safeguard();
+    }
+
+    void LSystemView::adjust()
+    {
+        // Redimension the L-System to take 2/3 of the lowest
+        // screen. Double the load time, but it should be okay
+        // except for huge L-Systems.
+        constexpr double target_ratio = 2. / 3.;
+        double step {0};
+        auto box = get_bounding_box();
+        auto window_size = sfml_window::window.getSize();
+        float xratio = window_size.x / box.width;
+        float yratio = window_size.y / box.height;
+        auto zoom_level = controller::WindowController::get_zoom_level();
+        if(xratio < yratio)
+        {
+
+            double target_size = target_ratio * window_size.x;
+            double diff_ratio = box.width != 0 ? target_size / box.width : target_size;
+            step = get_parameters().get_step() * diff_ratio * zoom_level;
+        }
+        else
+        {
+            double target_size = target_ratio * window_size.y;
+            double diff_ratio = box.height != 0 ? target_size / box.height : target_size;
+            step = get_parameters().get_step() * diff_ratio * zoom_level;
+        }
+        ref_parameters().set_step(step);
+
+        box = get_bounding_box();
+        ext::sf::Vector2d middle = {box.left + box.width / 2,
+                                    box.top + box.height / 2};
+        middle = get_parameters().get_starting_position() - middle;
+        ref_parameters().set_starting_position(get_parameters().get_starting_position()+middle);
+    }
 
     void LSystemView::draw(sf::RenderTarget &target)
     {
@@ -430,7 +492,7 @@ namespace procgui
             target.draw(turtle_.vertices_.data(),
                         turtle_.vertices_.size(),
                         sf::LineStrip, get_transform());
-            OPainter::get_target()->unwrap()->supplementary_drawing(visible_bounding_box);
+            get_vertex_painter_wrapper().unwrap()->supplementary_drawing(visible_bounding_box);
         }
 
         if (is_selected_ && bounding_box_is_visible_)
