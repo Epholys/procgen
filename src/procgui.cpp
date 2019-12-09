@@ -1077,6 +1077,8 @@ namespace
 
     void interact_with(colors::DiscreteGradient& gen)
     {
+        constexpr int max_colors = 10000;
+
         bool is_modified = false;
 
         auto keys = gen.get_keys();
@@ -1162,7 +1164,7 @@ namespace
             ImGui::Text(" "); // '\n'
 
             // Number of transitional colors.
-            int diff = next(it)->index - it->index - 1;
+            int diff = next(it)->index - it->index - 1 + modifier;
             int diff_copy = diff;
 
             ImGui::PushItemWidth(75.f);
@@ -1289,8 +1291,7 @@ namespace
         // Preview the color gradient
         std::vector<sf::Color> colors = gen.get_colors();
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        constexpr int max_draw_calls = 10000;
-        if (draw_list->VtxBuffer.Size + colors.size() > max_draw_calls)
+        if (draw_list->VtxBuffer.Size + colors.size() > max_colors)
         {
             ImGui::TextColored(ImVec4(1.f,0.f,0.f,1.f), "Can't display preview: too many colors");
         }
@@ -1317,7 +1318,7 @@ namespace
             ImGui::Dummy(size);
         }
 
-        if (is_modified)
+        if (is_modified && keys.back().index < max_colors)
         {
             gen.set_keys(keys);
         }
