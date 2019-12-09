@@ -17,7 +17,6 @@
 
 ** Main Roadmap
    1. Polish before the first release
-      * Add low-hanging fruits optimization
       * Move from makefiles to CMake
       * Compile and package for Linux and Windows
    2. BIG REFACTORING
