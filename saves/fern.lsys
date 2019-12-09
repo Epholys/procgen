@@ -6,33 +6,55 @@
             "cereal_class_version": 0,
             "axiom": "X",
             "production_rules": {
-                "F": "FF",
-                "X": "F[+X][X]F[+X]-FX"
+                "X": "F[+X][-X]F[+X]-FX",
+                "F": "FF"
             },
             "iteration_predecessors": "X"
         },
         "DrawingParameters": {
             "cereal_class_version": 0,
-            "starting_angle": 79.99999767274336,
-            "delta_angle": 25.00000012650595,
+            "starting_angle": 80.0,
+            "delta_angle": 25.0,
             "n_iter": 6
         },
         "Interpretation Map": {
             "cereal_class_version": 0,
+            "-": "turn_left",
+            "F": "go_forward",
             "[": "save_position",
             "]": "load_position",
-            "+": "turn_right",
-            "-": "turn_left",
-            "F": "go_forward"
+            "+": "turn_right"
         },
         "VertexPainter": {
             "cereal_class_version": 0,
-            "type": "VertexPainterConstant",
-            "ColorGenerator": {
-                "cereal_class_version": 0,
-                "type": "ConstantColor",
-                "color": "#FFFFFFFF"
-            }
+            "type": "VertexPainterComposite",
+            "main_painter": {
+                "type": "VertexPainterIteration",
+                "ColorGenerator": {
+                    "cereal_class_version": 0,
+                    "type": "ColorGeneratorComposite"
+                }
+            },
+            "child_painters": [
+                {
+                    "type": "VertexPainterConstant",
+                    "ColorGenerator": {
+                        "type": "ConstantColor",
+                        "color": "#B74747FF"
+                    }
+                },
+                {
+                    "type": "VertexPainterSequential",
+                    "repetition_factor": 5.0,
+                    "ColorGenerator": {
+                        "type": "LinearGradient",
+                        "color_keys": {
+                            "#FFFD00FF": 0.0,
+                            "#FF1900FF": 1.0
+                        }
+                    }
+                }
+            ]
         }
     }
 }

@@ -6,8 +6,8 @@
             "cereal_class_version": 0,
             "axiom": "F",
             "production_rules": {
-                "G": "F-G-F",
-                "F": "G+F+G"
+                "F": "G+F+G",
+                "G": "F-G-F"
             },
             "iteration_predecessors": "FG"
         },
@@ -19,20 +19,28 @@
         },
         "Interpretation Map": {
             "cereal_class_version": 0,
-            "[": "save_position",
             "F": "go_forward",
             "-": "turn_right",
-            "+": "turn_left",
+            "[": "save_position",
+            "]": "load_position",
             "G": "go_forward",
-            "]": "load_position"
+            "+": "turn_left"
         },
         "VertexPainter": {
             "cereal_class_version": 0,
-            "type": "VertexPainterConstant",
+            "type": "VertexPainterSequential",
+            "repetition_factor": 1.0,
             "ColorGenerator": {
                 "cereal_class_version": 0,
-                "type": "ConstantColor",
-                "color": "#FFFFFFFF"
+                "type": "LinearGradient",
+                "color_keys": {
+                    "#FF0000FF": 0.0,
+                    "#DF00FFFF": 0.20000000298023225,
+                    "#406AFFFF": 0.4000000059604645,
+                    "#00FFE2FF": 0.6000000238418579,
+                    "#1CFF00FF": 0.800000011920929,
+                    "#EFFF05FF": 1.0
+                }
             }
         }
     }
