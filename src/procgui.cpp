@@ -434,12 +434,12 @@ namespace
 
     void interact_with(colors::VertexPainterSequential& painter, bool from_composite=false)
     {
-        float factor = painter.get_factor();
+        double factor = painter.get_factor();
 
-        if (ImGui::DragFloat("Repetition factor", &factor,
-                             0.01f, 0.f, double_max_limit, "%.2f") )
+        if (ext::ImGui::DragDouble("Repetition factor", &factor,
+                                   0.01f, 0.f, double_max_limit, "%.2f") )
         {
-            factor = clamp(factor, 0.f, float(double_max_limit));
+            factor = std::clamp(factor, 0., double_max_limit);
             painter.set_factor(factor);
         }
 
