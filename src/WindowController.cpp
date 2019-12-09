@@ -102,8 +102,9 @@ namespace controller
         {
             if (ImGui::MenuItem("New LSystem", "Ctrl+N"))
             {
-                lsys_views.emplace_front(procgui::LSystemView(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))),
-                                                              default_step_ * zoom_level_));
+                lsys_views.emplace_front(ext::sf::Vector2d(real_mouse_position(sf::Mouse::getPosition(window))),
+                                                              default_step_ * zoom_level_);
+                lsys_views.front().finish_loading();
                 lsys_views.front().select();
             }
             if (ImGui::MenuItem("Load LSystem", "Ctrl+O"))
@@ -175,9 +176,11 @@ namespace controller
                 }
                 else if (event.key.code == sf::Keyboard::N)
                 {
-                    lsys_views.emplace_front(procgui::LSystemView(ext::sf::Vector2d(real_mouse_position({int(sfml_window::window.getSize().x/2),
-                                            int(sfml_window::window.getSize().y/2)})),
-                            default_step_ * zoom_level_));
+                    lsys_views.emplace_front(ext::sf::Vector2d(real_mouse_position(
+                                                               {int(sfml_window::window.getSize().x/2),
+                                                                int(sfml_window::window.getSize().y/2)})),
+                                             default_step_ * zoom_level_);
+                    lsys_views.front().finish_loading();
                     lsys_views.front().select();
                 }
                 else if (event.key.code == sf::Keyboard::O)
