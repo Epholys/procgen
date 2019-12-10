@@ -4,6 +4,7 @@
 
 #include <list>
 #include <experimental/filesystem>
+#include <optional>
 
 #include <SFML/Graphics.hpp>
 

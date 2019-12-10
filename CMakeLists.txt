@@ -31,7 +31,7 @@ target_link_libraries(lsys
   PUBLIC
   ${OPENGL_LIBRARIES}
   sfml-system sfml-window sfml-graphics
-  stdc++fs
+  $<$<PLATFORM_ID:Linux>:stdc++fs>
   )
 
 install(

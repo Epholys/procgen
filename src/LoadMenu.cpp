@@ -1,3 +1,4 @@
+#include <cctype>
 #include <fstream>
 
 #include "imgui/imgui.h"
@@ -316,11 +317,15 @@ namespace controller
         try
         {
             // Get all files in the 'save_dir_' directory, ...
-            for (const auto& file : fs::directory_iterator(save_dir_))
-            {
-                files.push_back({ file,
-                            file.path().filename().string(),
-                            file.path().filename().u32string()});
+			for (const auto& file : fs::directory_iterator(save_dir_))
+			{
+				files.push_back({ file,
+							file.path().filename().string(),
+#ifdef _WIN32 // std::filesystem::path::u32string() is deleted in VS15
+							file.path().filename().string()});
+#else
+							file.path().filename().u32string()});
+#endif
             }
 
             // ... remove the directory, links, etc ...

@@ -1,6 +1,7 @@
 #ifndef COLORS_GENERATOR_H
 #define COLORS_GENERATOR_H
 
+#include <cctype>
 #include <cstdio>
 #include <vector>
 

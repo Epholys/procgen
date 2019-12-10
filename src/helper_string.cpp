@@ -1,3 +1,4 @@
+#include <cctype>
 #include "helper_string.h"
 
 std::string ltrim(std::string str)

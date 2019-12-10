@@ -64,7 +64,11 @@ namespace controller
         struct file_entry {
             std::experimental::filesystem::directory_entry file; // The file object
             std::string filename;       // The name in 'char' raw encoding
-            std::u32string u32filename; // The name in 'utf32' encoding
+#ifdef _WIN32 // std::filesystem::path::u32string() is deleted in VS15
+			std::string u32filename;
+#else
+			std::u32string u32filename;
+#endif // !_WIN32 // std::filesystem::path::u32string() is deleted in VS15
         };
 
         // The column layout of the save manu
