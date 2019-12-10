@@ -121,7 +121,7 @@ namespace drawing
     }
     bool Matrix::mult_overflow(number a, number b)
     {
-        if (a > MAX / b)
+        if (b != 0 && a > MAX / b)
         {
             return true;
         }
