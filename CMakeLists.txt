@@ -18,6 +18,9 @@ target_include_directories(lsys
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/.>
   )
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 target_compile_features(lsys PRIVATE cxx_std_17)
 
 find_package(OpenGL REQUIRED)
@@ -28,6 +31,7 @@ target_link_libraries(lsys
   PUBLIC
   ${OPENGL_LIBRARIES}
   sfml-system sfml-window sfml-graphics
+  stdc++fs
   )
 
 install(

@@ -4,7 +4,7 @@
 
 #include <array>
 #include <vector>
-#include <filesystem>
+#include <experimental/filesystem>
 
 #include <SFML/Window.hpp>
 
@@ -46,7 +46,7 @@ namespace controller
     private:
         // A file entry with all its components
         struct file_entry {
-            std::filesystem::directory_entry file; // The file object
+            std::experimental::filesystem::directory_entry file; // The file object
             std::string filename;       // The name in 'char' raw encoding
             std::u32string u32filename; // The name in 'utf32' encoding
         };
@@ -86,7 +86,7 @@ namespace controller
         // File to save to.
         std::array<char, FILENAME_LENGTH_> filename_;
         // Saves directory.
-        const std::filesystem::path save_dir_ = WindowController::save_dir_;
+        const std::experimental::filesystem::path save_dir_ = WindowController::save_dir_;
 
         // True if the save menu should be closed
         bool close_menu_ { false };

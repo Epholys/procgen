@@ -5,7 +5,7 @@
 #include <array>
 #include <list>
 #include <vector>
-#include <filesystem>
+#include <experimental/filesystem>
 
 #include <SFML/Window.hpp>
 
@@ -18,7 +18,7 @@ namespace procgui
 }
 
 namespace controller
-{
+{   
     // A class implementing the load menu of the application.
     // Usage : simply call 'open()' and it manages the display and user inputs,
     // with the huge help of imgui.
@@ -62,7 +62,7 @@ namespace controller
     private:
         // A file entry with all its components
         struct file_entry {
-            std::filesystem::directory_entry file; // The file object
+            std::experimental::filesystem::directory_entry file; // The file object
             std::string filename;       // The name in 'char' raw encoding
             std::u32string u32filename; // The name in 'utf32' encoding
         };
@@ -109,7 +109,7 @@ namespace controller
         // File to save to.
         std::array<char, FILENAME_LENGTH_> file_to_load_;
         // Saves directory.
-        const std::filesystem::path save_dir_ = WindowController::save_dir_;
+        const std::experimental::filesystem::path save_dir_ = WindowController::save_dir_;
 
         // Index of the selected file in the list
         int file_idx_ {0};
