@@ -1,5 +1,5 @@
 #include <algorithm>
-#include <gsl/gsl>
+#include "gsl/gsl"
 #include "ColorsGenerator.h"
 
 namespace colors

@@ -86,13 +86,13 @@ test : $(OBJECTS) $(TEST_OBJ) $(TEST_DIR)/gtest_main.a
 debug : main
 
 # release: Same as main with optimization flags (see above).
-release : main test
+release : main
 
 # profiling: Same as main with optimization and debug flags (see above)
-profiling : main test
+profiling : main
 
 # optimized: Same as main with the even more optimization flags (see above)
-optimized : main test
+optimized : main
 
 
 # Each .o file is compiled with its associated *.cpp file.

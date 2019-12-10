@@ -32,3 +32,6 @@ GTAGS
 
 # clang
 compile_commands.json
+
+# cmake
+build/

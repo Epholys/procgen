@@ -2,7 +2,7 @@
 #define EXPORT_MENU_H
 
 #include <vector>
-#include <filesystem>
+#include <experimental/filesystem>
 #include <SFML/Window/Keyboard.hpp>
 #include "WindowController.h"
 
@@ -39,7 +39,7 @@ namespace controller
         void export_to_png() const;
         void save_file();
 
-        const std::filesystem::path save_dir_ = WindowController::save_dir_;
+        const std::experimental::filesystem::path save_dir_ = WindowController::save_dir_;
 
         bool first_time_open_ {true};
 
