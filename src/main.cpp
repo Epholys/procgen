@@ -11,6 +11,10 @@
 #include "PopupGUI.h"
 #include "export.h"
 
+#ifdef _WIN32 // :(
+#include <windows.h>
+#endif
+
 using namespace drawing;
 using namespace math;
 using namespace procgui;
@@ -21,6 +25,11 @@ using sfml_window::window;
 void opt(int argc, char* argv[]);
 int export_mode(int argc, char* argv[]);
 
+#ifdef _WIN32
+int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance,
+	LPSTR lpCmdLine, int nCmdShow)
+{
+#else
 int main(int argc, char* argv[])
 {
     // if (argc > 1)
@@ -33,7 +42,7 @@ int main(int argc, char* argv[])
     {
         return export_mode(argc, argv);
     }
-
+#endif
     // Load config file
     bool load_config_failed = false;
     try
@@ -73,7 +82,7 @@ int main(int argc, char* argv[])
     // Init SFML window and imgui
     sfml_window::init_window();
     ImGui::SFML::Init(window);
-
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 
     // Default L-System
     std::list<LSystemView> views;
