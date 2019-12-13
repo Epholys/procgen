@@ -13,8 +13,6 @@
 
 namespace controller
 {
-    namespace fs = std::experimental::filesystem;
-
     SaveMenu::~SaveMenu()
     {
         for (auto id : popups_ids_)
@@ -238,11 +236,7 @@ namespace controller
             {
                 save_files.push_back({file,
                             file.path().filename().string(),
-#ifdef _WIN32 // std::filesystem::path::u32string() is deleted in VS15
-							file.path().filename().string()});
-#else
 							file.path().filename().u32string()});
-#endif
             }
 
             // ... remove the directory, links, etc ...

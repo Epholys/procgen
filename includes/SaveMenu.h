@@ -4,10 +4,10 @@
 
 #include <array>
 #include <vector>
-#include <experimental/filesystem>
 
 #include <SFML/Window.hpp>
 
+#include "modern_cpp.h"
 #include "WindowController.h"
 
 namespace controller
@@ -46,13 +46,9 @@ namespace controller
     private:
         // A file entry with all its components
         struct file_entry {
-            std::experimental::filesystem::directory_entry file; // The file object
+            fs::directory_entry file;   // The file object
             std::string filename;       // The name in 'char' raw encoding
-#ifdef _WIN32 // std::filesystem::path::u32string() is deleted in VS15
-			std::string u32filename;
-#else
             std::u32string u32filename; // The name in 'utf32' encoding
-#endif
         };
 
         // The column layout of the save manu
@@ -90,7 +86,7 @@ namespace controller
         // File to save to.
         std::array<char, FILENAME_LENGTH_> filename_;
         // Saves directory.
-        const std::experimental::filesystem::path save_dir_ = WindowController::save_dir_;
+        const fs::path save_dir_ = WindowController::save_dir_;
 
         // True if the save menu should be closed
         bool close_menu_ { false };

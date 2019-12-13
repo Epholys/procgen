@@ -17,8 +17,6 @@
 
 namespace controller
 {
-    namespace fs = std::experimental::filesystem;
-
     ExportMenu::~ExportMenu()
     {
         for (auto id : popups_ids_)

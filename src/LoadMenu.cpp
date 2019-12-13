@@ -15,8 +15,6 @@
 
 namespace controller
 {
-    namespace fs = std::experimental::filesystem;
-
     // Global error message access in deserialization of LSys
     std::vector<std::string> LoadMenu::error_messages;
 
@@ -321,11 +319,7 @@ namespace controller
 			{
 				files.push_back({ file,
 							file.path().filename().string(),
-#ifdef _WIN32 // std::filesystem::path::u32string() is deleted in VS15
-							file.path().filename().string()});
-#else
 							file.path().filename().u32string()});
-#endif
             }
 
             // ... remove the directory, links, etc ...

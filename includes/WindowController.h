@@ -3,13 +3,14 @@
 
 
 #include <list>
-#include <experimental/filesystem>
 #include <optional>
 
 #include <SFML/Graphics.hpp>
 
 #include "imgui/imgui.h"
 #include "imgui_extension.h"
+
+#include "modern_cpp.h"
 
 namespace procgui
 {
@@ -71,7 +72,7 @@ namespace controller
         static constexpr int FILENAME_LENGTH_ = 128;
 
         // The fixed save directory of the application
-        static const std::experimental::filesystem::path save_dir_;
+        static const fs::path save_dir_;
 
     private:
 

@@ -5,10 +5,10 @@
 #include <array>
 #include <list>
 #include <vector>
-#include <experimental/filesystem>
 
 #include <SFML/Window.hpp>
 
+#include "modern_cpp.h"
 #include "WindowController.h"
 #include "imgui_extension.h"
 
@@ -62,13 +62,9 @@ namespace controller
     private:
         // A file entry with all its components
         struct file_entry {
-            std::experimental::filesystem::directory_entry file; // The file object
+            fs::directory_entry file; // The file object
             std::string filename;       // The name in 'char' raw encoding
-#ifdef _WIN32 // std::filesystem::path::u32string() is deleted in VS15
-			std::string u32filename;
-#else
 			std::u32string u32filename;
-#endif // !_WIN32 // std::filesystem::path::u32string() is deleted in VS15
         };
 
         // The column layout of the save manu
@@ -113,7 +109,7 @@ namespace controller
         // File to save to.
         std::array<char, FILENAME_LENGTH_> file_to_load_;
         // Saves directory.
-        const std::experimental::filesystem::path save_dir_ = WindowController::save_dir_;
+        const fs::path save_dir_ = WindowController::save_dir_;
 
         // Index of the selected file in the list
         int file_idx_ {0};
