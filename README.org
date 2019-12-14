@@ -61,6 +61,8 @@ Thanks for asking the question! Here's why and how this app is different:
    Simply type =make optimized= :).
    Other make recipees are documented in the Makefile.
 
+   There is now a CMakeLists file. It is for now quite minimal and is only used to compile the main program without the tests.
+
 ** Development framework
    - *Environment:* debian sid chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=
    - *Dependencies:*
