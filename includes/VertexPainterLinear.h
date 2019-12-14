@@ -53,7 +53,7 @@ namespace colors
 
     private:
 
-        float angle_ {0};
+        float angle_ {0}; // in degree
         sf::Vector2f center_ {0.5,0.5};
         bool display_helper_ {true};
 

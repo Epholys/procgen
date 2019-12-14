@@ -215,21 +215,19 @@ namespace procgui
         }
 
         // --- Starting angle ---
-        double starting_angle_deg = math::rad_to_degree(parameters.get_starting_angle());
-        if (ext::ImGui::DragDouble("Starting Angle", &starting_angle_deg,
-                              1.f, 0.f, 360.f, "%.lf") )
-        {
-            starting_angle_deg = clamp_angle(starting_angle_deg);
-            parameters.set_starting_angle(math::degree_to_rad(starting_angle_deg));
-        }
+       double starting_angle_deg = parameters.get_starting_angle();
+       if (ext::ImGui::SliderAngleDouble("Starting Angle", &starting_angle_deg, 0.))
+       {
+           starting_angle_deg = clamp(starting_angle_deg, 0., 2*math::pi);
+           parameters.set_starting_angle(starting_angle_deg);
+       }
 
         // --- Angle Delta ---
-        double delta_angle_deg = math::rad_to_degree(parameters.get_delta_angle());
-        if (ext::ImGui::DragDouble("Angle Delta", &delta_angle_deg,
-                              1.f, 0.f, 360.f, "%.lf") )
+        double delta_angle_deg = parameters.get_delta_angle();
+        if (ext::ImGui::SliderAngleDouble("Angle Delta", &delta_angle_deg, 0.))
         {
-            delta_angle_deg = clamp_angle(delta_angle_deg);
-            parameters.set_delta_angle(math::degree_to_rad(delta_angle_deg));
+            delta_angle_deg = clamp(delta_angle_deg, 0., 2*math::pi);
+            parameters.set_delta_angle(delta_angle_deg);
         }
 
         // --- Step ---
@@ -367,12 +365,11 @@ namespace
         }
 
         // --- Gradient angle ---
-        float angle = painter.get_angle();
-        if (ImGui::DragFloat("Gradient Angle", &angle,
-                              1.f, 0.f, 360.f, "%.lf") )
+        float angle = math::degree_to_rad(painter.get_angle());
+        if (ImGui::SliderAngle("Gradient Angle", &angle, 0.f))
         {
-            angle = clamp_angle(angle);
-            painter.set_angle(angle);
+            angle = clamp(angle, 0.f, 2*static_cast<float>(math::pi));
+            painter.set_angle(math::rad_to_degree(angle));
         }
 
         if (!from_composite)
@@ -392,8 +389,7 @@ namespace
 
         // --- Center ---
         float center[2] = {painter.get_center().x, painter.get_center().y};
-        if (ImGui::DragFloat2("Circle Center", center,
-                              0.001f, 0.f, 1.f, "%.2f") )
+        if (ImGui::SliderFloat2("Circle Center", center, 0.f, 1.f, "%.2f") )
         {
             center[0] = clamp(center[0], 0.f, 1.f);
             center[1] = clamp(center[1], 0.f, 1.f);
@@ -439,7 +435,7 @@ namespace
         if (ext::ImGui::DragDouble("Repetition factor", &factor,
                                    0.01f, 0.f, double_max_limit, "%.2f") )
         {
-            factor = std::clamp(factor, 0., double_max_limit);
+            factor = clamp(factor, 0., double_max_limit);
             painter.set_factor(factor);
         }
 

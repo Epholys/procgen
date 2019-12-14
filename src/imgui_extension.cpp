@@ -29,6 +29,21 @@ namespace ext::ImGui
         return ::ImGui::DragScalarN(label, ::ImGuiDataType_Double, v, 2, v_speed, min, max, format, power);
     }
 
+    bool SliderDouble(const char* label, double* v, double v_min, double v_max, const char* format, double power)
+    {
+        return ::ImGui::SliderScalar(label, ::ImGuiDataType_Double, v, &v_min, &v_max, format, power);
+    }
+
+    bool SliderAngleDouble(const char* label, double* v_rad, double v_degrees_min, double v_degrees_max, const char* format)
+    {
+        if (format == NULL)
+            format = "%.0f deg";
+        double v_deg = (*v_rad) * 360.0f / (2*math::pi);
+        bool value_changed = SliderDouble(label, &v_deg, v_degrees_min, v_degrees_max, format, 1.0f);
+        *v_rad = v_deg * (2*math::pi) / 360.0f;
+        return value_changed;
+    }
+
     bool InputUnsignedLongLong(const char* label, unsigned long long* v, unsigned long long step, unsigned long long step_fast, ImGuiInputTextFlags flags)
     {
         // Hexadecimal input provided as a convenience but the flag name is awkward. Typically you'd use InputText() to parse your own data, if you want to handle prefixes.
