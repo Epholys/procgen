@@ -93,6 +93,11 @@ namespace
             ImGui::PopID();
         }
     }
+
+    void show_drag_info()
+    {
+        ext::ImGui::ShowHelpMarker("Click and drag to quickly change value.");
+    }
 }
 
 
@@ -213,23 +218,23 @@ namespace procgui
             ext::sf::Vector2d starting_position {pos[0], pos[1]};
             parameters.set_starting_position(starting_position);
         }
+        ImGui::SameLine();
+        show_drag_info();
 
         // --- Starting angle ---
-        double starting_angle_deg = math::rad_to_degree(parameters.get_starting_angle());
-        if (ext::ImGui::DragDouble("Starting Angle", &starting_angle_deg,
-                              1.f, 0.f, 360.f, "%.lf") )
-        {
-            starting_angle_deg = clamp_angle(starting_angle_deg);
-            parameters.set_starting_angle(math::degree_to_rad(starting_angle_deg));
-        }
+       double starting_angle_deg = parameters.get_starting_angle();
+       if (ext::ImGui::SliderAngleDouble("Starting Angle", &starting_angle_deg, 0.))
+       {
+           starting_angle_deg = clamp(starting_angle_deg, 0., 2*math::pi);
+           parameters.set_starting_angle(starting_angle_deg);
+       }
 
         // --- Angle Delta ---
-        double delta_angle_deg = math::rad_to_degree(parameters.get_delta_angle());
-        if (ext::ImGui::DragDouble("Angle Delta", &delta_angle_deg,
-                              1.f, 0.f, 360.f, "%.lf") )
+        double delta_angle_deg = parameters.get_delta_angle();
+        if (ext::ImGui::SliderAngleDouble("Angle Delta", &delta_angle_deg, 0.))
         {
-            delta_angle_deg = clamp_angle(delta_angle_deg);
-            parameters.set_delta_angle(math::degree_to_rad(delta_angle_deg));
+            delta_angle_deg = clamp(delta_angle_deg, 0., 2*math::pi);
+            parameters.set_delta_angle(delta_angle_deg);
         }
 
         // --- Step ---
@@ -239,6 +244,8 @@ namespace procgui
             step = clamp(step, 0., double_max_limit);
             parameters.set_step(step);
         }
+        ImGui::SameLine();
+        show_drag_info();
 
         // --- Iterations ---
         // Arbitrary value to avoid resource depletion happening with higher
@@ -308,6 +315,8 @@ namespace procgui
         {
             lsys->set_iteration_predecessors(array_to_string(buf));
         }
+        ImGui::SameLine();
+        ext::ImGui::ShowHelpMarker("Used in the Iterative Painter.");
 
         conclude();
     }
@@ -355,11 +364,14 @@ namespace
 {
     void interact_with(colors::VertexPainterConstant& painter)
     {
+        ImGui::Text("Paint all the vertices in the same color.");
         ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
                                  ::procgui::color_wrapper_mode::CONSTANT);
     }
     void interact_with(colors::VertexPainterLinear& painter, bool from_composite=false)
     {
+        ImGui::Text("Paint the vertices on both side of an axis.");
+
         bool display_helper = painter.get_display_flag();
         if (ImGui::Checkbox("Display angle marker", &display_helper))
         {
@@ -367,12 +379,11 @@ namespace
         }
 
         // --- Gradient angle ---
-        float angle = painter.get_angle();
-        if (ImGui::DragFloat("Gradient Angle", &angle,
-                              1.f, 0.f, 360.f, "%.lf") )
+        float angle = math::degree_to_rad(painter.get_angle());
+        if (ImGui::SliderAngle("Gradient Angle", &angle, 0.f))
         {
-            angle = clamp_angle(angle);
-            painter.set_angle(angle);
+            angle = clamp(angle, 0.f, 2*static_cast<float>(math::pi));
+            painter.set_angle(math::rad_to_degree(angle));
         }
 
         if (!from_composite)
@@ -384,6 +395,8 @@ namespace
 
     void interact_with(colors::VertexPainterRadial& painter, bool from_composite=false)
     {
+        ImGui::Text("Paint the vertices around a center.");
+
         bool display_helper = painter.get_display_flag();
         if (ImGui::Checkbox("Display center marker", &display_helper))
         {
@@ -392,8 +405,7 @@ namespace
 
         // --- Center ---
         float center[2] = {painter.get_center().x, painter.get_center().y};
-        if (ImGui::DragFloat2("Circle Center", center,
-                              0.001f, 0.f, 1.f, "%.2f") )
+        if (ImGui::SliderFloat2("Circle Center", center, 0.f, 1.f, "%.2f") )
         {
             center[0] = clamp(center[0], 0.f, 1.f);
             center[1] = clamp(center[1], 0.f, 1.f);
@@ -409,6 +421,8 @@ namespace
 
     void interact_with(colors::VertexPainterRandom& painter, bool from_composite=false)
     {
+        ImGui::Text("Paint the vertices randomly in blocks.");
+
         int block_size = painter.get_block_size();
         if (ImGui::DragInt("Block size", &block_size, 1, 1, std::numeric_limits<int>::max()))
         {
@@ -417,6 +431,8 @@ namespace
                 painter.set_block_size(block_size);
             }
         }
+        ImGui::SameLine();
+        show_drag_info();
 
         ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
         if (ImGui::Button("Randomize"))
@@ -434,14 +450,17 @@ namespace
 
     void interact_with(colors::VertexPainterSequential& painter, bool from_composite=false)
     {
-        double factor = painter.get_factor();
+        ImGui::Text("Paint the vertices in the order of the array.");
 
+        double factor = painter.get_factor();
         if (ext::ImGui::DragDouble("Repetition factor", &factor,
                                    0.01f, 0.f, double_max_limit, "%.2f") )
         {
-            factor = std::clamp(factor, 0., double_max_limit);
+            factor = clamp(factor, 0., double_max_limit);
             painter.set_factor(factor);
         }
+        ImGui::SameLine();
+        show_drag_info();
 
         if (!from_composite)
         {
@@ -452,6 +471,8 @@ namespace
 
     void interact_with(colors::VertexPainterIteration& painter, bool from_composite=false)
     {
+        ImGui::Text("Paint the vertices according to the iteration depth\nof \"Iteration predecessors\".");
+
         if (!from_composite)
         {
             ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
@@ -464,6 +485,9 @@ namespace
         // Composite of composite will have ImGui's widget ID collision issue.
         static int nested_id = 0;
         ImGui::PushID(nested_id++);
+
+        static std::string child_title = "";
+        child_title += "-- " + painter.get_main_painter()->unwrap()->type_name() + " ";
 
         // ImGui's ID for the several child painters.
         int index = 0;
@@ -503,11 +527,12 @@ namespace
         // Begin the child painters
         for (auto it = begin(child_painters); it != end(child_painters); ++it)
         {
+            child_title += std::to_string(index+1) + " ";
             ImGui::PushID(index);
 
             // Interact with this child painter.
             push_embedded();
-            ::procgui::interact_with(**it, "");
+            ::procgui::interact_with(**it, child_title);
             pop_embedded();
 
             ImGui::Separator();
@@ -557,6 +582,7 @@ namespace
             ImGui::Separator();
             ImGui::PopID();
             index++;
+            child_title.erase(child_title.size()-2);
         }
 
         // Remove the painter pointed by 'to_remove', if set.
@@ -580,6 +606,11 @@ namespace
         }
 
         nested_id--;
+        const auto name = painter.get_main_painter()->unwrap()->type_name();
+        const auto where = child_title.rfind(name);
+        Expects(where != std::string::npos);
+        child_title.erase(where-3, name.size() + 4); //"-- "=3 + name + " "=1
+
         ImGui::PopID();
     }
 
@@ -739,6 +770,8 @@ namespace procgui
         {
             // Checkbox to choose if the VertexPainter is composite.
             bool checked = ImGui::Checkbox("Composite", &is_composite);
+            ImGui::SameLine();
+            ext::ImGui::ShowHelpMarker("Paint vertices according to children painters.");
             bool create_new_composite = checked && is_composite;
             bool remove_composite = checked && (!is_composite);
 

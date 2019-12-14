@@ -27,6 +27,10 @@ namespace ext::ImGui
 
     bool DragDouble2(const char* label, double v[2], double v_speed = 1.0, double v_min = 0.0, double v_max = math::double_max_limit, const char* format = "%.3f", double power = 1.0);
 
+    bool SliderDouble(const char* label, double* v, double v_min, double v_max, const char* format = "%.3f", double power = 1.0f);
+
+    bool SliderAngleDouble(const char* label, double* v_rad, double v_degrees_min = -360.0f, double v_degrees_max = +360.0f, const char* format = "%.0f deg");
+
     // Proxy function to InputScalar like existing InputInt, InputFloat, etc.
     bool InputUnsignedLongLong(const char* label, unsigned long long* v, unsigned long long step = 1, unsigned long long step_fast = 100, ImGuiInputTextFlags flags = 0);
 }

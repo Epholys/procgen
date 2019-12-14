@@ -220,9 +220,9 @@ int main(int argc, char* argv[])
 
 int export_mode(int argc, char* argv[])
 {
-    if (argc != 4)
+    if (argc != 5)
     {
-        std::cout << "Usage: procgen <filename> <image_dim> <ratio>\n";
+        std::cout << "Usage: procgen <filename> <n_iter> <image_dim> <ratio>\n";
         return EXIT_SUCCESS;
     }
 
@@ -249,14 +249,21 @@ int export_mode(int argc, char* argv[])
     }
 
 
-    int image_dim = std::atoi(argv[2]);
+    int n_iter = std::atoi(argv[2]);
+    if (n_iter <= 0)
+    {
+        std::cerr << "Error: <n_iter> is not a valid number ; exiting\n";
+        return EXIT_FAILURE;
+    }
+
+    int image_dim = std::atoi(argv[3]);
     if (image_dim <= 0)
     {
         std::cerr << "Error: <image_dim> is not a valid number ; exiting\n";
         return EXIT_FAILURE;
     }
 
-    double ratio = std::atof(argv[3]);
+    double ratio = std::atof(argv[4]);
     if (ratio <= 0)
     {
         std::cerr << "Error: <ratio> is not a valid number ; exiting\n";
@@ -265,7 +272,7 @@ int export_mode(int argc, char* argv[])
 
     bool success = export_to_png(view,
                                  filename+".png",
-                                 view.get_parameters().get_n_iter(),
+                                 n_iter,
                                  image_dim,
                                  ratio);
 
