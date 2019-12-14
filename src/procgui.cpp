@@ -486,6 +486,9 @@ namespace
         static int nested_id = 0;
         ImGui::PushID(nested_id++);
 
+        static std::string child_title = "";
+        child_title += "-- " + painter.get_main_painter()->unwrap()->type_name() + " ";
+
         // ImGui's ID for the several child painters.
         int index = 0;
         auto child_painters = painter.get_child_painters();
@@ -524,11 +527,12 @@ namespace
         // Begin the child painters
         for (auto it = begin(child_painters); it != end(child_painters); ++it)
         {
+            child_title += std::to_string(index+1) + " ";
             ImGui::PushID(index);
 
             // Interact with this child painter.
             push_embedded();
-            ::procgui::interact_with(**it, "");
+            ::procgui::interact_with(**it, child_title);
             pop_embedded();
 
             ImGui::Separator();
@@ -578,6 +582,7 @@ namespace
             ImGui::Separator();
             ImGui::PopID();
             index++;
+            child_title.erase(child_title.size()-2);
         }
 
         // Remove the painter pointed by 'to_remove', if set.
@@ -601,6 +606,11 @@ namespace
         }
 
         nested_id--;
+        const auto name = painter.get_main_painter()->unwrap()->type_name();
+        const auto where = child_title.rfind(name);
+        Expects(where != std::string::npos);
+        child_title.erase(where-3, name.size() + 4); //"-- "=3 + name + " "=1
+
         ImGui::PopID();
     }
 
