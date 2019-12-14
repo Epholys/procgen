@@ -2,9 +2,19 @@
 
 #+html: <p align="center"><img src="media/screenshot.png" /></p>
 
-** Philosophy
-  - Highly interactive
-  - Climbing the [[http://worrydream.com/LadderOfAbstraction/][ladder of abstraction]]
+** What is this?
+
+This application is a tool to create and paint L-System in a fully interactive and dynamic way.
+
+"But," you'll say, "why yet another app for L-System? There's a lot of them, and it gets old quickly..."
+
+Thanks for asking the question! Here's why and how this app is different:
+
+  - Fully-interactive: every change done through the interface is immediately visible on the fractal.
+  - Rich system of painting: there's a lot of way to paint the tree thanks to painters: linearly, randomly, according to the branches, etc... Everything with arbitrary gradient. And you can have nested painters, for maximum control.
+  - Saving and Loading: the L-Systems can be saved and loaded. Around 40 of them are present in the saves.zip file, please take a look!
+  - Exporting: you can export the trees a .png files. Huge png files, according to you GPU, like 16 or 32 kilo pixels images!
+  - Fast: The app is in C++, so it is fast enough for real-time interactive "medium-size" L-Systems. Medium-size meaning thousands of branches! You can of course go bigger, but your RAM and CPU may die...
 
 ** Implemented
    - (Simple) L-systems
@@ -42,6 +52,10 @@
       * Stochastic L-System
       * Parameters for each interpretation order (step for go_forward, delta_angle for turn_*)
 
+** Versionning
+   This project use [[https://semver.org/][Semantic Versioning]] in a slightly different way. This is an application, so the internal API does not matter and may change at anytime. However, the save files are subject to this versionning. Patch version increment means that the old version can open the new save files. Minor version increment means the old version can't open the new saves files, but the new version can open the old ones. Major version increment means that the saves files are not compatible at all. I will try to stay in 1.y.z as long as it is reasonable.
+
+
 ** Compiling
    Make sure you have SFML installed, a C++17 compiler (with std::filesystem support), and make.
    Simply type =make optimized= :).
@@ -68,7 +82,6 @@
     The master branch is assured to compile, the application works as intended (except for known bugs), all the test passes, and the code is documented. However, the features may not be complete.
 
 *** Warnings
-   - The save format is not yet stable, the save files may not be compatible between two commits. It is however possible to manually edit them to support the new features. the 'saves' directory will always be populated with valid examples.
    - The API is not stable (and will probably never be, as this is a software and not a library)
 
 ** Completing the framework?
