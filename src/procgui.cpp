@@ -93,6 +93,11 @@ namespace
             ImGui::PopID();
         }
     }
+
+    void show_drag_info()
+    {
+        ext::ImGui::ShowHelpMarker("Click and drag to quickly change value.");
+    }
 }
 
 
@@ -213,6 +218,8 @@ namespace procgui
             ext::sf::Vector2d starting_position {pos[0], pos[1]};
             parameters.set_starting_position(starting_position);
         }
+        ImGui::SameLine();
+        show_drag_info();
 
         // --- Starting angle ---
        double starting_angle_deg = parameters.get_starting_angle();
@@ -237,6 +244,8 @@ namespace procgui
             step = clamp(step, 0., double_max_limit);
             parameters.set_step(step);
         }
+        ImGui::SameLine();
+        show_drag_info();
 
         // --- Iterations ---
         // Arbitrary value to avoid resource depletion happening with higher
@@ -306,6 +315,8 @@ namespace procgui
         {
             lsys->set_iteration_predecessors(array_to_string(buf));
         }
+        ImGui::SameLine();
+        ext::ImGui::ShowHelpMarker("Used in the Iterative Painter.");
 
         conclude();
     }
@@ -353,11 +364,14 @@ namespace
 {
     void interact_with(colors::VertexPainterConstant& painter)
     {
+        ImGui::Text("Paint all the vertices in the same color.");
         ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
                                  ::procgui::color_wrapper_mode::CONSTANT);
     }
     void interact_with(colors::VertexPainterLinear& painter, bool from_composite=false)
     {
+        ImGui::Text("Paint the vertices on both side of an axis.");
+
         bool display_helper = painter.get_display_flag();
         if (ImGui::Checkbox("Display angle marker", &display_helper))
         {
@@ -381,6 +395,8 @@ namespace
 
     void interact_with(colors::VertexPainterRadial& painter, bool from_composite=false)
     {
+        ImGui::Text("Paint the vertices around a center.");
+
         bool display_helper = painter.get_display_flag();
         if (ImGui::Checkbox("Display center marker", &display_helper))
         {
@@ -405,6 +421,8 @@ namespace
 
     void interact_with(colors::VertexPainterRandom& painter, bool from_composite=false)
     {
+        ImGui::Text("Paint the vertices randomly in blocks.");
+
         int block_size = painter.get_block_size();
         if (ImGui::DragInt("Block size", &block_size, 1, 1, std::numeric_limits<int>::max()))
         {
@@ -413,6 +431,8 @@ namespace
                 painter.set_block_size(block_size);
             }
         }
+        ImGui::SameLine();
+        show_drag_info();
 
         ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
         if (ImGui::Button("Randomize"))
@@ -430,14 +450,17 @@ namespace
 
     void interact_with(colors::VertexPainterSequential& painter, bool from_composite=false)
     {
-        double factor = painter.get_factor();
+        ImGui::Text("Paint the vertices in the order of the array.");
 
+        double factor = painter.get_factor();
         if (ext::ImGui::DragDouble("Repetition factor", &factor,
                                    0.01f, 0.f, double_max_limit, "%.2f") )
         {
             factor = clamp(factor, 0., double_max_limit);
             painter.set_factor(factor);
         }
+        ImGui::SameLine();
+        show_drag_info();
 
         if (!from_composite)
         {
@@ -448,6 +471,8 @@ namespace
 
     void interact_with(colors::VertexPainterIteration& painter, bool from_composite=false)
     {
+        ImGui::Text("Paint the vertices according to the iteration depth\nof \"Iteration predecessors\".");
+
         if (!from_composite)
         {
             ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
@@ -735,6 +760,8 @@ namespace procgui
         {
             // Checkbox to choose if the VertexPainter is composite.
             bool checked = ImGui::Checkbox("Composite", &is_composite);
+            ImGui::SameLine();
+            ext::ImGui::ShowHelpMarker("Paint vertices according to children painters.");
             bool create_new_composite = checked && is_composite;
             bool remove_composite = checked && (!is_composite);
 
