@@ -14,7 +14,10 @@ namespace drawing
 {
     // This data structure contains all constant informations necessary to
     // interpret the result of a L-system. Each attribute can be freely
-    // initialized and modified via getters and setters, there are no invariant.
+    // initialized and modified via getters and setters. The invariant is the
+    // modification flag from the 'Indicator' inheritance: it must be set to
+    // true when modifying some of the members (starting_angle, delta_angle, and
+    // n_iter).
     // During an interpretation, this structure will not be modified.
     class DrawingParameters : public Indicator
     {
@@ -41,8 +44,6 @@ namespace drawing
         u8 get_n_iter() const;
 
         // Setters
-        // The starting position is only used when rendering the LSystem, so it
-        // does not 'notify()' to avoid re-calculating for nothing.
         void set_starting_position(const ext::sf::Vector2d starting_position);
         void set_starting_angle(double starting_angle);
         void set_delta_angle(double delta_angle);
@@ -50,7 +51,7 @@ namespace drawing
         void set_n_iter(u8 n_iter);
 
         // Revert to previous 'n_iter'.
-        // Useful when cancelling computatoin of too big L-Systems.
+        // Useful when cancelling computation of too big L-Systems.
         void revert();
 
         // Validate modification of 'n_iter'.

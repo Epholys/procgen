@@ -56,7 +56,7 @@ namespace procgui
         LSystemView(const ext::sf::Vector2d& position, double step);
         // Deep copy;
         //   - All Observers' pointers are cloned or moved
-        //   - 'turtle_' is copied
+        //   - 'parameters_' and 'turtle_' are copied
         //   - Id and colors are created or moved
         //   - Selection is reset
         LSystemView(const LSystemView& other);
