@@ -31,7 +31,7 @@ struct parameters_example
                                                               LSystem::Rules({{'F', "FF"}, {'X', "F[+X][-X]"}}),
                                                               "X");
     std::shared_ptr<InterpretationMap> map = std::make_shared<InterpretationMap>(default_interpretation_map);
-    std::shared_ptr<DrawingParameters> params = std::make_shared<DrawingParameters>(ext::sf::Vector2d(10,10), 1, 1, 5, 3);
+    DrawingParameters params {{10,10}, 1, 1, 5, 3};
     std::shared_ptr<VertexPainterWrapper> painter =
         std::make_shared<VertexPainterWrapper>(
             std::make_shared<VertexPainterLinear>(
@@ -46,7 +46,6 @@ TEST(LSystemView, copy_ctor)
     copied_view.select();
     LSystemView copy_view (copied_view);
 
-    ASSERT_NE(&copied_view.get_parameters(), &copy_view.get_parameters());
     // Does not work: only the 'RuleMapBuffer<>' is fetched and it is is not
     // possible to check the inequality of their 'RuleMap<>' AND their coherence
     // with the 'Observer<>''s pointer. Adding more code as getters may
@@ -68,7 +67,6 @@ TEST(LSystemView, copy_assignment_ctor)
     LSystemView assign_view ({100, 100}, 5);
     assign_view = assigned_view;
 
-    ASSERT_NE(&assigned_view.get_parameters(), &assign_view.get_parameters());
     // Does not work: only the 'RuleMapBuffer<>' is fetched and it is is not
     // possible to check the inequality of their 'RuleMap<>' AND their coherence
     // with the 'Observer<>''s pointer. Adding more code as getters may
@@ -91,7 +89,6 @@ TEST(LSystemView, move_ctor)
     auto color = moved_view.get_color();
     LSystemView move_view (std::move(moved_view));
 
-    ASSERT_EQ(&move_view.get_parameters(), &(*params.params));
     // Does not work: only the 'RuleMapBuffer<>' is fetched and it is is not
     // possible to check the equality of their 'RuleMap<>' AND their coherence
     // with the 'Observer<>''s pointer. Adding more code as getters may
@@ -113,7 +110,6 @@ TEST(LSystemView, assign_move_ctor)
     LSystemView move_view ({100, 100}, 5);
     move_view = std::move(moved_view);
 
-    ASSERT_EQ(&move_view.get_parameters(), &(*params.params));
     // Does not work: only the 'RuleMapBuffer<>' is fetched and it is is not
     // possible to check the equality of their 'RuleMap<>' AND their coherence
     // with the 'Observer<>''s pointer. Adding more code as getters may

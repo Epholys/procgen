@@ -22,24 +22,23 @@ namespace procgui
     {
         OLSys::add_callback([this](){size_safeguard();});
         OMap::add_callback([this](){size_safeguard();});
-        OParams::add_callback([this](){size_safeguard();});
         OPainter::add_callback([this](){paint_vertices();});
     }
 
     LSystemView::LSystemView(const std::string& name,
                              std::shared_ptr<LSystem> lsys,
                              std::shared_ptr<InterpretationMap> map,
-                             std::shared_ptr<DrawingParameters> params,
+                             const DrawingParameters& params,
                              std::shared_ptr<VertexPainterWrapper> painter)
         : OLSys (std::make_shared<LSystemBuffer>(lsys))
         , OMap (std::make_shared<InterpretationMapBuffer>(map))
-        , OParams {params}
         , OPainter {painter}
+        , parameters_{params}
         , id_{unique_ids_.get_id()}
         , color_id_{unique_colors_.get_color(id_)}
         , name_ {name}
         , is_modified_{false}
-        , turtle_{*params}
+        , turtle_{parameters_}
         , max_iteration_ {0}
         , bounding_box_ {}
         , sub_boxes_ {}
@@ -61,11 +60,7 @@ namespace procgui
                                               {{'F', "FF"}, {'X', "F[+X][-X]"}},
                                               "X")),
             std::make_shared<InterpretationMap>(default_interpretation_map),
-            std::make_shared<DrawingParameters>(position,
-                                                math::pi/2,
-                                                math::degree_to_rad(30),
-                                                step,
-                                                3))
+            DrawingParameters(position, math::pi/2, math::degree_to_rad(30), step, 3))
     {
     }
 
@@ -74,8 +69,8 @@ namespace procgui
             std::make_shared<LSystem>(*other.OLSys::get_target()->get_rule_map()))}
         , OMap {std::make_shared<InterpretationMapBuffer>(
             std::make_shared<InterpretationMap>(*other.OMap::get_target()->get_rule_map()))}
-        , OParams {std::make_shared<DrawingParameters>(*other.OParams::get_target())}
         , OPainter {std::make_shared<VertexPainterWrapper>(*other.OPainter::get_target())}
+        , parameters_{other.parameters_}
         , id_{unique_ids_.get_id()}
         , color_id_{unique_colors_.get_color(id_)}
         , name_ {other.name_}
@@ -98,8 +93,8 @@ namespace procgui
     LSystemView::LSystemView(LSystemView&& other)
         : OLSys {other.OLSys::get_target()} // with std::move, clang warning
         , OMap {other.OMap::get_target()}
-        , OParams {other.OParams::get_target()}
         , OPainter {other.OPainter::get_target()}
+        , parameters_{other.parameters_}
         , id_ {other.id_}
         , color_id_{std::move(other.color_id_)}
         , name_ {std::move(other.name_)}
@@ -119,7 +114,6 @@ namespace procgui
         // Remove callbacks of the moved 'other'.
         other.OLSys::set_target(nullptr);
         other.OMap::set_target(nullptr);
-        other.OParams::set_target(nullptr);
         other.OPainter::set_target(nullptr);
 
         // the 'other' object must not matter in the 'color_gen_' anymore.
@@ -145,8 +139,8 @@ namespace procgui
             OMap::set_target(
                 std::make_shared<InterpretationMapBuffer>(
                     std::make_shared<InterpretationMap>(*other.OMap::get_target()->get_rule_map())));
-            OParams::set_target(std::make_shared<DrawingParameters>(*other.OParams::get_target()));
             OPainter::set_target(std::make_shared<VertexPainterWrapper>(*other.OPainter::get_target()));
+            parameters_ = other.parameters_;
             id_ = unique_ids_.get_id();
             color_id_ = unique_colors_.get_color(id_);
             name_ = other.name_;
@@ -174,8 +168,8 @@ namespace procgui
         {
             OLSys::set_target(other.OLSys::get_target());
             OMap::set_target(other.OMap::get_target());
-            OParams::set_target(other.OParams::get_target());
             OPainter::set_target(other.OPainter::get_target());
+            parameters_ = std::move(other.parameters_);
             id_ = other.id_;
             color_id_ = other.color_id_;
             name_ = std::move(other.name_);
@@ -195,7 +189,6 @@ namespace procgui
             // Remove callbacks of the moved 'other'.
             other.OLSys::set_target(nullptr);
             other.OMap::set_target(nullptr);
-            other.OParams::set_target(nullptr);
             other.OPainter::set_target(nullptr);
 
             // the 'other' object must not matter in the 'color_gen_' anymore.
@@ -230,7 +223,7 @@ namespace procgui
 
     DrawingParameters& LSystemView::ref_parameters()
     {
-        return *OParams::get_target();
+        return parameters_;
     }
     LSystemBuffer& LSystemView::ref_lsystem_buffer()
     {
@@ -250,7 +243,7 @@ namespace procgui
     }
     const DrawingParameters& LSystemView::get_parameters() const
     {
-        return *OParams::get_target();
+        return parameters_;
     }
     const LSystemBuffer& LSystemView::get_lsystem_buffer() const
     {
@@ -399,7 +392,7 @@ namespace procgui
         // Invariant respected: cohesion between the vertices and the bounding
         // boxes.
 
-        const auto& [str, iterations, max_iteration] = ref_lsystem_buffer().ref_rule_map()->produce(OParams::get_target()->get_n_iter(), system_size_.lsystem_size);
+        const auto& [str, iterations, max_iteration] = ref_lsystem_buffer().ref_rule_map()->produce(parameters_.get_n_iter(), system_size_.lsystem_size);
         max_iteration_ = max_iteration;
         turtle_.init_from_parameters(get_parameters());
         turtle_.compute_vertices(str,
@@ -469,6 +462,14 @@ namespace procgui
                                     box.top + box.height / 2};
         middle = get_parameters().get_starting_position() - middle;
         ref_parameters().set_starting_position(get_parameters().get_starting_position()+middle);
+    }
+
+    void LSystemView::update()
+    {
+        if (parameters_.poll_modification())
+        {
+            size_safeguard();
+        }
     }
 
     void LSystemView::draw(sf::RenderTarget &target)

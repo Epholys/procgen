@@ -93,11 +93,11 @@ int main(int argc, char* argv[])
         auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[+X][-X]F[+X]-FX" }, { 'F', "FF" } }, "X" });
         auto map = std::make_shared<InterpretationMap>(default_interpretation_map);
 
-        auto plant_param = std::make_shared<DrawingParameters>();
-        plant_param->set_starting_position({ 400, 500 });
-        plant_param->set_starting_angle(degree_to_rad(80.f));
-        plant_param->set_delta_angle(degree_to_rad(25.f));
-        plant_param->set_n_iter(6);
+        DrawingParameters plant_param({ 400, 500 },
+                                      degree_to_rad(80.f),
+                                      degree_to_rad(25.f),
+                                      10.f,
+                                      6);
 
         auto constant_color_gen = std::make_shared<ColorGeneratorWrapper>(
             std::make_shared<ConstantColor>(sf::Color(183,71,71,255)));
@@ -160,6 +160,7 @@ int main(int argc, char* argv[])
 
         for (auto& v : views)
         {
+            v.update();
             v.draw(window);
         }
         SupplementaryRendering::draw(window);

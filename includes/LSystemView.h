@@ -36,13 +36,11 @@ namespace procgui
     // TODO: simplifies ctor by initializing some attribute here.
     class LSystemView : public Observer<procgui::LSystemBuffer>,
                         public Observer<procgui::InterpretationMapBuffer>,
-                        public Observer<drawing::DrawingParameters>,
                         public Observer<colors::VertexPainterWrapper>
     {
     public:
         using OLSys = Observer<procgui::LSystemBuffer>;
         using OMap = Observer<procgui::InterpretationMapBuffer>;
-        using OParams = Observer<drawing::DrawingParameters>;
         using OPainter = Observer<colors::VertexPainterWrapper>;
 
         // Too many moving pieces to serenely have a default constructor.
@@ -52,7 +50,7 @@ namespace procgui
         LSystemView(const std::string& name,
                     std::shared_ptr<LSystem> lsys,
                     std::shared_ptr<drawing::InterpretationMap> map,
-                    std::shared_ptr<drawing::DrawingParameters> params,
+                    const drawing::DrawingParameters& params,
                     std::shared_ptr<colors::VertexPainterWrapper> painter = std::make_shared<colors::VertexPainterWrapper>());
         // Special-case constructor when creating a default LSystem
         LSystemView(const ext::sf::Vector2d& position, double step);
@@ -111,6 +109,9 @@ namespace procgui
         // Paint the vertices.
         void paint_vertices();
 
+        // Checks the complete system and update everything if necessary.
+        void update();
+
         // Draw the vertices.
         void draw(sf::RenderTarget &target);
 
@@ -145,6 +146,8 @@ namespace procgui
         // Display the size warning popup and call 'compute_vertices()' if the
         // user confirms the computation.
         void open_size_warning_popup();
+
+        drawing::DrawingParameters parameters_;
 
         // The managers of unique identifiers and colors for each instance of
         // LSystemView.
@@ -204,7 +207,7 @@ namespace procgui
             {
                 ar(cereal::make_nvp("name", name_),
                    cereal::make_nvp("LSystem", *OLSys::get_target()->get_rule_map()),
-                   cereal::make_nvp("DrawingParameters", *OParams::get_target()),
+                   cereal::make_nvp("DrawingParameters", parameters_),
                    cereal::make_nvp("Interpretation Map", *OMap::get_target()->get_rule_map()));
 
                 auto painter_serializer  = colors::VertexPainterSerializer(OPainter::get_target()->unwrap());
@@ -216,13 +219,12 @@ namespace procgui
             {
                 std::string name;
                 LSystem lsys;
-                drawing::DrawingParameters params;
                 drawing::InterpretationMap map;
                 colors::VertexPainterSerializer painter_serializer;
 
                 ar(name,
                    cereal::make_nvp("LSystem", lsys),
-                   cereal::make_nvp("DrawingParameters", params),
+                   cereal::make_nvp("DrawingParameters", parameters_),
                    cereal::make_nvp("Interpretation Map", map),
                    cereal::make_nvp("VertexPainter", painter_serializer));
 
@@ -230,7 +232,7 @@ namespace procgui
                 *this = LSystemView(name,
                                     std::make_shared<LSystem>(lsys),
                                     std::make_shared<drawing::InterpretationMap>(map),
-                                    std::make_shared<drawing::DrawingParameters>(params),
+                                    parameters_,
                                     std::make_shared<colors::VertexPainterWrapper>(painter_serializer.get_serialized()));
 
             }

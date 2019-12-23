@@ -26,88 +26,59 @@ TEST(DrawingParametersTest, complete_ctor)
 
 //---------------------------------------------------------------------------------------
 
-class Obs : public Observer<DrawingParameters>
-{
-public:
-    using O = Observer<DrawingParameters>;
-
-    explicit Obs(std::shared_ptr<DrawingParameters> params)
-        : O{params}
-        {add_callback( [this](){ ++notify_count_; });}
-
-    operator bool() const
-        {
-            return notify_count_ == 1;
-        }
-
-    int get_notify_count()
-        {
-            return notify_count_;
-        }
-
-private:
-    int notify_count_ {0};
-};
-
-
 TEST(DrawingParametersTest, set_starting_position)
 {
-    DrawingParameters d;
-    auto params_ptr = std::make_shared<DrawingParameters>(d);
-    Obs params_obs (params_ptr);
+    DrawingParameters parameters;
 
     ext::sf::Vector2d expected (10, 10);
-    params_ptr->set_starting_position(expected);
+    parameters.set_starting_position(expected);
 
-    ASSERT_EQ(0, params_obs.get_notify_count());
-    ASSERT_EQ(expected, params_ptr->get_starting_position());
+    ASSERT_EQ(expected, parameters.get_starting_position());
+    ASSERT_FALSE(parameters.poll_modification());
 }
 
 TEST(DrawingParametersTest, set_starting_angle)
 {
-    auto params_ptr = std::make_shared<DrawingParameters>(DrawingParameters());
-    Obs params_obs (params_ptr);
+    DrawingParameters parameters;
 
     double expected {3.141};
-    params_ptr->set_starting_angle(expected);
+    parameters.set_starting_angle(expected);
 
-    ASSERT_TRUE(params_obs);
-    ASSERT_FLOAT_EQ(3.141, params_ptr->get_starting_angle());
+    ASSERT_FLOAT_EQ(3.141, parameters.get_starting_angle());
+    ASSERT_TRUE(parameters.poll_modification());
 }
 
 TEST(DrawingParametersTest, set_delta_angle)
 {
-    auto params_ptr = std::make_shared<DrawingParameters>(DrawingParameters());
-    Obs params_obs (params_ptr);
+    DrawingParameters parameters;
 
     double expected {3.141};
-    params_ptr->set_delta_angle(expected);
+    parameters.set_delta_angle(expected);
 
-    ASSERT_TRUE(params_obs);
-    ASSERT_FLOAT_EQ(expected, params_ptr->get_delta_angle());
+    ASSERT_FLOAT_EQ(expected, parameters.get_delta_angle());
+    ASSERT_TRUE(parameters.poll_modification());
 }
 
 TEST(DrawingParametersTest, set_step)
 {
-    auto params_ptr = std::make_shared<DrawingParameters>(DrawingParameters());
-    Obs params_obs (params_ptr);
+    DrawingParameters parameters;
 
     int expected {42};
-    params_ptr->set_step(expected);
+    parameters.set_step(expected);
 
-    ASSERT_FLOAT_EQ(expected, params_ptr->get_step());
+    ASSERT_FLOAT_EQ(expected, parameters.get_step());
+    ASSERT_FALSE(parameters.poll_modification());
 }
 
 TEST(DrawingParametersTest, set_n_iter)
 {
-    auto params_ptr = std::make_shared<DrawingParameters>(DrawingParameters());
-    Obs params_obs (params_ptr);
+    DrawingParameters parameters;
 
     int expected {5};
-    params_ptr->set_n_iter(expected);
+    parameters.set_n_iter(expected);
 
-    ASSERT_TRUE(params_obs);
-    ASSERT_EQ(expected, params_ptr->get_n_iter());
+    ASSERT_EQ(expected, parameters.get_n_iter());
+    ASSERT_TRUE(parameters.poll_modification());
 }
 
 //---------------------------------------------------------------------------------------

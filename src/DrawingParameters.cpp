@@ -46,29 +46,29 @@ namespace drawing
     {
         starting_position_ = starting_position;
         // The starting position is only used when rendering the LSystem, so it
-        // does not 'notify()' to avoid re-calculating for nothing.
+        // does not 'indicate_modification()' to avoid re-calculating for nothing.
     }
     void DrawingParameters::set_starting_angle(double starting_angle)
     {
         starting_angle_ = starting_angle;
-        notify();
+        indicate_modification();
     }
     void DrawingParameters::set_delta_angle(double delta_angle)
     {
         delta_angle_ = delta_angle;
-        notify();
+        indicate_modification();
     }
     void DrawingParameters::set_step(double step)
     {
         step_ = step;
         // The step is only used when rendering the LSystem, so it does not
-        // 'notify()' to avoid re-calculating for nothing.
+        // 'indicate_modification()' to avoid re-calculating for nothing.
     }
     void DrawingParameters::set_n_iter(u8 n_iter)
     {
         previous_n_iter_ = n_iter_;
         n_iter_ = n_iter;
-        notify();
+        indicate_modification();
     }
 
     void DrawingParameters::revert()

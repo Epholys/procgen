@@ -6,7 +6,7 @@
 
 #include "types.h"
 #include "helper_math.h"
-#include "Observable.h"
+#include "Indicator.h"
 #include "LoadMenu.h"
 
 // Main explanation of drawing in Turtle.h
@@ -16,7 +16,7 @@ namespace drawing
     // interpret the result of a L-system. Each attribute can be freely
     // initialized and modified via getters and setters, there are no invariant.
     // During an interpretation, this structure will not be modified.
-    class DrawingParameters : public Observable
+    class DrawingParameters : public Indicator
     {
     public:
         DrawingParameters() = default;
