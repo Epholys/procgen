@@ -73,6 +73,10 @@ namespace drawing
 
         for (auto c : lsystem_production)
         {
+            // Update the iteration depth for the vertices of the next symbol.
+            // Operation that apply the invariant
+            iteration_depth_ = lsystem_iterations.at(iteration_index_++);
+
             if (interpretation.has_predecessor(c))
             {
                 // If an interpretation of the character 'c' is found,
@@ -84,10 +88,6 @@ namespace drawing
                 // Do nothing: if 'c' does not have an associated
                 // order, it has no effects.
             }
-
-            // Update the iteration depth for the vertices of the next symbol.
-            // Operation that apply the invariant
-            iteration_depth_ = lsystem_iterations.at(iteration_index_++);
         }
 
         // Ensures the invariant
