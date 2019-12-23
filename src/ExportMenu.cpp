@@ -66,8 +66,8 @@ namespace controller
 
         Expects(lsystem);
 
-        const auto sizes = drawing::compute_max_size(*lsystem->get_lsystem_buffer().get_rule_map(),
-                                                     *lsystem->get_interpretation_buffer().get_rule_map(),
+        const auto sizes = drawing::compute_max_size(lsystem->get_lsystem_buffer().get_rule_map(),
+                                                     lsystem->get_interpretation_buffer().get_rule_map(),
                                                      n_iteration_);
         const auto total_lsys_size = drawing::memory_size(sizes);
 

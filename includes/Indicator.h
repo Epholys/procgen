@@ -29,7 +29,8 @@ public:
     Indicator& operator=(Indicator&& other) = default;
 
     // Return 'is_modified_' and set it to false.
-    bool poll_modification();
+    // Set to virtual to ease the special case of chained Indicators.
+    virtual bool poll_modification();
 
 protected:
     // Set 'is_modified_' to true.

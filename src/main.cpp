@@ -90,8 +90,7 @@ int main(int argc, char* argv[])
     std::ifstream ifs ("saves/fern.lsys");
     if (!ifs.is_open())
     {
-        auto plant = std::make_shared<LSystem>(LSystem { "X", { { 'X', "F[+X][-X]F[+X]-FX" }, { 'F', "FF" } }, "X" });
-        auto map = std::make_shared<InterpretationMap>(default_interpretation_map);
+        LSystem plant { "X", { { 'X', "F[+X][-X]F[+X]-FX" }, { 'F', "FF" } }, "X" };
 
         DrawingParameters plant_param({ 400, 500 },
                                       degree_to_rad(80.f),
@@ -119,7 +118,7 @@ int main(int argc, char* argv[])
         composite_painter->set_child_painters({constant_painter, sequential_painter_wrapper});
         auto composite_wrapper = std::make_shared<VertexPainterWrapper>(composite_painter);
 
-        LSystemView plant_view ("Plant", plant, map, plant_param, composite_wrapper);
+        LSystemView plant_view ("Plant", plant, default_interpretation_map, plant_param, composite_wrapper);
         views.emplace_back(std::move(plant_view));
     }
     else
@@ -622,8 +621,8 @@ void opt(int argc, char* argv[])
         view.ref_parameters().set_n_iter(9);
         for (int i=0; i<5; ++i)
         {
-            auto rule = view.ref_lsystem_buffer().ref_rule_map()->get_rule('F').second + 'F';
-            view.ref_lsystem_buffer().ref_rule_map()->add_rule('F', rule);
+            auto rule = view.ref_lsystem_buffer().ref_rule_map().get_rule('F').second + 'F';
+            view.ref_lsystem_buffer().ref_rule_map().add_rule('F', rule);
         }
 
     }

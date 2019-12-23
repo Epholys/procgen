@@ -34,13 +34,9 @@ namespace procgui
     //     - Each instance as a unique 'id_' and 'color_id_'
     //
     // TODO: simplifies ctor by initializing some attribute here.
-    class LSystemView : public Observer<procgui::LSystemBuffer>,
-                        public Observer<procgui::InterpretationMapBuffer>,
-                        public Observer<colors::VertexPainterWrapper>
+    class LSystemView : public Observer<colors::VertexPainterWrapper>
     {
     public:
-        using OLSys = Observer<procgui::LSystemBuffer>;
-        using OMap = Observer<procgui::InterpretationMapBuffer>;
         using OPainter = Observer<colors::VertexPainterWrapper>;
 
         // Too many moving pieces to serenely have a default constructor.
@@ -48,8 +44,8 @@ namespace procgui
         LSystemView() = delete;
         virtual ~LSystemView();
         LSystemView(const std::string& name,
-                    std::shared_ptr<LSystem> lsys,
-                    std::shared_ptr<drawing::InterpretationMap> map,
+                    const LSystem& lsys,
+                    const drawing::InterpretationMap& map,
                     const drawing::DrawingParameters& params,
                     std::shared_ptr<colors::VertexPainterWrapper> painter = std::make_shared<colors::VertexPainterWrapper>());
         // Special-case constructor when creating a default LSystem
@@ -147,7 +143,10 @@ namespace procgui
         // user confirms the computation.
         void open_size_warning_popup();
 
-        drawing::DrawingParameters parameters_;
+        // The main system defining the L-System visible on screen
+        drawing::DrawingParameters parameters_ {};
+        LSystemBuffer lsystem_ {};
+        InterpretationMapBuffer map_ {};
 
         // The managers of unique identifiers and colors for each instance of
         // LSystemView.
@@ -206,9 +205,9 @@ namespace procgui
         void save (Archive& ar, const u32) const
             {
                 ar(cereal::make_nvp("name", name_),
-                   cereal::make_nvp("LSystem", *OLSys::get_target()->get_rule_map()),
+                   cereal::make_nvp("LSystem", lsystem_.get_rule_map()),
                    cereal::make_nvp("DrawingParameters", parameters_),
-                   cereal::make_nvp("Interpretation Map", *OMap::get_target()->get_rule_map()));
+                   cereal::make_nvp("Interpretation Map", map_.get_rule_map()));
 
                 auto painter_serializer  = colors::VertexPainterSerializer(OPainter::get_target()->unwrap());
                 ar(cereal::make_nvp("VertexPainter", painter_serializer));
@@ -230,8 +229,8 @@ namespace procgui
 
 
                 *this = LSystemView(name,
-                                    std::make_shared<LSystem>(lsys),
-                                    std::make_shared<drawing::InterpretationMap>(map),
+                                    lsys,
+                                    map,
                                     parameters_,
                                     std::make_shared<colors::VertexPainterWrapper>(painter_serializer.get_serialized()));
 

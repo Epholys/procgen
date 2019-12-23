@@ -1,30 +1,9 @@
 #include <gtest/gtest.h>
 
-#include "Observer.h"
 #include "RuleMap.h"
 
 
 using IntMap = RuleMap<int>;
-using IntMapPtr = std::shared_ptr<IntMap>;
-class IntMapObs
-{
-public:
-    explicit IntMapObs(IntMapPtr ptr)
-        : obs_(ptr)
-        {
-            obs_.add_callback([this](){notified_ = true;});
-        }
-
-    explicit operator bool() const
-        {
-            return notified_;
-        }
-
-private:
-    Observer<IntMap> obs_ {nullptr};
-    bool notified_ {false};
-};
-
 
 
 TEST(RuleMapTest, default_ctor)
@@ -89,49 +68,45 @@ TEST(RuleMapTest, size)
 
 TEST(RuleMapTest, add_rule)
 {
-    IntMapPtr map = std::make_shared<IntMap>();
-    IntMapObs obs (map);
+    IntMap map;
 
     IntMap::Rules expected_rules = { { 'A', 0 } };
 
-    map->add_rule('A', 0);
+    map.add_rule('A', 0);
 
-    ASSERT_EQ(map->get_rules(), expected_rules);
-    ASSERT_TRUE(obs);
+    ASSERT_EQ(map.get_rules(), expected_rules);
+    ASSERT_TRUE(map.poll_modification());
 }
 
 TEST(RuleMapTest, remove_rule)
 {
-    IntMapPtr map = std::make_shared<IntMap>(IntMap::Rules({ { 'A', 0 } }));
-    IntMapObs obs (map);
+    IntMap map { { 'A', 0 } };
     IntMap::Rules empty_rules;
 
-    map->remove_rule('A');
+    map.remove_rule('A');
 
-    ASSERT_EQ(map->get_rules(), empty_rules);
-    ASSERT_TRUE(obs);
+    ASSERT_EQ(map.get_rules(), empty_rules);
+    ASSERT_TRUE(map.poll_modification());
 }
 
 TEST(RuleMapTest, clear_rules)
 {
-    IntMapPtr map = std::make_shared<IntMap>(IntMap::Rules({ { 'A', 0 }, { 'B', 1 } }));
-    IntMapObs obs (map);
+    IntMap map { { 'A', 0 }, { 'B', 1 } };
     IntMap::Rules empty_rules;
 
-    map->clear_rules();
+    map.clear_rules();
 
-    ASSERT_EQ(map->get_rules(), empty_rules);
-    ASSERT_TRUE(obs);
+    ASSERT_EQ(map.get_rules(), empty_rules);
+    ASSERT_TRUE(map.poll_modification());
 }
 
 TEST(RuleMapTest, replace_rules)
 {
-    IntMapPtr map = std::make_shared<IntMap>(IntMap::Rules({ { 'A', 0 }, { 'B', 1 } }));
-    IntMapObs obs (map);
+    IntMap map = { { 'A', 0 }, { 'B', 1 } };
     IntMap::Rules new_rules {{'C', 2}, {'D', 3}};
 
-    map->replace_rules(new_rules);
+    map.replace_rules(new_rules);
 
-    ASSERT_EQ(new_rules, map->get_rules());
-    ASSERT_TRUE(obs);
+    ASSERT_EQ(new_rules, map.get_rules());
+    ASSERT_TRUE(map.poll_modification());
 }

@@ -47,7 +47,7 @@ void LSystem::set_axiom(const std::string& axiom)
 {
     production_cache_ = { {0, axiom} };
     iteration_count_cache_ = { {0, {std::vector<u8>(axiom.size(), 0), 0} } };
-    notify();
+    indicate_modification();
 }
 
 void LSystem::add_rule(char predecessor, const Successor& successor)
@@ -82,7 +82,7 @@ void LSystem::set_iteration_predecessors(const std::string& predecessors)
 {
     iteration_count_cache_ = { {0, {std::vector<u8>(get_axiom().size(), 0), 0} } };
     iteration_predecessors_ = predecessors;
-    notify();
+    indicate_modification();
 }
 
 
@@ -210,9 +210,9 @@ LSystem::LSystemProduction LSystem::produce(u8 n, unsigned long long size)
         max_iteration = iteration_count_cache_.at(highest_iteration->first + i + 1).second;
     }
 
-    // No 'notify()' call: this function is generally called each time there is
-    // a notification of the LSystem. A second notify would double the
-    // computation time and may double the computation time of the hungrier
+    // No 'indicate_modification()' call: this function is generally called each
+    // time there is a notification of the LSystem. A second notify would double
+    // the computation time and may double the computation time of the hungrier
     // 'drawing::compute_vertices()' function.
 
     // Ensures invariant.

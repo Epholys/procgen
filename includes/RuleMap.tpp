@@ -1,14 +1,12 @@
 template<typename Successor>
 RuleMap<Successor>::RuleMap(const Rules& rules)
-    : Observable{}
-    , rules_(rules)
+    : rules_(rules)
 {
 }
 
 template<typename Successor>
 RuleMap<Successor>::RuleMap(std::initializer_list<typename Rules::value_type> init)
-    : Observable{}
-    , rules_{init}
+    : rules_{init}
 {
 }
 
@@ -48,7 +46,7 @@ template<typename Successor>
 void RuleMap<Successor>::add_rule(char predecessor, const Successor& successor)
 {
     rules_[predecessor] = successor;
-    notify();
+    indicate_modification();
 }
 
 template<typename Successor>
@@ -58,19 +56,19 @@ void RuleMap<Successor>::remove_rule(char predecessor)
     Expects(rule != rules_.end());
 
     rules_.erase(rule);
-    notify();
+    indicate_modification();
 }
 
 template<typename Successor>
 void RuleMap<Successor>::clear_rules()
 {
     rules_.clear();
-    notify();
+    indicate_modification();
 }
 
 template<typename Successor>
 void RuleMap<Successor>::replace_rules(const Rules& new_rules)
 {
     rules_ = new_rules;
-    notify();
+    indicate_modification();
 }

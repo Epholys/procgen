@@ -285,11 +285,11 @@ namespace procgui
         auto lsys = buffer.ref_rule_map();
 
         // --- Axiom ---
-        auto buf = string_to_array<lsys_successor_size>(lsys->get_axiom());
+        auto buf = string_to_array<lsys_successor_size>(lsys.get_axiom());
 
         if (ImGui::InputText("Axiom", buf.data(), lsys_successor_size))
         {
-            lsys->set_axiom(array_to_string(buf));
+            lsys.set_axiom(array_to_string(buf));
         }
 
         //  --- Rules ---
@@ -310,10 +310,10 @@ namespace procgui
                              });
 
         // --- Iteration Predecessors ---
-        buf = string_to_array<lsys_successor_size>(lsys->get_iteration_predecessors());
+        buf = string_to_array<lsys_successor_size>(lsys.get_iteration_predecessors());
         if (ImGui::InputText("Iteration predecessors", buf.data(), lsys_successor_size))
         {
-            lsys->set_iteration_predecessors(array_to_string(buf));
+            lsys.set_iteration_predecessors(array_to_string(buf));
         }
         ImGui::SameLine();
         ext::ImGui::ShowHelpMarker("Used in the Iterative Painter.");

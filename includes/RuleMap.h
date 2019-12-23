@@ -6,7 +6,7 @@
 
 #include <gsl/gsl>
 
-#include "Observable.h"
+#include "Indicator.h"
 
 // RuleMap is a thin wrapper around an unordered_map specialized for the rules
 // 'char -> T'. Semantically, in this project, it links a symbol of a LSystem
@@ -16,7 +16,7 @@
 // unordered_map with the Observable behaviour. Moreover, it is useful has a
 // base class for all '*Buffer' for the GUI.
 template<typename T>
-class RuleMap : public Observable
+class RuleMap : public Indicator
 {
 public:
     using Successor = T;
@@ -24,7 +24,7 @@ public:
     using Rules = std::unordered_map<char, Successor>;
 
     RuleMap() = default;
-    virtual ~RuleMap() {}
+    virtual ~RuleMap() = default;
     explicit RuleMap(const Rules &rules);
     RuleMap(std::initializer_list<typename Rules::value_type> init);
     RuleMap(const RuleMap &other) = default;

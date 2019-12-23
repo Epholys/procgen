@@ -4,7 +4,7 @@
 
 #include <list>
 
-#include "Observer.h"
+#include "Indicator.h"
 #include "RuleMap.h"
 #include "helper_algorithm.h"
 
@@ -23,7 +23,7 @@ namespace procgui
     //   - empty rules:
     //   If a rule does not have a predecessor (a null character), it is
     // considered as a scratch buffer. They are not synchronized with the
-    // Target or others 'RuleMapBuffer'.
+    // Target.
     //
     //   - duplication:
     //   Several rules can be duplicated. If one of these rule is removed, the
@@ -36,10 +36,11 @@ namespace procgui
     //   - The Target and the buffer must be synchronized
     //
     // Note:
-    //   - This is an Observable, but it simply foward the notification from its
-    //   Observer, and does not notify from its internal modifications.
+    //   - This is an Indicator, but polling modification from it directly polls
+    //   from its Target: RuleMapBuffer's own internal modifications are not
+    //   tracked.
     template<typename Target>
-    class RuleMapBuffer : public Observable
+    class RuleMapBuffer : public Indicator
     {
     public:
         // must be a derived class of RuleMap
@@ -50,12 +51,12 @@ namespace procgui
         // A production rule:
         struct Rule
         {
-            bool is_active {true};    // If a Rule is a duplicate of an already existing
+            bool is_active {true};   // If a Rule is a duplicate of an already existing
                                      // rule, it is not active.
             char predecessor {'\0'};
-            Successor successor {}; // If the successor is a basic type like 'int',
-                               // it will be not be initialized. Do not forget
-                               // to override 'add_rule' if this is the case.
+            Successor successor {};  // If the successor is a basic type like 'int',
+                                     // it will be not be initialized. Do not forget
+                                     // to override 'add_rule' if this is the case.
             inline bool operator== (const Rule& other) const
                 { return is_active == other.is_active &&
                          predecessor == other.predecessor &&
@@ -70,14 +71,15 @@ namespace procgui
         using iterator       = typename buffer::iterator;
         using const_iterator = typename buffer::const_iterator;
 
+        RuleMapBuffer() = default;
         // Constructor
-        explicit RuleMapBuffer(std::shared_ptr<Target> rule_map_);
-        virtual ~RuleMapBuffer();
+        explicit RuleMapBuffer(const Target& rule_map_);
+        virtual ~RuleMapBuffer() = default;
 
-        RuleMapBuffer(const RuleMapBuffer& other);
-        RuleMapBuffer(RuleMapBuffer&& other);
-        RuleMapBuffer& operator=(const RuleMapBuffer& other);
-        RuleMapBuffer& operator=(RuleMapBuffer&& other);
+        RuleMapBuffer(const RuleMapBuffer& other) = default;
+        RuleMapBuffer(RuleMapBuffer&& other) = default;
+        RuleMapBuffer& operator=(const RuleMapBuffer& other) = default;
+        RuleMapBuffer& operator=(RuleMapBuffer&& other) = default;
 
         // Access the underlying buffer without allowing modifications. Every
         // modification should be done with the associated functions.
@@ -88,11 +90,11 @@ namespace procgui
         size_t size() const;
 
         // Get target
-        std::shared_ptr<const Target> get_rule_map() const;
-        std::shared_ptr<Target> ref_rule_map() const;
+        const Target& get_rule_map() const;
+        Target& ref_rule_map();
 
         // Set target
-        void set_rule_map(std::shared_ptr<Target> new_rule_map);
+        void set_rule_map(const Target& new_rule_map);
 
         // Add an empty rule: a scratch buffer.
         // Do not forget to override it if there is not a default initialization
@@ -133,6 +135,8 @@ namespace procgui
         //  - Precondition: 'cit' must be valid and derenferenceable.
         void change_successor(const_iterator cit, const Successor& succ);
 
+        virtual bool poll_modification() override;
+
         // Reverse the last modification by setting all rules of the target by
         // the rules of 'previous_buffer_'.
         void revert();
@@ -154,7 +158,7 @@ namespace procgui
         typename Target::Rules generate_rule_map();
 
         // The target
-        Observer<Target> target_observer_{nullptr};
+        Target rule_map_ {};
 
         // The rule buffer.
         buffer buffer_{};

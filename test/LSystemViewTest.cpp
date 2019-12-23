@@ -27,10 +27,8 @@ using namespace colors;
 struct parameters_example
 {
     std::string name {"Testing"};
-    std::shared_ptr<LSystem> lsys = std::make_shared<LSystem>("X",
-                                                              LSystem::Rules({{'F', "FF"}, {'X', "F[+X][-X]"}}),
-                                                              "X");
-    std::shared_ptr<InterpretationMap> map = std::make_shared<InterpretationMap>(default_interpretation_map);
+    LSystem lsys {"X", LSystem::Rules({{'F', "FF"}, {'X', "F[+X][-X]"}}), "X"};
+    InterpretationMap map {default_interpretation_map};
     DrawingParameters params {{10,10}, 1, 1, 5, 3};
     std::shared_ptr<VertexPainterWrapper> painter =
         std::make_shared<VertexPainterWrapper>(
@@ -46,12 +44,6 @@ TEST(LSystemView, copy_ctor)
     copied_view.select();
     LSystemView copy_view (copied_view);
 
-    // Does not work: only the 'RuleMapBuffer<>' is fetched and it is is not
-    // possible to check the inequality of their 'RuleMap<>' AND their coherence
-    // with the 'Observer<>''s pointer. Adding more code as getters may
-    // introduce less encapsulation later.
-    // ASSERT_NE(&copied_view.get_lsystem_buffer(), &copy_view.get_lsystem_buffer());
-    // ASSERT_NE(&copied_view.get_interpretation_buffer(), &copy_view.get_interpretation_buffer());
     ASSERT_NE(&(*copied_view.get_vertex_painter_wrapper().unwrap()),
               &(*copy_view.get_vertex_painter_wrapper().unwrap()));
     ASSERT_NE(copied_view.get_id(), copy_view.get_id());
@@ -67,12 +59,6 @@ TEST(LSystemView, copy_assignment_ctor)
     LSystemView assign_view ({100, 100}, 5);
     assign_view = assigned_view;
 
-    // Does not work: only the 'RuleMapBuffer<>' is fetched and it is is not
-    // possible to check the inequality of their 'RuleMap<>' AND their coherence
-    // with the 'Observer<>''s pointer. Adding more code as getters may
-    // introduce less encapsulation later.
-    // ASSERT_NE(&copied_view.get_lsystem_buffer(), &copy_view.get_lsystem_buffer());
-    // ASSERT_NE(&copied_view.get_interpretation_buffer(), &copy_view.get_interpretation_buffer());
     ASSERT_NE(&(*assigned_view.get_vertex_painter_wrapper().unwrap()),
               &(*assign_view.get_vertex_painter_wrapper().unwrap()));
     ASSERT_NE(assigned_view.get_id(), assign_view.get_id());
@@ -89,10 +75,6 @@ TEST(LSystemView, move_ctor)
     auto color = moved_view.get_color();
     LSystemView move_view (std::move(moved_view));
 
-    // Does not work: only the 'RuleMapBuffer<>' is fetched and it is is not
-    // possible to check the equality of their 'RuleMap<>' AND their coherence
-    // with the 'Observer<>''s pointer. Adding more code as getters may
-    // introduce less encapsulation later.
     ASSERT_EQ(&(*move_view.get_vertex_painter_wrapper().unwrap()),
               &(*params.painter->unwrap()));
     ASSERT_EQ(move_view.get_id(), id);
@@ -110,10 +92,6 @@ TEST(LSystemView, assign_move_ctor)
     LSystemView move_view ({100, 100}, 5);
     move_view = std::move(moved_view);
 
-    // Does not work: only the 'RuleMapBuffer<>' is fetched and it is is not
-    // possible to check the equality of their 'RuleMap<>' AND their coherence
-    // with the 'Observer<>''s pointer. Adding more code as getters may
-    // introduce less encapsulation later.
     ASSERT_EQ(&(*move_view.get_vertex_painter_wrapper().unwrap()),
               &(*params.painter->unwrap()));
     ASSERT_EQ(move_view.get_id(), id);
