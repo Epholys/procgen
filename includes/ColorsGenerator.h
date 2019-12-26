@@ -14,7 +14,7 @@
 #include "cereal/archives/json.hpp"
 
 #include "types.h"
-#include "Observable.h"
+#include "Indicator.h"
 #include "LoadMenu.h"
 
 namespace cereal
@@ -141,7 +141,7 @@ namespace colors
     // As a polymorphic class, it is generally used as a
     // 'shared_ptr<>'.
     // Note that this class is an Observable.
-    class ColorGenerator : public Observable
+    class ColorGenerator : public Indicator
     {
     public:
         ColorGenerator() = default;

@@ -1,3 +1,4 @@
+#include "gsl/gsl"
 #include "VertexPainterRandom.h"
 
 namespace colors
@@ -24,7 +25,7 @@ namespace colors
         clone->block_size_ = block_size_;
         clone->random_seed_ = random_seed_;
         clone->random_generator_ = random_generator_;
-        clone->set_target(std::make_shared<ColorGeneratorWrapper>(*get_target()));
+        clone->generator_ = std::make_shared<ColorGeneratorWrapper>(generator_);
         return clone;
     }
 
@@ -32,7 +33,7 @@ namespace colors
     {
         random_seed_ = math::random_dev();
         random_generator_.seed(random_seed_);
-        notify();
+        indicate_modification();
     }
 
     int VertexPainterRandom::get_block_size() const
@@ -45,7 +46,7 @@ namespace colors
     {
         Expects(block_size > 0);
         block_size_ = block_size;
-        notify();
+        indicate_modification();
     }
 
 
@@ -56,7 +57,7 @@ namespace colors
                                              sf::FloatRect)
 
     {
-        auto generator = get_target()->unwrap();
+        auto generator = generator_->unwrap();
         if (!generator)
         {
             return;

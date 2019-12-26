@@ -19,7 +19,7 @@ namespace colors
     {
         auto clone = std::make_shared<VertexPainterSequential>();
         clone->factor_ = factor_;
-        clone->set_target(std::make_shared<ColorGeneratorWrapper>(*get_target()));
+        clone->generator_ = std::make_shared<ColorGeneratorWrapper>(generator_);
         return clone;
     }
 
@@ -31,7 +31,7 @@ namespace colors
     void VertexPainterSequential::set_factor(float factor)
     {
         factor_ = factor;
-        notify();
+        indicate_modification();
     }
 
     void VertexPainterSequential::paint_vertices(std::vector<sf::Vertex>& vertices,
@@ -41,7 +41,7 @@ namespace colors
                                                  sf::FloatRect)
 
     {
-        auto generator = get_target()->unwrap();
+        auto generator = generator_->unwrap();
         if (!generator)
         {
             return;

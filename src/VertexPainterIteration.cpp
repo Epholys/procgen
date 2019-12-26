@@ -1,3 +1,4 @@
+#include "gsl/gsl"
 #include "VertexPainterIteration.h"
 
 namespace colors
@@ -14,7 +15,7 @@ namespace colors
 
     std::shared_ptr<VertexPainter> VertexPainterIteration::clone() const
     {
-        auto color_wrapper = std::make_shared<ColorGeneratorWrapper>(*get_target());
+        auto color_wrapper = std::make_shared<ColorGeneratorWrapper>(generator_);
         return std::make_shared<VertexPainterIteration>(color_wrapper);
     }
 
@@ -27,7 +28,7 @@ namespace colors
     {
         Expects(vertices.size() == vertices_iteration.size());
 
-        auto generator = get_target()->unwrap();
+        auto generator = generator_->unwrap();
         if (!generator)
         {
             return;

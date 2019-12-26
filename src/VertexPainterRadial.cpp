@@ -25,7 +25,7 @@ namespace colors
     {
         auto clone = std::make_shared<VertexPainterRadial>();
         clone->center_ = center_;
-        clone->set_target(std::make_shared<ColorGeneratorWrapper>(*get_target()));
+        clone->generator_ = std::make_shared<ColorGeneratorWrapper>(generator_);
         return clone;
     }
 
@@ -41,7 +41,7 @@ namespace colors
     void VertexPainterRadial::set_center(sf::Vector2f center)
     {
         center_ = center;
-        notify();
+        indicate_modification();
     }
     void VertexPainterRadial::set_display_flag(bool flag)
     {
@@ -55,7 +55,7 @@ namespace colors
                                              int,
                                              sf::FloatRect bounding_box)
     {
-        auto generator = get_target()->unwrap();
+        auto generator = generator_->unwrap();
         if (!generator)
         {
             return;

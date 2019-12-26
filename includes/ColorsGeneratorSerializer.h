@@ -7,6 +7,8 @@
 #include <string>
 #include <functional>
 
+#include "gsl/gsl"
+
 #include "types.h"
 #include "helper_cereal.hpp"
 #include "ColorsGenerator.h"

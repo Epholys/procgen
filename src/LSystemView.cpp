@@ -18,20 +18,15 @@ namespace procgui
     UniqueId LSystemView::unique_ids_ {};
     UniqueColor LSystemView::unique_colors_ {};
 
-    void LSystemView::update_callbacks()
-    {
-        OPainter::add_callback([this](){paint_vertices();});
-    }
-
     LSystemView::LSystemView(const std::string& name,
                              const LSystem& lsys,
                              const InterpretationMap& map,
                              const DrawingParameters& params,
-                             std::shared_ptr<VertexPainterWrapper> painter)
-        : OPainter {painter}
-        , parameters_{params}
+                             const colors::VertexPainterWrapper& painter)
+        : parameters_{params}
         , lsystem_{lsys}
         , map_{map}
+        , painter_{painter}
         , id_{unique_ids_.get_id()}
         , color_id_{unique_colors_.get_color(id_)}
         , name_ {name}
@@ -44,10 +39,6 @@ namespace procgui
         , bounding_box_is_visible_{true}
         , popups_ids_{}
     {
-        // Invariant respected: cohesion between the LSystem/InterpretationMap
-        // and the vertices.
-        update_callbacks();
-
         is_modified_ = false;
     }
 
@@ -61,10 +52,10 @@ namespace procgui
     }
 
     LSystemView::LSystemView(const LSystemView& other)
-        : OPainter {std::make_shared<VertexPainterWrapper>(*other.OPainter::get_target())}
-        , parameters_{other.parameters_}
+        : parameters_{other.parameters_}
         , lsystem_{other.lsystem_}
         , map_{other.map_}
+        , painter_{other.painter_}
         , id_{unique_ids_.get_id()}
         , color_id_{unique_colors_.get_color(id_)}
         , name_ {other.name_}
@@ -78,17 +69,14 @@ namespace procgui
         , max_mem_size_{other.max_mem_size_}
         , popups_ids_{}
     {
-        // Manually managing Observer<> callbacks.
-        update_callbacks();
-
         is_modified_ = false;
     }
 
     LSystemView::LSystemView(LSystemView&& other)
-        : OPainter {other.OPainter::get_target()}
-        , parameters_{other.parameters_}
+        : parameters_{other.parameters_}
         , lsystem_{other.lsystem_}
         , map_{other.map_}
+        , painter_{other.painter_}
         , id_ {other.id_}
         , color_id_{std::move(other.color_id_)}
         , name_ {std::move(other.name_)}
@@ -102,12 +90,6 @@ namespace procgui
         , max_mem_size_{other.max_mem_size_}
         , popups_ids_{}
     {
-        // Manually managing Observer<> callbacks.
-        update_callbacks();
-
-        // Remove callbacks of the moved 'other'.
-        other.OPainter::set_target(nullptr);
-
         // the 'other' object must not matter in the 'color_gen_' anymore.
         other.id_ = -1;
         other.color_id_ = sf::Color::Black;
@@ -125,10 +107,10 @@ namespace procgui
     {
         if (this != &other)
         {
-            OPainter::set_target(std::make_shared<VertexPainterWrapper>(*other.OPainter::get_target()));
             parameters_ = other.parameters_;
-            lsystem_ =other.lsystem_;
-            map_ =other.map_;
+            lsystem_ = other.lsystem_;
+            map_ = other.map_;
+            painter_ = other.painter_;
             id_ = unique_ids_.get_id();
             color_id_ = unique_colors_.get_color(id_);
             name_ = other.name_;
@@ -142,8 +124,6 @@ namespace procgui
             max_mem_size_ = other.max_mem_size_;
             popups_ids_ = {};
 
-            update_callbacks();
-
             is_modified_ = false;
         }
 
@@ -154,10 +134,10 @@ namespace procgui
     {
         if (this != &other)
         {
-            OPainter::set_target(other.OPainter::get_target());
             parameters_ = std::move(other.parameters_);
             lsystem_ = std::move(other.lsystem_);
             map_ = std::move(other.map_);
+            painter_ = std::move(other.painter_);
             id_ = other.id_;
             color_id_ = other.color_id_;
             name_ = std::move(other.name_);
@@ -170,12 +150,6 @@ namespace procgui
             bounding_box_is_visible_ = true;
             max_mem_size_ =other.max_mem_size_;
             popups_ids_ = {};
-
-            // Manually managing Observer<> callbacks.
-            update_callbacks();
-
-            // Remove callbacks of the moved 'other'.
-            other.OPainter::set_target(nullptr);
 
             // the 'other' object must not matter in the 'color_gen_' anymore.
             other.id_ = -1;
@@ -221,7 +195,7 @@ namespace procgui
     }
     VertexPainterWrapper& LSystemView::ref_vertex_painter_wrapper()
     {
-        return *OPainter::get_target();
+        return painter_;
     }
     sf::FloatRect LSystemView::get_bounding_box() const
     {
@@ -241,7 +215,7 @@ namespace procgui
     }
     const VertexPainterWrapper& LSystemView::get_vertex_painter_wrapper() const
     {
-        return *OPainter::get_target();
+        return painter_;
     }
     const drawing::Turtle& LSystemView::get_turtle() const
     {
@@ -395,11 +369,11 @@ namespace procgui
     void LSystemView::paint_vertices()
     {
         // un-transformed vertices and bounding box
-        get_vertex_painter_wrapper().unwrap()->paint_vertices(turtle_.vertices_,
-                                                             turtle_.iterations_,
-                                                             turtle_.transparency_,
-                                                             max_iteration_,
-                                                             bounding_box_);
+        painter_.unwrap()->paint_vertices(turtle_.vertices_,
+                                          turtle_.iterations_,
+                                          turtle_.transparency_,
+                                          max_iteration_,
+                                          bounding_box_);
         is_modified_ = true;
 
         if (to_adjust_)
@@ -481,7 +455,7 @@ namespace procgui
             target.draw(turtle_.vertices_.data(),
                         turtle_.vertices_.size(),
                         sf::LineStrip, get_transform());
-            get_vertex_painter_wrapper().unwrap()->supplementary_drawing(visible_bounding_box);
+            painter_.unwrap()->supplementary_drawing(visible_bounding_box);
         }
 
         if (is_selected_ && bounding_box_is_visible_)

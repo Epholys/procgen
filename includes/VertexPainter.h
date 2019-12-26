@@ -10,8 +10,6 @@
 #include "cereal/types/polymorphic.hpp"
 
 #include "types.h"
-#include "Observable.h"
-#include "Observer.h"
 #include "ColorsGeneratorWrapper.h"
 
 
@@ -23,12 +21,9 @@ namespace colors
     // VertexPainter is a base class with pure virtual methods, the child
     // classes implement the coloring rules. It observes a ColorGeneratorWrapper
     // and pass the 'notify()' call to the Observers.
-    class VertexPainter : public Observable
-                        , public Observer<ColorGeneratorWrapper>
+    class VertexPainter : public Indicator
     {
     public:
-        using OGenBuff = Observer<ColorGeneratorWrapper>;
-
         VertexPainter(); // Create a default generator
         virtual ~VertexPainter() {};
         explicit VertexPainter(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
@@ -43,9 +38,9 @@ namespace colors
         virtual std::shared_ptr<VertexPainter> clone() const = 0;
 
         // Getters/Setters
-        std::shared_ptr<ColorGeneratorWrapper> get_generator_wrapper() const;
+        std::shared_ptr<const ColorGeneratorWrapper> get_generator_wrapper() const;
+        std::shared_ptr<ColorGeneratorWrapper> ref_generator_wrapper() const;
         void set_generator_wrapper(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper);
-        void set_target(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper);
 
         // Method to be called every frame to draw some helper visuals.
         // 'bounding_box' is the only necessary information for now, but all
@@ -62,6 +57,11 @@ namespace colors
                                     sf::FloatRect bounding_box) = 0;
 
         virtual std::string type_name() const = 0;
+
+        virtual bool poll_modification() override;
+
+    protected:
+        std::shared_ptr<ColorGeneratorWrapper> generator_;
     };
 }
 

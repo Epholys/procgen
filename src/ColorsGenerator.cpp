@@ -35,7 +35,7 @@ namespace colors
     void ConstantColor::set_imcolor(const ImVec4& color)
     {
         color_ = color;
-        notify();
+        indicate_modification();
     }
 
     // Return a copy of this as a shared_ptr for polymorphic purpose.
@@ -90,7 +90,7 @@ namespace colors
         keys_.back().position = 1.f;
 
 
-        notify();
+        indicate_modification();
     }
 
     sf::Color LinearGradient::get(float f)
@@ -221,12 +221,13 @@ namespace colors
         }
 
         generate_colors();
-        notify();
 
         Ensures(keys_.at(0).index == 0);
         Ensures(std::is_sorted(begin(keys_), end(keys_),
                                [](const auto& a, const auto& b)
                                {return a.index < b.index;}));
+
+        indicate_modification();
     }
 
     void DiscreteGradient::generate_colors()

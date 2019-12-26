@@ -3,38 +3,30 @@
 namespace colors
 {
     ColorGeneratorWrapper::ColorGeneratorWrapper()
-        : Observable{}
-        , OGen{std::make_shared<ConstantColor>()}
+        : generator_{std::make_shared<ConstantColor>()}
     {
-        add_callback([this](){notify();});
+
     }
-                                         
+
     ColorGeneratorWrapper::ColorGeneratorWrapper(std::shared_ptr<ColorGenerator> gen)
-        : Observable{}
-        , OGen{gen}
+        : generator_{gen}
     {
-        add_callback([this](){notify();});
     }
 
     ColorGeneratorWrapper::ColorGeneratorWrapper(const ColorGeneratorWrapper& other)
-        : Observable{}
-        , OGen{other.get_target()->clone()}
+        : generator_{other.generator_->clone()}
     {
-        add_callback([this](){notify();});
     }
     ColorGeneratorWrapper::ColorGeneratorWrapper(ColorGeneratorWrapper&& other)
-        : Observable{}
-        , OGen{other.get_target()}
+        : generator_{std::move(other.generator_)}
     {
-        add_callback([this](){notify();});
-        other.set_target(nullptr);
+        other.generator_.reset();
     }
     ColorGeneratorWrapper& ColorGeneratorWrapper::operator=(const ColorGeneratorWrapper& other)
     {
         if (this != &other)
         {
-            set_target(other.get_target()->clone());
-            add_callback([this](){notify();});
+            generator_ = other.generator_->clone();
         }
         return *this;
     }
@@ -42,22 +34,25 @@ namespace colors
     {
         if (this != &other)
         {
-            set_target(other.get_target());
-            add_callback([this](){notify();});
-            other.set_target(nullptr);
+            generator_ = std::move(other.generator_);
+            other.generator_.reset();
         }
         return *this;
     }
-    
+
     std::shared_ptr<ColorGenerator> ColorGeneratorWrapper::unwrap() const
     {
-        return get_target();
+        return generator_;
     }
 
     void ColorGeneratorWrapper::wrap(std::shared_ptr<ColorGenerator> gen)
     {
-        set_target(gen);
-        add_callback([this](){notify();});
-        notify();
+        generator_ = gen;
+        indicate_modification();
+    }
+
+    bool ColorGeneratorWrapper::poll_modification()
+    {
+        return Indicator::poll_modification() | generator_->poll_modification();
     }
 }

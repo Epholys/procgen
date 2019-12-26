@@ -34,11 +34,9 @@ namespace procgui
     //     - Each instance as a unique 'id_' and 'color_id_'
     //
     // TODO: simplifies ctor by initializing some attribute here.
-    class LSystemView : public Observer<colors::VertexPainterWrapper>
+    class LSystemView
     {
     public:
-        using OPainter = Observer<colors::VertexPainterWrapper>;
-
         // Too many moving pieces to serenely have a default constructor.
         // TODO: bite the bullet and do it
         LSystemView() = delete;
@@ -47,7 +45,7 @@ namespace procgui
                     const LSystem& lsys,
                     const drawing::InterpretationMap& map,
                     const drawing::DrawingParameters& params,
-                    std::shared_ptr<colors::VertexPainterWrapper> painter = std::make_shared<colors::VertexPainterWrapper>());
+                    const colors::VertexPainterWrapper& painter = colors::VertexPainterWrapper());
         // Special-case constructor when creating a default LSystem
         LSystemView(const ext::sf::Vector2d& position, double step);
         // Deep copy;
@@ -124,8 +122,8 @@ namespace procgui
         //    lowest dimension of the screen size
         void adjust();
 
-        // Update the callbacks of the Observers
-        void update_callbacks();
+        // // Update the callbacks of the Observers
+        // void update_callbacks();
 
         // Draw a placeholder box if the LSystem does not have enough vertices
         // or does not have any size.
@@ -147,6 +145,7 @@ namespace procgui
         drawing::DrawingParameters parameters_ {};
         LSystemBuffer lsystem_ {};
         InterpretationMapBuffer map_ {};
+        colors::VertexPainterWrapper painter_{};
 
         // The managers of unique identifiers and colors for each instance of
         // LSystemView.
@@ -209,7 +208,7 @@ namespace procgui
                    cereal::make_nvp("DrawingParameters", parameters_),
                    cereal::make_nvp("Interpretation Map", map_.get_rule_map()));
 
-                auto painter_serializer  = colors::VertexPainterSerializer(OPainter::get_target()->unwrap());
+                auto painter_serializer  = colors::VertexPainterSerializer(painter_.unwrap());
                 ar(cereal::make_nvp("VertexPainter", painter_serializer));
             }
 
@@ -232,7 +231,7 @@ namespace procgui
                                     lsys,
                                     map,
                                     parameters_,
-                                    std::make_shared<colors::VertexPainterWrapper>(painter_serializer.get_serialized()));
+                                    colors::VertexPainterWrapper(painter_serializer.get_serialized()));
 
             }
     };

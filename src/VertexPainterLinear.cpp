@@ -25,7 +25,7 @@ namespace colors
     {
         auto clone = std::make_shared<VertexPainterLinear>();
         clone->angle_ = angle_;
-        clone->set_target(std::make_shared<ColorGeneratorWrapper>(*get_target()));
+        clone->generator_ = std::make_shared<ColorGeneratorWrapper>(generator_);
         return clone;
     }
 
@@ -41,7 +41,7 @@ namespace colors
     void VertexPainterLinear::set_angle(float angle)
     {
         angle_ = angle;
-        notify();
+        indicate_modification();
     }
     void VertexPainterLinear::set_display_flag(bool flag)
     {
@@ -54,7 +54,7 @@ namespace colors
                                              int,
                                              sf::FloatRect bounding_box)
     {
-        auto generator = get_target()->unwrap();
+        auto generator = generator_->unwrap();
         if (!generator)
         {
             return;

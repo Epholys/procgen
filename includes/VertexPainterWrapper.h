@@ -10,12 +10,9 @@ namespace colors
     // painter is created (chaning for example from a Linear to a Radial), it
     // will notify() all Observers. It will also notify the Observers if the
     // VertexPainter is modified.
-    class VertexPainterWrapper : public Observable
-                               , public Observer<VertexPainter>
+    class VertexPainterWrapper : public Indicator
     {
     public:
-        using OPainter = Observer<VertexPainter>;
-        
         // Default constructor, construct an empy VertexPainter.
         VertexPainterWrapper();
         explicit VertexPainterWrapper(std::shared_ptr<VertexPainter> painter);
@@ -31,6 +28,11 @@ namespace colors
 
         // Setter
         void wrap(std::shared_ptr<VertexPainter> painter);
+
+        virtual bool poll_modification() override;
+
+    private:
+        std::shared_ptr<VertexPainter> painter_;
     };
 }
 

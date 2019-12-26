@@ -1,7 +1,6 @@
 #ifndef COLOR_GENERATOR_WRAPPER_H
 #define COLOR_GENERATOR_WRAPPER_H
 
-#include "Observer.h"
 #include "ColorsGenerator.h"
 
 namespace colors
@@ -10,12 +9,9 @@ namespace colors
     // generator is created (changing for example from a ConstantColor to a
     // LinearGradient), it will 'notify()' all Observers. It will also notify if
     // the generator is modified.
-    class ColorGeneratorWrapper : public Observable
-                                , public Observer<ColorGenerator>
+    class ColorGeneratorWrapper : public Indicator
     {
     public:
-        using OGen = Observer<ColorGenerator>;
-        
         // Construct this object with a white ConstantColor.
         ColorGeneratorWrapper();
         virtual ~ColorGeneratorWrapper() {};
@@ -27,12 +23,16 @@ namespace colors
         ColorGeneratorWrapper& operator=(const ColorGeneratorWrapper& other);
         ColorGeneratorWrapper& operator=(ColorGeneratorWrapper&& other);
 
-        
         // Getter
         std::shared_ptr<ColorGenerator> unwrap() const;
 
         // Setter (notify)
         void wrap(std::shared_ptr<ColorGenerator> gen);
+
+        virtual bool poll_modification() override;
+
+    private:
+        std::shared_ptr<ColorGenerator> generator_;
     };
 }
 

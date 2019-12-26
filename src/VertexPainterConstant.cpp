@@ -14,7 +14,7 @@ namespace colors
 
     std::shared_ptr<VertexPainter> VertexPainterConstant::clone() const
     {
-        auto color_wrapper = std::make_shared<ColorGeneratorWrapper>(*get_target());
+        auto color_wrapper = std::make_shared<ColorGeneratorWrapper>(generator_);
         return std::make_shared<VertexPainterConstant>(color_wrapper);
     }
 
@@ -25,12 +25,12 @@ namespace colors
                                                sf::FloatRect)
 
     {
-        auto generator = get_target()->unwrap();
-        if (!generator)
+        if (!generator_)
         {
             return;
         }
 
+        auto generator = generator_->unwrap();
 
 #ifdef DEBUG_CHECKS
         for (auto i=0ull; i<vertices.size(); ++i)

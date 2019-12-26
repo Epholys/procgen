@@ -81,38 +81,8 @@ namespace colors
                 {
                 }
         };
-
-        // A utility class to manipulate an Observer of a
-        // 'VertexPainterWrapper'. Used in 'VertexPainterComposite' as the main
-        // and slave painters. The rational is to call 'painter_.notify()' at
-        // each modification of each painter.
-        class VertexPainterWrapperObserver : public Observer<VertexPainterWrapper>
-        {
-        public:
-            using OWrapper = Observer<VertexPainterWrapper>;
-
-            VertexPainterWrapperObserver() = delete;
-            VertexPainterWrapperObserver(std::shared_ptr<VertexPainterWrapper> painter_wrapper,
-                                         VertexPainterComposite* painter_composite);
-            VertexPainterWrapperObserver(const VertexPainterWrapperObserver& other) = delete;
-            VertexPainterWrapperObserver(VertexPainterWrapperObserver&& other);
-            VertexPainterWrapperObserver& operator=(const VertexPainterWrapperObserver& other) = delete;
-            VertexPainterWrapperObserver& operator=(VertexPainterWrapperObserver&& other);
-
-            std::shared_ptr<VertexPainterWrapper> get_painter_wrapper() const;
-            void set_painter_wrapper(std::shared_ptr<VertexPainterWrapper> painter_buff);
-
-            void set_composite_painter(VertexPainterComposite* painter);
-
-        private:
-            // Pointer to the linked VertexPainterComposite
-            VertexPainterComposite* painter_;
-        };
     }
-}
 
-namespace colors
-{
     class VertexPainterSerializer;
 
     // The main class.
@@ -159,6 +129,8 @@ namespace colors
         friend class VertexPainterSerializer;
         virtual std::string type_name() const override;
 
+        virtual bool poll_modification() override;
+
     private:
 
         // The copied painter
@@ -169,8 +141,7 @@ namespace colors
         std::shared_ptr<impl::ColorGeneratorComposite> color_distributor_;
 
         // The main painter.
-        friend impl::VertexPainterWrapperObserver;
-        impl::VertexPainterWrapperObserver main_painter_observer_;
+        std::shared_ptr<VertexPainterWrapper> main_painter_;
 
         // The pools for the indices of vertices.
         // Each pool corresponds to a painter in 'child_painters_observers_'. It
@@ -180,7 +151,7 @@ namespace colors
         // in 'paint_vertices()'.
         std::vector<std::vector<std::size_t>> vertex_indices_pools_;
 
-        std::vector<impl::VertexPainterWrapperObserver> child_painters_observers_;
+        std::vector<std::shared_ptr<VertexPainterWrapper>> child_painters_;
 
         // Hack to avoid circular dependency between VertexPainterSerializer and
         // VertexPainterComposite. The VertexPainterSerializer is never included
@@ -191,11 +162,11 @@ namespace colors
             {
                 static_assert(std::is_same<Serializer, VertexPainterSerializer>::value);
 
-                auto main_painter = Serializer(main_painter_observer_.get_painter_wrapper()->unwrap());
+                auto main_painter = Serializer(main_painter_->unwrap());
                 std::vector<Serializer> child_painters;
-                for(const auto& child : child_painters_observers_)
+                for(const auto& child : child_painters_)
                 {
-                    child_painters.push_back(Serializer(child.get_painter_wrapper()->unwrap()));
+                    child_painters.push_back(Serializer(child->unwrap()));
                 }
                 ar(cereal::make_nvp("main_painter", main_painter),
                    cereal::make_nvp("child_painters", child_painters));
