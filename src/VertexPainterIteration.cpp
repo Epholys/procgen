@@ -15,8 +15,7 @@ namespace colors
 
     std::shared_ptr<VertexPainter> VertexPainterIteration::clone() const
     {
-        auto color_wrapper = std::make_shared<ColorGeneratorWrapper>(generator_);
-        return std::make_shared<VertexPainterIteration>(color_wrapper);
+        return std::make_shared<VertexPainterIteration>(generator_);
     }
 
     void VertexPainterIteration::paint_vertices(std::vector<sf::Vertex>& vertices,

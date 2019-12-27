@@ -25,7 +25,7 @@ namespace colors
     {
         auto clone = std::make_shared<VertexPainterLinear>();
         clone->angle_ = angle_;
-        clone->generator_ = std::make_shared<ColorGeneratorWrapper>(generator_);
+        clone->generator_ = generator_;
         return clone;
     }
 

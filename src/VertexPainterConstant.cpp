@@ -14,7 +14,7 @@ namespace colors
 
     std::shared_ptr<VertexPainter> VertexPainterConstant::clone() const
     {
-        auto color_wrapper = std::make_shared<ColorGeneratorWrapper>(generator_);
+        auto color_wrapper = generator_;
         return std::make_shared<VertexPainterConstant>(color_wrapper);
     }
 

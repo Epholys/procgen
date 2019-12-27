@@ -25,7 +25,7 @@ namespace colors
         clone->block_size_ = block_size_;
         clone->random_seed_ = random_seed_;
         clone->random_generator_ = random_generator_;
-        clone->generator_ = std::make_shared<ColorGeneratorWrapper>(generator_);
+        clone->generator_ = generator_;
         return clone;
     }
 

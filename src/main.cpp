@@ -100,8 +100,7 @@ int main(int argc, char* argv[])
 
         auto constant_color_gen = std::make_shared<ColorGeneratorWrapper>(
             std::make_shared<ConstantColor>(sf::Color(183,71,71,255)));
-        auto constant_painter = std::make_shared<VertexPainterWrapper>(
-            std::make_shared<VertexPainterConstant>(constant_color_gen));
+        auto constant_painter = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterConstant>(constant_color_gen));
 
         auto linear_color_gen = std::make_shared<ColorGeneratorWrapper>(
             std::make_shared<LinearGradient>(LinearGradient::keys({{sf::Color(255,253,0,255), 0},
@@ -110,13 +109,12 @@ int main(int argc, char* argv[])
         sequential_painter->set_factor(5);
         auto sequential_painter_wrapper = std::make_shared<VertexPainterWrapper>(sequential_painter);
 
-        auto main_painter = std::make_shared<VertexPainterWrapper>(
-            std::make_shared<VertexPainterIteration>());
+        auto main_painter = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterIteration>());
 
         auto composite_painter = std::make_shared<VertexPainterComposite>();
         composite_painter->set_main_painter(main_painter);
         composite_painter->set_child_painters({constant_painter, sequential_painter_wrapper});
-        auto composite_wrapper = std::make_shared<VertexPainterWrapper>(composite_painter);
+        VertexPainterWrapper composite_wrapper (composite_painter);
 
         LSystemView plant_view ("Plant", plant, default_interpretation_map, plant_param, composite_wrapper);
         views.emplace_back(std::move(plant_view));

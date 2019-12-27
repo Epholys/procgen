@@ -31,7 +31,7 @@ namespace colors
             // We do not clamp to 1 as it would be an out-of-bound call. So we clamp
             // it to just before 1.
             f = std::clamp(f, 0.f, 1.f-std::numeric_limits<float>::epsilon());
-            auto size = painter_->child_painters_observers_.size();
+            auto size = painter_->child_painters_.size();
             // Compute which child painter is concerned by this vertex.
             unsigned which_painter = static_cast<unsigned>(f * size);
 
@@ -75,7 +75,7 @@ namespace colors
         , vertex_indices_pools_{}
         , child_painters_{}
     {
-        child_painters_.emplace_back(std::make_shared<VertexPainterWrapper>(), this);
+        child_painters_.emplace_back(std::make_shared<VertexPainterWrapper>());
     }
 
     VertexPainterComposite::VertexPainterComposite(const std::shared_ptr<ColorGeneratorWrapper>)
@@ -88,7 +88,7 @@ namespace colors
         auto clone = std::make_shared<VertexPainterComposite>();
 
         auto composite_color_wrapper = std::make_shared<ColorGeneratorWrapper>(clone->color_distributor_);
-        auto main_painter_clone = std::make_shared<VertexPainterWrapper>(main_painter_);
+        auto main_painter_clone = main_painter_;
         main_painter_clone->unwrap()->set_generator_wrapper(composite_color_wrapper);
         clone->main_painter_ = main_painter_clone;
 
@@ -96,7 +96,7 @@ namespace colors
         clone->child_painters_.clear();
         for (const auto& child : child_painters_)
         {
-            auto child_clone = std::make_shared<VertexPainterWrapper>(child);
+            auto child_clone = child;
             clone->child_painters_.emplace_back(std::move(child_clone));
         }
 
@@ -138,7 +138,7 @@ namespace colors
         child_painters_.clear();
         for (const auto& painter : painters)
         {
-            child_painters_.emplace_back(std::move(painter), this);
+            child_painters_.emplace_back(std::move(painter));
         }
         indicate_modification();
     }

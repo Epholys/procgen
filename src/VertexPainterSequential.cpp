@@ -19,7 +19,7 @@ namespace colors
     {
         auto clone = std::make_shared<VertexPainterSequential>();
         clone->factor_ = factor_;
-        clone->generator_ = std::make_shared<ColorGeneratorWrapper>(generator_);
+        clone->generator_ = generator_;
         return clone;
     }
 

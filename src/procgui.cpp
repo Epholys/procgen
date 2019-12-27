@@ -365,7 +365,7 @@ namespace
     void interact_with(colors::VertexPainterConstant& painter)
     {
         ImGui::Text("Paint all the vertices in the same color.");
-        ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
+        ::procgui::interact_with(*painter.ref_generator_wrapper(), "Colors",
                                  ::procgui::color_wrapper_mode::CONSTANT);
     }
     void interact_with(colors::VertexPainterLinear& painter, bool from_composite=false)
@@ -388,7 +388,7 @@ namespace
 
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
+            ::procgui::interact_with(*painter.ref_generator_wrapper(), "Colors",
                                      ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
@@ -414,7 +414,7 @@ namespace
 
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
+            ::procgui::interact_with(*painter.ref_generator_wrapper(), "Colors",
                                      ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
@@ -443,7 +443,7 @@ namespace
 
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
+            ::procgui::interact_with(*painter.ref_generator_wrapper(), "Colors",
                                      ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
@@ -464,7 +464,7 @@ namespace
 
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
+            ::procgui::interact_with(*painter.ref_generator_wrapper(), "Colors",
                                      ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
@@ -475,7 +475,7 @@ namespace
 
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.get_generator_wrapper(), "Colors",
+            ::procgui::interact_with(*painter.ref_generator_wrapper(), "Colors",
                                      ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
@@ -562,7 +562,7 @@ namespace
             ::ext::ImGui::PushStyleColoredButton<ext::ImGui::Purple>();
             if (ImGui::Button("Copy previous Painter"))
             {
-                colors::VertexPainterComposite::save_painter((*it)->get_target());
+                colors::VertexPainterComposite::save_painter((*it)->unwrap());
             }
             ImGui::PopStyleColor(3);
 
@@ -632,7 +632,7 @@ namespace
         }
         else
         {
-            next_generator = painter->get_generator_wrapper();
+            next_generator = painter->ref_generator_wrapper();
         }
 
         switch(index)
