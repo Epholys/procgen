@@ -30,11 +30,10 @@ struct parameters_example
     LSystem lsys {"X", LSystem::Rules({{'F', "FF"}, {'X', "F[+X][-X]"}}), "X"};
     InterpretationMap map {default_interpretation_map};
     DrawingParameters params {{10,10}, 1, 1, 5, 3};
-    std::shared_ptr<VertexPainterWrapper> painter =
-        std::make_shared<VertexPainterWrapper>(
+    VertexPainterWrapper painter {
             std::make_shared<VertexPainterLinear>(
-                std::make_shared<ColorGeneratorWrapper>(
-                    std::make_shared<LinearGradient>(LinearGradient::keys({{sf::Color::Red, 0.}, {sf::Color::Blue, 1.0}})))));
+                ColorGeneratorWrapper(
+                    std::make_shared<LinearGradient>(LinearGradient::keys({{sf::Color::Red, 0.}, {sf::Color::Blue, 1.0}}))))};
 };
 
 TEST(LSystemView, copy_ctor)
@@ -44,8 +43,6 @@ TEST(LSystemView, copy_ctor)
     copied_view.select();
     LSystemView copy_view (copied_view);
 
-    ASSERT_NE(&(*copied_view.get_vertex_painter_wrapper().unwrap()),
-              &(*copy_view.get_vertex_painter_wrapper().unwrap()));
     ASSERT_NE(copied_view.get_id(), copy_view.get_id());
     ASSERT_NE(copied_view.get_color(), copy_view.get_color());
     ASSERT_FALSE(copy_view.is_selected());
@@ -59,8 +56,6 @@ TEST(LSystemView, copy_assignment_ctor)
     LSystemView assign_view ({100, 100}, 5);
     assign_view = assigned_view;
 
-    ASSERT_NE(&(*assigned_view.get_vertex_painter_wrapper().unwrap()),
-              &(*assign_view.get_vertex_painter_wrapper().unwrap()));
     ASSERT_NE(assigned_view.get_id(), assign_view.get_id());
     ASSERT_NE(assigned_view.get_color(), assign_view.get_color());
     ASSERT_FALSE(assign_view.is_selected());
@@ -75,8 +70,7 @@ TEST(LSystemView, move_ctor)
     auto color = moved_view.get_color();
     LSystemView move_view (std::move(moved_view));
 
-    ASSERT_EQ(&(*move_view.get_vertex_painter_wrapper().unwrap()),
-              &(*params.painter->unwrap()));
+
     ASSERT_EQ(move_view.get_id(), id);
     ASSERT_EQ(move_view.get_color(), color);
     ASSERT_FALSE(move_view.is_selected());
@@ -92,8 +86,6 @@ TEST(LSystemView, assign_move_ctor)
     LSystemView move_view ({100, 100}, 5);
     move_view = std::move(moved_view);
 
-    ASSERT_EQ(&(*move_view.get_vertex_painter_wrapper().unwrap()),
-              &(*params.painter->unwrap()));
     ASSERT_EQ(move_view.get_id(), id);
     ASSERT_EQ(move_view.get_color(), color);
     ASSERT_FALSE(move_view.is_selected());

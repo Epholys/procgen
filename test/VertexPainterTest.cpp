@@ -59,9 +59,7 @@ struct default_vertices
 
 TEST(VertexPainter, Constant)
 {
-    auto colors =
-        std::make_shared<ColorGeneratorWrapper>(
-            std::make_shared<ConstantColor>(sf::Color::Red));
+    ColorGeneratorWrapper colors (std::make_shared<ConstantColor>(sf::Color::Red));
     VertexPainterConstant painter (colors);
     std::vector<sf::Vertex> grid = vertices.grid;
     painter.paint_vertices(grid,
@@ -77,9 +75,7 @@ TEST(VertexPainter, Constant)
 }
 TEST(VertexPainter, ConstantSerialization)
 {
-   auto colors =
-        std::make_shared<ColorGeneratorWrapper>(
-            std::make_shared<ConstantColor>(sf::Color::Red));
+   ColorGeneratorWrapper colors (std::make_shared<ConstantColor>(sf::Color::Red));
     VertexPainterConstant opainter (colors);
     VertexPainterConstant ipainter (colors);
 
@@ -109,8 +105,7 @@ TEST(VertexPainter, ConstantSerialization)
 TEST(VertexPainter, Sequential)
 {
     std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Yellow, sf::Color::Green};
-    auto colors_gen =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper colors_gen (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2},{colors[3], 3}})));
     VertexPainterSequential painter (colors_gen);
@@ -133,8 +128,7 @@ TEST(VertexPainter, Sequential)
 TEST(VertexPainter, SequentialSerialization)
 {
     std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Yellow, sf::Color::Green};
-    auto colors_gen =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper colors_gen (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2},{colors[3], 3}})));
     VertexPainterSequential opainter (colors_gen);
@@ -170,8 +164,7 @@ TEST(VertexPainter, SequentialSerialization)
 TEST(VertexPainter, Iteration)
 {
     std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Yellow, sf::Color::Green};
-    auto colors_gen =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper colors_gen (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2},{colors[3], 3}})));
     VertexPainterIteration painter (colors_gen);
@@ -192,8 +185,7 @@ TEST(VertexPainter, Iteration)
 TEST(VertexPainter, IterationSerialization)
 {
     std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Yellow, sf::Color::Green};
-    auto colors_gen =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper colors_gen (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2},{colors[3], 3}})));
     VertexPainterIteration opainter (colors_gen);
@@ -227,8 +219,7 @@ TEST(VertexPainter, IterationSerialization)
 TEST(VertexPainter, Linear)
 {
     std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Green, sf::Color::Yellow};
-    auto colors_gen =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper colors_gen (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2}, {colors[3], 3}})));
     VertexPainterLinear painter (colors_gen);
@@ -255,8 +246,7 @@ TEST(VertexPainter, Linear)
 TEST(VertexPainter, LinearSerialization)
 {
     std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Green, sf::Color::Yellow};
-    auto colors_gen =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper colors_gen (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2}, {colors[3], 3}})));
     VertexPainterLinear opainter (colors_gen);
@@ -296,8 +286,7 @@ TEST(VertexPainter, LinearSerialization)
 TEST(VertexPainter, Radial)
 {
     std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Green};
-    auto colors_gen =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper colors_gen (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2}})));
     VertexPainterRadial painter (colors_gen);
@@ -324,8 +313,7 @@ TEST(VertexPainter, Radial)
 TEST(VertexPainter, RadialSerialization)
 {
     std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Green};
-    auto colors_gen =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper colors_gen(
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2}})));
     VertexPainterRadial opainter (colors_gen);
@@ -367,8 +355,7 @@ TEST(VertexPainter, RadialSerialization)
 TEST(VertexPainter, Random)
 {
     std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Yellow, sf::Color::Green};
-    auto colors_gen =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper colors_gen (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2},{colors[3], 3}})));
     VertexPainterRandom painter (colors_gen);
@@ -398,8 +385,7 @@ TEST(VertexPainter, Random)
 TEST(VertexPainter, RandomSerialization)
 {
     std::array<sf::Color, vertices.grid_size> colors {sf::Color::Red, sf::Color::Blue, sf::Color::Yellow, sf::Color::Green};
-    auto colors_gen =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper colors_gen (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors[0], 0}, {colors[1], 1}, {colors[2], 2},{colors[3], 3}})));
     VertexPainterRandom opainter (colors_gen);
@@ -447,31 +433,26 @@ TEST(VertexPainter, Composite)
     std::array<sf::Color, 2> colors1 {sf::Color::Green, sf::Color::Blue};
     std::array<sf::Color, 2> colors2 {sf::Color::Yellow, sf::Color::Magenta};
     std::array<sf::Color, 2> colors3 {sf::Color::Cyan, sf::Color::White};
-    auto constant_gen =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper constant_gen (
             std::make_shared<ConstantColor>(color));
-    auto discrete_gen1 =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper discrete_gen1(
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors1[0], 0}, {colors1[1], 1}})));
-    auto discrete_gen2 =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper discrete_gen2 (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors2[0], 0}, {colors2[1], 1}})));
-    auto discrete_gen3 =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper discrete_gen3 (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors3[0], 0}, {colors3[1], 1}})));
 
-    auto constant_wrapper = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterConstant>(constant_gen));
-    auto radial_wrapper = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterRadial>(discrete_gen1));
-    auto linear_painter = std::make_shared<VertexPainterLinear>(discrete_gen2);
-    auto linear_wrapper = std::make_shared<VertexPainterWrapper>(linear_painter);
-    auto sequential_wrapper = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterSequential>(discrete_gen3));
+    VertexPainterWrapper constant_wrapper (std::make_shared<VertexPainterConstant>(constant_gen));
+    VertexPainterWrapper radial_wrapper (std::make_shared<VertexPainterRadial>(discrete_gen1));
+    VertexPainterWrapper linear_wrapper (std::make_shared<VertexPainterLinear>(discrete_gen2));
+    VertexPainterWrapper sequential_wrapper (std::make_shared<VertexPainterSequential>(discrete_gen3));
 
     std::vector<sf::Vertex> grid = vertices.grid;
     VertexPainterComposite composite;
-    composite.set_main_painter(std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterIteration>()));
+    composite.set_main_painter(VertexPainterWrapper(std::make_shared<VertexPainterIteration>()));
     composite.set_child_painters({constant_wrapper, radial_wrapper, linear_wrapper, sequential_wrapper});
     composite.paint_vertices(grid,
                              vertices.iterations,
@@ -498,30 +479,25 @@ TEST(VertexPainter, CompositeSerialization)
     std::array<sf::Color, 2> colors1 {sf::Color::Green, sf::Color::Blue};
     std::array<sf::Color, 2> colors2 {sf::Color::Yellow, sf::Color::Magenta};
     std::array<sf::Color, 2> colors3 {sf::Color::Cyan, sf::Color::White};
-    auto constant_gen =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper constant_gen (
             std::make_shared<ConstantColor>(color));
-    auto discrete_gen1 =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper discrete_gen1(
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors1[0], 0}, {colors1[1], 1}})));
-    auto discrete_gen2 =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper discrete_gen2 (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors2[0], 0}, {colors2[1], 1}})));
-    auto discrete_gen3 =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper discrete_gen3 (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors3[0], 0}, {colors3[1], 1}})));
 
-    auto constant_wrapper = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterConstant>(constant_gen));
-    auto radial_wrapper = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterRadial>(discrete_gen1));
-    auto linear_painter = std::make_shared<VertexPainterLinear>(discrete_gen2);
-    auto linear_wrapper = std::make_shared<VertexPainterWrapper>(linear_painter);
-    auto sequential_wrapper = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterSequential>(discrete_gen3));
+    VertexPainterWrapper constant_wrapper (std::make_shared<VertexPainterConstant>(constant_gen));
+    VertexPainterWrapper radial_wrapper (std::make_shared<VertexPainterRadial>(discrete_gen1));
+    VertexPainterWrapper linear_wrapper (std::make_shared<VertexPainterLinear>(discrete_gen2));
+    VertexPainterWrapper sequential_wrapper (std::make_shared<VertexPainterSequential>(discrete_gen3));
 
     VertexPainterComposite ocomposite;
-    ocomposite.set_main_painter(std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterIteration>()));
+    ocomposite.set_main_painter(VertexPainterWrapper(std::make_shared<VertexPainterIteration>()));
     ocomposite.set_child_painters({constant_wrapper, radial_wrapper, linear_wrapper, sequential_wrapper});
     VertexPainterComposite icomposite;
 
@@ -561,21 +537,18 @@ TEST(VertexPainter, CompositeSerialization)
 TEST(VertexPainter, PolymorphicSerialization)
 {
     std::array<sf::Color, vertices.grid_size> colors1 {sf::Color::Red, sf::Color::Blue, sf::Color::Yellow, sf::Color::Green};
-    auto colors_gen1 =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper colors_gen1 (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors1[0], 0}, {colors1[1], 1}, {colors1[2], 2},{colors1[3], 3}})));
     auto orandom = std::make_shared<VertexPainterRandom>(colors_gen1);
     orandom->set_block_size(vertices.grid_size);
 
-    auto colors2 =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper colors2 (
             std::make_shared<ConstantColor>(sf::Color::Red));
     auto oconstant = std::make_shared<VertexPainterConstant>(colors2);
 
     std::array<sf::Color, vertices.grid_size> colors3 {sf::Color::Red, sf::Color::Blue, sf::Color::Green};
-    auto colors_gen3 =
-        std::make_shared<ColorGeneratorWrapper>(
+    ColorGeneratorWrapper colors_gen3 (
             std::make_shared<DiscreteGradient>(
                 DiscreteGradient::keys({{colors3[0], 0}, {colors3[1], 1}, {colors3[2], 2}})));
     auto olinear = std::make_shared<VertexPainterLinear> (colors_gen3);

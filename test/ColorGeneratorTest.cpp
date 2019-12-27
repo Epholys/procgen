@@ -8,12 +8,12 @@ using namespace colors;
 TEST(ColorGeneratorTest, color_serialization)
 {
     std::stringstream ss;
-    
+
     sf::Color color (0x11, 0x22, 0x33, 0x44);
     std::string expected_str = "#11223344";
     // Unused generic archive
     cereal::JSONOutputArchive ar (ss);
-    
+
     auto tested_str = cereal::save_minimal(ar, color);
     ASSERT_EQ(expected_str, tested_str);
 
@@ -285,7 +285,7 @@ TEST(ColorGeneratorTest, discrete_move_ctor)
     ASSERT_EQ(keys, d_moved.get_keys());
 }
 TEST(ColorGeneratorTest, discrete_moved)
-{ 
+{
     DiscreteGradient::keys keys {{sf::Color::Blue, 0}, {sf::Color::Red, 2}};
     DiscreteGradient d {keys};
     DiscreteGradient d_moved {{{sf::Color::Yellow, 0},{sf::Color::Magenta, 1}}};
@@ -387,7 +387,7 @@ TEST(ColorGeneratorTest, polymorphic_serialization)
         cereal::JSONOutputArchive oarchive_constant (ss_constant);
         cereal::JSONOutputArchive oarchive_linear (ss_linear);
         cereal::JSONOutputArchive oarchive_gradient (ss_discrete);
-        
+
         ColorGeneratorSerializer serializer_constant (oconstant);
         ColorGeneratorSerializer serializer_linear (olinear);
         ColorGeneratorSerializer serializer_discrete (odiscrete);
@@ -421,75 +421,58 @@ TEST(ColorGeneratorTest, polymorphic_serialization)
 
 //------------------------------------------------------------
 
-class Obs : public Observer<ColorGeneratorWrapper>
-{
-public:
-    using O = Observer<ColorGeneratorWrapper>;
+// Wrappers does not have shared_ptr anymore, there is no sense
+// TEST(ColorGeneratorTest, wrapper_ctor)
+// {
+//     ConstantColor generator (sf::Color::Red);
+//     ColorGeneratorWrapper wrapper (generator);
+//     ASSERT_EQ(generator.get(), wrapper.unwrap().get());
+// }
+// TEST(ColorGeneratorTest, wrapper_copy_ctor)
+// {
+//     auto generator = std::make_shared<ConstantColor>(sf::Color::Red);
+//     ColorGeneratorWrapper wrapper (generator);
+//     ColorGeneratorWrapper wrapper_copy (wrapper);
+//     ASSERT_NE(wrapper.unwrap().get(), wrapper_copy.unwrap().get());
 
-    explicit Obs(std::shared_ptr<ColorGeneratorWrapper> wrapper)
-        : O{wrapper}
-        {add_callback( [this](){ ++notify_count; });}
+//     auto constant = std::dynamic_pointer_cast<ConstantColor>(wrapper_copy.unwrap());
+//     ASSERT_TRUE(constant);
+//     ASSERT_EQ(generator->get_color(), constant->get_color());
+// }
+// TEST(ColorGeneratorTest, wrapper_assigned)
+// {
+//     auto generator = std::make_shared<ConstantColor>(sf::Color::Red);
+//     ColorGeneratorWrapper wrapper (generator);
+//     ColorGeneratorWrapper wrapper_assigned;
+//     wrapper_assigned = wrapper;
+//     ASSERT_NE(wrapper.unwrap().get(), wrapper_assigned.unwrap().get());
 
-    operator bool() const
-        {
-            return notify_count == 1;
-        }
+//     auto constant = std::dynamic_pointer_cast<ConstantColor>(wrapper_assigned.unwrap());
+//     ASSERT_TRUE(constant);
+//     ASSERT_EQ(generator->get_color(), constant->get_color());
+// }
+// TEST(ColorGeneratorTest, wrapper_moved_ctor)
+// {
+//     auto generator = std::make_shared<ConstantColor>(sf::Color::Red);
+//     ColorGeneratorWrapper wrapper (generator);
+//     ColorGeneratorWrapper wrapper_moved (std::move(wrapper));
+//     ASSERT_EQ(generator.get(), wrapper_moved.unwrap().get());
+// }
+// TEST(ColorGeneratorTest, wrapper_moved)
+// {
+//     auto generator = std::make_shared<ConstantColor>(sf::Color::Red);
+//     ColorGeneratorWrapper wrapper (generator);
+//     ColorGeneratorWrapper wrapper_moved;
+//     wrapper_moved = std::move(wrapper);
+//     ASSERT_EQ(generator.get(), wrapper_moved.unwrap().get());
+// }
 
-private:
-    int notify_count {0};
-};
-    
-TEST(ColorGeneratorTest, wrapper_ctor)
-{
-    auto generator = std::make_shared<ConstantColor>(sf::Color::Red);
-    ColorGeneratorWrapper wrapper (generator);
-    ASSERT_EQ(generator.get(), wrapper.unwrap().get());
-}
-TEST(ColorGeneratorTest, wrapper_copy_ctor)
-{
-    auto generator = std::make_shared<ConstantColor>(sf::Color::Red);
-    ColorGeneratorWrapper wrapper (generator);
-    ColorGeneratorWrapper wrapper_copy (wrapper);
-    ASSERT_NE(wrapper.unwrap().get(), wrapper_copy.unwrap().get());
-
-    auto constant = std::dynamic_pointer_cast<ConstantColor>(wrapper_copy.unwrap());
-    ASSERT_TRUE(constant);
-    ASSERT_EQ(generator->get_color(), constant->get_color());
-}
-TEST(ColorGeneratorTest, wrapper_assigned)
-{
-    auto generator = std::make_shared<ConstantColor>(sf::Color::Red);
-    ColorGeneratorWrapper wrapper (generator);
-    ColorGeneratorWrapper wrapper_assigned;
-    wrapper_assigned = wrapper;
-    ASSERT_NE(wrapper.unwrap().get(), wrapper_assigned.unwrap().get());
-
-    auto constant = std::dynamic_pointer_cast<ConstantColor>(wrapper_assigned.unwrap());
-    ASSERT_TRUE(constant);
-    ASSERT_EQ(generator->get_color(), constant->get_color());
-}
-TEST(ColorGeneratorTest, wrapper_moved_ctor)
-{
-    auto generator = std::make_shared<ConstantColor>(sf::Color::Red);
-    ColorGeneratorWrapper wrapper (generator);
-    ColorGeneratorWrapper wrapper_moved (std::move(wrapper));
-    ASSERT_EQ(generator.get(), wrapper_moved.unwrap().get());
-}
-TEST(ColorGeneratorTest, wrapper_moved)
-{
-    auto generator = std::make_shared<ConstantColor>(sf::Color::Red);
-    ColorGeneratorWrapper wrapper (generator);
-    ColorGeneratorWrapper wrapper_moved;
-    wrapper_moved = std::move(wrapper);
-    ASSERT_EQ(generator.get(), wrapper_moved.unwrap().get());
-}
-
-TEST(ColorGeneratorTest, wrapper_wrap)
-{
-    auto generator = std::make_shared<ConstantColor>(sf::Color::Red);
-    auto wrapper = std::make_shared<ColorGeneratorWrapper>();
-    Obs observer (wrapper);
-    wrapper->wrap(generator);
-    ASSERT_EQ(generator.get(), wrapper->unwrap().get());
-    ASSERT_TRUE(observer);
-}
+// TEST(ColorGeneratorTest, wrapper_wrap)
+// {
+//     auto generator = std::make_shared<ConstantColor>(sf::Color::Red);
+//     auto wrapper = std::make_shared<ColorGeneratorWrapper>();
+//     Obs observer (wrapper);
+//     wrapper->wrap(generator);
+//     ASSERT_EQ(generator.get(), wrapper->unwrap().get());
+//     ASSERT_TRUE(observer);
+// }
