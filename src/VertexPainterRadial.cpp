@@ -14,7 +14,7 @@ namespace colors
     {
     }
 
-    VertexPainterRadial::VertexPainterRadial(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+    VertexPainterRadial::VertexPainterRadial(const ColorGeneratorWrapper& wrapper)
         : VertexPainter{wrapper}
         , center_{.5,.5}
         , display_helper_{true}
@@ -55,11 +55,7 @@ namespace colors
                                              int,
                                              sf::FloatRect bounding_box)
     {
-        auto generator = generator_->unwrap();
-        if (!generator)
-        {
-            return;
-        }
+        auto generator = generator_.unwrap();
 
         // Get center coordinates relative to the 'center_'.
         sf::Vector2f relative_center {bounding_box.left + bounding_box.width * center_.x,

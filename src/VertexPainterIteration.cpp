@@ -8,7 +8,7 @@ namespace colors
     {
     }
 
-    VertexPainterIteration::VertexPainterIteration(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+    VertexPainterIteration::VertexPainterIteration(const ColorGeneratorWrapper& wrapper)
         : VertexPainter{wrapper}
     {
     }
@@ -27,7 +27,7 @@ namespace colors
     {
         Expects(vertices.size() == vertices_iteration.size());
 
-        auto generator = generator_->unwrap();
+        auto generator = generator_.unwrap();
         if (!generator)
         {
             return;

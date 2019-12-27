@@ -22,10 +22,10 @@ namespace colors
 
         sf::Color ColorGeneratorComposite::get(float f)
         {
-            // OPTIMIZATION
+            // OPTIMIZATION TODO
             // // Should never happen.
-            // Expects(painter_);
-            // Expects(!painter_->vertex_indices_pools_.empty());
+            Expects(painter_);
+            Expects(!painter_->vertex_indices_pools_.empty());
             // END
 
             // We do not clamp to 1 as it would be an out-of-bound call. So we clamp
@@ -68,17 +68,15 @@ namespace colors
         : VertexPainter{}
         , color_distributor_{std::make_shared<impl::ColorGeneratorComposite>(this)}
         , main_painter_{
-            std::make_shared<VertexPainterWrapper>(
                 std::make_shared<VertexPainterLinear>(
-                    std::make_shared<ColorGeneratorWrapper>(color_distributor_)))
-                }
+                    ColorGeneratorWrapper(color_distributor_))}
         , vertex_indices_pools_{}
         , child_painters_{}
     {
-        child_painters_.emplace_back(std::make_shared<VertexPainterWrapper>());
+        child_painters_.emplace_back(VertexPainterWrapper());
     }
 
-    VertexPainterComposite::VertexPainterComposite(const std::shared_ptr<ColorGeneratorWrapper>)
+    VertexPainterComposite::VertexPainterComposite(const ColorGeneratorWrapper&)
         : VertexPainterComposite{}
     {
     }
@@ -87,10 +85,8 @@ namespace colors
     {
         auto clone = std::make_shared<VertexPainterComposite>();
 
-        auto composite_color_wrapper = std::make_shared<ColorGeneratorWrapper>(clone->color_distributor_);
         auto main_painter_clone = main_painter_;
-        main_painter_clone->unwrap()->set_generator_wrapper(composite_color_wrapper);
-        clone->main_painter_ = main_painter_clone;
+        clone->set_main_painter(main_painter_clone);
 
 
         clone->child_painters_.clear();
@@ -105,17 +101,25 @@ namespace colors
         return clone;
     }
 
-    std::vector<std::shared_ptr<VertexPainterWrapper>> VertexPainterComposite::get_child_painters() const
+    const std::vector<VertexPainterWrapper>& VertexPainterComposite::get_child_painters() const
+    {
+        return child_painters_;
+    }
+    std::vector<VertexPainterWrapper>& VertexPainterComposite::ref_child_painters()
     {
         return child_painters_;
     }
 
-    std::shared_ptr<VertexPainterWrapper> VertexPainterComposite::get_main_painter() const
+    const VertexPainterWrapper& VertexPainterComposite::get_main_painter() const
+    {
+        return main_painter_;
+    }
+    VertexPainterWrapper& VertexPainterComposite::ref_main_painter()
     {
         return main_painter_;
     }
 
-    void VertexPainterComposite::set_main_painter(std::shared_ptr<VertexPainterWrapper> painter_wrapper)
+    void VertexPainterComposite::set_main_painter(const VertexPainterWrapper& painter_wrapper)
     {
         // Hack, as 'color_distributor_' will be called by the 'notify()' of the
         // 'wrap()' method of 'painter_wrapper'.
@@ -126,14 +130,14 @@ namespace colors
             vertex_indices_pools_.push_back({});
         }
 
-        auto painter = painter_wrapper->unwrap();
-        painter->ref_generator_wrapper()->wrap(color_distributor_);
-        main_painter_->wrap(painter);
+        auto painter = painter_wrapper.unwrap();
+        painter->ref_generator_wrapper().wrap(color_distributor_);
+        main_painter_.wrap(painter);
         indicate_modification();
     }
 
 
-    void VertexPainterComposite::set_child_painters(const std::vector<std::shared_ptr<VertexPainterWrapper>> painters)
+    void VertexPainterComposite::set_child_painters(const std::vector<VertexPainterWrapper>& painters)
     {
         child_painters_.clear();
         for (const auto& painter : painters)
@@ -163,11 +167,11 @@ namespace colors
         }
 
         // Fill the pools by making paint the main painter through 'color_distributor_'.
-        main_painter_->unwrap()->paint_vertices(vertices,
-                                                iteration_of_vertices,
-                                                transparent,
-                                                max_recursion,
-                                                bounding_box);
+        main_painter_.unwrap()->paint_vertices(vertices,
+                                               iteration_of_vertices,
+                                               transparent,
+                                               max_recursion,
+                                               bounding_box);
 
 #ifdef DEBUG_CHECKS
         for(auto i=0ull; i<child_painters_.size(); ++i)
@@ -188,11 +192,11 @@ namespace colors
                 iteration_of_vertices_part.push_back(iteration_of_vertices.at(idx));
                 transparent_part.push_back(transparent.at(idx));
             }
-            child_painters_.at(i)->unwrap()->paint_vertices(vertices_part,
-                                                            iteration_of_vertices_part,
-                                                            transparent_part,
-                                                            max_recursion,
-                                                            bounding_box);
+            child_painters_.at(i).unwrap()->paint_vertices(vertices_part,
+                                                           iteration_of_vertices_part,
+                                                           transparent_part,
+                                                           max_recursion,
+                                                           bounding_box);
             for (auto j=0ull; j<vertices_part.size(); ++j)
             {
                 vertices.at(vertex_indices_pools_.at(i).at(j)) = vertices_part.at(j);
@@ -217,11 +221,11 @@ namespace colors
                 iteration_of_vertices_part.push_back(iteration_of_vertices[idx]);
                 transparent_part.push_back(transparent[idx]);
             }
-            child_painters_[i]->unwrap()->paint_vertices(vertices_part,
-                                                         iteration_of_vertices_part,
-                                                         transparent_part,
-                                                         max_recursion,
-                                                         bounding_box);
+            child_painters_[i].unwrap()->paint_vertices(vertices_part,
+                                                        iteration_of_vertices_part,
+                                                        transparent_part,
+                                                        max_recursion,
+                                                        bounding_box);
             for (auto j=0ull; j<vertices_part.size(); ++j)
             {
                 vertices[vertex_indices_pools_[i][j]] = vertices_part[j];
@@ -232,10 +236,10 @@ namespace colors
 
     void VertexPainterComposite::supplementary_drawing(sf::FloatRect bounding_box) const
     {
-        main_painter_->unwrap()->supplementary_drawing(bounding_box);
+        main_painter_.unwrap()->supplementary_drawing(bounding_box);
         for (const auto& painter : child_painters_)
         {
-            painter->unwrap()->supplementary_drawing(bounding_box);
+            painter.unwrap()->supplementary_drawing(bounding_box);
         }
     }
 
@@ -262,10 +266,10 @@ namespace colors
     bool VertexPainterComposite::poll_modification()
     {
         bool modified = VertexPainter::poll_modification();
-        modified |= main_painter_->poll_modification();
+        modified |= main_painter_.poll_modification();
         for (auto& painter : child_painters_)
         {
-            modified |= painter->poll_modification();
+            modified |= painter.poll_modification();
         }
         return modified;
     }

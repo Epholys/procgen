@@ -26,7 +26,7 @@ namespace colors
     public:
         VertexPainter(); // Create a default generator
         virtual ~VertexPainter() {};
-        explicit VertexPainter(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        explicit VertexPainter(const ColorGeneratorWrapper& wrapper);
         // Delete the copy/move constructors to avoid slicing
         VertexPainter(const VertexPainter&) = delete;
         VertexPainter(VertexPainter&&) = delete;
@@ -38,9 +38,9 @@ namespace colors
         virtual std::shared_ptr<VertexPainter> clone() const = 0;
 
         // Getters/Setters
-        std::shared_ptr<const ColorGeneratorWrapper> get_generator_wrapper() const;
-        std::shared_ptr<ColorGeneratorWrapper> ref_generator_wrapper() const;
-        void set_generator_wrapper(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper);
+        const ColorGeneratorWrapper& get_generator_wrapper() const;
+        ColorGeneratorWrapper& ref_generator_wrapper();
+        void set_generator_wrapper(const ColorGeneratorWrapper& color_generator_wrapper);
 
         // Method to be called every frame to draw some helper visuals.
         // 'bounding_box' is the only necessary information for now, but all
@@ -61,7 +61,7 @@ namespace colors
         virtual bool poll_modification() override;
 
     protected:
-        std::shared_ptr<ColorGeneratorWrapper> generator_;
+        ColorGeneratorWrapper generator_;
     };
 }
 

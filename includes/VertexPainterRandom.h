@@ -13,7 +13,7 @@ namespace colors
     {
     public:
         VertexPainterRandom(); // Create a default generator
-        explicit VertexPainterRandom(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        explicit VertexPainterRandom(const ColorGeneratorWrapper& wrapper);
         virtual ~VertexPainterRandom() {}
         // This class is mainly used polymorphic-ally, so deleting these
         // constructors saved some LoC so potential bugs.
@@ -60,7 +60,7 @@ namespace colors
                 //    cereal::make_nvp("ColorGenerator", get_generator_wrapper()->unwrap()));
                 ar(cereal::make_nvp("block_size", block_size_));
 
-                auto color_generator = get_generator_wrapper()->unwrap();
+                auto color_generator = get_generator_wrapper().unwrap();
                 auto serializer = ColorGeneratorSerializer(color_generator);
                 ar(cereal::make_nvp("ColorGenerator", serializer));
             }
@@ -77,7 +77,7 @@ namespace colors
 
                 ColorGeneratorSerializer serializer;
                 ar(cereal::make_nvp("ColorGenerator", serializer));
-                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));
+                set_generator_wrapper(ColorGeneratorWrapper(serializer.get_serialized()));
             }
     };
 }

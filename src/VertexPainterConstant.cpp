@@ -7,7 +7,7 @@ namespace colors
     {
     }
 
-    VertexPainterConstant::VertexPainterConstant(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+    VertexPainterConstant::VertexPainterConstant(const ColorGeneratorWrapper& wrapper)
         : VertexPainter{wrapper}
     {
     }
@@ -25,12 +25,7 @@ namespace colors
                                                sf::FloatRect)
 
     {
-        if (!generator_)
-        {
-            return;
-        }
-
-        auto generator = generator_->unwrap();
+        auto generator = generator_.unwrap();
 
 #ifdef DEBUG_CHECKS
         for (auto i=0ull; i<vertices.size(); ++i)

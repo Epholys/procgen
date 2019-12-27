@@ -11,7 +11,7 @@ namespace colors
     {
     }
 
-    VertexPainterRandom::VertexPainterRandom(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+    VertexPainterRandom::VertexPainterRandom(const ColorGeneratorWrapper& wrapper)
         : VertexPainter{wrapper}
         , block_size_{1}
         , random_seed_(math::random_dev())
@@ -57,11 +57,7 @@ namespace colors
                                              sf::FloatRect)
 
     {
-        auto generator = generator_->unwrap();
-        if (!generator)
-        {
-            return;
-        }
+        auto generator = generator_.unwrap();
 
         random_generator_.seed(random_seed_);
 

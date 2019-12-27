@@ -15,7 +15,7 @@ namespace colors
     {
     }
 
-    VertexPainterLinear::VertexPainterLinear(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+    VertexPainterLinear::VertexPainterLinear(const ColorGeneratorWrapper& wrapper)
         : VertexPainter{wrapper}
         , angle_{0}
         , display_helper_{true}
@@ -54,11 +54,7 @@ namespace colors
                                              int,
                                              sf::FloatRect bounding_box)
     {
-        auto generator = generator_->unwrap();
-        if (!generator)
-        {
-            return;
-        }
+        auto generator = generator_.unwrap();
 
         // Find the two points on the bounding boxes that intersect the axis.
         sf::Vector2f direction = {float(std::cos(math::degree_to_rad(angle_))),

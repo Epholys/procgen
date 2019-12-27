@@ -9,7 +9,7 @@ namespace colors
     {
     }
 
-    VertexPainterSequential::VertexPainterSequential(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+    VertexPainterSequential::VertexPainterSequential(const ColorGeneratorWrapper& wrapper)
         : VertexPainter{wrapper}
         , factor_{1}
     {
@@ -41,11 +41,7 @@ namespace colors
                                                  sf::FloatRect)
 
     {
-        auto generator = generator_->unwrap();
-        if (!generator)
-        {
-            return;
-        }
+        auto generator = generator_.unwrap();
 
         auto size = vertices.size();
         for (auto i = 0ull; i < vertices.size(); ++i)

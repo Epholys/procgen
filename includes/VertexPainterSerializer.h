@@ -21,13 +21,13 @@
 namespace colors
 {
     class VertexPainterComposite;
-    
+
     // Helper class to serialize polymorphic classes VertexPainters.
     // cereal can handle the case of serializing and deserializing polymorphic
     // calsses. However, the end result is not "pretty", meaning that generating
     // save files becomes complicated. As such, this class implements (in a dirty way)
     // the following format:
-    // 
+    //
     // VertexPainter": {
     //     "cereal_class_version": 0,
     //     "type": "ConstantColor",
@@ -56,10 +56,10 @@ namespace colors
         VertexPainterSerializer(VertexPainterSerializer&& other) = default;
         VertexPainterSerializer& operator=(const VertexPainterSerializer& other) = default;
         VertexPainterSerializer& operator=(VertexPainterSerializer&& other) = default;
-        
+
         // Getter
         std::shared_ptr<VertexPainter> get_serialized() const;
-        
+
     private:
         friend class cereal::access;
         template<class Archive>
@@ -68,7 +68,7 @@ namespace colors
                 Expects(serialized_);
 
                 u32 version = 0; // ignored
-                
+
                 std::string type = serialized_->type_name();
                 ar(cereal::make_nvp("type", type));
 
@@ -94,7 +94,7 @@ namespace colors
                 SERIALIZE_PAINTER_CHILD(VertexPainterComposite);
 #undef SERIALIZE_PAINTER_CHILD
             }
-    
+
         template<class Archive>
         void load(Archive& ar, const u32)
             {
@@ -102,7 +102,7 @@ namespace colors
 
                 std::string type;
                 ar(cereal::make_nvp("type", type));
-            
+
 #define DESERIALIZE_PAINTER_CHILD(Child)                               \
                 do {                                                    \
                     if (type == #Child)                                 \
@@ -113,7 +113,7 @@ namespace colors
                     }                                                   \
                 }                                                       \
                 while(false)
-            
+
                 DESERIALIZE_PAINTER_CHILD(VertexPainterConstant);
                 DESERIALIZE_PAINTER_CHILD(VertexPainterIteration);
                 DESERIALIZE_PAINTER_CHILD(VertexPainterLinear);

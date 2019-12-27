@@ -3,24 +3,24 @@
 namespace colors
 {
     VertexPainter::VertexPainter()
-        : generator_{std::make_shared<ColorGeneratorWrapper>()}
+        : generator_{}
     {
     }
 
-    VertexPainter::VertexPainter(const std::shared_ptr<ColorGeneratorWrapper> wrapper)
+    VertexPainter::VertexPainter(const ColorGeneratorWrapper& wrapper)
         : generator_{wrapper}
     {
     }
 
-    std::shared_ptr<const ColorGeneratorWrapper> VertexPainter::get_generator_wrapper() const
+    const ColorGeneratorWrapper& VertexPainter::get_generator_wrapper() const
     {
         return generator_;
     }
-    std::shared_ptr<ColorGeneratorWrapper> VertexPainter::ref_generator_wrapper() const
+    ColorGeneratorWrapper& VertexPainter::ref_generator_wrapper()
     {
         return generator_;
     }
-    void VertexPainter::set_generator_wrapper(std::shared_ptr<ColorGeneratorWrapper> color_generator_wrapper)
+    void VertexPainter::set_generator_wrapper(const ColorGeneratorWrapper& color_generator_wrapper)
     {
         generator_ = color_generator_wrapper;
         indicate_modification();
@@ -32,6 +32,6 @@ namespace colors
 
     bool VertexPainter::poll_modification()
     {
-        return Indicator::poll_modification() | generator_->poll_modification();
+        return Indicator::poll_modification() | generator_.poll_modification();
     }
 }

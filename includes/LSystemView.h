@@ -226,7 +226,6 @@ namespace procgui
                    cereal::make_nvp("Interpretation Map", map),
                    cereal::make_nvp("VertexPainter", painter_serializer));
 
-
                 *this = LSystemView(name,
                                     lsys,
                                     map,

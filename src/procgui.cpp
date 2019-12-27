@@ -364,8 +364,8 @@ namespace
 {
     void interact_with(colors::VertexPainterConstant& painter)
     {
-        ImGui::Text("Paint all the vertices in the same color.");
-        ::procgui::interact_with(*painter.ref_generator_wrapper(), "Colors",
+        ImGui::Text("Paint all th vertices in the same color.");
+        ::procgui::interact_with(painter.ref_generator_wrapper(), "Colors",
                                  ::procgui::color_wrapper_mode::CONSTANT);
     }
     void interact_with(colors::VertexPainterLinear& painter, bool from_composite=false)
@@ -388,7 +388,7 @@ namespace
 
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.ref_generator_wrapper(), "Colors",
+            ::procgui::interact_with(painter.ref_generator_wrapper(), "Colors",
                                      ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
@@ -414,7 +414,7 @@ namespace
 
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.ref_generator_wrapper(), "Colors",
+            ::procgui::interact_with(painter.ref_generator_wrapper(), "Colors",
                                      ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
@@ -443,7 +443,7 @@ namespace
 
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.ref_generator_wrapper(), "Colors",
+            ::procgui::interact_with(painter.ref_generator_wrapper(), "Colors",
                                      ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
@@ -464,7 +464,7 @@ namespace
 
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.ref_generator_wrapper(), "Colors",
+            ::procgui::interact_with(painter.ref_generator_wrapper(), "Colors",
                                      ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
@@ -475,7 +475,7 @@ namespace
 
         if (!from_composite)
         {
-            ::procgui::interact_with(*painter.ref_generator_wrapper(), "Colors",
+            ::procgui::interact_with(painter.ref_generator_wrapper(), "Colors",
                                      ::procgui::color_wrapper_mode::GRADIENTS);
         }
     }
@@ -487,11 +487,11 @@ namespace
         ImGui::PushID(nested_id++);
 
         static std::string child_title = "";
-        child_title += "-- " + painter.get_main_painter()->unwrap()->type_name() + " ";
+        child_title += "-- " + painter.get_main_painter().unwrap()->type_name() + " ";
 
         // ImGui's ID for the several child painters.
         int index = 0;
-        auto child_painters = painter.get_child_painters();
+        auto& child_painters = painter.ref_child_painters();
         // If set, 'to_remove' points to the child painter to remove.
         auto to_remove = end(child_painters);
         // If set, 'to_add' points to the position in which to add a painter.
@@ -532,7 +532,7 @@ namespace
 
             // Interact with this child painter.
             push_embedded();
-            ::procgui::interact_with(**it, child_title);
+            ::procgui::interact_with(*it, child_title);
             pop_embedded();
 
             ImGui::Separator();
@@ -562,7 +562,7 @@ namespace
             ::ext::ImGui::PushStyleColoredButton<ext::ImGui::Purple>();
             if (ImGui::Button("Copy previous Painter"))
             {
-                colors::VertexPainterComposite::save_painter((*it)->unwrap());
+                colors::VertexPainterComposite::save_painter(it->unwrap());
             }
             ImGui::PopStyleColor(3);
 
@@ -589,24 +589,27 @@ namespace
         if (to_remove != end(child_painters))
         {
             child_painters.erase(to_remove);
-            painter.set_child_painters(child_painters);
+            std::vector<colors::VertexPainterWrapper> copy = child_painters;
+            painter.set_child_painters(copy);
         }
         // Add a new painter if necessary.
         else if (add_new_painter)
         {
-            child_painters.insert(to_add, std::make_shared<colors::VertexPainterWrapper>());
-            painter.set_child_painters(child_painters);
+            child_painters.insert(to_add, colors::VertexPainterWrapper());
+            std::vector<colors::VertexPainterWrapper> copy = child_painters;
+            painter.set_child_painters(copy);
         }
         // Paste the copied painter if necessary.
         else if (add_copied_painter)
         {
             child_painters.insert(to_add,
-                                  std::make_shared<colors::VertexPainterWrapper>(colors::VertexPainterComposite::get_copied_painter()));
-            painter.set_child_painters(child_painters);
+                                  colors::VertexPainterWrapper(colors::VertexPainterComposite::get_copied_painter()));
+            std::vector<colors::VertexPainterWrapper> copy = child_painters;
+            painter.set_child_painters(copy);
         }
 
         nested_id--;
-        const auto name = painter.get_main_painter()->unwrap()->type_name();
+        const auto name = painter.get_main_painter().unwrap()->type_name();
         const auto where = child_title.rfind(name);
         Expects(where != std::string::npos);
         child_title.erase(where-3, name.size() + 4); //"-- "=3 + name + " "=1
@@ -619,16 +622,16 @@ namespace
                                    int index,
                                    int old_index)
     {
-        std::shared_ptr<colors::ColorGeneratorWrapper> next_generator;
+        colors::ColorGeneratorWrapper next_generator;
         if (index == 0)
         {
             auto default_generator = std::make_shared<colors::ConstantColor>();
-            next_generator = std::make_shared<colors::ColorGeneratorWrapper>(default_generator);
+            next_generator = colors::ColorGeneratorWrapper(default_generator);
         }
         else if (index != 0 && old_index == 0)
         {
             auto default_generator = std::make_shared<colors::LinearGradient>();
-            next_generator = std::make_shared<colors::ColorGeneratorWrapper>(default_generator);
+            next_generator = colors::ColorGeneratorWrapper(default_generator);
         }
         else
         {
@@ -750,8 +753,8 @@ namespace procgui
             // 'composite'. 'painter' now refers to the main painter of
             // 'composite'.
             composite = std::dynamic_pointer_cast<colors::VertexPainterComposite>(painter);
-            index = ::vertex_painter_list(*(composite->get_main_painter()));
-            painter = composite->get_main_painter()->unwrap();
+            index = ::vertex_painter_list(composite->ref_main_painter());
+            painter = composite->get_main_painter().unwrap();
         }
         else
         {
@@ -780,14 +783,14 @@ namespace procgui
                 // A new VertexPainterComposite is created and refered by
                 // 'composite'. 'painter' is now the main painter of 'composite'.
                 composite = std::make_shared<colors::VertexPainterComposite>();
-                composite->set_main_painter(std::make_shared<colors::VertexPainterWrapper>(painter));
+                composite->set_main_painter(colors::VertexPainterWrapper(painter));
                 painter_wrapper.wrap(composite);
             }
             if (remove_composite)
             {
                 // The main painter of 'composite' is promoted as the real painter.
                 auto default_generator = std::make_shared<colors::LinearGradient>();
-                painter->set_generator_wrapper(std::make_shared<colors::ColorGeneratorWrapper>(default_generator));
+                painter->set_generator_wrapper(colors::ColorGeneratorWrapper(default_generator));
                 painter_wrapper.wrap(painter);
                 composite.reset();
             }

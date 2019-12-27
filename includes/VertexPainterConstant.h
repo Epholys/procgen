@@ -11,7 +11,7 @@ namespace colors
     {
     public:
         VertexPainterConstant(); // Create a default generator
-        explicit VertexPainterConstant(const std::shared_ptr<ColorGeneratorWrapper> wrapper);
+        explicit VertexPainterConstant(const ColorGeneratorWrapper& wrapper);
         virtual ~VertexPainterConstant() {}
         // This class is mainly used polymorphic-ally, so deleting these
         // constructors saved some LoC so potential bugs.
@@ -38,7 +38,7 @@ namespace colors
         template<class Archive>
         void save(Archive& ar, const u32) const
             {
-                auto color_generator = get_generator_wrapper()->unwrap();
+                auto color_generator = get_generator_wrapper().unwrap();
                 auto serializer = ColorGeneratorSerializer(color_generator);
                 ar(cereal::make_nvp("ColorGenerator", serializer));
             }
@@ -47,7 +47,7 @@ namespace colors
             {
                 ColorGeneratorSerializer serializer;
                 ar(cereal::make_nvp("ColorGenerator", serializer));
-                set_generator_wrapper(std::make_shared<ColorGeneratorWrapper>(serializer.get_serialized()));
+                set_generator_wrapper(ColorGeneratorWrapper(serializer.get_serialized()));
             }
     };
 }

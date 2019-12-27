@@ -98,18 +98,17 @@ int main(int argc, char* argv[])
                                       10.f,
                                       6);
 
-        auto constant_color_gen = std::make_shared<ColorGeneratorWrapper>(
-            std::make_shared<ConstantColor>(sf::Color(183,71,71,255)));
-        auto constant_painter = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterConstant>(constant_color_gen));
+        ColorGeneratorWrapper constant_color_gen (std::make_shared<ConstantColor>(sf::Color(183,71,71,255)));
+        VertexPainterWrapper constant_painter (std::make_shared<VertexPainterConstant>(constant_color_gen));
 
-        auto linear_color_gen = std::make_shared<ColorGeneratorWrapper>(
+        ColorGeneratorWrapper linear_color_gen(
             std::make_shared<LinearGradient>(LinearGradient::keys({{sf::Color(255,253,0,255), 0},
                                                                    {sf::Color(255,25,0,255), 1}})));
         auto sequential_painter = std::make_shared<VertexPainterSequential>(linear_color_gen);
         sequential_painter->set_factor(5);
-        auto sequential_painter_wrapper = std::make_shared<VertexPainterWrapper>(sequential_painter);
+        VertexPainterWrapper sequential_painter_wrapper(sequential_painter);
 
-        auto main_painter = std::make_shared<VertexPainterWrapper>(std::make_shared<VertexPainterIteration>());
+        VertexPainterWrapper main_painter (std::make_shared<VertexPainterIteration>());
 
         auto composite_painter = std::make_shared<VertexPainterComposite>();
         composite_painter->set_main_painter(main_painter);
@@ -337,7 +336,7 @@ void opt(int argc, char* argv[])
         params.set_n_iter(10);
         drawing::Turtle turtle (params);
         ConstantColor cc (sf::Color::Red);
-        auto wcc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<ConstantColor>(cc));
+        ColorGeneratorWrapper wcc (std::make_shared<ConstantColor>(cc));
         VertexPainterConstant vp (wcc);
 
         const auto& [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, rec, map, size.vertices_size);
@@ -363,7 +362,7 @@ void opt(int argc, char* argv[])
         auto map = drawing::default_interpretation_map;
         drawing::Turtle turtle (params);
         LinearGradient lc({{sf::Color::Red, 0}, {sf::Color::Blue, 1}});
-        auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
+        ColorGeneratorWrapper wlc (std::make_shared<LinearGradient>(lc));
         VertexPainterLinear vp (wlc);
         vp.set_angle(25);
         vp.set_display_flag(false);
@@ -394,7 +393,7 @@ void opt(int argc, char* argv[])
         drawing::Turtle turtle (params);
 
         LinearGradient lc({{sf::Color::Red, 0}, {sf::Color::Blue, 1}});
-        auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
+        ColorGeneratorWrapper wlc(std::make_shared<LinearGradient>(lc));
         VertexPainterRadial vr (wlc);
         vr.set_display_flag(false);
 
@@ -424,7 +423,7 @@ void opt(int argc, char* argv[])
         drawing::Turtle turtle (params);
 
         LinearGradient lc({{sf::Color::Red, 0}, {sf::Color::Blue, 1}});
-        auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
+        ColorGeneratorWrapper wlc(std::make_shared<LinearGradient>(lc));
         VertexPainterRandom vr (wlc);
         vr.set_block_size(500);
 
@@ -454,7 +453,7 @@ void opt(int argc, char* argv[])
         drawing::Turtle turtle (params);
 
         LinearGradient lc({{sf::Color::Red, 0}, {sf::Color::Blue, 1}});
-        auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
+        ColorGeneratorWrapper wlc (std::make_shared<LinearGradient>(lc));
         VertexPainterSequential vs (wlc);
         vs.set_factor(2);
 
@@ -484,7 +483,7 @@ void opt(int argc, char* argv[])
         drawing::Turtle turtle (params);
 
         LinearGradient lc({{sf::Color::Red, 0}, {sf::Color::Blue, 1}});
-        auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
+        ColorGeneratorWrapper wlc (std::make_shared<LinearGradient>(lc));
         VertexPainterIteration vi (wlc);
 
         const auto& [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, rec, map, size.vertices_size);
@@ -513,12 +512,10 @@ void opt(int argc, char* argv[])
         drawing::Turtle turtle (params);
 
         ConstantColor c (sf::Color::Red);
-        std::shared_ptr<VertexPainterWrapper> w =
-            std::make_shared<VertexPainterWrapper>(
+        VertexPainterWrapper w (
                 std::make_shared<VertexPainterConstant>(
-                    std::make_shared<ColorGeneratorWrapper>(
-                        std::make_shared<ConstantColor>(c))));
-        std::vector<std::shared_ptr<VertexPainterWrapper>> depth3 = {w, w, w};
+                    ColorGeneratorWrapper(std::make_shared<ConstantColor>(c))));
+        std::vector<VertexPainterWrapper> depth3 = {w, w, w};
 
         // auto wc2 =
         //     std::make_shared<VertexPainterWrapper>(
@@ -555,7 +552,7 @@ void opt(int argc, char* argv[])
         drawing::Turtle turtle (params);
 
         LinearGradient lc({{sf::Color::Red, 0}, {sf::Color::Green, 0.5}, {sf::Color::Yellow, 0.75}, {sf::Color::Blue, 1}});
-        auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<LinearGradient>(lc));
+        ColorGeneratorWrapper wlc(std::make_shared<LinearGradient>(lc));
         VertexPainterSequential vs (wlc);
 
         const auto& [vx, vx_iter, vx_tr] = turtle.compute_vertices(str, rec, map, size.vertices_size);
@@ -584,7 +581,7 @@ void opt(int argc, char* argv[])
         drawing::Turtle turtle (params);
 
         DiscreteGradient dc({{sf::Color::Red, 0}, {sf::Color::Blue, 500}, {sf::Color::Green, 1000}});
-        auto wlc = std::make_shared<ColorGeneratorWrapper>(std::make_shared<DiscreteGradient>(dc));
+        ColorGeneratorWrapper wlc (std::make_shared<DiscreteGradient>(dc));
         VertexPainterSequential vs (wlc);
         vs.set_factor(2);
 
