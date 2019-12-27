@@ -432,6 +432,10 @@ namespace procgui
         {
             size_safeguard();
         }
+        else if(painter_.poll_modification())
+        {
+            paint_vertices();
+        }
     }
 
     void LSystemView::draw(sf::RenderTarget &target)
