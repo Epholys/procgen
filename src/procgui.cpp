@@ -753,7 +753,9 @@ namespace procgui
             // 'composite'. 'painter' now refers to the main painter of
             // 'composite'.
             composite = std::dynamic_pointer_cast<colors::VertexPainterComposite>(painter);
-            index = ::vertex_painter_list(composite->ref_main_painter());
+            auto main = composite->get_main_painter();
+            index = ::vertex_painter_list(main);
+            composite->set_main_painter(main);
             painter = composite->get_main_painter().unwrap();
         }
         else
