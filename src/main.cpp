@@ -129,9 +129,9 @@ int main(int argc, char* argv[])
         views.emplace_back(std::move(loaded_view));
     }
 
+
     views.back().finish_loading();
     views.back().select();
-
 
     sf::Clock delta_clock;
     bool last_popup_open = false;

@@ -62,6 +62,9 @@ namespace colors
     {
         // Sanitize
         set_keys(keys);
+
+        // Little hack to avoid updating change at first creation
+        poll_modification();
     }
 
     const LinearGradient::keys& LinearGradient::get_keys() const

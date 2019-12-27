@@ -192,6 +192,9 @@ namespace colors
                     child_wrappers.push_back(VertexPainterWrapper(painter_serializer.get_serialized()));
                 }
                 set_child_painters(child_wrappers);
+
+                // Little hack to avoid updating change at first creation
+                poll_modification();
             }
 
         friend class cereal::access;

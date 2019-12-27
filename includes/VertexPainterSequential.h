@@ -71,7 +71,10 @@ namespace colors
 
                 ColorGeneratorSerializer serializer;
                 ar(cereal::make_nvp("ColorGenerator", serializer));
-                set_generator_wrapper(ColorGeneratorWrapper(serializer.get_serialized()));
+                std::shared_ptr<ColorGenerator> ser = serializer.get_serialized();
+                std::cout << "after get " << poll_modification() << "\n";
+                generator_ = ColorGeneratorWrapper(ser);
+                std::cout << "after assign " << poll_modification() << "\n";
             }
     };
 }

@@ -77,7 +77,7 @@ namespace colors
 
                 ColorGeneratorSerializer serializer;
                 ar(cereal::make_nvp("ColorGenerator", serializer));
-                set_generator_wrapper(ColorGeneratorWrapper(serializer.get_serialized()));
+                generator_ = ColorGeneratorWrapper(serializer.get_serialized());
             }
     };
 }

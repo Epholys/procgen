@@ -231,7 +231,6 @@ namespace procgui
                                     map,
                                     parameters_,
                                     colors::VertexPainterWrapper(painter_serializer.get_serialized()));
-
             }
     };
 }
