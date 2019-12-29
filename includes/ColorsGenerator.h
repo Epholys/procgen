@@ -305,6 +305,9 @@ namespace colors
                 }
 
                 set_keys(keys);
+
+                // Avoid updating change at first creation
+                poll_modification();
             }
     };
 
@@ -421,6 +424,9 @@ namespace colors
                 }
 
                 set_keys(keys);
+
+                // Avoid updating change at first creation
+                poll_modification();
             }
     };
 }

@@ -98,6 +98,8 @@ namespace colors
 
         clone->vertex_indices_pools_ = vertex_indices_pools_;
 
+        clone->poll_modification();
+
         return clone;
     }
 

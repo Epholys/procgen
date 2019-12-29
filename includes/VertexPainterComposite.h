@@ -193,7 +193,7 @@ namespace colors
                 }
                 set_child_painters(child_wrappers);
 
-                // Little hack to avoid updating change at first creation
+                // Avoid updating change at first creation
                 poll_modification();
             }
 

@@ -151,7 +151,7 @@ namespace procgui
             max_mem_size_ =other.max_mem_size_;
             popups_ids_ = {};
 
-            // the 'other' object must not matter in the 'color_gen_' anymore.
+           // the 'other' object must not matter in the 'color_gen_' anymore.
             other.id_ = -1;
             other.color_id_ = sf::Color::Black;
             other.bounding_box_ = {};
