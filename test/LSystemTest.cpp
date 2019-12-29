@@ -1,7 +1,6 @@
 #include <sstream>
 #include <gtest/gtest.h>
 #include "cereal/archives/json.hpp"
-#include "Observer.h"
 #include "LSystem.h"
 
 

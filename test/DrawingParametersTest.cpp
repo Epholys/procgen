@@ -2,7 +2,6 @@
 #include <gtest/gtest.h>
 #include "cereal/archives/json.hpp"
 #include "DrawingParameters.h"
-#include "Observer.h"
 
 using namespace drawing;
 

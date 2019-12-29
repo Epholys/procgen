@@ -9,7 +9,6 @@
 #include "cereal/types/unordered_map.hpp"
 
 #include "types.h"
-#include "Observable.h"
 #include "RuleMap.h"
 #include "LoadMenu.h"
 
