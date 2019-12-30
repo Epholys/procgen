@@ -35,3 +35,12 @@ compile_commands.json
 
 # cmake
 build/
+
+# clangd
+.clangd/
+
+# coverage
+*.gcda
+*.gcno
+out/
+*.info

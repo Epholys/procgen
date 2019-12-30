@@ -23,6 +23,12 @@ debug : CXXFLAGS = -std=c++17 -g -O0 -Wall -Wextra -pthread
 debug : MACROFLAGS += -DDEBUG_CHECKS
 profiling : CXXFLAGS += -g
 optimized : CXXFLAGS += -march=native
+test: TESTFLAGS = --coverage
+test: LTESTFLAGS= --coverage
+testdebug : CXXFLAGS = -std=c++17 -g -O0 -Wall -Wextra -pthread
+testdebug : MACROFLAGS += -DDEBUG_CHECKS
+testdebug: TESTFLAGS = --coverage
+testdebug: LTESTFLAGS= --coverage
 
 ### Source files, Object Files, Directories, Targets, ...
 # Core object files to compile for every target.
@@ -54,7 +60,7 @@ TEST_TARGET = $(TEST_DIR)/procgenTest.out
 GTEST_DIR = /usr/src/googletest/googletest
 
 # Flags passed to the preprocessor
-GTEST_CPPFLAGS = -isystem $(GTEST_DIR)/include
+GTEST_CPPFLAGS = --coverage -isystem $(GTEST_DIR)/include
 
 # All Google Test headers.
 GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
@@ -65,42 +71,50 @@ GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 
 
 
-all : debug test
+all : testdebug
 
 # Cleans all intermediate compilation files.
 clean :
-	rm -f $(addprefix $(SRC_DIR)/,*.o *.a *.out) \
-	$(addprefix  $(TEST_DIR)/, *.o *.a *.out) \
-	$(addprefix $(IMGUI_DIR)/, *.o *.a *.out)
+	rm -rf $(addprefix $(SRC_DIR)/,*.o *.a *.out *.gcda *.gcno) \
+	$(addprefix  $(TEST_DIR)/, *.o *.a *.out *.gcda *.gcno) \
+	$(addprefix $(IMGUI_DIR)/, *.o *.a *.out *.gcda *.gcno) \
+	out/
+
 
 # main: Links all the .o file from MAIN to TARGET.
 main : $(ALL_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(MACROFLAGS) -o $(TARGET) $^ $(LFLAGS)
+	$(CXX) $(CXXFLAGS) $(TESTFLAGS) $(MACROFLAGS) -o $(TARGET) $^ $(LFLAGS) $(LTESTFLAGS)
 
 # test: Links all OBJECTS, TEST files plus gtest_main.a into the test
 #       suite TEST_TARGET.
 test : $(OBJECTS) $(TEST_OBJ) $(TEST_DIR)/gtest_main.a
 	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -o $(TEST_TARGET) $^ $(IFLAGS) $(LFLAGS) -lpthread
+	./$(TEST_TARGET)
+	lcov --capture --directory src/ --output-file coverage.info
+	lcov --remove coverage.info $(shell pwd)/cereal/\* $(shell pwd)/imgui/\* $(shell pwd)/gsl/\* '/usr/include/*' -o clean-coverage.info
+	genhtml clean-coverage.info --output-directory out
 
 # debug: only main but with debug flags
-debug : main
+debug : format main
+
+testdebug : format main test
 
 # release: Same as main with optimization flags (see above).
-release : main
+release : format main
 
 # profiling: Same as main with optimization and debug flags (see above)
-profiling : main
+profiling : format main
 
 # optimized: Same as main with the even more optimization flags (see above)
-optimized : main
+optimized : format main
 
 
 # Each .o file is compiled with its associated *.cpp file.
 %.o : %.cpp
-	$(CXX) $(CXXFLAGS) $(MACROFLAGS) -c $^ -o $@ $(IFLAGS)
+	$(CXX) $(CXXFLAGS) $(TESTFLAGS) $(MACROFLAGS)  -c $^ -o $@ $(IFLAGS) $(LTESTFLAGS)
 
 $(TEST_DIR)/%.o : $(TEST_DIR)/%.cpp
-	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -c $^ -o $@ $(IFLAGS)
+	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) $(TESTFLAGS) -c $^ -o $@ $(IFLAGS) $(LTESTFLAGS)
 
 
 # Compiles and archives googletest internals.
