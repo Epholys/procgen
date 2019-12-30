@@ -1,7 +1,9 @@
-#include <sstream>
-#include <gtest/gtest.h>
-#include "cereal/archives/json.hpp"
 #include "DrawingParameters.h"
+
+#include "cereal/archives/json.hpp"
+
+#include <gtest/gtest.h>
+#include <sstream>
 
 using namespace drawing;
 
@@ -12,7 +14,11 @@ TEST(DrawingParametersTest, complete_ctor)
     double expected_delta {1};
     double expected_step {10};
     int expected_iter {3};
-    DrawingParameters params (expected_pos, expected_angle, expected_delta, expected_step, expected_iter);
+    DrawingParameters params(expected_pos,
+                             expected_angle,
+                             expected_delta,
+                             expected_step,
+                             expected_iter);
 
     ASSERT_EQ(expected_pos, params.get_starting_position());
     ASSERT_FLOAT_EQ(expected_angle, params.get_starting_angle());
@@ -29,7 +35,7 @@ TEST(DrawingParametersTest, set_starting_position)
 {
     DrawingParameters parameters;
 
-    ext::sf::Vector2d expected (10, 10);
+    ext::sf::Vector2d expected(10, 10);
     parameters.set_starting_position(expected);
 
     ASSERT_EQ(expected, parameters.get_starting_position());
@@ -85,7 +91,7 @@ TEST(DrawingParametersTest, set_n_iter)
 TEST(DrawingParametersTest, revert_n_iter)
 {
     constexpr int base_iter = 5;
-    DrawingParameters params ({0, 0}, 0, 0, 10, /*n_iter*/ base_iter);
+    DrawingParameters params({0, 0}, 0, 0, 10, /*n_iter*/ base_iter);
     constexpr int new_iter = 7;
 
     params.set_n_iter(new_iter);
@@ -97,7 +103,7 @@ TEST(DrawingParametersTest, revert_n_iter)
 
 TEST(DrawingParametersTest, validate_n_iter)
 {
-    DrawingParameters params ({0, 0}, 0, 0, 10, /*n_iter*/ 5);
+    DrawingParameters params({0, 0}, 0, 0, 10, /*n_iter*/ 5);
     const int new_iter = 7;
 
     params.set_n_iter(new_iter);
@@ -112,16 +118,16 @@ TEST(DrawingParametersTest, validate_n_iter)
 
 TEST(DrawingParametersTest, serialization)
 {
-    DrawingParameters oparams { {100,100}, 1, 1, 10, 3};
+    DrawingParameters oparams {{100, 100}, 1, 1, 10, 3};
     DrawingParameters iparams;
 
     std::stringstream ss;
     {
-        cereal::JSONOutputArchive oarchive (ss);
+        cereal::JSONOutputArchive oarchive(ss);
         oarchive(oparams);
     }
     {
-        cereal::JSONInputArchive iarchive (ss);
+        cereal::JSONInputArchive iarchive(ss);
         iarchive(iparams);
     }
 

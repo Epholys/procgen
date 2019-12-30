@@ -1,17 +1,16 @@
-#include <vector>
-#include <string>
+#include "helper_algorithm.h"
 
 #include <gtest/gtest.h>
-
-#include "helper_algorithm.h"
+#include <string>
+#include <vector>
 
 TEST(helper_algorithm_test, find_duplicate_it)
 {
-    std::vector<int> v { 1, 2, 3, 1 };
+    std::vector<int> v {1, 2, 3, 1};
 
-    auto first  = v.begin();
+    auto first = v.begin();
     auto second = std::next(first);
-    auto last   = v.end();
+    auto last = v.end();
     auto penultimate = std::prev(last);
 
     ASSERT_TRUE(find_duplicate(first, first, last) == penultimate);
@@ -21,17 +20,13 @@ TEST(helper_algorithm_test, find_duplicate_it)
 
 TEST(helper_algorithm_test, find_duplicate_it_pred)
 {
-    std::vector<std::string> v { "AA", "BB", "CC", "AB" };
+    std::vector<std::string> v {"AA", "BB", "CC", "AB"};
 
-    auto predicate =
-        [](const auto& s1, const auto& s2)
-        {
-            return s1.at(0) == s2.at(0);
-        };
-    
-    auto first  = v.begin();
+    auto predicate = [](const auto& s1, const auto& s2) { return s1.at(0) == s2.at(0); };
+
+    auto first = v.begin();
     auto second = std::next(first);
-    auto last   = v.end();
+    auto last = v.end();
     auto penultimate = std::prev(last);
 
     ASSERT_TRUE(find_duplicate_if(first, first, last, predicate) == penultimate);

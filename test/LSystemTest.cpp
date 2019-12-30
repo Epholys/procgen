@@ -1,12 +1,15 @@
-#include <sstream>
-#include <gtest/gtest.h>
-#include "cereal/archives/json.hpp"
 #include "LSystem.h"
+
+#include "cereal/archives/json.hpp"
+
+#include <gtest/gtest.h>
+#include <sstream>
 
 
 using Rules = LSystem::Rules;
 using ProductionCache = std::unordered_map<std::uint8_t, std::string>;
-using IterationCache = std::unordered_map<std::uint8_t, std::pair<std::vector<std::uint8_t>, std::uint8_t>>;
+using IterationCache =
+    std::unordered_map<std::uint8_t, std::pair<std::vector<std::uint8_t>, std::uint8_t>>;
 
 // Check if all the members are initialized. Not so useful by itself, except if
 // one of the members suddenly does not have a default initialization.
@@ -28,9 +31,9 @@ TEST(LSystemTest, default_ctor)
 
 TEST(LSystemTest, complete_ctor)
 {
-    LSystem lsys { "F", { { 'F', "F+F" } }, "F" };
-    LSystem::Rules expected_rules = { { 'F', "F+F" } };
-    IterationCache expected_iteration_cache = { {0, {{0}, 0}} };
+    LSystem lsys {"F", {{'F', "F+F"}}, "F"};
+    LSystem::Rules expected_rules = {{'F', "F+F"}};
+    IterationCache expected_iteration_cache = {{0, {{0}, 0}}};
 
     ASSERT_EQ(lsys.get_axiom(), "F");
     ASSERT_EQ(lsys.get_rules(), expected_rules);
@@ -42,16 +45,16 @@ TEST(LSystemTest, complete_ctor)
 
 TEST(LSystemTest, get_axiom)
 {
-    LSystem lsys { "F", { { 'F', "F+F" } }, "F"  };
+    LSystem lsys {"F", {{'F', "F+F"}}, "F"};
 
     ASSERT_EQ(lsys.get_axiom(), "F");
 }
 
 TEST(LSystemTest, set_axiom)
 {
-    LSystem lsys ("F", Rules({{'F', "F+F"}}), "F");
-    ProductionCache axiom_prod_cache { { 0, "FF" } };
-    IterationCache axiom_iter_cache { {0, {{0, 0}, 0 }} };
+    LSystem lsys("F", Rules({{'F', "F+F"}}), "F");
+    ProductionCache axiom_prod_cache {{0, "FF"}};
+    IterationCache axiom_iter_cache {{0, {{0, 0}, 0}}};
 
     lsys.set_axiom("FF");
 
@@ -64,10 +67,10 @@ TEST(LSystemTest, set_axiom)
 
 TEST(LSystemTest, add_rule)
 {
-    LSystem lsys ("F", Rules({ }), "F");
-    LSystem::Rules expected_rules = { { 'F', "F+F" } };
-    ProductionCache base_prod_cache { { 0, "F" } };
-    IterationCache base_iter_cache { {0, {{0}, 0 }} };
+    LSystem lsys("F", Rules({}), "F");
+    LSystem::Rules expected_rules = {{'F', "F+F"}};
+    ProductionCache base_prod_cache {{0, "F"}};
+    IterationCache base_iter_cache {{0, {{0}, 0}}};
     lsys.add_rule('F', "F+F");
 
     ASSERT_EQ(lsys.get_rules(), expected_rules);
@@ -78,10 +81,10 @@ TEST(LSystemTest, add_rule)
 
 TEST(LSystemTest, remove_rule)
 {
-    LSystem lsys ("F", Rules({ { 'F', "F+F" } }), "F");
+    LSystem lsys("F", Rules({{'F', "F+F"}}), "F");
     LSystem::Rules empty_rules;
-    ProductionCache base_prod_cache { { 0, "F" } };
-    IterationCache base_iter_cache { {0, {{0}, 0 }} };
+    ProductionCache base_prod_cache {{0, "F"}};
+    IterationCache base_iter_cache {{0, {{0}, 0}}};
 
     lsys.remove_rule('F');
 
@@ -96,9 +99,9 @@ TEST(LSystemTest, remove_rule)
 
 TEST(LSystemTest, clear_rules)
 {
-    LSystem lsys ("F", Rules({ { 'F', "F+F" }, { 'G', "GG" } }), "F");
+    LSystem lsys("F", Rules({{'F', "F+F"}, {'G', "GG"}}), "F");
     LSystem::Rules empty_rules;
-    ProductionCache base_cache { { 0, "F" } };
+    ProductionCache base_cache {{0, "F"}};
 
     lsys.clear_rules();
 
@@ -110,10 +113,11 @@ TEST(LSystemTest, clear_rules)
 
 TEST(LSystemTest, replace_rules)
 {
-    LSystem lsys ("F", Rules({ { 'F', "FF" }, { 'G', "GG" } }), "F");
-    LSystem::Rules new_rules {{'H', "HH"},{'I', "II"}};;
-    ProductionCache base_prod_cache { { 0, "F" } };
-    IterationCache base_iter_cache { {0, {{0}, 0 }} };
+    LSystem lsys("F", Rules({{'F', "FF"}, {'G', "GG"}}), "F");
+    LSystem::Rules new_rules {{'H', "HH"}, {'I', "II"}};
+    ;
+    ProductionCache base_prod_cache {{0, "F"}};
+    IterationCache base_iter_cache {{0, {{0}, 0}}};
 
     lsys.replace_rules(new_rules);
 
@@ -126,9 +130,9 @@ TEST(LSystemTest, replace_rules)
 
 TEST(LSystemTest, set_iteration_predecessors)
 {
-    LSystem lsys("F", Rules({ { 'F', "F+F" }, { 'G', "GG" } }), "F");
+    LSystem lsys("F", Rules({{'F', "F+F"}, {'G', "GG"}}), "F");
     std::string expected_predecessors = "";
-    IterationCache expected_cache = { {0, {{0}, 0}} };
+    IterationCache expected_cache = {{0, {{0}, 0}}};
 
 
     lsys.set_iteration_predecessors("");
@@ -141,15 +145,15 @@ TEST(LSystemTest, set_iteration_predecessors)
 // Test some iterations.
 TEST(LSystemTest, derivation)
 {
-    LSystem lsys { "F", { { 'F', "F+G" }, { 'G', "G-F" } }, "F" };
+    LSystem lsys {"F", {{'F', "F+G"}, {'G', "G-F"}}, "F"};
 
     std::string prod_iter_1 = "F+G";
-//    std::string prod_iter_2 = "F+G + G-F";
+    //    std::string prod_iter_2 = "F+G + G-F";
     std::string prod_iter_3 = "F+G+G-F+G-F-F+G";
 
     std::vector<std::uint8_t> rec_iter_1 = {1, 1, 1};
-//    std::vector<std::uint8_t> rec_iter_2 = {2,2,2, 1, 1,1,1};
-    std::vector<std::uint8_t> rec_iter_3 = {3,3,3, 2, 2,2,2,  1,  1,1,1, 1, 2,2,2};
+    //    std::vector<std::uint8_t> rec_iter_2 = {2,2,2, 1, 1,1,1};
+    std::vector<std::uint8_t> rec_iter_3 = {3, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2};
 
     auto [prod1, rec1, max1] = lsys.produce(1);
     auto [prod3, rec3, max3] = lsys.produce(3);
@@ -165,13 +169,13 @@ TEST(LSystemTest, derivation)
 // Test some iterations in a non-standard order.
 TEST(LSystemTest, wild_derivation)
 {
-    LSystem lsys { "F", { { 'F', "F+" } }, "F" };
+    LSystem lsys {"F", {{'F', "F+"}}, "F"};
 
     std::string prod_iter_1 = "F+";
     std::string prod_iter_3 = "F+++";
     std::string prod_iter_5 = "F+++++";
 
-    std::vector<std::uint8_t> rec_iter_1 {1,1};
+    std::vector<std::uint8_t> rec_iter_1 {1, 1};
     std::vector<std::uint8_t> rec_iter_3 {3, 3, 2, 1};
     std::vector<std::uint8_t> rec_iter_5 {5, 5, 4, 3, 2, 1};
 
@@ -194,7 +198,7 @@ TEST(LSystemTest, wild_derivation)
 // Test if a default rule is correctly iterated
 TEST(LSystemTest, corner_iteration)
 {
-    LSystem lsys { "FG", { { 'F', "FG" } }, "G" };
+    LSystem lsys {"FG", {{'F', "FG"}}, "G"};
 
     std::string prod_iter_3 = "FGGGG";
 
@@ -208,15 +212,14 @@ TEST(LSystemTest, corner_iteration)
 
 TEST(LSystemTest, disjoint_derivation)
 {
-    LSystem lsys { "F", { { 'F', "F+G" }, { 'G', "G-F" } }, "F" };
+    LSystem lsys {"F", {{'F', "F+G"}, {'G', "G-F"}}, "F"};
 
     lsys.produce(2);
     lsys.set_iteration_predecessors("G");
     lsys.produce(1);
 
-    ProductionCache production_cache { {0, "F"}, {1, "F+G"}, {2, "F+G+G-F"} };
-    IterationCache iteration_cache
-                    { {0, {{0}, 0}}, {1, {{0,0,0}, 0}} };
+    ProductionCache production_cache {{0, "F"}, {1, "F+G"}, {2, "F+G+G-F"}};
+    IterationCache iteration_cache {{0, {{0}, 0}}, {1, {{0, 0, 0}, 0}}};
 
     ASSERT_EQ(lsys.get_production_cache(), production_cache);
     ASSERT_EQ(lsys.get_iteration_cache(), iteration_cache);
@@ -224,16 +227,16 @@ TEST(LSystemTest, disjoint_derivation)
 
 TEST(LSystemTest, serialization)
 {
-    LSystem olsys ("FG", { {'F', "F+G"}, {'G', "G-F" } }, "F");
+    LSystem olsys("FG", {{'F', "F+G"}, {'G', "G-F"}}, "F");
     LSystem ilsys;
 
     std::stringstream ss;
     {
-        cereal::JSONOutputArchive oarchive (ss);
+        cereal::JSONOutputArchive oarchive(ss);
         oarchive(olsys);
     }
     {
-        cereal::JSONInputArchive iarchive (ss);
+        cereal::JSONInputArchive iarchive(ss);
         iarchive(ilsys);
     }
 

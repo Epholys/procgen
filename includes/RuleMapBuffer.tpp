@@ -1,11 +1,11 @@
-template <typename Target>
+template<typename Target>
 RuleMapBuffer<Target>::RuleMapBuffer(const Target& rule_map)
-    : rule_map_{rule_map}
+    : rule_map_ {rule_map}
 {
     // Initialize the buffer with the LSystem's rules.
     // By construction, there are not duplicate rules in a 'LSystem', so
     // there is no check: all rules are valid.
-    for (const auto &rule : rule_map_.get_rules())
+    for (const auto& rule : rule_map_.get_rules())
     {
         buffer_.push_back({true, rule.first, rule.second});
     }
@@ -111,15 +111,17 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
 
     // Check if the new rule is original by finding an existing one with the
     // new predecessor.
-    bool new_is_original = std::find_if(buffer_.cbegin(), buffer_.cend(),
-                                        [pred](const auto& rule)
-                                        { return rule.predecessor == pred &&
-                                          rule.is_active; }) == buffer_.end();
+    bool new_is_original = std::find_if(buffer_.cbegin(),
+                                        buffer_.cend(),
+                                        [pred](const auto& rule) {
+                                            return rule.predecessor == pred && rule.is_active;
+                                        })
+                           == buffer_.end();
 
     // Modify 'buffer_' with the new predicate.
     RuleMapBuffer<Target>::iterator it = remove_const(cit);
 
-    *it = Rule({ new_is_original, pred, succ });
+    *it = Rule({new_is_original, pred, succ});
 
     if (new_is_original) // Case 1.
     {
@@ -133,10 +135,10 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
     if (previous_was_active && previous_pred != '\0')
     {
         // Try to find a duplicate of the old rule
-        auto old_duplicate = std::find_if(buffer_.begin(), buffer_.end(),
-                                          [previous_pred](const auto& rule)
-                                          { return rule.predecessor == previous_pred &&
-                                            !rule.is_active; });
+        auto old_duplicate =
+            std::find_if(buffer_.begin(), buffer_.end(), [previous_pred](const auto& rule) {
+                return rule.predecessor == previous_pred && !rule.is_active;
+            });
 
         if (old_duplicate == buffer_.end()) // Case 4.
         {
@@ -145,8 +147,7 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
         else // Case 5.
         {
             old_duplicate->is_active = true;
-            rule_map_.add_rule(old_duplicate->predecessor,
-                               old_duplicate->successor);
+            rule_map_.add_rule(old_duplicate->predecessor, old_duplicate->successor);
         }
     }
     else // Case 3. & 6.
@@ -167,7 +168,7 @@ void RuleMapBuffer<Target>::remove_predecessor(RuleMapBuffer<Target>::const_iter
 
     // Go back to scratch buffer.
     auto it = remove_const(cit);
-    *it = { true, '\0', cit->successor };
+    *it = {true, '\0', cit->successor};
 
     // If it was an original rule, remove it.
     if (was_active)
@@ -185,7 +186,7 @@ void RuleMapBuffer<Target>::change_successor(const_iterator cit, const Successor
     previous_buffer_ = buffer_;
 
     auto it = remove_const(cit);
-    *it = Rule({ cit->is_active, cit->predecessor, succ });
+    *it = Rule({cit->is_active, cit->predecessor, succ});
 
     // If it was an original rule, replace it in the Target
     if (cit->is_active && cit->predecessor != '\0')
@@ -194,7 +195,7 @@ void RuleMapBuffer<Target>::change_successor(const_iterator cit, const Successor
     }
 }
 
-template <typename Target>
+template<typename Target>
 void RuleMapBuffer<Target>::remove_rule(char pred)
 {
     previous_buffer_ = buffer_;
@@ -204,21 +205,18 @@ void RuleMapBuffer<Target>::remove_rule(char pred)
     // RuleMapBuffer.
 
     // If 'pred' designate a still valid rule, remove this rule.
-    auto original = std::find_if(buffer_.begin(), buffer_.end(),
-                                 [pred](const auto &rule)
-                                 {
-                                     return rule.predecessor == pred && rule.is_active;
-                                 });
+    auto original = std::find_if(buffer_.begin(), buffer_.end(), [pred](const auto& rule) {
+        return rule.predecessor == pred && rule.is_active;
+    });
     if (original != buffer_.end())
     {
         buffer_.erase(original);
     }
 
     // Find a duplicate
-    auto duplicate = std::find_if(buffer_.begin(), buffer_.end(),
-                                  [pred](const auto& rule)
-                                  { return rule.predecessor == pred &&
-                                    !rule.is_active; });
+    auto duplicate = std::find_if(buffer_.begin(), buffer_.end(), [pred](const auto& rule) {
+        return rule.predecessor == pred && !rule.is_active;
+    });
 
     if (duplicate != buffer_.end())
     {

@@ -27,6 +27,8 @@ optimized : CXXFLAGS += -march=native
 ### Source files, Object Files, Directories, Targets, ...
 # Core object files to compile for every target.
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+INCLUDES = $(wildcard $(INCLUDE_DIR)/*.h)
+INCLUDES += $(wildcard $(INCLUDE_DIR)/*.tpp)
 ALL_OBJECTS = $(SRCS:%.cpp=%.o)
 OBJECTS = $(filter-out $(SRC_DIR)/main.o, $(ALL_OBJECTS))
 
@@ -74,7 +76,7 @@ clean :
 	$(addprefix $(IMGUI_DIR)/, *.o *.a *.out)
 
 # main: Links all the .o file from MAIN to TARGET.
-main : $(ALL_OBJECTS)
+main : format $(ALL_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(MACROFLAGS) -o $(TARGET) $^ $(LFLAGS)
 
 # test: Links all OBJECTS, TEST files plus gtest_main.a into the test
@@ -94,6 +96,8 @@ profiling : main
 # optimized: Same as main with the even more optimization flags (see above)
 optimized : main
 
+format:
+	clang-format-9 -style=file -i $(SRCS) $(INCLUDES) $(TEST_SRC)
 
 # Each .o file is compiled with its associated *.cpp file.
 %.o : %.cpp

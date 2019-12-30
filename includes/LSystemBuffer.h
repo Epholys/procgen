@@ -8,14 +8,14 @@
 
 namespace procgui
 {
-    // ImGui needs a number for its fixed-size input buffer.
-    // We arbitrarily choose 128 characters as the limit for the sucessor of a
-    // production rule.
-    constexpr int lsys_successor_size = 128;
+// ImGui needs a number for its fixed-size input buffer.
+// We arbitrarily choose 128 characters as the limit for the sucessor of a
+// production rule.
+constexpr int lsys_successor_size = 128;
 
-    // Simple implementation of the LSystemBuffer.
-    using LSystemBuffer = RuleMapBuffer<LSystem>;
-}
+// Simple implementation of the LSystemBuffer.
+using LSystemBuffer = RuleMapBuffer<LSystem>;
+} // namespace procgui
 
 
 #endif // LSYSTEM_BUFFER_H

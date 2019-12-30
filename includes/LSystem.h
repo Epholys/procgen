@@ -2,74 +2,79 @@
 #define L_SYSTEM_H
 
 
+#include "LoadMenu.h"
+#include "RuleMap.h"
+#include "cereal/cereal.hpp"
+#include "cereal/types/unordered_map.hpp"
+#include "types.h"
+
 #include <string>
 #include <unordered_map>
 
-#include "cereal/cereal.hpp"
-#include "cereal/types/unordered_map.hpp"
-
-#include "types.h"
-#include "RuleMap.h"
-#include "LoadMenu.h"
-
 namespace cereal
 {
-    // Saving for std::map<std::string, std::string> for text based archives
-    // Copied from https://uscilab.github.io/cereal/archive_specialization.html (MIT License)
-    template <class Archive, class C, class A,
-              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
-    void save( Archive & ar, std::unordered_map<char, std::string, C, A> const& map )
+// Saving for std::map<std::string, std::string> for text based archives
+// Copied from https://uscilab.github.io/cereal/archive_specialization.html (MIT License)
+template<class Archive,
+         class C,
+         class A,
+         traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae>
+inline void save(Archive& ar, std::unordered_map<char, std::string, C, A> const& map)
+{
+    for (const auto& i : map)
+        ar(cereal::make_nvp(std::string() + i.first, i.second));
+}
+
+// Loading for std::map<char, std::string> for text based archives
+template<class Archive,
+         class C,
+         class A,
+         traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae>
+inline void load(Archive& ar, std::unordered_map<char, std::string, C, A>& map)
+{
+    map.clear();
+
+    bool key_too_big = false;
+    bool void_key = false;
+    auto hint = map.begin();
+    while (true)
     {
-        for(const auto& i : map)
-            ar(cereal::make_nvp(std::string()+i.first, i.second));
+        const auto namePtr = ar.getNodeName();
+
+        if (!namePtr)
+            break;
+
+        std::string loaded_key = namePtr;
+        std::string value;
+        ar(value);
+        char key = ' ';
+        if (loaded_key.size() != 0)
+        {
+            if (loaded_key.size() > 1)
+            {
+                key_too_big = true;
+            }
+            key = loaded_key.at(0);
+            hint = map.emplace_hint(hint, key, std::move(value));
+        }
+        else
+        {
+            void_key = true;
+        }
     }
 
-    // Loading for std::map<char, std::string> for text based archives
-    template <class Archive, class C, class A,
-              traits::EnableIf<traits::is_text_archive<Archive>::value> = traits::sfinae> inline
-    void load( Archive & ar, std::unordered_map<char, std::string, C, A>& map)
+    if (key_too_big)
     {
-        map.clear();
-
-        bool key_too_big = false;
-        bool void_key = false;
-        auto hint = map.begin();
-        while(true)
-        {
-            const auto namePtr = ar.getNodeName();
-
-            if(!namePtr)
-                break;
-
-            std::string loaded_key = namePtr;
-            std::string value; ar(value);
-            char key = ' ';
-            if (loaded_key.size() != 0)
-            {
-                if (loaded_key.size() > 1)
-                {
-                    key_too_big = true;
-                }
-                key = loaded_key.at(0);
-                hint = map.emplace_hint(hint, key, std::move(value));
-            }
-            else
-            {
-                void_key = true;
-            }
-        }
-
-        if (key_too_big)
-        {
-            controller::LoadMenu::add_loading_error_message("One or more LSystem's key was too big, it is now cropped.");
-        }
-        if (void_key)
-        {
-            controller::LoadMenu::add_loading_error_message("One or more LSystem's key was empty, so it was ignored.");
-        }
-
+        controller::LoadMenu::add_loading_error_message(
+            "One or more LSystem's key was too big, it is now cropped.");
+    }
+    if (void_key)
+    {
+        controller::LoadMenu::add_loading_error_message(
+            "One or more LSystem's key was empty, so it was ignored.");
     }
 }
+} // namespace cereal
 
 // Simple L-system generation class. Starting from an axiom and simple
 // production rules, generate by iteration a result array of character by
@@ -113,7 +118,7 @@ namespace cereal
 //   of this class.
 class LSystem : public RuleMap<std::string>
 {
-public:
+  public:
     using Successor = std::string;
 
     // A 'production_rule' is a sole symbol associated with an
@@ -180,7 +185,8 @@ public:
     struct LSystemProduction
     {
         const std::string& production; // The array of character derived from the axiom and rules.
-        const std::vector<u8> iteration; // The array of the iteration number for each character is 'production'.
+        const std::vector<u8>
+            iteration;    // The array of the iteration number for each character is 'production'.
         u8 max_iteration; // The maximum number of iteration in 'iteration'
     };
 
@@ -197,10 +203,9 @@ public:
     //   - Ensures coherence of 'production_rules
     //   - Throw in case of allocation problem.
     //   - Throw at '.at()' if code is badly refactored.
-    LSystemProduction produce(u8 n, unsigned long long size=0);
+    LSystemProduction produce(u8 n, unsigned long long size = 0);
 
-private:
-
+  private:
     // The predecessors indicating than, at their next derivation, the iteration
     // counter will be incremented by one.
     std::string iteration_predecessors_ = {};
@@ -218,22 +223,22 @@ private:
 
     friend class cereal::access;
 
-    template <class Archive>
-    void save (Archive& ar, const u32) const
-        {
-            ar(cereal::make_nvp("axiom", production_cache_.at(0)),
-               cereal::make_nvp("production_rules", rules_),
-               cereal::make_nvp("iteration_predecessors", iteration_predecessors_));
-        }
+    template<class Archive>
+    void save(Archive& ar, const u32) const
+    {
+        ar(cereal::make_nvp("axiom", production_cache_.at(0)),
+           cereal::make_nvp("production_rules", rules_),
+           cereal::make_nvp("iteration_predecessors", iteration_predecessors_));
+    }
 
-    template <class Archive>
-    void load (Archive& ar, const u32)
-        {
-            ar(cereal::make_nvp("axiom", production_cache_[0]),
-               cereal::make_nvp("production_rules", rules_),
-               cereal::make_nvp("iteration_predecessors", iteration_predecessors_));
-            iteration_count_cache_[0] = {std::vector<u8>(production_cache_.at(0).size(), 0), 0};
-        }
+    template<class Archive>
+    void load(Archive& ar, const u32)
+    {
+        ar(cereal::make_nvp("axiom", production_cache_[0]),
+           cereal::make_nvp("production_rules", rules_),
+           cereal::make_nvp("iteration_predecessors", iteration_predecessors_));
+        iteration_count_cache_[0] = {std::vector<u8>(production_cache_.at(0).size(), 0), 0};
+    }
 };
 
 #endif

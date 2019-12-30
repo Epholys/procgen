@@ -1,6 +1,7 @@
-#include <gtest/gtest.h>
-#include "UniqueId.h"
 #include "UniqueColor.h"
+#include "UniqueId.h"
+
+#include <gtest/gtest.h>
 
 TEST(UniqueTest, new_id)
 {

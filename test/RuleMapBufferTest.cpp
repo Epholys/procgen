@@ -1,9 +1,10 @@
-#include <iostream>
-#include <gtest/gtest.h>
-#include "gsl/gsl"
-
 #include "RuleMapBuffer.h"
+
+#include "gsl/gsl"
 #include "helper_algorithm.h"
+
+#include <gtest/gtest.h>
+#include <iostream>
 
 using namespace procgui;
 
@@ -11,86 +12,84 @@ using namespace procgui;
 using IntMap = RuleMap<int>;
 using IntBuffer = RuleMapBuffer<IntMap>;
 
-class RuleBufferTest :  public ::testing::Test
+class RuleBufferTest : public ::testing::Test
 {
-public:
+  public:
     using const_iterator = IntBuffer::const_iterator;
     using Successor = IntBuffer::Successor;
     using Rule = IntBuffer::Rule;
 
     RuleBufferTest()
-        : buffer{}
-        , map{buffer.ref_rule_map()}
-        {
-            buffer.add_rule();
-            buffer.change_predecessor(buffer.begin(), pred1);
-            buffer.change_successor(buffer.begin(), succ1);
-            buffer.add_rule();
-            buffer.change_predecessor(std::next(buffer.begin()), pred2);
-            buffer.change_successor(std::next(buffer.begin()), succ2);
-            buffer.poll_modification(); // Reset modification indicator
-        }
+        : buffer {}
+        , map {buffer.ref_rule_map()}
+    {
+        buffer.add_rule();
+        buffer.change_predecessor(buffer.begin(), pred1);
+        buffer.change_successor(buffer.begin(), succ1);
+        buffer.add_rule();
+        buffer.change_predecessor(std::next(buffer.begin()), pred2);
+        buffer.change_successor(std::next(buffer.begin()), succ2);
+        buffer.poll_modification(); // Reset modification indicator
+    }
 
     // Helper methods:
 
     // Check the existence of the predecessor 'pred' in 'buff'
-    bool has_predecessor (const IntBuffer& buff, char pred) const
+    bool has_predecessor(const IntBuffer& buff, char pred) const
+    {
+        for (auto rule : buff)
         {
-            for (auto rule : buff)
+            if (rule.predecessor == pred)
             {
-                if (rule.predecessor == pred)
-                {
-                    return true;
-                }
+                return true;
             }
-            return false;
         }
+        return false;
+    }
 
     // Check the existence of the rule "'pred' -> 'succ'" in 'buff'
-    bool has_rule (const IntBuffer& buff, char pred, int succ) const
+    bool has_rule(const IntBuffer& buff, char pred, int succ) const
+    {
+        for (auto rule : buff)
         {
-            for (auto rule : buff)
+            if (rule.predecessor == pred && rule.successor == succ)
             {
-                if (rule.predecessor == pred &&
-                    rule.successor == succ)
-                {
-                    return true;
-                }
+                return true;
             }
-            return false;
         }
+        return false;
+    }
 
     // Check if 'buff' has a duplicate of the rule at 'it'.
     bool has_duplicate(const IntBuffer& buff, const_iterator it) const
+    {
+        for (auto jt = buff.begin(); jt != buff.end(); ++jt)
         {
-            for (auto jt = buff.begin(); jt != buff.end(); ++jt)
+            if (it != jt && it->predecessor == jt->predecessor)
             {
-                if (it != jt &&
-                    it->predecessor == jt->predecessor)
-                {
-                    return true;
-                }
+                return true;
             }
-            return false;
         }
+        return false;
+    }
 
     // Check if all duplicates in 'buff' are correctly tagged with the 'active'
     // attribute of the buffer's rules.
     bool duplicates_marked(const IntBuffer& buff) const
+    {
+        for (auto it = buff.begin(); it != buff.end(); ++it)
         {
-            for(auto it = buff.begin(); it != buff.end(); ++it)
+            auto jt = it;
+            while ((jt = find_duplicate(it, jt, buff.end())) != buff.end())
             {
-                auto jt = it;
-                while ((jt = find_duplicate(it, jt, buff.end())) != buff.end())
+                if (jt->is_active)
                 {
-                    if (jt->is_active)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
-            return true;
         }
+        return true;
+    }
 
     IntBuffer buffer;
     IntMap& map;
@@ -133,9 +132,7 @@ TEST_F(RuleBufferTest, helper_has_duplicate)
 TEST_F(RuleBufferTest, constructor)
 {
     // Check if all map' rules are here
-    for (auto it = map.get_rules().begin();
-         it != map.get_rules().end();
-         ++it)
+    for (auto it = map.get_rules().begin(); it != map.get_rules().end(); ++it)
     {
         ASSERT_TRUE(has_rule(buffer, it->first, it->second));
     }
@@ -174,8 +171,8 @@ TEST_F(RuleBufferTest, change_predecessor_simple)
 TEST_F(RuleBufferTest, change_predecessor_old_duplicated)
 {
     IntMap::Rules rules = {};
-    IntMap initmap (rules);
-    IntBuffer buffer (initmap);
+    IntMap initmap(rules);
+    IntBuffer buffer(initmap);
     IntMap& map = buffer.ref_rule_map();
 
     // === SETUP
@@ -288,7 +285,7 @@ TEST_F(RuleBufferTest, change_predecessor_double_duplication)
     buffer.add_rule();
     end = std::prev(buffer.end());
     buffer.change_predecessor(end, pred3);
-    buffer.change_successor(end, pred4+1);
+    buffer.change_successor(end, pred4 + 1);
 
     // buffer:
     // A -> 0
@@ -377,7 +374,7 @@ TEST_F(RuleBufferTest, change_predecessor_duplication_go_back)
     buffer.change_predecessor(end, pred3);
     buffer.change_successor(end, succ3);
 
-     // BUFFER
+    // BUFFER
     // dup pred succ
     //  t  A    0
     //  t  B    1
@@ -554,7 +551,6 @@ TEST_F(RuleBufferTest, change2_predecessors_new_dup_old_dup)
 // diuplicate ?
 TEST_F(RuleBufferTest, change2_predecessors_new_orig_old_orig_w_dup)
 {
-
     buffer.add_rule();
     auto end = std::prev(buffer.end());
     buffer.change_predecessor(end, pred2);
@@ -620,8 +616,6 @@ TEST_F(RuleBufferTest, change2_predecessors_new_dup_old_orig_w_dup)
 
     ASSERT_TRUE(buffer.poll_modification());
 }
-
-
 
 
 TEST_F(RuleBufferTest, remove_predecessor_simple)
@@ -747,7 +741,7 @@ TEST_F(RuleBufferTest, erase_simple)
 
     ASSERT_FALSE(map.has_predecessor(pred));
     ASSERT_FALSE(has_predecessor(buffer, pred));
-    ASSERT_EQ(size-1, buffer.size());
+    ASSERT_EQ(size - 1, buffer.size());
 
     ASSERT_TRUE(buffer.poll_modification());
 }
@@ -827,7 +821,7 @@ TEST_F(RuleBufferTest, erase_from_duplicate)
     ASSERT_TRUE(map.has_rule(first_pred, succ3));
     ASSERT_TRUE(map.has_rule(pred2, succ2));
 
-   ASSERT_TRUE(buffer.poll_modification());
+    ASSERT_TRUE(buffer.poll_modification());
 }
 
 
@@ -845,7 +839,7 @@ TEST_F(RuleBufferTest, erase_empty)
 TEST_F(RuleBufferTest, erase_replacement)
 {
     auto size = buffer.size();
-    auto begin  = buffer.begin();
+    auto begin = buffer.begin();
     auto first_pred = begin->predecessor;
 
     buffer.add_rule();

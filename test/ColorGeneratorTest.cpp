@@ -1,7 +1,8 @@
-#include <gtest/gtest.h>
 #include "ColorsGenerator.h"
-#include "ColorsGeneratorWrapper.h"
 #include "ColorsGeneratorSerializer.h"
+#include "ColorsGeneratorWrapper.h"
+
+#include <gtest/gtest.h>
 
 using namespace colors;
 
@@ -9,10 +10,10 @@ TEST(ColorGeneratorTest, color_serialization)
 {
     std::stringstream ss;
 
-    sf::Color color (0x11, 0x22, 0x33, 0x44);
+    sf::Color color(0x11, 0x22, 0x33, 0x44);
     std::string expected_str = "#11223344";
     // Unused generic archive
-    cereal::JSONOutputArchive ar (ss);
+    cereal::JSONOutputArchive ar(ss);
 
     auto tested_str = cereal::save_minimal(ar, color);
     ASSERT_EQ(expected_str, tested_str);
@@ -24,17 +25,17 @@ TEST(ColorGeneratorTest, color_serialization)
 
 TEST(ColorGeneratorTest, pair_color_serialization)
 {
-    sf::Color color (0x11, 0x22, 0x33, 0x44);
+    sf::Color color(0x11, 0x22, 0x33, 0x44);
     std::pair<sf::Color, int> expected_pair {color, 42};
     std::pair<sf::Color, int> tested_pair {sf::Color::Transparent, -1};
 
     std::stringstream ss;
     {
-        cereal::JSONOutputArchive ar (ss);
+        cereal::JSONOutputArchive ar(ss);
         ar(expected_pair);
     }
     {
-        cereal::JSONInputArchive ar (ss);
+        cereal::JSONInputArchive ar(ss);
         ar(tested_pair);
     }
 
@@ -43,19 +44,18 @@ TEST(ColorGeneratorTest, pair_color_serialization)
 
 TEST(ColorGeneratorTest, vector_pair_serialization)
 {
-    std::vector<std::pair<sf::Color, int>> expected_vector =
-        { {sf::Color::Red, 7      },
-          {sf::Color::Blue, 42    },
-          {sf::Color::Green, 1337 } };
+    std::vector<std::pair<sf::Color, int>> expected_vector = {{sf::Color::Red, 7},
+                                                              {sf::Color::Blue, 42},
+                                                              {sf::Color::Green, 1337}};
     std::vector<std::pair<sf::Color, int>> tested_vector;
 
     std::stringstream ss;
     {
-        cereal::JSONOutputArchive ar (ss);
+        cereal::JSONOutputArchive ar(ss);
         ar(expected_vector);
     }
     {
-        cereal::JSONInputArchive ar (ss);
+        cereal::JSONInputArchive ar(ss);
         ar(tested_vector);
     }
 
@@ -74,7 +74,7 @@ TEST(ColorGeneratorTest, constant_ctor)
 TEST(ColorGeneratorTest, constant_copy_ctor)
 {
     ConstantColor c {sf::Color::Blue};
-    ConstantColor c_copy (c);
+    ConstantColor c_copy(c);
     ASSERT_EQ(c.get_color(), c_copy.get_color());
 }
 TEST(ColorGeneratorTest, constant_assigned)
@@ -126,11 +126,11 @@ TEST(ColorGeneratorTest, constant_serialization)
 
     std::stringstream ss;
     {
-        cereal::JSONOutputArchive oarchive (ss);
+        cereal::JSONOutputArchive oarchive(ss);
         oarchive(oconstant);
     }
     {
-        cereal::JSONInputArchive iarchive (ss);
+        cereal::JSONInputArchive iarchive(ss);
         iarchive(iconstant);
     }
 
@@ -141,36 +141,38 @@ TEST(ColorGeneratorTest, constant_serialization)
 
 namespace colors
 {
-    inline bool operator== (const LinearGradient::Key left, const LinearGradient::Key right)
-    {
-        return sf::Color(left.imcolor) == sf::Color(right.imcolor) && left.position == right.position;
-    }
+inline bool operator==(const LinearGradient::Key left, const LinearGradient::Key right)
+{
+    return sf::Color(left.imcolor) == sf::Color(right.imcolor) && left.position == right.position;
 }
+} // namespace colors
 
 // Lots of useless tests, as the constructors are defaulted-generated.
 TEST(ColorGeneratorTest, linear_ctor)
 {
-    LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
+    LinearGradient::keys keys {{sf::Color::Red, 0}, {sf::Color::Green, 0.5}, {sf::Color::Blue, 1.}};
     LinearGradient l {keys};
     ASSERT_EQ(keys, l.get_keys());
 }
 TEST(ColorGeneratorTest, linear_raw_ctor)
 {
-    LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
-    LinearGradient::keys raw_keys {{sf::Color::Red, -1},{sf::Color::Green, 0.5},{sf::Color::Blue, 2}};
+    LinearGradient::keys keys {{sf::Color::Red, 0}, {sf::Color::Green, 0.5}, {sf::Color::Blue, 1.}};
+    LinearGradient::keys raw_keys {{sf::Color::Red, -1},
+                                   {sf::Color::Green, 0.5},
+                                   {sf::Color::Blue, 2}};
     LinearGradient l {raw_keys};
     ASSERT_EQ(keys, l.get_keys());
 }
 TEST(ColorGeneratorTest, linear_copy_ctor)
 {
-    LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
+    LinearGradient::keys keys {{sf::Color::Red, 0}, {sf::Color::Green, 0.5}, {sf::Color::Blue, 1.}};
     LinearGradient l {keys};
-    LinearGradient l_copy (l);
+    LinearGradient l_copy(l);
     ASSERT_EQ(l.get_keys(), l_copy.get_keys());
 }
 TEST(ColorGeneratorTest, linear_assigned)
 {
-    LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
+    LinearGradient::keys keys {{sf::Color::Red, 0}, {sf::Color::Green, 0.5}, {sf::Color::Blue, 1.}};
     LinearGradient l {keys};
     LinearGradient l_assigned {{{sf::Color::Yellow, 0}, {sf::Color::Magenta, 1}}};
     l_assigned = l;
@@ -178,14 +180,14 @@ TEST(ColorGeneratorTest, linear_assigned)
 }
 TEST(ColorGeneratorTest, linear_move_ctor)
 {
-    LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
+    LinearGradient::keys keys {{sf::Color::Red, 0}, {sf::Color::Green, 0.5}, {sf::Color::Blue, 1.}};
     LinearGradient l {keys};
     LinearGradient l_moved {std::move(l)};
     ASSERT_EQ(keys, l_moved.get_keys());
 }
 TEST(ColorGeneratorTest, linear_moved)
 {
-    LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
+    LinearGradient::keys keys {{sf::Color::Red, 0}, {sf::Color::Green, 0.5}, {sf::Color::Blue, 1.}};
     LinearGradient l {keys};
     LinearGradient l_moved {{{sf::Color::Yellow, 0}, {sf::Color::Magenta, 1}}};
     l_moved = std::move(l);
@@ -194,20 +196,24 @@ TEST(ColorGeneratorTest, linear_moved)
 
 TEST(ColorGeneratorTest, linear_setter)
 {
-    LinearGradient::keys sanitized_keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1}};
+    LinearGradient::keys sanitized_keys {{sf::Color::Red, 0},
+                                         {sf::Color::Green, 0.5},
+                                         {sf::Color::Blue, 1}};
 
-    LinearGradient::keys raw_keys {{sf::Color::Red, -1},{sf::Color::Green, 0.5},{sf::Color::Blue, 2}};
+    LinearGradient::keys raw_keys {{sf::Color::Red, -1},
+                                   {sf::Color::Green, 0.5},
+                                   {sf::Color::Blue, 2}};
     LinearGradient l {raw_keys};
     ASSERT_EQ(sanitized_keys, l.get_keys());
 
-    raw_keys  = {{sf::Color::Red, 0.2},{sf::Color::Green, 0.5},{sf::Color::Blue, 0.8}};
+    raw_keys = {{sf::Color::Red, 0.2}, {sf::Color::Green, 0.5}, {sf::Color::Blue, 0.8}};
     l.set_keys(raw_keys);
     ASSERT_EQ(sanitized_keys, l.get_keys());
 }
 
 TEST(ColorGeneratorTest, linear_get)
 {
-    LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
+    LinearGradient::keys keys {{sf::Color::Red, 0}, {sf::Color::Green, 0.5}, {sf::Color::Blue, 1.}};
     sf::Color interpolation1 {127, 127, 0};
     sf::Color interpolation2 {0, 127, 127};
     LinearGradient l {keys};
@@ -218,7 +224,7 @@ TEST(ColorGeneratorTest, linear_get)
 
 TEST(ColorGeneratorTest, linear_clone)
 {
-    LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
+    LinearGradient::keys keys {{sf::Color::Red, 0}, {sf::Color::Green, 0.5}, {sf::Color::Blue, 1.}};
     std::shared_ptr<ColorGenerator> pl = std::make_shared<LinearGradient>(keys);
     auto clone = pl->clone();
 
@@ -227,17 +233,17 @@ TEST(ColorGeneratorTest, linear_clone)
 
 TEST(ColorGeneratorTest, linear_serialization)
 {
-    LinearGradient::keys keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
+    LinearGradient::keys keys {{sf::Color::Red, 0}, {sf::Color::Green, 0.5}, {sf::Color::Blue, 1.}};
     LinearGradient olinear {keys};
     LinearGradient ilinear;
 
     std::stringstream ss;
     {
-        cereal::JSONOutputArchive oarchive (ss);
+        cereal::JSONOutputArchive oarchive(ss);
         oarchive(olinear);
     }
     {
-        cereal::JSONInputArchive iarchive (ss);
+        cereal::JSONInputArchive iarchive(ss);
         iarchive(ilinear);
     }
 
@@ -248,11 +254,11 @@ TEST(ColorGeneratorTest, linear_serialization)
 
 namespace colors
 {
-    inline bool operator== (const DiscreteGradient::Key left, const DiscreteGradient::Key right)
-    {
-        return sf::Color(left.imcolor) == sf::Color(right.imcolor) && left.index == right.index;
-    }
+inline bool operator==(const DiscreteGradient::Key left, const DiscreteGradient::Key right)
+{
+    return sf::Color(left.imcolor) == sf::Color(right.imcolor) && left.index == right.index;
 }
+} // namespace colors
 
 // Lots of useless tests, as the constructors are defaulted-generated.
 TEST(ColorGeneratorTest, discrete_ctor)
@@ -266,14 +272,14 @@ TEST(ColorGeneratorTest, discrete_copy_ctor)
 {
     DiscreteGradient::keys keys {{sf::Color::Blue, 0}, {sf::Color::Red, 2}};
     DiscreteGradient d {keys};
-    DiscreteGradient d_copy (d);
+    DiscreteGradient d_copy(d);
     ASSERT_EQ(d.get_keys(), d_copy.get_keys());
 }
 TEST(ColorGeneratorTest, discrete_assigned)
 {
     DiscreteGradient::keys keys {{sf::Color::Blue, 0}, {sf::Color::Red, 2}};
     DiscreteGradient d {keys};
-    DiscreteGradient d_assigned {{{sf::Color::Yellow, 0},{sf::Color::Magenta, 1}}};
+    DiscreteGradient d_assigned {{{sf::Color::Yellow, 0}, {sf::Color::Magenta, 1}}};
     d_assigned = d;
     ASSERT_EQ(d.get_keys(), d_assigned.get_keys());
 }
@@ -288,7 +294,7 @@ TEST(ColorGeneratorTest, discrete_moved)
 {
     DiscreteGradient::keys keys {{sf::Color::Blue, 0}, {sf::Color::Red, 2}};
     DiscreteGradient d {keys};
-    DiscreteGradient d_moved {{{sf::Color::Yellow, 0},{sf::Color::Magenta, 1}}};
+    DiscreteGradient d_moved {{{sf::Color::Yellow, 0}, {sf::Color::Magenta, 1}}};
     d_moved = std::move(d);
     ASSERT_EQ(keys, d_moved.get_keys());
 }
@@ -296,7 +302,10 @@ TEST(ColorGeneratorTest, discrete_moved)
 TEST(ColorGeneratorTest, discrete_generate)
 {
     DiscreteGradient::keys keys {{sf::Color::Red, 0}, {sf::Color::Green, 1}, {sf::Color::Blue, 3}};
-    std::vector<sf::Color> colors {sf::Color::Red, sf::Color::Green, sf::Color(0,127,127), sf::Color::Blue};
+    std::vector<sf::Color> colors {sf::Color::Red,
+                                   sf::Color::Green,
+                                   sf::Color(0, 127, 127),
+                                   sf::Color::Blue};
     DiscreteGradient d {keys};
 
     ASSERT_EQ(colors, d.get_colors());
@@ -305,7 +314,10 @@ TEST(ColorGeneratorTest, discrete_generate)
 TEST(ColorGeneratorTest, discrete_setter)
 {
     DiscreteGradient::keys keys {{sf::Color::Red, 0}, {sf::Color::Green, 1}, {sf::Color::Blue, 3}};
-    std::vector<sf::Color> colors {sf::Color::Red, sf::Color::Green, sf::Color(0,127,127), sf::Color::Blue};
+    std::vector<sf::Color> colors {sf::Color::Red,
+                                   sf::Color::Green,
+                                   sf::Color(0, 127, 127),
+                                   sf::Color::Blue};
     DiscreteGradient d {};
     d.set_keys(keys);
 
@@ -315,8 +327,14 @@ TEST(ColorGeneratorTest, discrete_setter)
 
 TEST(ColorGeneratorTest, discrete_setter_resistance)
 {
-    DiscreteGradient::keys wrong_keys {{sf::Color::Green, 1}, {sf::Color::Red, -1}, {sf::Color::Blue, 1}, {sf::Color::Yellow, 0}};
-    DiscreteGradient::keys fixed_keys {{sf::Color::Red, 0}, {sf::Color::Yellow, 1}, {sf::Color::Green, 2}, {sf::Color::Blue, 3}};
+    DiscreteGradient::keys wrong_keys {{sf::Color::Green, 1},
+                                       {sf::Color::Red, -1},
+                                       {sf::Color::Blue, 1},
+                                       {sf::Color::Yellow, 0}};
+    DiscreteGradient::keys fixed_keys {{sf::Color::Red, 0},
+                                       {sf::Color::Yellow, 1},
+                                       {sf::Color::Green, 2},
+                                       {sf::Color::Blue, 3}};
     DiscreteGradient d {};
     d.set_keys(wrong_keys);
 
@@ -327,7 +345,10 @@ TEST(ColorGeneratorTest, discrete_setter_resistance)
 TEST(ColorGeneratorTest, discrete_get)
 {
     DiscreteGradient::keys keys {{sf::Color::Red, 0}, {sf::Color::Green, 1}, {sf::Color::Blue, 3}};
-    std::vector<sf::Color> colors {sf::Color::Red, sf::Color::Green, sf::Color(0,127,127), sf::Color::Blue};
+    std::vector<sf::Color> colors {sf::Color::Red,
+                                   sf::Color::Green,
+                                   sf::Color(0, 127, 127),
+                                   sf::Color::Blue};
     DiscreteGradient d {keys};
 
     ASSERT_EQ(colors[0], d.get(0.2));
@@ -353,11 +374,11 @@ TEST(ColorGeneratorTest, discrete_serialization)
 
     std::stringstream ss;
     {
-        cereal::JSONOutputArchive oarchive (ss);
+        cereal::JSONOutputArchive oarchive(ss);
         oarchive(odiscrete);
     }
     {
-        cereal::JSONInputArchive iarchive (ss);
+        cereal::JSONInputArchive iarchive(ss);
         iarchive(idiscrete);
     }
 
@@ -369,8 +390,12 @@ TEST(ColorGeneratorTest, discrete_serialization)
 
 TEST(ColorGeneratorTest, polymorphic_serialization)
 {
-    LinearGradient::keys linear_keys {{sf::Color::Red, 0},{sf::Color::Green, 0.5},{sf::Color::Blue, 1.}};
-    DiscreteGradient::keys discrete_keys {{sf::Color::Red, 0}, {sf::Color::Green, 1}, {sf::Color::Blue, 3}};
+    LinearGradient::keys linear_keys {{sf::Color::Red, 0},
+                                      {sf::Color::Green, 0.5},
+                                      {sf::Color::Blue, 1.}};
+    DiscreteGradient::keys discrete_keys {{sf::Color::Red, 0},
+                                          {sf::Color::Green, 1},
+                                          {sf::Color::Blue, 3}};
 
     std::shared_ptr<ColorGenerator> oconstant = std::make_shared<ConstantColor>(sf::Color::Red);
     std::shared_ptr<ColorGenerator> olinear = std::make_shared<LinearGradient>(linear_keys);
@@ -384,13 +409,13 @@ TEST(ColorGeneratorTest, polymorphic_serialization)
     std::stringstream ss_linear;
     std::stringstream ss_discrete;
     {
-        cereal::JSONOutputArchive oarchive_constant (ss_constant);
-        cereal::JSONOutputArchive oarchive_linear (ss_linear);
-        cereal::JSONOutputArchive oarchive_gradient (ss_discrete);
+        cereal::JSONOutputArchive oarchive_constant(ss_constant);
+        cereal::JSONOutputArchive oarchive_linear(ss_linear);
+        cereal::JSONOutputArchive oarchive_gradient(ss_discrete);
 
-        ColorGeneratorSerializer serializer_constant (oconstant);
-        ColorGeneratorSerializer serializer_linear (olinear);
-        ColorGeneratorSerializer serializer_discrete (odiscrete);
+        ColorGeneratorSerializer serializer_constant(oconstant);
+        ColorGeneratorSerializer serializer_linear(olinear);
+        ColorGeneratorSerializer serializer_discrete(odiscrete);
 
         oarchive_constant(serializer_constant);
         oarchive_linear(serializer_linear);
@@ -402,9 +427,9 @@ TEST(ColorGeneratorTest, polymorphic_serialization)
     ColorGeneratorSerializer serializer_linear;
     ColorGeneratorSerializer serializer_discrete;
     {
-        cereal::JSONInputArchive iarchive_constant (ss_constant);
-        cereal::JSONInputArchive iarchive_linear (ss_linear);
-        cereal::JSONInputArchive iarchive_gradient (ss_discrete);
+        cereal::JSONInputArchive iarchive_constant(ss_constant);
+        cereal::JSONInputArchive iarchive_linear(ss_linear);
+        cereal::JSONInputArchive iarchive_gradient(ss_discrete);
 
         iarchive_constant(serializer_constant);
         iarchive_linear(serializer_linear);
