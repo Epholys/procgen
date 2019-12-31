@@ -21,14 +21,14 @@ IFLAGS     += -isystem . -I$(INCLUDE_DIR)
 # Other flags
 debug : CXXFLAGS = -std=c++17 -g -O0 -Wall -Wextra -pthread
 debug : MACROFLAGS += -DDEBUG_CHECKS
+
 profiling : CXXFLAGS += -g
 optimized : CXXFLAGS += -march=native
-test: TESTFLAGS = --coverage
-test: LTESTFLAGS= --coverage
-testdebug : CXXFLAGS = -std=c++17 -g -O0 -Wall -Wextra -pthread
-testdebug : MACROFLAGS += -DDEBUG_CHECKS
-testdebug: TESTFLAGS = --coverage
-testdebug: LTESTFLAGS= --coverage
+
+coverage: CXXFLAGS = -std=c++17 -g -O0 -Wall -Wextra -pthread
+coverage: MACROFLAGS += -DDEBUG_CHECKS
+coverage: TESTFLAGS = --coverage
+coverage: LTESTFLAGS= --coverage
 
 ### Source files, Object Files, Directories, Targets, ...
 # Core object files to compile for every target.
@@ -62,7 +62,7 @@ TEST_TARGET = $(TEST_DIR)/procgenTest.out
 GTEST_DIR = /usr/src/googletest/googletest
 
 # Flags passed to the preprocessor
-GTEST_CPPFLAGS = --coverage -isystem $(GTEST_DIR)/include
+GTEST_CPPFLAGS = -isystem $(GTEST_DIR)/include
 
 # All Google Test headers.
 GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
@@ -73,7 +73,11 @@ GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 
 
 
-all : testdebug
+all : format debug test
+
+format:
+	clang-format-9 -style=file -i $(SRCS) $(INCLUDES) $(TEST_SRC)
+
 
 # Cleans all intermediate compilation files.
 clean :
@@ -90,28 +94,26 @@ main : $(ALL_OBJECTS)
 # test: Links all OBJECTS, TEST files plus gtest_main.a into the test
 #       suite TEST_TARGET.
 test : $(OBJECTS) $(TEST_OBJ) $(TEST_DIR)/gtest_main.a
-	$(CXX) $(GTEST_CPPFLAGS) $(CXXFLAGS) -o $(TEST_TARGET) $^ $(IFLAGS) $(LFLAGS) -lpthread
+	$(CXX) $(GTEST_CPPFLAGS) $(TESTFLAGS) $(CXXFLAGS) -o $(TEST_TARGET) $^ $(IFLAGS) $(LFLAGS) $(LTESTFLAGS) -lpthread
 	./$(TEST_TARGET)
+
+# debug: only main but with debug flags
+debug : main
+
+coverage : main test
 	lcov --capture --directory src/ --output-file coverage.info
 	lcov --remove coverage.info $(shell pwd)/cereal/\* $(shell pwd)/imgui/\* $(shell pwd)/gsl/\* '/usr/include/*' -o clean-coverage.info
 	genhtml clean-coverage.info --output-directory out
 
-# debug: only main but with debug flags
-debug : format main
-
-testdebug : format main test
-
 # release: Same as main with optimization flags (see above).
-release : format main
+release : main
 
 # profiling: Same as main with optimization and debug flags (see above)
-profiling : format main
+profiling : main
 
 # optimized: Same as main with the even more optimization flags (see above)
-optimized : format main
+optimized : main
 
-format:
-	clang-format-9 -style=file -i $(SRCS) $(INCLUDES) $(TEST_SRC)
 
 # Each .o file is compiled with its associated *.cpp file.
 %.o : %.cpp
