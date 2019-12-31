@@ -1,8 +1,9 @@
-#include <gtest/gtest.h>
+#include "LSystemView.h"
+
+#include "VertexPainterLinear.h"
 #include "cereal/archives/json.hpp"
 
-#include "LSystemView.h"
-#include "VertexPainterLinear.h"
+#include <gtest/gtest.h>
 
 using namespace procgui;
 using namespace drawing;
@@ -29,19 +30,18 @@ struct parameters_example
     std::string name {"Testing"};
     LSystem lsys {"X", LSystem::Rules({{'F', "FF"}, {'X', "F[+X][-X]"}}), "X"};
     InterpretationMap map {default_interpretation_map};
-    DrawingParameters params {{10,10}, 1, 1, 5, 3};
-    VertexPainterWrapper painter {
-            std::make_shared<VertexPainterLinear>(
-                ColorGeneratorWrapper(
-                    std::make_shared<LinearGradient>(LinearGradient::keys({{sf::Color::Red, 0.}, {sf::Color::Blue, 1.0}}))))};
+    DrawingParameters params {{10, 10}, 1, 1, 5, 3};
+    VertexPainterWrapper painter {std::make_shared<VertexPainterLinear>(
+        ColorGeneratorWrapper(std::make_shared<LinearGradient>(
+            LinearGradient::keys({{sf::Color::Red, 0.}, {sf::Color::Blue, 1.0}}))))};
 };
 
 TEST(LSystemView, copy_ctor)
 {
     parameters_example params;
-    LSystemView copied_view (params.name, params.lsys, params.map, params.params, params.painter);
+    LSystemView copied_view(params.name, params.lsys, params.map, params.params, params.painter);
     copied_view.select();
-    LSystemView copy_view (copied_view);
+    LSystemView copy_view(copied_view);
 
     ASSERT_NE(copied_view.get_id(), copy_view.get_id());
     ASSERT_NE(copied_view.get_color(), copy_view.get_color());
@@ -51,9 +51,9 @@ TEST(LSystemView, copy_ctor)
 TEST(LSystemView, copy_assignment_ctor)
 {
     parameters_example params;
-    LSystemView assigned_view (params.name, params.lsys, params.map, params.params, params.painter);
+    LSystemView assigned_view(params.name, params.lsys, params.map, params.params, params.painter);
     assigned_view.select();
-    LSystemView assign_view ({100, 100}, 5);
+    LSystemView assign_view({100, 100}, 5);
     assign_view = assigned_view;
 
     ASSERT_NE(assigned_view.get_id(), assign_view.get_id());
@@ -64,11 +64,11 @@ TEST(LSystemView, copy_assignment_ctor)
 TEST(LSystemView, move_ctor)
 {
     parameters_example params;
-    LSystemView moved_view (params.name, params.lsys, params.map, params.params, params.painter);
+    LSystemView moved_view(params.name, params.lsys, params.map, params.params, params.painter);
     moved_view.select();
     auto id = moved_view.get_id();
     auto color = moved_view.get_color();
-    LSystemView move_view (std::move(moved_view));
+    LSystemView move_view(std::move(moved_view));
 
 
     ASSERT_EQ(move_view.get_id(), id);
@@ -79,11 +79,11 @@ TEST(LSystemView, move_ctor)
 TEST(LSystemView, assign_move_ctor)
 {
     parameters_example params;
-    LSystemView moved_view (params.name, params.lsys, params.map, params.params, params.painter);
+    LSystemView moved_view(params.name, params.lsys, params.map, params.params, params.painter);
     moved_view.select();
     auto id = moved_view.get_id();
     auto color = moved_view.get_color();
-    LSystemView move_view ({100, 100}, 5);
+    LSystemView move_view({100, 100}, 5);
     move_view = std::move(moved_view);
 
     ASSERT_EQ(move_view.get_id(), id);

@@ -6,7 +6,7 @@ RuleMap<Successor>::RuleMap(const Rules& rules)
 
 template<typename Successor>
 RuleMap<Successor>::RuleMap(std::initializer_list<typename Rules::value_type> init)
-    : rules_{init}
+    : rules_ {init}
 {
 }
 
@@ -27,7 +27,7 @@ template<typename Successor>
 typename RuleMap<Successor>::Rule RuleMap<Successor>::get_rule(char predecessor) const
 {
     Expects(has_predecessor(predecessor));
-    return { predecessor, rules_.at(predecessor) };
+    return {predecessor, rules_.at(predecessor)};
 }
 
 template<typename Successor>

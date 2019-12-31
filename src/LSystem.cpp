@@ -1,5 +1,6 @@
-#include "gsl/gsl"
 #include "LSystem.h"
+
+#include "gsl/gsl"
 
 
 // Some functions returns references to axiom or production that could be empty.
@@ -9,10 +10,10 @@ const static std::string empty_string = "";
 LSystem::LSystem(const std::string& axiom, const Rules& prod, const std::string& preds)
     : RuleMap<std::string>(prod)
     , iteration_predecessors_ {preds}
-    , production_cache_{ {0, axiom} }
-    , iteration_count_cache_ { {0, {std::vector<u8>(axiom.size(), 0), 0} } }
-    {
-    }
+    , production_cache_ {{0, axiom}}
+    , iteration_count_cache_ {{0, {std::vector<u8>(axiom.size(), 0), 0}}}
+{
+}
 
 const std::string& LSystem::get_axiom() const
 {
@@ -45,42 +46,42 @@ const LSystem::IterationCache& LSystem::get_iteration_cache() const
 
 void LSystem::set_axiom(const std::string& axiom)
 {
-    production_cache_ = { {0, axiom} };
-    iteration_count_cache_ = { {0, {std::vector<u8>(axiom.size(), 0), 0} } };
+    production_cache_ = {{0, axiom}};
+    iteration_count_cache_ = {{0, {std::vector<u8>(axiom.size(), 0), 0}}};
     indicate_modification();
 }
 
 void LSystem::add_rule(char predecessor, const Successor& successor)
 {
-    production_cache_ = { {0, get_axiom()} };
-    iteration_count_cache_ = { {0, {std::vector<u8>(get_axiom().size(), 0), 0} } };
+    production_cache_ = {{0, get_axiom()}};
+    iteration_count_cache_ = {{0, {std::vector<u8>(get_axiom().size(), 0), 0}}};
     RuleMap::add_rule(predecessor, successor);
 }
 
 void LSystem::remove_rule(char predecessor)
 {
-    production_cache_ = { {0, get_axiom()} };
-    iteration_count_cache_ = { {0, {std::vector<u8>(get_axiom().size(), 0), 0} } };
+    production_cache_ = {{0, get_axiom()}};
+    iteration_count_cache_ = {{0, {std::vector<u8>(get_axiom().size(), 0), 0}}};
     RuleMap::remove_rule(predecessor);
 }
 
 void LSystem::clear_rules()
 {
-    production_cache_ = { {0, get_axiom()} };
-    iteration_count_cache_ = { {0, {{std::vector<u8>(get_axiom().size(), 0)}, 0}}};
+    production_cache_ = {{0, get_axiom()}};
+    iteration_count_cache_ = {{0, {{std::vector<u8>(get_axiom().size(), 0)}, 0}}};
     RuleMap::clear_rules();
 }
 
 void LSystem::replace_rules(const Rules& new_rules)
 {
-    production_cache_ = { {0, get_axiom()} };
-    iteration_count_cache_ = { {0, {{std::vector<u8>(get_axiom().size(), 0)}, 0}}};
+    production_cache_ = {{0, get_axiom()}};
+    iteration_count_cache_ = {{0, {{std::vector<u8>(get_axiom().size(), 0)}, 0}}};
     RuleMap::replace_rules(new_rules);
 }
 
 void LSystem::set_iteration_predecessors(const std::string& predecessors)
 {
-    iteration_count_cache_ = { {0, {std::vector<u8>(get_axiom().size(), 0), 0} } };
+    iteration_count_cache_ = {{0, {std::vector<u8>(get_axiom().size(), 0), 0}}};
     iteration_predecessors_ = predecessors;
     indicate_modification();
 }
@@ -111,14 +112,14 @@ LSystem::LSystemProduction LSystem::produce(u8 n, unsigned long long size)
 
     // The caches saves all the iteration from the start. So we get
     // the highest-iteration result for each cache.
-    auto highest_production = std::max_element(production_cache_.begin(),
-                                               production_cache_.end(),
-                                               [](const auto& pair1, const auto& pair2)
-                                               { return pair1.first < pair2.first; });
-    auto highest_iteration = std::max_element(iteration_count_cache_.begin(),
-                                              iteration_count_cache_.end(),
-                                              [](const auto& pair1, const auto& pair2)
-                                              { return pair1.first < pair2.first; });
+    auto highest_production = std::max_element(
+        production_cache_.begin(),
+        production_cache_.end(),
+        [](const auto& pair1, const auto& pair2) { return pair1.first < pair2.first; });
+    auto highest_iteration = std::max_element(
+        iteration_count_cache_.begin(),
+        iteration_count_cache_.end(),
+        [](const auto& pair1, const auto& pair2) { return pair1.first < pair2.first; });
 
     // Invariant check: the production cache element count must be equal or
     // greater than the iteration one.
@@ -136,7 +137,8 @@ LSystem::LSystemProduction LSystem::produce(u8 n, unsigned long long size)
 
     int max_iteration = highest_iteration->second.second;
     u8 n_iter = n - highest_iteration->first;
-    for (u8 i=0; i<n_iter; ++i) {
+    for (u8 i = 0; i < n_iter; ++i)
+    {
         // We start iterating from the iteration's highest iteration.
         const std::string& base_production = production_cache_.at(highest_iteration->first + i);
         const auto& [base_iteration, _] = iteration_count_cache_.at(highest_iteration->first + i);
@@ -156,7 +158,7 @@ LSystem::LSystemProduction LSystem::produce(u8 n, unsigned long long size)
         bool is_new_iteration = false;
 
 
-        for (auto j=0u; j<base_iteration.size(); ++j)
+        for (auto j = 0u; j < base_iteration.size(); ++j)
         {
             char c = base_production.at(j);
             int successor_count = 0;
@@ -172,7 +174,9 @@ LSystem::LSystemProduction LSystem::produce(u8 n, unsigned long long size)
                     std::string derivation = rules_.at(c);
 
                     // Replace the symbol according to its rule.
-                    tmp_production.insert(tmp_production.end(), derivation.begin(), derivation.end());
+                    tmp_production.insert(tmp_production.end(),
+                                          derivation.begin(),
+                                          derivation.end());
                 }
             }
             else // The identity rule
@@ -198,7 +202,7 @@ LSystem::LSystemProduction LSystem::produce(u8 n, unsigned long long size)
             tmp_iteration.insert(end(tmp_iteration), successor_count, order);
         }
 
-        if(!only_iteration)
+        if (!only_iteration)
         {
             production_cache_.try_emplace(highest_iteration->first + i + 1,
                                           std::move(tmp_production));
@@ -206,7 +210,7 @@ LSystem::LSystemProduction LSystem::produce(u8 n, unsigned long long size)
 
         iteration_count_cache_.try_emplace(highest_iteration->first + i + 1,
                                            std::move(tmp_iteration),
-                                           is_new_iteration ? max_iteration+1 : max_iteration);
+                                           is_new_iteration ? max_iteration + 1 : max_iteration);
         max_iteration = iteration_count_cache_.at(highest_iteration->first + i + 1).second;
     }
 

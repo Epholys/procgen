@@ -33,6 +33,8 @@ testdebug: LTESTFLAGS= --coverage
 ### Source files, Object Files, Directories, Targets, ...
 # Core object files to compile for every target.
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+INCLUDES = $(wildcard $(INCLUDE_DIR)/*.h)
+INCLUDES += $(wildcard $(INCLUDE_DIR)/*.tpp)
 ALL_OBJECTS = $(SRCS:%.cpp=%.o)
 OBJECTS = $(filter-out $(SRC_DIR)/main.o, $(ALL_OBJECTS))
 
@@ -108,6 +110,8 @@ profiling : format main
 # optimized: Same as main with the even more optimization flags (see above)
 optimized : format main
 
+format:
+	clang-format-9 -style=file -i $(SRCS) $(INCLUDES) $(TEST_SRC)
 
 # Each .o file is compiled with its associated *.cpp file.
 %.o : %.cpp

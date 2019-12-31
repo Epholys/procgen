@@ -1,35 +1,34 @@
-#include <cmath>
-#include <sstream>
-
-#include <gtest/gtest.h>
-#include <SFML/Graphics.hpp>
-#include "cereal/archives/json.hpp"
-
+#include "InterpretationMap.h"
 #include "LSystem.h"
 #include "Turtle.h"
-#include "InterpretationMap.h"
+#include "cereal/archives/json.hpp"
+
+#include <SFML/Graphics.hpp>
+#include <cmath>
+#include <gtest/gtest.h>
+#include <sstream>
 
 
 using namespace std;
 using namespace drawing;
 using namespace math;
 
-class DrawingTest :  public ::testing::Test
+class DrawingTest : public ::testing::Test
 {
-public:
+  public:
     DrawingTest()
-        {
-        }
+    {
+    }
 
-    LSystem lsys { "F", { { 'F', "F+G" } }, "F" };
-    InterpretationMap interpretation { { 'F', go_forward },
-                                        { 'G', go_forward },
-                                        { '+', turn_left  },
-                                        { '-', turn_right },
-                                        { '[', save_position },
-                                        { ']', load_position } };
+    LSystem lsys {"F", {{'F', "F+G"}}, "F"};
+    InterpretationMap interpretation {{'F', go_forward},
+                                      {'G', go_forward},
+                                      {'+', turn_left},
+                                      {'-', turn_right},
+                                      {'[', save_position},
+                                      {']', load_position}};
     // starting_position, starting_angle, delta_angle, step, n_iter
-    DrawingParameters parameters { { 100, 100 }, 0, degree_to_rad(90.), 10, 0 };
+    DrawingParameters parameters {{100, 100}, 0, degree_to_rad(90.), 10, 0};
     Turtle turtle {parameters};
 };
 
@@ -37,14 +36,12 @@ public:
 // defined inside the 'sf' namespace to help googletest find it.
 namespace sf
 {
-    inline bool operator== (const sf::Vertex& left, const sf::Vertex& right)
-    {
-        return
-            left.position == right.position &&
-            left.color == right.color &&
-            left.texCoords == right.texCoords;
-    }
+inline bool operator==(const sf::Vertex& left, const sf::Vertex& right)
+{
+    return left.position == right.position && left.color == right.color
+           && left.texCoords == right.texCoords;
 }
+} // namespace sf
 
 // Some InterpretationMap's constructors are defaulted, we assume the
 // implementation is correct.
@@ -54,17 +51,17 @@ namespace sf
 // Test the go_forward order.
 TEST_F(DrawingTest, go_forward)
 {
-    sf::Vertex begin ( {0.f, 0.f} );
-    float newx = Turtle::step_* std::cos(parameters.get_starting_angle());
+    sf::Vertex begin({0.f, 0.f});
+    float newx = Turtle::step_ * std::cos(parameters.get_starting_angle());
     float newy = Turtle::step_ * std::sin(parameters.get_starting_angle());
-    sf::Vector2f end_pos = begin.position + sf::Vector2f (newx, newy);
-    sf::Vertex end { end_pos };
-    std::vector<std::uint8_t> expected_iter {1,1};
+    sf::Vector2f end_pos = begin.position + sf::Vector2f(newx, newy);
+    sf::Vertex end {end_pos};
+    std::vector<std::uint8_t> expected_iter {1, 1};
 
     go_forward_fn(turtle);
 
     ASSERT_EQ(turtle.vertices_.at(0), end);
-    //ASSERT_EQ(turtle.vertices.at(1), end);
+    // ASSERT_EQ(turtle.vertices.at(1), end);
     // CAN'T TEST ITERS WITH NEW SYSTEM
     // ASSERT_EQ(turtle.iteration_of_vertices, expected_iter);
 }
@@ -74,7 +71,7 @@ TEST_F(DrawingTest, turn_right)
 {
     turn_right_fn(turtle);
 
-    ext::sf::Vector2d direction { 0, -1 };
+    ext::sf::Vector2d direction {0, -1};
     ASSERT_NEAR(turtle.state_.direction.x, direction.x, 1e-10);
     ASSERT_NEAR(turtle.state_.direction.y, direction.y, 1e-10);
 }
@@ -84,7 +81,7 @@ TEST_F(DrawingTest, turn_left)
 {
     turn_left_fn(turtle);
 
-    ext::sf::Vector2d direction { 0, 1 };
+    ext::sf::Vector2d direction {0, 1};
     ASSERT_NEAR(turtle.state_.direction.x, direction.x, 1e-10);
     ASSERT_NEAR(turtle.state_.direction.y, direction.y, 1e-10);
 }
@@ -104,7 +101,7 @@ TEST_F(DrawingTest, stack_test)
     ASSERT_EQ(saved_state.direction, turtle.state_.direction);
 
     // 1 at creation, 1 at go_forward, 3 at load_position_fn
-    std::vector<std::uint8_t> expected_iter {1,1,1,1,1};
+    std::vector<std::uint8_t> expected_iter {1, 1, 1, 1, 1};
     // CAN'T TEST ITERS WITH NEW SYSTEM
     // ASSERT_EQ(turtle.iteration_of_vertices, expected_iter);
 }
@@ -117,12 +114,12 @@ TEST_F(DrawingTest, stack_test)
 TEST_F(DrawingTest, compute_paths)
 {
     go_forward_fn(turtle);
-    turn_left_fn (turtle);
+    turn_left_fn(turtle);
     go_forward_fn(turtle);
 
-    std::vector<sf::Vertex> norm { sf::Vertex({0, 0}),
-                                   turtle.vertices_.at(0),
-                                   turtle.vertices_.at(1) };
+    std::vector<sf::Vertex> norm {sf::Vertex({0, 0}),
+                                  turtle.vertices_.at(0),
+                                  turtle.vertices_.at(1)};
 
     parameters.set_n_iter(1);
     auto [str, iter, _] = lsys.produce(1);
@@ -132,18 +129,18 @@ TEST_F(DrawingTest, compute_paths)
     ASSERT_EQ(vx, norm);
 
     // 1 at creation, 1 at first go_forward, 1 at second go_forward
-    std::vector<std::uint8_t> expected_iter {1,1,1};
+    std::vector<std::uint8_t> expected_iter {1, 1, 1};
     // CAN'T TEST ITERS WITH NEW SYSTEM
     // ASSERT_EQ(vx_iter, expected_iter);
 }
 
 namespace drawing
 {
-    bool operator==(const Order& o1, const Order& o2)
-    {
-        return o1.id == o2.id;
-    }
+bool operator==(const Order& o1, const Order& o2)
+{
+    return o1.id == o2.id;
 }
+} // namespace drawing
 // Also test 'Order' save/load
 TEST_F(DrawingTest, serialization)
 {
@@ -151,11 +148,11 @@ TEST_F(DrawingTest, serialization)
 
     std::stringstream ss;
     {
-        cereal::JSONOutputArchive oarchive (ss);
+        cereal::JSONOutputArchive oarchive(ss);
         oarchive(interpretation);
     }
     {
-        cereal::JSONInputArchive iarchive (ss);
+        cereal::JSONInputArchive iarchive(ss);
         iarchive(imap);
     }
 

@@ -19,7 +19,7 @@
 //   used, so nothing is lost.
 class Indicator
 {
-public:
+  public:
     // Defaulted everything
     Indicator() = default;
     virtual ~Indicator() = default;
@@ -32,11 +32,11 @@ public:
     // Set to virtual to ease the special case of chained Indicators.
     virtual bool poll_modification();
 
-protected:
+  protected:
     // Set 'is_modified_' to true.
     void indicate_modification();
 
-private:
+  private:
     // Flag to indicate another class if the object is meaningfully modified.
     bool is_modified_ {false};
 };

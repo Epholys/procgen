@@ -2,10 +2,10 @@
 #define HELPER_STRING_H
 
 
-#include <locale>
-#include <array>
-#include <string>
 #include <algorithm>
+#include <array>
+#include <locale>
+#include <string>
 
 // ImGui heavily use C-style string for displaying and interacting with
 // text. Passing raw pointers is tricky, so I prefer to use std::array with easy
@@ -23,10 +23,8 @@ std::array<char, N> string_to_array(std::string str)
 {
     std::array<char, N> arr {};
     arr.fill('\0');
-    str.resize(N-1, '\0');
-    std::copy(str.begin(),
-              std::find(str.begin(), str.end(), '\0'),
-              arr.begin());
+    str.resize(N - 1, '\0');
+    std::copy(str.begin(), std::find(str.begin(), str.end(), '\0'), arr.begin());
     return arr;
 }
 
@@ -36,14 +34,13 @@ std::array<char, N> string_to_array(std::string str)
 template<size_t N>
 std::string array_to_string(const std::array<char, N>& arr)
 {
-    return {arr.begin(),
-            std::find(arr.begin(), arr.end(), '\0')};
+    return {arr.begin(), std::find(arr.begin(), arr.end(), '\0')};
 }
 
 // Trim whitespace on the left
 std::string ltrim(std::string str);
 // Trim whitespace on the right
-std::string rtrim( std::string str);
+std::string rtrim(std::string str);
 // Trim whitespace both side
 std::string trim(std::string str);
 
