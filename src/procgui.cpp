@@ -286,7 +286,7 @@ void interact_with(LSystemBuffer& buffer, const std::string& name)
     }
 
     // The LSystem itelf
-    auto lsys = buffer.ref_rule_map();
+    auto& lsys = buffer.ref_rule_map();
 
     // --- Axiom ---
     auto buf = string_to_array<lsys_successor_size>(lsys.get_axiom());
@@ -642,7 +642,7 @@ void create_new_vertex_painter(colors::VertexPainterWrapper& wrapper,
     }
     else
     {
-        next_generator = painter->ref_generator_wrapper();
+        next_generator = painter->get_generator_wrapper();
     }
 
     switch (index)
