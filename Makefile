@@ -27,7 +27,7 @@ optimized : CXXFLAGS += -march=native
 
 coverage: CXXFLAGS = -std=c++17 -g -O0 -Wall -Wextra -pthread
 coverage: MACROFLAGS += -DDEBUG_CHECKS
-coverage: TESTFLAGS = --coverage
+coverage: TESTFLAGS = --coverage -fno-inline -fno-inline-small-functions -fno-default-inline
 coverage: LTESTFLAGS= --coverage
 
 ### Source files, Object Files, Directories, Targets, ...
@@ -95,15 +95,17 @@ main : $(ALL_OBJECTS)
 #       suite TEST_TARGET.
 test : $(OBJECTS) $(TEST_OBJ) $(TEST_DIR)/gtest_main.a
 	$(CXX) $(GTEST_CPPFLAGS) $(TESTFLAGS) $(CXXFLAGS) -o $(TEST_TARGET) $^ $(IFLAGS) $(LFLAGS) $(LTESTFLAGS) -lpthread
-	./$(TEST_TARGET)
 
 # debug: only main but with debug flags
 debug : main
 
-coverage : main test
-	lcov --capture --directory src/ --output-file coverage.info
-	lcov --remove coverage.info $(shell pwd)/cereal/\* $(shell pwd)/imgui/\* $(shell pwd)/gsl/\* '/usr/include/*' -o clean-coverage.info
-	genhtml clean-coverage.info --output-directory out
+coverage : format main test
+	lcov --capture --initial --directory src/ --directory includes/ --directory test/ -o coverage-baseline.info
+	./$(TEST_TARGET)
+	lcov --capture --directory src/ --directory includes/ --directory test/ --output-file coverage.info
+	lcov --add-tracefile coverage-baseline.info --add-tracefile coverage.info -o coverage-combined.info
+	lcov --remove coverage-combined.info $(shell pwd)/test/\* $(shell pwd)/cereal/\* $(shell pwd)/imgui/\* $(shell pwd)/gsl/\* '/usr/include/*' '/usr/src/*' -o coverage-clean.info
+	genhtml coverage-clean.info --output-directory out
 
 # release: Same as main with optimization flags (see above).
 release : main
