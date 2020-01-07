@@ -125,7 +125,7 @@ void WindowController::right_click_menu(sf::RenderWindow& window,
 }
 
 
-void WindowController::handle_input(std::vector<sf::Event> events,
+void WindowController::handle_input(const std::vector<sf::Event>& events,
                                     std::list<procgui::LSystemView>& lsys_views)
 {
     ImGuiIO& imgui_io = ImGui::GetIO();

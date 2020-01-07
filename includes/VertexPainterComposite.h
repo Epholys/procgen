@@ -132,7 +132,7 @@ class VertexPainterComposite : public VertexPainter
     // Static methods to manage the copy of the VertexPainter.
     static bool has_copied_painter();
     static std::shared_ptr<VertexPainter> get_copied_painter();
-    static void save_painter(std::shared_ptr<VertexPainter> painter);
+    static void save_painter(const std::shared_ptr<VertexPainter>& painter);
 
     // Implements the deep-copy cloning.
     virtual std::shared_ptr<VertexPainter> clone() const override;

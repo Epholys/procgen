@@ -190,7 +190,7 @@ const std::vector<sf::Color>& DiscreteGradient::get_colors() const
 }
 
 
-void DiscreteGradient::set_keys(keys keys)
+void DiscreteGradient::set_keys(const keys& keys)
 {
     // Verify the invariant
     Expects(keys.size() >= 2);

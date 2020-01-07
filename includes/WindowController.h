@@ -38,7 +38,7 @@ class WindowController
 
     // Hub of all the input of the application, manages locally the 'sf::View'
     // of the 'window'.
-    static void handle_input(std::vector<sf::Event> events,
+    static void handle_input(const std::vector<sf::Event>& events,
                              std::list<procgui::LSystemView>& lsys_views);
 
     // The 'sf::Mouse::getPosition()' give the absolute position in a

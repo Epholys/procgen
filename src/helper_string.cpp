@@ -1,6 +1,7 @@
 #include "helper_string.h"
 
 #include <cctype>
+#include <utility>
 
 std::string ltrim(std::string str)
 {
@@ -22,7 +23,7 @@ std::string rtrim(std::string str)
 
 std::string trim(std::string str)
 {
-    return ltrim(rtrim(str));
+    return ltrim(rtrim(std::move(str)));
 }
 
 std::string to_camel_case(std::string str)

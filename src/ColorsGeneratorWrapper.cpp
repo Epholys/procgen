@@ -1,5 +1,7 @@
 #include "ColorsGeneratorWrapper.h"
 
+#include <utility>
+
 namespace colors
 {
 ColorGeneratorWrapper::ColorGeneratorWrapper()
@@ -8,7 +10,7 @@ ColorGeneratorWrapper::ColorGeneratorWrapper()
 }
 
 ColorGeneratorWrapper::ColorGeneratorWrapper(std::shared_ptr<ColorGenerator> gen)
-    : generator_ {gen}
+    : generator_ {std::move(gen)}
 {
 }
 
@@ -46,7 +48,7 @@ std::shared_ptr<ColorGenerator> ColorGeneratorWrapper::unwrap() const
 
 void ColorGeneratorWrapper::wrap(std::shared_ptr<ColorGenerator> gen)
 {
-    generator_ = gen;
+    generator_ = std::move(gen);
     indicate_modification();
 }
 

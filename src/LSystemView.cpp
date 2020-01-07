@@ -78,12 +78,12 @@ LSystemView::LSystemView(LSystemView&& other)
     , map_ {other.map_}
     , painter_ {other.painter_}
     , id_ {other.id_}
-    , color_id_ {std::move(other.color_id_)}
+    , color_id_ {other.color_id_}
     , name_ {std::move(other.name_)}
     , is_modified_ {other.is_modified_}
     , turtle_ {other.turtle_}
     , max_iteration_ {other.max_iteration_}
-    , bounding_box_ {std::move(other.bounding_box_)}
+    , bounding_box_ {other.bounding_box_}
     , sub_boxes_ {std::move(other.sub_boxes_)}
     , is_selected_ {false}
     , bounding_box_is_visible_ {true}
@@ -144,7 +144,7 @@ LSystemView& LSystemView::operator=(LSystemView&& other)
         is_modified_ = other.is_modified_;
         turtle_ = other.turtle_;
         max_iteration_ = other.max_iteration_;
-        bounding_box_ = std::move(other.bounding_box_);
+        bounding_box_ = other.bounding_box_;
         sub_boxes_ = std::move(other.sub_boxes_);
         is_selected_ = false;
         bounding_box_is_visible_ = true;

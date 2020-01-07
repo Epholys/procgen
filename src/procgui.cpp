@@ -117,7 +117,7 @@ void display(const LSystem& lsys, const std::string& name)
 
     ImGui::Indent();
 
-    ImGui::Text(lsys.get_axiom().c_str());
+    ImGui::Text("%s", lsys.get_axiom().c_str());
 
     ImGui::Unindent();
 
@@ -131,7 +131,7 @@ void display(const LSystem& lsys, const std::string& name)
         std::ostringstream oss;
         oss << rule.first << " -> " << rule.second;
         std::string str = oss.str();
-        ImGui::Text(str.c_str());
+        ImGui::Text("%s", str.c_str());
     }
     ImGui::Unindent();
 
@@ -140,7 +140,7 @@ void display(const LSystem& lsys, const std::string& name)
 
     ImGui::Indent();
 
-    ImGui::Text(lsys.get_iteration_predecessors().c_str());
+    ImGui::Text("%s", lsys.get_iteration_predecessors().c_str());
 
     ImGui::Unindent();
 
@@ -197,7 +197,7 @@ void display(const drawing::InterpretationMap& map, const std::string& name)
         return;
     }
 
-    for (auto interpretation : map.get_rules())
+    for (const auto& interpretation : map.get_rules())
     {
         std::string name = interpretation.second.name;
         ImGui::Text("%c -> %s", interpretation.first, name.c_str());

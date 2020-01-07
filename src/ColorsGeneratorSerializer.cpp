@@ -1,5 +1,7 @@
 #include "ColorsGeneratorSerializer.h"
 
+#include <utility>
+
 namespace colors
 {
 ColorGeneratorSerializer::ColorGeneratorSerializer()
@@ -8,7 +10,7 @@ ColorGeneratorSerializer::ColorGeneratorSerializer()
 }
 
 ColorGeneratorSerializer::ColorGeneratorSerializer(std::shared_ptr<ColorGenerator> to_serialize)
-    : serialized_ {to_serialize}
+    : serialized_ {std::move(to_serialize)}
 {
     Expects(serialized_);
 }

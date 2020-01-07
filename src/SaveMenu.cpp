@@ -32,9 +32,9 @@ void SaveMenu::save_lsys(const std::string& trimmed_filename)
         // Open the file error popup if the save file is inaccessible
         procgui::PopupGUI file_error_popup = {
             "Error##PERM",
-            [this, trimmed_filename]() {
+            [ trimmed_filename]() {
                 std::string error_message = "Error: can't open file: " + trimmed_filename;
-                ImGui::Text(error_message.c_str());
+                ImGui::Text("%s", error_message.c_str());
             }};
 
         popups_ids_.push_back(procgui::push_popup(file_error_popup));
@@ -78,7 +78,7 @@ bool SaveMenu::save_button(const std::string& trimmed_filename, sf::Keyboard::Ke
                 [trimmed_filename]() {
                     std::string warning_text = trimmed_filename
                                                + " already exists.\nDo you want to overwrite it?";
-                    ImGui::Text(warning_text.c_str());
+                    ImGui::Text("%s", warning_text.c_str());
                 },
                 false,
                 "Overwrite",
@@ -321,7 +321,7 @@ void SaveMenu::list(std::vector<file_entry>& save_files)
             [this]() {
                 std::string error_message = "Error: can't open directory: "
                                             + save_dir_.filename().string();
-                ImGui::Text(error_message.c_str());
+                ImGui::Text("%s", error_message.c_str());
             }};
         popups_ids_.push_back(procgui::push_popup(dir_error_popup));
         close_menu_ = true;

@@ -1,5 +1,7 @@
 #include "VertexPainterWrapper.h"
 
+#include <utility>
+
 #include "VertexPainterConstant.h"
 
 namespace colors
@@ -10,7 +12,7 @@ VertexPainterWrapper::VertexPainterWrapper()
 }
 
 VertexPainterWrapper::VertexPainterWrapper(std::shared_ptr<VertexPainter> painter)
-    : painter_ {painter}
+    : painter_ {std::move(painter)}
 {
 }
 
@@ -51,7 +53,7 @@ std::shared_ptr<VertexPainter> VertexPainterWrapper::unwrap() const
 
 void VertexPainterWrapper::wrap(std::shared_ptr<VertexPainter> painter)
 {
-    painter_ = painter;
+    painter_ = std::move(painter);
     indicate_modification();
 }
 

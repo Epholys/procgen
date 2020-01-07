@@ -55,7 +55,7 @@ void LoadMenu::load(std::list<procgui::LSystemView>& lsys_views,
             [this]() {
                 std::string message = "Error: file '" + array_to_string(file_to_load_)
                                       + "' isn't a valid or complete JSON L-System file.";
-                ImGui::Text(message.c_str());
+                ImGui::Text("%s", message.c_str());
             }};
 
         popups_ids_.push_back(procgui::push_popup(format_popup));
@@ -91,12 +91,12 @@ void LoadMenu::load(std::list<procgui::LSystemView>& lsys_views,
                     message = "Warning: file '" + array_to_string(file_to_load_)
                               + "' has one issue:\n";
                 }
-                ImGui::Text(message.c_str());
+                ImGui::Text("%s", message.c_str());
 
                 for (const auto& error_message : error_messages)
                 {
                     std::string message = "\t- " + error_message + "\n";
-                    ImGui::Text(message.c_str());
+                    ImGui::Text("%s", message.c_str());
                 }
 
                 if (error_messages.size() > 1)
@@ -141,7 +141,7 @@ void LoadMenu::load_button(std::list<procgui::LSystemView>& lsys_views,
                     // TODO true name
                     std::string error_message = "Error: can't open file: "
                                                 + array_to_string(file_to_load_);
-                    ImGui::Text(error_message.c_str());
+                    ImGui::Text("%s", error_message.c_str());
                 }};
 
             popups_ids_.push_back(procgui::push_popup(file_error_popup));
@@ -398,7 +398,7 @@ void LoadMenu::list(std::vector<file_entry>& files, sf::Keyboard::Key key, sf::U
             [this]() {
                 std::string error_message = "Error: can't open directory: "
                                             + save_dir_.filename().string();
-                ImGui::Text(error_message.c_str());
+                ImGui::Text("%s", error_message.c_str());
             }};
         popups_ids_.push_back(procgui::push_popup(dir_error_popup));
         close_menu_ = true;
@@ -431,7 +431,7 @@ bool LoadMenu::open(std::list<procgui::LSystemView>& lsys_views,
 
         // Simple informative text
         std::string tmp = "File to load: '" + array_to_string(file_to_load_) + "'";
-        ImGui::Text(tmp.c_str());
+        ImGui::Text("%s", tmp.c_str());
         ImGui::SameLine();
 
         load_button(lsys_views, load_position, key);

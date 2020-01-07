@@ -1,5 +1,7 @@
 #include "VertexPainterSerializer.h"
 
+#include <utility>
+
 namespace colors
 {
 VertexPainterSerializer::VertexPainterSerializer()
@@ -8,7 +10,7 @@ VertexPainterSerializer::VertexPainterSerializer()
 }
 
 VertexPainterSerializer::VertexPainterSerializer(std::shared_ptr<VertexPainter> to_serialize)
-    : serialized_ {to_serialize}
+    : serialized_ {std::move(to_serialize)}
 {
     Expects(serialized_);
 }

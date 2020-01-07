@@ -145,7 +145,7 @@ void VertexPainterComposite::set_child_painters(const std::vector<VertexPainterW
     child_painters_.clear();
     for (const auto& painter : painters)
     {
-        child_painters_.emplace_back(std::move(painter));
+        child_painters_.emplace_back(painter);
     }
     indicate_modification();
 }
@@ -256,7 +256,7 @@ std::shared_ptr<VertexPainter> VertexPainterComposite::get_copied_painter()
     Expects(has_copied_painter());
     return copied_painter_->clone();
 }
-void VertexPainterComposite::save_painter(std::shared_ptr<VertexPainter> painter)
+void VertexPainterComposite::save_painter(const std::shared_ptr<VertexPainter>& painter)
 {
     copied_painter_ = painter->clone();
 }

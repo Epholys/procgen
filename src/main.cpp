@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
                 std::string message = "Can't open or load config file: "
                                       + config::config_path.string()
                                       + "\nDefault configuration will be loaded instead.";
-                ImGui::Text(message.c_str());
+                ImGui::Text("%s", message.c_str());
             }};
         push_popup(config_failed);
     }
@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
                         std::string message = "Can't open or save config file: "
                                               + config::config_path.string()
                                               + "\nModified configuration will not be saved.";
-                        ImGui::Text(message.c_str());
+                        ImGui::Text("%s", message.c_str());
                     }};
                 push_popup(config_failed);
             }

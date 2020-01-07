@@ -83,7 +83,7 @@ void ExportMenu::size_warning() const
                  << " MB and an image of size "
                  << (image_size_mb == 0 ? "<0" : std::to_string(image_size_mb)) << " MB";
 
-    ImGui::Text(warning_text.str().c_str());
+    ImGui::Text("%s", warning_text.str().c_str());
     ImGui::Text("For big L-System, the application may take a long time to compute it.");
     ImGui::Text("For bigger L-System, the application of your");
     ImGui::SameLine();
@@ -115,7 +115,7 @@ void ExportMenu::save_file()
 
     ImGui::Text("The LSystem will be exported to file : ");
     ImGui::SameLine();
-    ImGui::Text(save_file.c_str());
+    ImGui::Text("%s", save_file.c_str());
 
     ext::ImGui::PushStyleColoredButton<ext::ImGui::Green>();
     bool to_export = ImGui::Button("Export");
@@ -134,7 +134,7 @@ void ExportMenu::save_file()
                 "Error##FILE",
                 [save_file]() {
                     std::string error_message = "Error when exporting: " + save_file;
-                    ImGui::Text(error_message.c_str());
+                    ImGui::Text("%s", error_message.c_str());
                 }};
             popups_ids_.push_back(procgui::push_popup(file_error_popup));
         }

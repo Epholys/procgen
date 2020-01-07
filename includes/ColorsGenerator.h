@@ -352,7 +352,7 @@ class DiscreteGradient : public ColorGenerator
 
     // Setter
     // Set 'keys_' to 'keys' and generate the 'colors_'.
-    void set_keys(keys keys);
+    void set_keys(const keys& keys);
 
     friend class ColorGeneratorSerializer;
     virtual std::string type_name() const override;
