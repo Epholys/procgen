@@ -70,7 +70,7 @@ void VertexPainterRadial::paint_vertices(std::vector<sf::Vertex>& vertices,
          {bounding_box.left + bounding_box.width, bounding_box.top + bounding_box.height}}};
 
     // Find the farthest corner and compute the distance.
-    std::array<float, 4> distances;
+    std::array<float, 4> distances {};
     for (unsigned i = 0; i < 4; ++i)
     {
         distances[i] = geometry::distance(relative_center, corners[i]);

@@ -1,8 +1,8 @@
 #include "VertexPainterWrapper.h"
 
-#include <utility>
-
 #include "VertexPainterConstant.h"
+
+#include <utility>
 
 namespace colors
 {

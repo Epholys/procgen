@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
         SupplementaryRendering::clear_draw_calls();
 
         std::vector<sf::Event> events;
-        sf::Event event;
+        sf::Event event {};
         // ImGui has the priority as it is the topmost GUI.
         // The events are then redistributed in the rest of the application.
         while (window.pollEvent(event))

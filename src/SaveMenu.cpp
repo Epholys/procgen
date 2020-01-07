@@ -32,7 +32,7 @@ void SaveMenu::save_lsys(const std::string& trimmed_filename)
         // Open the file error popup if the save file is inaccessible
         procgui::PopupGUI file_error_popup = {
             "Error##PERM",
-            [ trimmed_filename]() {
+            [trimmed_filename]() {
                 std::string error_message = "Error: can't open file: " + trimmed_filename;
                 ImGui::Text("%s", error_message.c_str());
             }};
