@@ -13,12 +13,11 @@ bool is_transparent(ImVec4 imcolor)
 
 
 ConstantColor::ConstantColor(const sf::Color& color)
-    : ColorGenerator()
-    , color_ {color}
+    : color_ {color}
 {
 }
 
-sf::Color ConstantColor::get(float)
+sf::Color ConstantColor::get(float /*f*/)
 {
     return color_;
 }
@@ -58,8 +57,7 @@ LinearGradient::LinearGradient()
 }
 
 LinearGradient::LinearGradient(const LinearGradient::keys& keys)
-    : ColorGenerator()
-    , keys_()
+
 {
     // Sanitize
     set_keys(keys);
@@ -157,9 +155,8 @@ DiscreteGradient::DiscreteGradient()
 }
 
 DiscreteGradient::DiscreteGradient(const keys& keys)
-    : ColorGenerator()
-    , keys_ {keys}
-    , colors_ {}
+    : keys_ {keys}
+
 {
     // Verify the invariant.
     Expects(keys.size() > 1);

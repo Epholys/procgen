@@ -7,8 +7,8 @@ namespace drawing
 void go_forward_fn(Turtle& turtle)
 {
     // Go forward following the direction vector.
-    double dx = turtle.step_ * turtle.state_.direction.x;
-    double dy = turtle.step_ * -turtle.state_.direction.y;
+    double dx = drawing::Turtle::step_ * turtle.state_.direction.x;
+    double dy = drawing::Turtle::step_ * -turtle.state_.direction.y;
     turtle.state_.position += {dx, dy};
     turtle.vertices_.emplace_back(sf::Vector2f(turtle.state_.position));
     turtle.iterations_.push_back(turtle.iteration_depth_);
@@ -40,7 +40,7 @@ void save_position_fn(Turtle& turtle)
 
 void load_position_fn(Turtle& turtle)
 {
-    if (turtle.stack_.empty() || turtle.vertices_.size() == 0)
+    if (turtle.stack_.empty() || turtle.vertices_.empty())
     {
         // Do nothing
     }

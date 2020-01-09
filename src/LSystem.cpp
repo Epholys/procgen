@@ -22,10 +22,9 @@ const std::string& LSystem::get_axiom() const
     {
         return production_cache_.at(0);
     }
-    else
-    {
-        return empty_string;
-    }
+
+
+    return empty_string;
 }
 
 const LSystem::ProductionCache& LSystem::get_production_cache() const

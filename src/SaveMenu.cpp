@@ -43,9 +43,9 @@ void SaveMenu::save_lsys(const std::string& trimmed_filename)
     {
         // Save the LSystemView in the file.
         cereal::JSONOutputArchive archive(ofs);
-        if (LSystemController::under_mouse()) // Virtually useless check,
-                                              // but here to avoid null
-                                              // pointer crash at worst
+        if (LSystemController::under_mouse() != nullptr) // Virtually useless check,
+                                                         // but here to avoid null
+                                                         // pointer crash at worst
         {
             LSystemController::under_mouse()->set_name(trimmed_filename);
             archive(cereal::make_nvp("LSystemView", *LSystemController::under_mouse()));

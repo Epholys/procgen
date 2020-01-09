@@ -5,8 +5,7 @@
 namespace colors
 {
 VertexPainterRandom::VertexPainterRandom()
-    : VertexPainter {}
-    , block_size_ {1}
+    : block_size_ {1}
     , random_seed_(math::random_dev())
     , random_generator_(random_seed_)
 {
@@ -52,10 +51,10 @@ void VertexPainterRandom::set_block_size(int block_size)
 
 
 void VertexPainterRandom::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                         const std::vector<u8>&,
+                                         const std::vector<u8>& /*iteration_of_vertices*/,
                                          const std::vector<bool>& transparent,
-                                         int,
-                                         sf::FloatRect)
+                                         int /*max_recursion*/,
+                                         sf::FloatRect /*bounding_box*/)
 
 {
     auto generator = generator_.unwrap();

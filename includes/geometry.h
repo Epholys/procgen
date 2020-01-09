@@ -51,7 +51,7 @@ sf::FloatRect bounding_box(const std::vector<sf::Vertex>& vertices);
 std::vector<sf::FloatRect> sub_boxes(const std::vector<sf::Vertex>& vertices, int max_boxes);
 
 // Expand 'boxes' by 'expension' in all directions.
-void expand_boxes(std::vector<sf::FloatRect>& boxes, float expension = 5.f);
+void expand_boxes(std::vector<sf::FloatRect>& boxes, float expansion = 5.f);
 
 // Computes the two intersections 'line' forms with 'bounding_box'. The
 // first component of the pair is the intersection closest to the 'point'

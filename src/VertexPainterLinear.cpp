@@ -11,8 +11,7 @@
 namespace colors
 {
 VertexPainterLinear::VertexPainterLinear()
-    : VertexPainter {}
-    , angle_ {0}
+    : angle_ {0}
     , display_helper_ {true}
 {
 }
@@ -51,9 +50,9 @@ void VertexPainterLinear::set_display_flag(bool flag)
 }
 
 void VertexPainterLinear::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                         const std::vector<u8>&,
+                                         const std::vector<u8>& /*iteration_of_vertices*/,
                                          const std::vector<bool>& transparent,
-                                         int,
+                                         int /*max_recursion*/,
                                          sf::FloatRect bounding_box)
 {
     auto generator = generator_.unwrap();

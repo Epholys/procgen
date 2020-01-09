@@ -66,17 +66,16 @@ bool set_up(const std::string& name, bool* open = nullptr)
         return is_active;
     }
     // Otherwise, set up a CollapsingHeader
-    else
+
+
+    bool is_active = ImGui::CollapsingHeader(name.c_str());
+    if (is_active)
     {
-        bool is_active = ImGui::CollapsingHeader(name.c_str());
-        if (is_active)
-        {
-            // Avoid name collision between two widgets (like '+' button).
-            ImGui::PushID(name.c_str());
-            ImGui::Indent();
-        }
-        return is_active;
+        // Avoid name collision between two widgets (like '+' button).
+        ImGui::PushID(name.c_str());
+        ImGui::Indent();
     }
+    return is_active;
 }
 
 // Concludes the window or CollapsingHeader
@@ -922,7 +921,7 @@ void interact_with(colors::LinearGradient& gen)
     bool is_modified = false;
 
     colors::LinearGradient::keys keys;
-    if (generator_address && generator_address == &gen && was_focusing_previous_frame)
+    if ((generator_address != nullptr) && generator_address == &gen && was_focusing_previous_frame)
     {
         // Correct generator && user is interacting with the keys.
         keys = keys_buffer;
@@ -1082,7 +1081,7 @@ void interact_with(colors::LinearGradient& gen)
         keys_buffer = keys;
         generator_address = &gen;
     }
-    else if (generator_address && generator_address == &gen && !is_focusing_this_frame
+    else if ((generator_address != nullptr) && generator_address == &gen && !is_focusing_this_frame
              && was_focusing_previous_frame)
     {
         // The user stopped key modification for the concerned generator.
@@ -1389,7 +1388,7 @@ void interact_with(colors::DiscreteGradient& gen)
 namespace procgui
 {
 void interact_with(colors::ColorGeneratorWrapper& color_wrapper,
-                   const std::string&,
+                   const std::string& /*unused*/,
                    color_wrapper_mode mode)
 {
     // Always call this function in a predefined window.
@@ -1547,7 +1546,7 @@ void interact_with_global_parameters(bool& box_is_visible)
 
 void interact_with(LSystemView& lsys_view, const std::string& name, bool is_modified, bool* open)
 {
-    if (open && !(*open))
+    if ((open != nullptr) && !(*open))
     {
         return;
     }

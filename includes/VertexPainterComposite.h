@@ -117,7 +117,7 @@ class VertexPainterComposite : public VertexPainter
     const VertexPainterWrapper& get_main_painter() const;
     VertexPainterWrapper& ref_main_painter();
 
-    void set_main_painter(const VertexPainterWrapper& painter_buff);
+    void set_main_painter(const VertexPainterWrapper& painter_wrapper);
     void set_child_painters(const std::vector<VertexPainterWrapper>& painters);
 
     virtual void paint_vertices(std::vector<sf::Vertex>& vertices,

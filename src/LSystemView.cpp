@@ -34,11 +34,9 @@ LSystemView::LSystemView(const std::string& name,
     , is_modified_ {false}
     , turtle_ {parameters_}
     , max_iteration_ {0}
-    , bounding_box_ {}
-    , sub_boxes_ {}
     , is_selected_ {false}
     , bounding_box_is_visible_ {true}
-    , popups_ids_ {}
+
 {
     is_modified_ = false;
 }
@@ -67,7 +65,7 @@ LSystemView::LSystemView(const LSystemView& other)
     , is_selected_ {false}
     , bounding_box_is_visible_ {true}
     , max_mem_size_ {other.max_mem_size_}
-    , popups_ids_ {}
+
 {
     is_modified_ = false;
 }
@@ -88,7 +86,7 @@ LSystemView::LSystemView(LSystemView&& other)
     , is_selected_ {false}
     , bounding_box_is_visible_ {true}
     , max_mem_size_ {other.max_mem_size_}
-    , popups_ids_ {}
+
 {
     // the 'other' object must not matter in the 'color_gen_' anymore.
     other.id_ = -1;
@@ -559,10 +557,9 @@ bool LSystemView::is_inside(const sf::Vector2f& click) const
         }
         return false;
     }
-    else // checks if 'click' is inside the placeholder box.
-    {
-        return compute_placeholder_box().contains(sf::Vector2f(click));
-    }
+    // checks if 'click' is inside the placeholder box.
+
+    return compute_placeholder_box().contains(sf::Vector2f(click));
 }
 
 void LSystemView::select()

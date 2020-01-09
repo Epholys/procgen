@@ -146,7 +146,7 @@ class LSystem : public RuleMap<std::string>
     // Constructors
     LSystem() = default;
     virtual ~LSystem() = default;
-    LSystem(const std::string& axiom, const Rules& rule_map, const std::string& preds);
+    LSystem(const std::string& axiom, const Rules& prod, const std::string& preds);
     LSystem(const LSystem& other) = default;
     LSystem& operator=(const LSystem& other) = default;
     LSystem(LSystem&& other) = default;

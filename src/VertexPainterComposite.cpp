@@ -67,17 +67,15 @@ namespace impl
 std::shared_ptr<VertexPainter> VertexPainterComposite::copied_painter_ {};
 
 VertexPainterComposite::VertexPainterComposite()
-    : VertexPainter {}
-    , color_distributor_ {std::make_shared<impl::ColorGeneratorComposite>(this)}
-    , main_painter_ {std::make_shared<VertexPainterLinear>(
-          ColorGeneratorWrapper(color_distributor_))}
-    , vertex_indices_pools_ {}
-    , child_painters_ {}
+    : color_distributor_ {std::make_shared<impl::ColorGeneratorComposite>(this)}
+    , main_painter_ {
+          std::make_shared<VertexPainterLinear>(ColorGeneratorWrapper(color_distributor_))}
+
 {
     child_painters_.emplace_back(VertexPainterWrapper());
 }
 
-VertexPainterComposite::VertexPainterComposite(const ColorGeneratorWrapper&)
+VertexPainterComposite::VertexPainterComposite(const ColorGeneratorWrapper& /*unused*/)
     : VertexPainterComposite {}
 {
 }

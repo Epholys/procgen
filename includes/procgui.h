@@ -34,14 +34,14 @@
 
 namespace procgui
 {
-void display(const drawing::DrawingParameters& turtle, const std::string& name);
+void display(const drawing::DrawingParameters& parameters, const std::string& name);
 
 void display(const LSystem& lsys, const std::string& name);
 
 void display(const drawing::InterpretationMap& map, const std::string& name);
 
 
-void interact_with(drawing::DrawingParameters& turtle, const std::string& name);
+void interact_with(drawing::DrawingParameters& parameters, const std::string& name);
 
 // Special case for the RuleMapBuffers
 template<typename Buffer>

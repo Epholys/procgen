@@ -98,10 +98,9 @@ number Matrix::grand_sum()
                 overflowed_ = true;
                 return MAX;
             }
-            else
-            {
-                sum += data_.at(i).at(j);
-            }
+
+
+            sum += data_.at(i).at(j);
         }
     }
     return sum;
@@ -114,21 +113,11 @@ bool Matrix::has_overflowed() const
 
 bool Matrix::add_overflow(number a, number b)
 {
-    if (a > MAX - b)
-    {
-        return true;
-    }
-
-    return false;
+    return a > MAX - b;
 }
 bool Matrix::mult_overflow(number a, number b)
 {
-    if (b != 0 && a > MAX / b)
-    {
-        return true;
-    }
-
-    return false;
+    return b != 0 && a > MAX / b;
 }
 
 std::string all_predecessors(const LSystem& lsystem, const drawing::InterpretationMap& map)
@@ -287,29 +276,29 @@ Matrix::number memory_size(const system_size& size)
     {
         return Matrix::MAX;
     }
-    else
-    {
-        total_size += size.lsystem_size * bytes_per_predecessor;
-    }
+
+
+    total_size += size.lsystem_size * bytes_per_predecessor;
+
 
     Matrix::number vx_size {0};
     if (Matrix::mult_overflow(size.vertices_size, bytes_per_vertex))
     {
         return Matrix::MAX;
     }
-    else
-    {
-        vx_size = size.vertices_size * bytes_per_vertex;
-    }
+
+
+    vx_size = size.vertices_size * bytes_per_vertex;
+
 
     if (Matrix::add_overflow(total_size, vx_size))
     {
         return Matrix::MAX;
     }
-    else
-    {
-        total_size += vx_size;
-    }
+
+
+    total_size += vx_size;
+
 
     return total_size;
 }

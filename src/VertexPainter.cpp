@@ -3,7 +3,7 @@
 namespace colors
 {
 VertexPainter::VertexPainter()
-    : generator_ {}
+
 {
 }
 
@@ -26,12 +26,12 @@ void VertexPainter::set_generator_wrapper(const ColorGeneratorWrapper& color_gen
     indicate_modification();
 }
 
-void VertexPainter::supplementary_drawing(sf::FloatRect) const
+void VertexPainter::supplementary_drawing(sf::FloatRect /*unused*/) const
 {
 }
 
 bool VertexPainter::poll_modification()
 {
-    return Indicator::poll_modification() | generator_.poll_modification();
+    return Indicator::poll_modification() || generator_.poll_modification();
 }
 } // namespace colors

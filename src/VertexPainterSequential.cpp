@@ -5,8 +5,7 @@
 namespace colors
 {
 VertexPainterSequential::VertexPainterSequential()
-    : VertexPainter {}
-    , factor_ {1}
+    : factor_ {1}
 {
 }
 
@@ -36,10 +35,10 @@ void VertexPainterSequential::set_factor(float factor)
 }
 
 void VertexPainterSequential::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                             const std::vector<u8>&,
+                                             const std::vector<u8>& /*iteration_of_vertices*/,
                                              const std::vector<bool>& transparent,
-                                             int,
-                                             sf::FloatRect)
+                                             int /*max_recursion*/,
+                                             sf::FloatRect /*bounding_box*/)
 
 {
     auto generator = generator_.unwrap();

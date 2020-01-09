@@ -59,7 +59,7 @@ class SaveMenu
 
     // Compute the layout of the file list display and open it.
     // 'save_files' is used to manages filename sizes.
-    column_layout list_layout(const std::vector<file_entry>& save_files);
+    static column_layout list_layout(const std::vector<file_entry>& save_files);
 
     // Display the list and manages selection of files
     // 'save_files' is filled here.

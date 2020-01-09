@@ -75,7 +75,7 @@ class LoadMenu
 
     // Compute the layout of the file list display and open it.
     // 'save_files' is used to manages filename sizes.
-    column_layout list_layout(const std::vector<file_entry>& files);
+    static column_layout list_layout(const std::vector<file_entry>& files);
 
     // Update 'file_idx_' according to 'unicode' (quick-selection of the save
     // file with the first same letter) and to 'key' (arrow keys navigation)

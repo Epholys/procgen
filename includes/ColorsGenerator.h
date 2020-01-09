@@ -238,7 +238,7 @@ class LinearGradient : public ColorGenerator
     virtual ~LinearGradient() = default;
     // Precondition: 'key_colors' must have at least 2 elements.
     // Note: 'key_colors' will be formated to respect the invariant.
-    explicit LinearGradient(const keys& key_colors);
+    explicit LinearGradient(const keys& keys);
     LinearGradient(const LinearGradient& other) = default;
     LinearGradient(LinearGradient&& other) = default;
     LinearGradient& operator=(const LinearGradient& other) = default;

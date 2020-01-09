@@ -9,8 +9,7 @@
 namespace colors
 {
 VertexPainterRadial::VertexPainterRadial()
-    : VertexPainter {}
-    , center_ {.5, .5}
+    : center_ {.5, .5}
     , display_helper_ {true}
 {
 }
@@ -51,9 +50,9 @@ void VertexPainterRadial::set_display_flag(bool flag)
 
 
 void VertexPainterRadial::paint_vertices(std::vector<sf::Vertex>& vertices,
-                                         const std::vector<u8>&,
+                                         const std::vector<u8>& /*iteration_of_vertices*/,
                                          const std::vector<bool>& transparent,
-                                         int,
+                                         int /*max_recursion*/,
                                          sf::FloatRect bounding_box)
 {
     auto generator = generator_.unwrap();

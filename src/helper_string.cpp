@@ -29,10 +29,10 @@ std::string trim(std::string str)
 std::string to_camel_case(std::string str)
 {
     std::transform(begin(str), end(str), begin(str), [](char c) -> char {
-        if (std::isspace(c))
+        if (std::isspace(c) != 0)
             return '_';
-        else
-            return std::tolower(c);
+
+        return std::tolower(c);
     });
     return str;
 }

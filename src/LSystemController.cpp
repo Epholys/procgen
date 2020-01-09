@@ -91,7 +91,7 @@ void LSystemController::handle_input(std::list<procgui::LSystemView>& views, con
              && event.key.code == sf::Keyboard::Delete)
     {
         // Remove the LSys under_mouse_ if there are several of them.
-        if (under_mouse_ && under_mouse_->is_selected())
+        if ((under_mouse_ != nullptr) && under_mouse_->is_selected())
         {
             delete_view(views, under_mouse_->get_id());
         }
@@ -124,7 +124,7 @@ void LSystemController::handle_input(std::list<procgui::LSystemView>& views, con
 
 void LSystemController::handle_delta(sf::Vector2f delta)
 {
-    if (under_mouse_)
+    if (under_mouse_ != nullptr)
     {
         auto& parameters = under_mouse_->ref_parameters();
         auto starting_position = parameters.get_starting_position() - ext::sf::Vector2d(delta);
@@ -168,11 +168,11 @@ void LSystemController::right_click_menu(std::list<procgui::LSystemView>& views)
     if (ImGui::BeginPopupContextVoid())
     {
         // Cloning is deep-copying the LSystem.
-        if (ImGui::MenuItem("Copy", "Ctrl+C") && under_mouse_)
+        if (ImGui::MenuItem("Copy", "Ctrl+C") && (under_mouse_ != nullptr))
         {
             saved_view_ = *under_mouse_;
         }
-        if (ImGui::MenuItem("Delete", "Del") && under_mouse_)
+        if (ImGui::MenuItem("Delete", "Del") && (under_mouse_ != nullptr))
         {
             delete_view(views, under_mouse_->get_id());
         }

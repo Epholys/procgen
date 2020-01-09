@@ -30,10 +30,9 @@ sf::Vector2f intersection(const Line& l1, const Line& l2)
         intersection = a + t * u;
         return intersection;
     }
-    else
-    {
-        return {std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
-    }
+
+
+    return {std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
 }
 
 float angle_from_vector(const sf::Vector2f vec)
@@ -44,11 +43,11 @@ float angle_from_vector(const sf::Vector2f vec)
     {
         return math::pi / 2;
     }
-    else if (vec.x == 0 && vec.y > 0)
+    if (vec.x == 0 && vec.y > 0)
     {
         return 3 * math::pi / 2;
     }
-    else if (vec.x > 0 && vec.y >= 0)
+    if (vec.x > 0 && vec.y >= 0)
     {
         return std::atan(vec.y / vec.x);
     }
@@ -109,7 +108,7 @@ sf::Vector2f project_and_clamp(sf::Vector2f A, sf::Vector2f B, sf::Vector2f P)
 
 sf::FloatRect bounding_box(const std::vector<sf::Vertex>& vertices)
 {
-    if (vertices.size() == 0)
+    if (vertices.empty())
     {
         return {0, 0, 0, 0};
     }

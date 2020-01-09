@@ -59,6 +59,6 @@ void VertexPainterWrapper::wrap(std::shared_ptr<VertexPainter> painter)
 
 bool VertexPainterWrapper::poll_modification()
 {
-    return Indicator::poll_modification() | painter_->poll_modification();
+    return Indicator::poll_modification() || painter_->poll_modification();
 }
 } // namespace colors

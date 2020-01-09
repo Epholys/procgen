@@ -14,10 +14,9 @@ sf::Color UniqueColor::get_color(int id)
     {
         return new_color();
     }
-    else
-    {
-        return colors_.at(id);
-    }
+
+
+    return colors_.at(id);
 }
 
 // https://blog.bruce-hill.com/6-useful-snippets

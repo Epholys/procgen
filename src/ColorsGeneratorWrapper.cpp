@@ -54,6 +54,6 @@ void ColorGeneratorWrapper::wrap(std::shared_ptr<ColorGenerator> gen)
 
 bool ColorGeneratorWrapper::poll_modification()
 {
-    return Indicator::poll_modification() | generator_->poll_modification();
+    return Indicator::poll_modification() || generator_->poll_modification();
 }
 } // namespace colors

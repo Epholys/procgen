@@ -268,7 +268,7 @@ void WindowController::handle_input(const std::vector<sf::Event>& events,
         std::string save_name;
 
         auto* under_mouse = LSystemController::under_mouse();
-        if (under_mouse)
+        if (under_mouse != nullptr)
         {
             save_name = under_mouse->get_name();
         }
@@ -277,7 +277,7 @@ void WindowController::handle_input(const std::vector<sf::Event>& events,
     if (export_menu_open_)
     {
         auto* under_mouse = LSystemController::under_mouse();
-        if (under_mouse)
+        if (under_mouse != nullptr)
         {
             export_menu_open_ = !export_menu_.open(key_to_menus);
         }

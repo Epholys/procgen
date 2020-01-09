@@ -246,7 +246,7 @@ void LoadMenu::list_navigation(const std::vector<file_entry>& files,
         for (auto i = 0u; i < files.size(); ++i)
         {
             const auto& f = files.at(i);
-            if (f.u32filename.size() > 0
+            if (!f.u32filename.empty()
                 && std::tolower(f.u32filename.at(0)) == std::tolower(unicode))
             {
                 file_idx_ = i;

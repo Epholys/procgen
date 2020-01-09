@@ -12,9 +12,12 @@ std::vector<sf::Vertex> add_width(const std::vector<sf::Vertex>& v, float w)
     auto normalize = [](auto v) {
         auto norm = std::sqrt(v.x * v.x + v.y * v.y);
         if (norm)
+        {
             return sf::Vector2f(v.x / norm, v.y / norm);
-        else
+        }
+        {
             return v;
+        }
     };
     for (auto i = 1u; i < v.size(); ++i)
     {

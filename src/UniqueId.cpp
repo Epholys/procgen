@@ -13,12 +13,11 @@ int UniqueId::get_id()
         free_slot->is_free = false;
         return free_slot->id;
     }
-    else
-    {
-        // There is not, add a new id to 'map_' and return it.
-        map_.push_back({next_id_, false});
-        return next_id_++;
-    }
+
+
+    // There is not, add a new id to 'map_' and return it.
+    map_.push_back({next_id_, false});
+    return next_id_++;
 }
 
 void UniqueId::free_id(int id)

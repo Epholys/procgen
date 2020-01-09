@@ -74,7 +74,9 @@ bool SliderAngleDouble(const char* label,
                        const char* format)
 {
     if (format == NULL)
+    {
         format = "%.0f deg";
+    }
     double v_deg = (*v_rad) * 360.0f / (2 * math::pi);
     bool value_changed = SliderDouble(label, &v_deg, v_degrees_min, v_degrees_max, format, 1.0f);
     *v_rad = v_deg * (2 * math::pi) / 360.0f;
@@ -89,7 +91,7 @@ bool InputUnsignedLongLong(const char* label,
 {
     // Hexadecimal input provided as a convenience but the flag name is awkward. Typically you'd use
     // InputText() to parse your own data, if you want to handle prefixes.
-    const char* format = (flags & ImGuiInputTextFlags_CharsHexadecimal) ? "%08X" : "%llu";
+    const char* format = (flags & ImGuiInputTextFlags_CharsHexadecimal) != 0 ? "%08X" : "%llu";
     return ::ImGui::InputScalar(label,
                                 ImGuiDataType_U64,
                                 (void*)v,
