@@ -1,14 +1,11 @@
 #include "VertexPainter.h"
 
+#include <utility>
+
 namespace colors
 {
-VertexPainter::VertexPainter()
-
-{
-}
-
-VertexPainter::VertexPainter(const ColorGeneratorWrapper& wrapper)
-    : generator_ {wrapper}
+VertexPainter::VertexPainter(ColorGeneratorWrapper wrapper)
+    : generator_ {std::move(wrapper)}
 {
 }
 

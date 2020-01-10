@@ -14,7 +14,7 @@ namespace colors
 class VertexPainterLinear : public VertexPainter
 {
   public:
-    VertexPainterLinear(); // Create a default generator
+    VertexPainterLinear();
     explicit VertexPainterLinear(const ColorGeneratorWrapper& wrapper);
     virtual ~VertexPainterLinear()
     {

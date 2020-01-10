@@ -10,7 +10,7 @@ namespace colors
 class VertexPainterConstant : public VertexPainter
 {
   public:
-    VertexPainterConstant(); // Create a default generator
+    VertexPainterConstant() = default;
     explicit VertexPainterConstant(const ColorGeneratorWrapper& wrapper);
     virtual ~VertexPainterConstant()
     {

@@ -332,7 +332,7 @@ bool SaveMenu::open(sf::Keyboard::Key key, const std::string& filename)
 {
     ImGui::SetNextWindowPosCenter();
     if (ImGui::Begin("Save LSystem to file",
-                     NULL,
+                     nullptr,
                      ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings))
     {
         if (first_menu_frame_)

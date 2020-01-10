@@ -9,6 +9,8 @@
 #include "helper_math.h"
 #include "procgui.h"
 
+#include <utility>
+
 namespace procgui
 {
 using namespace drawing;
@@ -19,18 +21,18 @@ using namespace procgui;
 UniqueId LSystemView::unique_ids_ {};
 UniqueColor LSystemView::unique_colors_ {};
 
-LSystemView::LSystemView(const std::string& name,
+LSystemView::LSystemView(std::string name,
                          const LSystem& lsys,
                          const InterpretationMap& map,
-                         const DrawingParameters& params,
-                         const colors::VertexPainterWrapper& painter)
-    : parameters_ {params}
+                         DrawingParameters params,
+                         colors::VertexPainterWrapper painter)
+    : parameters_ {std::move(params)}
     , lsystem_ {lsys}
     , map_ {map}
-    , painter_ {painter}
+    , painter_ {std::move(painter)}
     , id_ {unique_ids_.get_id()}
     , color_id_ {unique_colors_.get_color(id_)}
-    , name_ {name}
+    , name_ {std::move(name)}
     , is_modified_ {false}
     , turtle_ {parameters_}
     , max_iteration_ {0}

@@ -73,7 +73,7 @@ bool SliderAngleDouble(const char* label,
                        double v_degrees_max,
                        const char* format)
 {
-    if (format == NULL)
+    if (format == nullptr)
     {
         format = "%.0f deg";
     }
@@ -95,8 +95,8 @@ bool InputUnsignedLongLong(const char* label,
     return ::ImGui::InputScalar(label,
                                 ImGuiDataType_U64,
                                 (void*)v,
-                                (void*)(step > 0 ? &step : NULL),
-                                (void*)(step_fast > 0 ? &step_fast : NULL),
+                                (void*)(step > 0 ? &step : nullptr),
+                                (void*)(step_fast > 0 ? &step_fast : nullptr),
                                 format,
                                 flags);
 }

@@ -4,11 +4,6 @@
 
 namespace colors
 {
-VertexPainterIteration::VertexPainterIteration()
-
-{
-}
-
 VertexPainterIteration::VertexPainterIteration(const ColorGeneratorWrapper& wrapper)
     : VertexPainter {wrapper}
 {

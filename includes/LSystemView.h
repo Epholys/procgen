@@ -39,11 +39,11 @@ class LSystemView
     // TODO: bite the bullet and do it
     LSystemView() = delete;
     virtual ~LSystemView();
-    LSystemView(const std::string& name,
+    LSystemView(std::string name,
                 const LSystem& lsys,
                 const drawing::InterpretationMap& map,
-                const drawing::DrawingParameters& params,
-                const colors::VertexPainterWrapper& painter = colors::VertexPainterWrapper());
+                drawing::DrawingParameters params,
+                colors::VertexPainterWrapper painter = colors::VertexPainterWrapper());
     // Special-case constructor when creating a default LSystem
     LSystemView(const ext::sf::Vector2d& position, double step);
     // Deep copy;

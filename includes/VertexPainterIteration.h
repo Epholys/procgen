@@ -10,7 +10,7 @@ namespace colors
 class VertexPainterIteration : public VertexPainter
 {
   public:
-    VertexPainterIteration(); // Create a default generator
+    VertexPainterIteration() = default;
     explicit VertexPainterIteration(const ColorGeneratorWrapper& wrapper);
     virtual ~VertexPainterIteration()
     {

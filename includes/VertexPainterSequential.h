@@ -12,7 +12,7 @@ namespace colors
 class VertexPainterSequential : public VertexPainter
 {
   public:
-    VertexPainterSequential(); // Create a default generator
+    VertexPainterSequential();
     explicit VertexPainterSequential(const ColorGeneratorWrapper& wrapper);
     virtual ~VertexPainterSequential()
     {

@@ -65,7 +65,7 @@ Turtle::TurtleProduction Turtle::compute_vertices(const std::string& lsystem_pro
     // origin.
     if (!lsystem_production.empty())
     {
-        vertices_.push_back(sf::Vector2f(state_.position));
+        vertices_.emplace_back(sf::Vector2f(state_.position));
         iterations_.push_back(lsystem_iterations.at(0));
         transparency_.push_back(false);
         iteration_depth_ = iterations_.at(0);

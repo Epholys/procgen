@@ -35,7 +35,7 @@ namespace impl
         f = std::clamp(f, 0.f, 1.f - std::numeric_limits<float>::epsilon());
         auto size = painter_->child_painters_.size();
         // Compute which child painter is concerned by this vertex.
-        unsigned which_painter = static_cast<unsigned>(f * size);
+        auto which_painter = static_cast<unsigned>(f * size);
 
         // OPTIMIZATION
         // painter_->vertex_indices_pools_.at(which_painter).push_back(global_index_++);
@@ -128,7 +128,7 @@ void VertexPainterComposite::set_main_painter(const VertexPainterWrapper& painte
     vertex_indices_pools_.clear();
     for (auto i = 0u; i < child_painters_.size(); ++i)
     {
-        vertex_indices_pools_.push_back({});
+        vertex_indices_pools_.emplace_back();
     }
 
     auto painter = painter_wrapper.unwrap();
@@ -163,7 +163,7 @@ void VertexPainterComposite::paint_vertices(std::vector<sf::Vertex>& vertices,
     vertex_indices_pools_.clear();
     for (auto i = 0u; i < n_child; ++i)
     {
-        vertex_indices_pools_.push_back({});
+        vertex_indices_pools_.emplace_back();
         vertex_indices_pools_.back().reserve(approx_size);
     }
 

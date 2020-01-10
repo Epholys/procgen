@@ -93,7 +93,7 @@ class VertexPainterSerializer;
 class VertexPainterComposite : public VertexPainter
 {
   public:
-    VertexPainterComposite(); // Create a default generator
+    VertexPainterComposite();
     // Useless constructor: only calls the default constructor. Defined to
     // have a common interface with the other painters.
     explicit VertexPainterComposite(const ColorGeneratorWrapper&);

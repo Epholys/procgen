@@ -12,7 +12,7 @@ namespace colors
 class VertexPainterRadial : public VertexPainter
 {
   public:
-    VertexPainterRadial(); // Create a default generator
+    VertexPainterRadial();
     explicit VertexPainterRadial(const ColorGeneratorWrapper& wrapper);
     virtual ~VertexPainterRadial()
     {

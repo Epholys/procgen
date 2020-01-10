@@ -2,14 +2,16 @@
 
 #include "gsl/gsl"
 
+#include <utility>
+
 
 // Some functions returns references to axiom or production that could be empty.
 // In these cases, it returns this string.
 const static std::string empty_string = "";
 
-LSystem::LSystem(const std::string& axiom, const Rules& prod, const std::string& preds)
+LSystem::LSystem(const std::string& axiom, const Rules& prod, std::string preds)
     : RuleMap<std::string>(prod)
-    , iteration_predecessors_ {preds}
+    , iteration_predecessors_ {std::move(preds)}
     , production_cache_ {{0, axiom}}
     , iteration_count_cache_ {{0, {std::vector<u8>(axiom.size(), 0), 0}}}
 {

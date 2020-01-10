@@ -12,7 +12,7 @@ namespace colors
 class VertexPainterRandom : public VertexPainter
 {
   public:
-    VertexPainterRandom(); // Create a default generator
+    VertexPainterRandom();
     explicit VertexPainterRandom(const ColorGeneratorWrapper& wrapper);
     virtual ~VertexPainterRandom()
     {

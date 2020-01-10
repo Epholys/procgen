@@ -153,7 +153,7 @@ bool ExportMenu::open(sf::Keyboard::Key key)
 
     ImGui::SetNextWindowPosCenter();
     if (ImGui::Begin("Export LSystem to PNG",
-                     NULL,
+                     nullptr,
                      ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings
                          | ImGuiWindowFlags_AlwaysAutoResize))
     {

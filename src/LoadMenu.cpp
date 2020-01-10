@@ -412,7 +412,7 @@ bool LoadMenu::open(std::list<procgui::LSystemView>& lsys_views,
 {
     ImGui::SetNextWindowPosCenter();
     if (ImGui::Begin("Load LSystem from file",
-                     NULL,
+                     nullptr,
                      ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings))
     {
         error_messages.clear();

@@ -22,9 +22,9 @@ namespace colors
 class VertexPainter : public Indicator
 {
   public:
-    VertexPainter(); // Create a default generator
+    VertexPainter() = default; // Create a default generator
     virtual ~VertexPainter() {};
-    explicit VertexPainter(const ColorGeneratorWrapper& wrapper);
+    explicit VertexPainter(ColorGeneratorWrapper wrapper);
     // Delete the copy/move constructors to avoid slicing
     VertexPainter(const VertexPainter&) = delete;
     VertexPainter(VertexPainter&&) = delete;
@@ -59,7 +59,7 @@ class VertexPainter : public Indicator
     virtual bool poll_modification() override;
 
   protected:
-    ColorGeneratorWrapper generator_;
+    ColorGeneratorWrapper generator_ {};
 };
 } // namespace colors
 

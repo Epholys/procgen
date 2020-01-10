@@ -2,11 +2,6 @@
 
 namespace colors
 {
-VertexPainterConstant::VertexPainterConstant()
-
-{
-}
-
 VertexPainterConstant::VertexPainterConstant(const ColorGeneratorWrapper& wrapper)
     : VertexPainter {wrapper}
 {
