@@ -52,9 +52,9 @@ class LSystemView
     //   - Id and colors are created or moved
     //   - Selection is reset
     LSystemView(const LSystemView& other);
-    LSystemView(LSystemView&& other);
+    LSystemView(LSystemView&& other) noexcept;
     LSystemView& operator=(const LSystemView& other);
-    LSystemView& operator=(LSystemView&& other);
+    LSystemView& operator=(LSystemView&& other) noexcept;
 
     // -- Reference Getters
     drawing::DrawingParameters& ref_parameters();

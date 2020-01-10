@@ -72,11 +72,11 @@ LSystemView::LSystemView(const LSystemView& other)
     is_modified_ = false;
 }
 
-LSystemView::LSystemView(LSystemView&& other)
-    : parameters_ {other.parameters_}
-    , lsystem_ {other.lsystem_}
-    , map_ {other.map_}
-    , painter_ {other.painter_}
+LSystemView::LSystemView(LSystemView&& other) noexcept
+    : parameters_ {std::move(other.parameters_)}
+    , lsystem_ {std::move(other.lsystem_)}
+    , map_ {std::move(other.map_)}
+    , painter_ {std::move(other.painter_)}
     , id_ {other.id_}
     , color_id_ {other.color_id_}
     , name_ {std::move(other.name_)}
@@ -130,7 +130,7 @@ LSystemView& LSystemView::operator=(const LSystemView& other)
     return *this;
 }
 
-LSystemView& LSystemView::operator=(LSystemView&& other)
+LSystemView& LSystemView::operator=(LSystemView&& other) noexcept
 {
     if (this != &other)
     {

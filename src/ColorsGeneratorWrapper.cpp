@@ -18,7 +18,7 @@ ColorGeneratorWrapper::ColorGeneratorWrapper(const ColorGeneratorWrapper& other)
     : generator_ {other.generator_->clone()}
 {
 }
-ColorGeneratorWrapper::ColorGeneratorWrapper(ColorGeneratorWrapper&& other)
+ColorGeneratorWrapper::ColorGeneratorWrapper(ColorGeneratorWrapper&& other) noexcept
     : generator_ {std::move(other.generator_)}
 {
     other.generator_.reset();
@@ -31,7 +31,7 @@ ColorGeneratorWrapper& ColorGeneratorWrapper::operator=(const ColorGeneratorWrap
     }
     return *this;
 }
-ColorGeneratorWrapper& ColorGeneratorWrapper::operator=(ColorGeneratorWrapper&& other)
+ColorGeneratorWrapper& ColorGeneratorWrapper::operator=(ColorGeneratorWrapper&& other) noexcept
 {
     if (this != &other)
     {

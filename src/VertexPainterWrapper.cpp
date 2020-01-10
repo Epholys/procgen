@@ -21,7 +21,7 @@ VertexPainterWrapper::VertexPainterWrapper(const VertexPainterWrapper& other)
 {
 }
 
-VertexPainterWrapper::VertexPainterWrapper(VertexPainterWrapper&& other)
+VertexPainterWrapper::VertexPainterWrapper(VertexPainterWrapper&& other) noexcept
     : painter_ {std::move(other.painter_)}
 {
     other.painter_.reset();
@@ -36,7 +36,7 @@ VertexPainterWrapper& VertexPainterWrapper::operator=(const VertexPainterWrapper
     return *this;
 }
 
-VertexPainterWrapper& VertexPainterWrapper::operator=(VertexPainterWrapper&& other)
+VertexPainterWrapper& VertexPainterWrapper::operator=(VertexPainterWrapper&& other) noexcept
 {
     if (this != &other)
     {

@@ -19,9 +19,9 @@ class ColorGeneratorWrapper : public Indicator
     explicit ColorGeneratorWrapper(std::shared_ptr<ColorGenerator> gen);
     // Rule-of-five depp copy.
     ColorGeneratorWrapper(const ColorGeneratorWrapper& other);
-    ColorGeneratorWrapper(ColorGeneratorWrapper&& other);
+    ColorGeneratorWrapper(ColorGeneratorWrapper&& other) noexcept;
     ColorGeneratorWrapper& operator=(const ColorGeneratorWrapper& other);
-    ColorGeneratorWrapper& operator=(ColorGeneratorWrapper&& other);
+    ColorGeneratorWrapper& operator=(ColorGeneratorWrapper&& other) noexcept;
 
     // Getter
     std::shared_ptr<ColorGenerator> unwrap() const;

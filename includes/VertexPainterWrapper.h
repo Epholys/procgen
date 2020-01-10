@@ -21,9 +21,9 @@ class VertexPainterWrapper : public Indicator
     }
     // Rule-of-five deep copy.
     VertexPainterWrapper(const VertexPainterWrapper& other);
-    VertexPainterWrapper(VertexPainterWrapper&& other);
+    VertexPainterWrapper(VertexPainterWrapper&& other) noexcept;
     VertexPainterWrapper& operator=(const VertexPainterWrapper& other);
-    VertexPainterWrapper& operator=(VertexPainterWrapper&& other);
+    VertexPainterWrapper& operator=(VertexPainterWrapper&& other) noexcept;
 
     // Getter
     std::shared_ptr<VertexPainter> unwrap() const;
