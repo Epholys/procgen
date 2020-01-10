@@ -18,6 +18,8 @@ MACROFLAGS += -DGSL_THROW_ON_CONTRACT_VIOLATION
 LFLAGS     += -lsfml-system -lsfml-window -lsfml-graphics -lGL -lstdc++fs
 IFLAGS     += -isystem . -I$(INCLUDE_DIR)
 
+CXX = ccache g++
+
 # Other flags
 debug : CXXFLAGS = -std=c++17 -g -O0 -Wall -Wextra -pthread
 debug : MACROFLAGS += -DDEBUG_CHECKS
