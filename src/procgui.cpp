@@ -1,5 +1,6 @@
 #include "procgui.h"
 
+#include "ColorsGenerator.h"
 #include "RenderWindow.h"
 #include "VertexPainterComposite.h"
 #include "VertexPainterConstant.h"
@@ -624,7 +625,7 @@ void interact_with(colors::VertexPainterComposite& painter)
 }
 
 void create_new_vertex_painter(colors::VertexPainterWrapper& wrapper,
-                               std::shared_ptr<colors::VertexPainter> painter,
+                               const colors::VertexPainter& painter,
                                int index,
                                int old_index)
 {
@@ -641,33 +642,34 @@ void create_new_vertex_painter(colors::VertexPainterWrapper& wrapper,
     }
     else
     {
-        next_generator = painter->get_generator_wrapper();
+        next_generator = painter.get_generator_wrapper();
     }
 
+    std::shared_ptr<colors::VertexPainter> new_painter;
     switch (index)
     {
     case 0:
-        painter = std::make_shared<colors::VertexPainterConstant>(next_generator);
+        new_painter = std::make_shared<colors::VertexPainterConstant>(next_generator);
         break;
 
     case 1:
-        painter = std::make_shared<colors::VertexPainterLinear>(next_generator);
+        new_painter = std::make_shared<colors::VertexPainterLinear>(next_generator);
         break;
 
     case 2:
-        painter = std::make_shared<colors::VertexPainterRadial>(next_generator);
+        new_painter = std::make_shared<colors::VertexPainterRadial>(next_generator);
         break;
 
     case 3:
-        painter = std::make_shared<colors::VertexPainterRandom>(next_generator);
+        new_painter = std::make_shared<colors::VertexPainterRandom>(next_generator);
         break;
 
     case 4:
-        painter = std::make_shared<colors::VertexPainterSequential>(next_generator);
+        new_painter = std::make_shared<colors::VertexPainterSequential>(next_generator);
         break;
 
     case 5:
-        painter = std::make_shared<colors::VertexPainterIteration>(next_generator);
+        new_painter = std::make_shared<colors::VertexPainterIteration>(next_generator);
         break;
 
     default:
@@ -675,17 +677,17 @@ void create_new_vertex_painter(colors::VertexPainterWrapper& wrapper,
         break;
     }
 
-    wrapper.wrap(painter);
+    wrapper.wrap(new_painter);
 }
 
 int vertex_painter_list(colors::VertexPainterWrapper& painter_wrapper)
 {
-    auto painter = painter_wrapper.unwrap();
+    const auto& painter = *painter_wrapper.unwrap();
 
     // Represents the index of the next ListBox. Set by inspecting the
     // polyphormism.
     int index = 0;
-    const auto& info = typeid(*painter).hash_code();
+    const auto& info = typeid(painter).hash_code();
     if (info == typeid(colors::VertexPainterConstant).hash_code())
     {
         index = 0;
@@ -751,8 +753,10 @@ void interact_with(colors::VertexPainterWrapper& painter_wrapper, const std::str
     int index = -1; // Index defining the type of 'painter'. Values are
                     // defined in 'vertex_painter_list()'.
 
-    auto info = typeid(*painter).hash_code();
-    bool is_composite = info == typeid(colors::VertexPainterComposite).hash_code();
+
+    const auto& concrete = *painter;
+    auto type = typeid(concrete).hash_code();
+    bool is_composite = type == typeid(colors::VertexPainterComposite).hash_code();
     if (is_composite)
     {
         // If 'painter' is a composite, it will now be accessed through
@@ -1394,12 +1398,13 @@ void interact_with(colors::ColorGeneratorWrapper& color_wrapper,
     // Always call this function in a predefined window.
     Expects(embedded_level > 0);
 
-    auto gen = color_wrapper.unwrap();
+    auto generator = color_wrapper.unwrap();
 
     // Represents the index of the next ListBox. Set by inspecting the
     // polyphormism.
     int index = 0;
-    const auto& info = typeid(*gen).hash_code();
+    const auto& concrete = *generator; // To avoid typeid evaluation clang warning
+    const auto& info = typeid(concrete).hash_code();
     if (info == typeid(colors::ConstantColor).hash_code())
     {
         index = 0;
@@ -1453,15 +1458,15 @@ void interact_with(colors::ColorGeneratorWrapper& color_wrapper,
     {
         if (index == 0)
         {
-            gen = std::make_shared<colors::ConstantColor>();
+            generator = std::make_shared<colors::ConstantColor>();
         }
         else if (index == 1)
         {
-            gen = std::make_shared<colors::LinearGradient>();
+            generator = std::make_shared<colors::LinearGradient>();
         }
         else if (index == 2)
         {
-            gen = std::make_shared<colors::DiscreteGradient>();
+            generator = std::make_shared<colors::DiscreteGradient>();
         }
         else
         {
@@ -1469,24 +1474,24 @@ void interact_with(colors::ColorGeneratorWrapper& color_wrapper,
         }
         // Updates ColorGeneratorWrapper and VertexPainter and a 'notify()'
         // waterfall.
-        color_wrapper.wrap(gen);
+        color_wrapper.wrap(generator);
     }
 
     // Does not use embedded_level, the generator will be displayed just
     // after the generator selection.
     if (index == 0)
     {
-        auto constant = std::dynamic_pointer_cast<colors::ConstantColor>(gen);
+        auto constant = std::dynamic_pointer_cast<colors::ConstantColor>(generator);
         ::interact_with(*constant);
     }
     else if (index == 1)
     {
-        auto gradient = std::dynamic_pointer_cast<colors::LinearGradient>(gen);
+        auto gradient = std::dynamic_pointer_cast<colors::LinearGradient>(generator);
         ::interact_with(*gradient);
     }
     else if (index == 2)
     {
-        auto discrete = std::dynamic_pointer_cast<colors::DiscreteGradient>(gen);
+        auto discrete = std::dynamic_pointer_cast<colors::DiscreteGradient>(generator);
         ::interact_with(*discrete);
     }
     else

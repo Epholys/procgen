@@ -117,7 +117,7 @@ TEST_F(size_computer_test, MatrixGrandSumOverflow)
     std::vector<std::vector<number>> data {{Matrix::MAX, 2}, {3, 4}, {5, 6}};
     Matrix mat(data);
 
-    number UNUSED = mat.grand_sum();
+    /* auto unused = */ mat.grand_sum();
 
     ASSERT_TRUE(mat.has_overflowed());
 }

@@ -107,7 +107,7 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
     //  5. It was an original rule with a duplicate => replace it
     //  6. It was a scratch buffer => do nothing
 
-    auto [previous_was_active, previous_pred, succ] = *cit;
+    Rule old_rule = *cit;
 
     // Check if the new rule is original by finding an existing one with the
     // new predecessor.
@@ -121,28 +121,28 @@ void RuleMapBuffer<Target>::change_predecessor(const_iterator cit, char pred)
     // Modify 'buffer_' with the new predicate.
     RuleMapBuffer<Target>::iterator it = remove_const(cit);
 
-    *it = Rule({new_is_original, pred, succ});
+    *it = Rule({new_is_original, pred, old_rule.successor});
 
     if (new_is_original) // Case 1.
     {
-        rule_map_.add_rule(pred, succ);
+        rule_map_.add_rule(pred, old_rule.successor);
     }
     else // Case 2.
     {
         // Do nothing
     }
 
-    if (previous_was_active && previous_pred != '\0')
+    if (old_rule.is_active && old_rule.predecessor != '\0')
     {
         // Try to find a duplicate of the old rule
         auto old_duplicate =
-            std::find_if(buffer_.begin(), buffer_.end(), [previous_pred](const auto& rule) {
-                return rule.predecessor == previous_pred && !rule.is_active;
+            std::find_if(buffer_.begin(), buffer_.end(), [old_rule](const auto& rule) {
+                return rule.predecessor == old_rule.predecessor && !rule.is_active;
             });
 
         if (old_duplicate == buffer_.end()) // Case 4.
         {
-            rule_map_.remove_rule(previous_pred);
+            rule_map_.remove_rule(old_rule.predecessor);
         }
         else // Case 5.
         {
