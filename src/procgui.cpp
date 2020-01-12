@@ -890,7 +890,7 @@ void interact_with(colors::ConstantColor& constant)
     {
         if (!colors::is_transparent(imcolor))
         {
-            constant.set_imcolor(imcolor);
+            constant.set_imcolor({color[0], color[1], color[2], color[3]});
         }
     }
 
@@ -998,7 +998,7 @@ void interact_with(colors::LinearGradient& gen)
             && !colors::is_transparent(imcolor))
         {
             is_modified = true;
-            it->imcolor = imcolor;
+            it->imcolor = {color[0], color[1], color[2], color[3]};
         }
 
         // Key's Position
@@ -1206,7 +1206,8 @@ void interact_with(colors::DiscreteGradient& gen)
             if (!colors::is_transparent(imcolor))
             {
                 is_modified = true;
-                it->imcolor = imcolor;
+                it->imcolor = {color[0], color[1], color[2], color[3]};
+                ;
             }
 
             block_size += ImGui::GetItemRectSize().x + style.ItemSpacing.x;
@@ -1297,7 +1298,8 @@ void interact_with(colors::DiscreteGradient& gen)
         && !colors::is_transparent(imcolor))
     {
         is_modified = true;
-        keys.back().imcolor = imcolor;
+        keys.back().imcolor = {color[0], color[1], color[2], color[3]};
+        ;
     }
     ImGui::PopID();
 
@@ -1527,7 +1529,8 @@ void interact_with_global_parameters(bool& box_is_visible)
                           ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel
                               | ImGuiColorEditFlags_NoAlpha))
     {
-        sfml_window::background_color = imcolor;
+        sfml_window::background_color = {color[0], color[1], color[2], color[3]};
+        ;
     }
     ImGui::SameLine();
     ImGui::Text("Background Color");
