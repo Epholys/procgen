@@ -492,7 +492,7 @@ void interact_with(colors::VertexPainterComposite& painter)
     static int nested_id = 0;
     ImGui::PushID(nested_id++);
 
-    static std::string child_title = "";
+    static std::string child_title;
     child_title += "-- " + painter.get_main_painter().unwrap()->type_name() + " ";
 
     // ImGui's ID for the several child painters.

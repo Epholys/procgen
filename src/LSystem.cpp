@@ -7,7 +7,7 @@
 
 // Some functions returns references to axiom or production that could be empty.
 // In these cases, it returns this string.
-const static std::string empty_string = "";
+const static std::string empty_string;
 
 LSystem::LSystem(const std::string& axiom, const Rules& prod, std::string preds)
     : RuleMap<std::string>(prod)

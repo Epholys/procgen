@@ -51,18 +51,16 @@ float angle_from_vector(const sf::Vector2f vec)
     {
         return std::atan(vec.y / vec.x);
     }
-    else if (vec.x < 0 && vec.y >= 0)
+    if (vec.x < 0 && vec.y >= 0)
     {
         return std::atan(-vec.x / vec.y) + math::pi / 2;
     }
-    else if (vec.x < 0 && vec.y < 0)
+    if (vec.x < 0 && vec.y < 0)
     {
         return std::atan(vec.y / vec.x) + math::pi;
     }
-    else
-    {
-        return std::atan(-vec.x / vec.y) + 3 * math::pi / 2;
-    }
+
+    return std::atan(-vec.x / vec.y) + 3 * math::pi / 2;
 }
 
 sf::Vector2f project(sf::Vector2f A, sf::Vector2f B, sf::Vector2f P)
