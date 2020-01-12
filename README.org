@@ -26,11 +26,8 @@ Thanks for asking the question! Here's why and how this app is different:
    - Complete system of colors
 
 ** Main Roadmap
-   1. Polish before the first release
-      * Move from makefiles to CMake
-      * Compile and package for Linux and Windows
-   2. BIG REFACTORING
-      * Complete test suit
+   1. BIG REFACTORING
+      * Complete test suite
       * Remove a maximum of code smells
       * Refactor old code
    2. Add automation:
@@ -57,26 +54,25 @@ Thanks for asking the question! Here's why and how this app is different:
 
 
 ** Compiling
-   Make sure you have SFML installed, a C++17 compiler (with std::filesystem support), and make.
+   Make sure you have SFML installed, a C++17 compiler (with =std::filesystem support=), and make.
    Simply type =make optimized= :).
    Other make recipees are documented in the Makefile.
 
    There is now a CMakeLists file. It is for now quite minimal and is only used to compile the main program without the tests.
 
 ** Development framework
-   - *Environment:* debian sid chroot with these development packages: =g++ make git libsfml-dev googletest gdb valgrind=
+   - *My environment:* debian sid chroot
    - *Dependencies:*
      - SFML / 2.5.1 / [[https://www.sfml-dev.org/][Website]] / installed from packages /
      - googletest / 1.9.0 / [[https://github.com/google/googletest][Github Repository]] / installed from packages
      - dear imgui, / 1.71 WIP / [[https://github.com/ocornut/imgui][Github Repository]] / installed from repo's release / included in the repo
      - imgui-sfml / [[https://github.com/eliasdaler/imgui-sfml][Github Repository]] / installed via the instructions from the
-       README.org of the repository / included in the repo with patches
+       README.org of the repository / included in the repo /with patches/
      - GSL (Guidelines Support Library) / 2018-05-21 / [[https://github.com/Microsoft/GSL][Github Repository]] / cloned from the repository / included in the repo
      - cereal / 1.2.2 / [[https://uscilab.github.io/cereal/index.html][Website]] / downloaded from the website / included in the repo
-   - *Coding rule:* [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]] with GSL
-     - Difference: [[https://en.wikipedia.org/wiki/Indentation_style#Allman_style][Allman indentation Style]]
-     - Difference: When using ImGui ; ImGui style of coding
-   - *Compilation:* =make= and C++17 needed
+   - *Coding rule:* Try to respect [[https://github.com/isocpp/CppCoreGuidelines][ISO C++ Core Guidelines]] and some =clang-tidy= rules (see Makefile)
+   - *Format:* Using =clang-format= to have a consistent formatting (see .clang-format)
+   - *Compilation:* =CMake= and C++17 for simply compiling, =make= with =clang-tidy= and =clang-format= for development
    - *Testing suite:* [[https://github.com/google/googletest/][googletest]]
 
 *** Releases
@@ -90,7 +86,6 @@ Thanks for asking the question! Here's why and how this app is different:
    - Static analysis (Coverity?)
    - Formal documentation (Doxygen?)
    - Automatic cross-compiling?
-   - Automatic on-screen serialization?
 
 ** (Res)sources
 [[http://blog.rabidgremlin.com/2014/12/09/procedural-content-generation-l-systems/][Procedural content generation: L-Systems (by Rabidgremlin)]]
