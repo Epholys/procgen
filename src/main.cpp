@@ -21,8 +21,8 @@ using namespace controller;
 using namespace colors;
 using sfml_window::window;
 
-void opt(int argc, char* argv[]);        //NOLINT c-style array
-int export_mode(int argc, char* argv[]); //NOLINT c-style array
+void opt(int argc, char* argv[]);        // NOLINT c-style array
+int export_mode(int argc, char* argv[]); // NOLINT c-style array
 
 #ifdef _WIN32
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -213,7 +213,7 @@ int main(int argc, char* argv[])
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-int export_mode(int argc, char* argv[]) //NOLINT c-style array
+int export_mode(int argc, char* argv[]) // NOLINT c-style array
 {
     if (argc != 5)
     {
@@ -279,7 +279,7 @@ int export_mode(int argc, char* argv[]) //NOLINT c-style array
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-void opt(int argc, char* argv[]) //NOLINT c-style array
+void opt(int argc, char* argv[]) // NOLINT c-style array
 {
     if (argc != 2)
     {

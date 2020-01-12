@@ -37,7 +37,7 @@ bool DragDouble(const char* label,
                                 power);
 }
 bool DragDouble2(const char* label,
-                 double v[2],      // NOLINT(cppcoreguidelines-avoid-c-arrays): ImGui style
+                 double v[2], // NOLINT ImGui style
                  double v_speed,
                  double v_min,
                  double v_max,

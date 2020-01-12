@@ -215,7 +215,8 @@ void interact_with(drawing::DrawingParameters& parameters, const std::string& na
     }
 
     // --- Starting position ---
-    std::array<double, 2> pos {parameters.get_starting_position().x, parameters.get_starting_position().y};
+    std::array<double, 2> pos {parameters.get_starting_position().x,
+                               parameters.get_starting_position().y};
     if (ext::ImGui::DragDouble2("Starting position", pos.data(), 1.f, 0.f, 0.f, "%.lf"))
     {
         // is_modified_ is not set: the render state take care of translating the view.
@@ -718,8 +719,12 @@ int vertex_painter_list(colors::VertexPainterWrapper& painter_wrapper)
     }
 
     int old_index = index;
-    const std::array<const char* const, 6> generators
-        {"Constant", "Linear", "Radial", "Random", "Sequential", "Iterative"};
+    const std::array<const char* const, 6> generators {"Constant",
+                                                       "Linear",
+                                                       "Radial",
+                                                       "Random",
+                                                       "Sequential",
+                                                       "Iterative"};
     bool new_generator = ImGui::ListBox("Vertex Painter", &index, generators.data(), 6)
                          && index != old_index;
 
@@ -1447,7 +1452,9 @@ void interact_with(colors::ColorGeneratorWrapper& color_wrapper,
     }
     else if (mode == color_wrapper_mode::ALL)
     {
-        std::array<const char* const, 3> generators {"Constant", "Linear Gradient", "Discrete Gradient"};
+        std::array<const char* const, 3> generators {"Constant",
+                                                     "Linear Gradient",
+                                                     "Discrete Gradient"};
         new_generator = ImGui::ListBox("Color Generator", &index, generators.data(), 3)
                         && index != old_index;
         ;
