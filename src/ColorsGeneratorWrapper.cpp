@@ -15,7 +15,8 @@ ColorGeneratorWrapper::ColorGeneratorWrapper(std::shared_ptr<ColorGenerator> gen
 }
 
 ColorGeneratorWrapper::ColorGeneratorWrapper(const ColorGeneratorWrapper& other)
-    : generator_ {other.generator_->clone()}
+    : Indicator(other)
+    , generator_ {other.generator_->clone()}
 {
 }
 ColorGeneratorWrapper::ColorGeneratorWrapper(ColorGeneratorWrapper&& other) noexcept

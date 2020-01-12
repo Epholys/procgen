@@ -17,7 +17,8 @@ VertexPainterWrapper::VertexPainterWrapper(std::shared_ptr<VertexPainter> painte
 }
 
 VertexPainterWrapper::VertexPainterWrapper(const VertexPainterWrapper& other)
-    : painter_ {other.painter_->clone()}
+    : Indicator(other)
+    , painter_ {other.painter_->clone()}
 {
 }
 
