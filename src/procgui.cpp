@@ -215,8 +215,8 @@ void interact_with(drawing::DrawingParameters& parameters, const std::string& na
     }
 
     // --- Starting position ---
-    double pos[2] = {parameters.get_starting_position().x, parameters.get_starting_position().y};
-    if (ext::ImGui::DragDouble2("Starting position", pos, 1.f, 0.f, 0.f, "%.lf"))
+    std::array<double, 2> pos {parameters.get_starting_position().x, parameters.get_starting_position().y};
+    if (ext::ImGui::DragDouble2("Starting position", pos.data(), 1.f, 0.f, 0.f, "%.lf"))
     {
         // is_modified_ is not set: the render state take care of translating the view.
         ext::sf::Vector2d starting_position {pos[0], pos[1]};
@@ -406,8 +406,8 @@ void interact_with(colors::VertexPainterRadial& painter, bool from_composite = f
     }
 
     // --- Center ---
-    float center[2] = {painter.get_center().x, painter.get_center().y};
-    if (ImGui::SliderFloat2("Circle Center", center, 0.f, 1.f, "%.2f"))
+    std::array<float, 2> center {painter.get_center().x, painter.get_center().y};
+    if (ImGui::SliderFloat2("Circle Center", center.data(), 0.f, 1.f, "%.2f"))
     {
         center[0] = clamp(center[0], 0.f, 1.f);
         center[1] = clamp(center[1], 0.f, 1.f);
@@ -718,9 +718,9 @@ int vertex_painter_list(colors::VertexPainterWrapper& painter_wrapper)
     }
 
     int old_index = index;
-    const char* generators[6] =
+    const std::array<const char* const, 6> generators
         {"Constant", "Linear", "Radial", "Random", "Sequential", "Iterative"};
-    bool new_generator = ImGui::ListBox("Vertex Painter", &index, generators, 6)
+    bool new_generator = ImGui::ListBox("Vertex Painter", &index, generators.data(), 6)
                          && index != old_index;
 
     // Create a new VertexPainter
@@ -876,8 +876,9 @@ void interact_with(colors::ConstantColor& constant)
 {
     // Color selection widget.
     ImVec4 imcolor = constant.get_imcolor();
+    std::array<float, 4> color {imcolor.x, imcolor.y, imcolor.z, imcolor.w};
     if (ImGui::ColorEdit4("Color",
-                          (float*)&imcolor,
+                          color.data(),
                           ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel
                               | ImGuiColorEditFlags_AlphaPreviewHalf
                               | ImGuiColorEditFlags_AlphaBar))
@@ -983,8 +984,9 @@ void interact_with(colors::LinearGradient& gen)
 
         // Color
         ImVec4 imcolor = it->imcolor;
+        std::array<float, 4> color {imcolor.x, imcolor.y, imcolor.z, imcolor.w};
         if (ImGui::ColorEdit4("Color",
-                              (float*)&imcolor,
+                              color.data(),
                               ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel
                                   | ImGuiColorEditFlags_AlphaPreviewHalf
                                   | ImGuiColorEditFlags_AlphaBar)
@@ -1189,8 +1191,9 @@ void interact_with(colors::DiscreteGradient& gen)
 
         // Key Color
         ImVec4 imcolor = it->imcolor;
+        std::array<float, 4> color {imcolor.x, imcolor.y, imcolor.z, imcolor.w};
         if (ImGui::ColorEdit4("Color",
-                              (float*)&imcolor,
+                              color.data(),
                               ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel
                                   | ImGuiColorEditFlags_AlphaPreviewHalf
                                   | ImGuiColorEditFlags_AlphaBar))
@@ -1281,8 +1284,9 @@ void interact_with(colors::DiscreteGradient& gen)
     // Last color widget.
     ImGui::PushID(keys.size());
     ImVec4 imcolor = keys.back().imcolor;
+    std::array<float, 4> color {imcolor.x, imcolor.y, imcolor.z, imcolor.w};
     if (ImGui::ColorEdit4("Color",
-                          (float*)&imcolor,
+                          color.data(),
                           ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel
                               | ImGuiColorEditFlags_AlphaPreviewHalf | ImGuiColorEditFlags_AlphaBar)
         && !colors::is_transparent(imcolor))
@@ -1426,8 +1430,8 @@ void interact_with(colors::ColorGeneratorWrapper& color_wrapper,
     int old_index = index;
     if (mode == color_wrapper_mode::CONSTANT)
     {
-        const char* generators[1] = {"Constant"};
-        new_generator = ImGui::ListBox("Color Generator", &index, generators, 1)
+        std::array<const char* const, 1> generators {"Constant"};
+        new_generator = ImGui::ListBox("Color Generator", &index, generators.data(), 1)
                         && index != old_index;
         ;
     }
@@ -1435,16 +1439,16 @@ void interact_with(colors::ColorGeneratorWrapper& color_wrapper,
     {
         --index;
         --old_index; // Change index to match the ListBox.
-        const char* generators[2] = {"Linear Gradient", "Discrete Gradient"};
-        new_generator = ImGui::ListBox("Color Generator", &index, generators, 2)
+        std::array<const char* const, 2> generators {"Linear Gradient", "Discrete Gradient"};
+        new_generator = ImGui::ListBox("Color Generator", &index, generators.data(), 2)
                         && index != old_index;
         ;
         ++index; // Change index to match the typeid indices.
     }
     else if (mode == color_wrapper_mode::ALL)
     {
-        const char* generators[3] = {"Constant", "Linear Gradient", "Discrete Gradient"};
-        new_generator = ImGui::ListBox("Color Generator", &index, generators, 3)
+        std::array<const char* const, 3> generators {"Constant", "Linear Gradient", "Discrete Gradient"};
+        new_generator = ImGui::ListBox("Color Generator", &index, generators.data(), 3)
                         && index != old_index;
         ;
     }
@@ -1510,8 +1514,9 @@ void interact_with_global_parameters(bool& box_is_visible)
 
     // Select background color.
     ImVec4 imcolor = sfml_window::background_color;
+    std::array<float, 4> color {imcolor.x, imcolor.y, imcolor.z, imcolor.w};
     if (ImGui::ColorEdit4("Background Color",
-                          (float*)&imcolor,
+                          color.data(),
                           ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel
                               | ImGuiColorEditFlags_NoAlpha))
     {

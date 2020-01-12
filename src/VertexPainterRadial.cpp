@@ -72,11 +72,11 @@ void VertexPainterRadial::paint_vertices(std::vector<sf::Vertex>& vertices,
     std::array<float, 4> distances {};
     for (unsigned i = 0; i < 4; ++i)
     {
-        distances[i] = geometry::distance(relative_center, corners[i]);
+        gsl::at(distances, i) = geometry::distance(relative_center, gsl::at(corners, i));
     }
 
     int index = std::distance(begin(distances), std::max_element(begin(distances), end(distances)));
-    auto greatest_distance = distances[index];
+    auto greatest_distance = gsl::at(distances, index);
 
     if (greatest_distance < std::numeric_limits<float>::epsilon())
     {
