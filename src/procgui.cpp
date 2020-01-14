@@ -15,6 +15,7 @@
 #include "imgui/imgui_internal.h"
 #include "imgui_extension.h"
 
+#include <SFML/System/Vector2.hpp>
 #include <cctype>
 #include <cstring>
 
@@ -899,7 +900,7 @@ void interact_with(colors::ConstantColor& constant)
     ImVec2 screen_pos = ImGui::GetCursorScreenPos();
     ImVec2 window_pos = ImGui::GetCursorPos();
     float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 30.f;
-    float xsize = (space_until_border < 400) ? space_until_border : 400;
+    float xsize = std::min(space_until_border, 400.f);
     ImVec2 size {xsize, 30.};
     float checker_box_size = 10.f;
     ImGui::RenderColorRectWithAlphaCheckerboard(
@@ -1107,7 +1108,7 @@ void interact_with(colors::LinearGradient& gen)
     ImVec2 screen_pos = ImGui::GetCursorScreenPos();
     ImVec2 window_pos = ImGui::GetCursorPos();
     float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 30.f;
-    float xsize = (space_until_border < 400) ? space_until_border : 400;
+    float xsize = std::min(space_until_border, 400.f);
     ImVec2 size {xsize, 30.};
     float checker_box_size = 10.f;
     ImGui::RenderColorRectWithAlphaCheckerboard(
@@ -1373,7 +1374,7 @@ void interact_with(colors::DiscreteGradient& gen)
         ImVec2 screen_pos = ImGui::GetCursorScreenPos();
         ImVec2 window_pos = ImGui::GetCursorPos();
         float space_until_border = ImGui::GetWindowWidth() - window_pos.x - 30.f;
-        float xsize = (space_until_border < 400) ? space_until_border : 400;
+        float xsize = std::min(space_until_border, 400.f);
         ImVec2 size {xsize, 30.};
         float checker_box_size = 10.f;
         ImGui::RenderColorRectWithAlphaCheckerboard(
@@ -1587,14 +1588,12 @@ void interact_with(LSystemView& lsys_view, const std::string& name, bool is_modi
         // Warning: lots of arbitrary values.
         // Shift the window next to the LSystemView and shift it again for
         // the window position always appearing on-screen in its entirety.
-        auto sfml_window_size = sfml_window::window.getSize();
+        sf::Vector2i sfml_window_size(sfml_window::window.getSize());
         int sfml_windowX = sfml_window_size.x;
         int sfml_windowY = sfml_window_size.y;
-        sf::Vector2f next_window_size {500, 600};
-        next_window_size.x = next_window_size.x > sfml_window_size.x ? sfml_window_size.x
-                                                                     : next_window_size.x;
-        next_window_size.y = next_window_size.y > sfml_window_size.y ? sfml_window_size.y
-                                                                     : next_window_size.y;
+        sf::Vector2i next_window_size {500, 600};
+        next_window_size.x = std::min(next_window_size.x, sfml_window_size.x);
+        next_window_size.y = std::min(next_window_size.y, sfml_window_size.y);
         ImGui::SetNextWindowSize(next_window_size, ImGuiSetCond_Appearing);
 
 
@@ -1622,7 +1621,7 @@ void interact_with(LSystemView& lsys_view, const std::string& name, bool is_modi
         pos.y -= 150;
 
         // If the window is too far up or down, shift it down or up.
-        pos.y = pos.y < 0 ? 0 : pos.y;
+        pos.y = std::max(pos.y, 0);
         pos.y = pos.y + next_window_size.y > sfml_windowY ? sfml_windowY - next_window_size.y
                                                           : pos.y;
 

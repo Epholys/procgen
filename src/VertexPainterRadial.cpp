@@ -125,9 +125,8 @@ void VertexPainterRadial::supplementary_drawing(sf::FloatRect bounding_box) cons
     }
 
     constexpr float ratio = 1 / 16.f;
-    float half_indicator_size = bounding_box.width < bounding_box.height
-                                    ? ratio * bounding_box.width / 2.
-                                    : ratio * bounding_box.height / 2.;
+    float half_indicator_size = std::min(bounding_box.width, bounding_box.height) * ratio / 2.;
+
     sf::Vector2f center = {bounding_box.left + bounding_box.width * center_.x,
                            bounding_box.top + bounding_box.height * (1 - center_.y)};
     sf::Color indicator_color = colors::bw_contrast_color(sfml_window::background_color);

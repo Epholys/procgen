@@ -220,8 +220,8 @@ SaveMenu::column_layout SaveMenu::list_layout(const std::vector<file_entry>& sav
         total_horizontal_size == 0
             ? 1
             : total_horizontal_size; // '0' has a special value for imgui, put '1'
-    float horizontal_size = total_horizontal_size < min_xsize ? min_xsize : total_horizontal_size;
-    horizontal_size = horizontal_size < max_xsize ? horizontal_size : max_xsize;
+    float horizontal_size = std::max(total_horizontal_size, min_xsize);
+    horizontal_size = std::min(horizontal_size, max_xsize);
 
     // The size of the load window.
     // x is the clamped total horizontal size

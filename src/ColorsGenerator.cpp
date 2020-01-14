@@ -76,8 +76,8 @@ void LinearGradient::set_keys(const keys& keys)
     // Clamp every keys between 0 and 1.
     for (auto& p : keys_)
     {
-        p.position = p.position < 0. ? 0. : p.position;
-        p.position = p.position > 1. ? 1. : p.position;
+        p.position = std::max(0.f, p.position);
+        p.position = std::min(p.position, 1.f);
     }
 
     // Sort the elements.

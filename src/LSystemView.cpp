@@ -507,8 +507,8 @@ sf::FloatRect LSystemView::compute_placeholder_box() const
     const float ratio = 1 / 16.f;
     sf::Vector2f window_size = sf::Vector2f(sfml_window::window.getSize())
                                * controller::WindowController::get_zoom_level();
-    float placeholder_size = window_size.x < window_size.y ? window_size.x * ratio
-                                                           : window_size.y * ratio;
+    float placeholder_size = std::min(window_size.x, window_size.y) * ratio;
+
     placeholder_box.width = placeholder_size;
     placeholder_box.height = placeholder_size;
     return placeholder_box;
@@ -517,9 +517,9 @@ sf::FloatRect LSystemView::compute_placeholder_box() const
 void LSystemView::draw_select_box(sf::RenderTarget& target, const sf::FloatRect& bounding_box) const
 {
     auto box = bounding_box;
-    auto margin = (box.width * .05f > box.height * .05f) ? box.height * .05f : box.width * .05f;
+    auto margin = std::min(box.width * .05f, box.height * .05f);
     float zoom = controller::WindowController::get_zoom_level();
-    margin = margin > 7.5 * zoom ? margin : 7.5 * zoom;
+    margin = std::max(margin, 7.5f * zoom);
 
     // Draw the global bounding boxes (with a little scaled margin) with
     // the unique color.

@@ -167,7 +167,7 @@ std::vector<sf::FloatRect> sub_boxes(const std::vector<sf::Vertex>& vertices, in
     // of vertices is greater than the real number. As a consequence, for
     // low count of vertices, it returns a number of boxes greater than
     // 'max_boxes'
-    vertices_per_box = vertices_per_box < 4 ? 4 : vertices_per_box;
+    vertices_per_box = std::max(vertices_per_box, 4);
 
     int n = 0;
     std::vector<sf::Vertex> box_vertices;
