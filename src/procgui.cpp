@@ -740,6 +740,7 @@ int vertex_painter_list(colors::VertexPainterWrapper& painter_wrapper)
 } // namespace
 namespace procgui
 {
+// TODO 'painter_wrapper' is a very bad name : no indication that it is the thing to modify
 void interact_with(colors::VertexPainterWrapper& painter_wrapper, const std::string& name)
 {
     if (!set_up(name))
@@ -771,8 +772,20 @@ void interact_with(colors::VertexPainterWrapper& painter_wrapper, const std::str
         composite = std::dynamic_pointer_cast<colors::VertexPainterComposite>(painter);
         auto main = composite->get_main_painter();
         index = ::vertex_painter_list(main);
-        composite->set_main_painter(main);
-        painter = composite->get_main_painter().unwrap();
+
+        if (index == 0) // New painter is a VertexPainterConstant, without a composite version.
+        {
+            painter = main.unwrap();
+            painter_wrapper.wrap(painter);
+
+            is_composite = false;
+            composite.reset();
+        }
+        else
+        {
+            composite->set_main_painter(main);
+            painter = composite->get_main_painter().unwrap();
+        }
     }
     else
     {
@@ -812,13 +825,6 @@ void interact_with(colors::VertexPainterWrapper& painter_wrapper, const std::str
             painter_wrapper.wrap(painter);
             composite.reset();
         }
-    }
-    // Special case if we switch from a composite to a constant
-    else if (is_composite)
-    {
-        is_composite = false;
-        painter_wrapper.wrap(painter);
-        composite.reset();
     }
 
     // Does not use embedded_level, the generator will be displayed just
