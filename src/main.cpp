@@ -1,3 +1,4 @@
+#include "LSystemController.h"
 #include "LSystemView.h"
 #include "PopupGUI.h"
 #include "RenderWindow.h"
@@ -133,6 +134,7 @@ int main(int argc, char* argv[])
 
     views.back().finish_loading();
     views.back().select();
+    controller::LSystemController::set_under_mouse(&views.back());
 
     sf::Clock delta_clock;
     bool last_popup_open = false;

@@ -46,7 +46,7 @@ class LSystemController
 
     // Set the under_mouse_ attribute to an existing LSystemView.
     // Used when loading a LSystem to have it already selected for all usual operations.
-    // Please be careful with obejct lifetime management.
+    // Please be careful with object lifetime management.
     static void set_under_mouse(gsl::not_null<procgui::LSystemView*> under_mouse);
 
   private:

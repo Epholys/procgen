@@ -107,6 +107,7 @@ void WindowController::right_click_menu(sf::RenderWindow& window,
                 default_step_ * zoom_level_);
             lsys_views.front().finish_loading();
             lsys_views.front().select();
+            LSystemController::set_under_mouse(&lsys_views.front());
         }
         if (ImGui::MenuItem("Load LSystem", "Ctrl+O"))
         {
@@ -182,6 +183,7 @@ void WindowController::handle_input(const std::vector<sf::Event>& events,
                                          default_step_ * zoom_level_);
                 lsys_views.front().finish_loading();
                 lsys_views.front().select();
+                LSystemController::set_under_mouse(&lsys_views.front());
             }
             else if (event.key.code == sf::Keyboard::O)
             {
