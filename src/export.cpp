@@ -43,6 +43,7 @@ bool export_to_png(procgui::LSystemView view,
 {
     view.set_headless(true);
     view.ref_parameters().set_n_iter(n_iter);
+    view.update();
 
     auto box = view.get_bounding_box();
     auto max_dim = std::max(box.width, box.height);
