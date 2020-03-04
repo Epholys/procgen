@@ -68,6 +68,7 @@ void LoadMenu::load(std::list<procgui::LSystemView>& lsys_views,
         lsys_views.front().ref_parameters().set_starting_position(load_position);
         lsys_views.front().finish_loading();
         lsys_views.front().select();
+        controller::LSystemController::set_under_mouse(&lsys_views.front());
 
         close_menu_ = true;
     }

@@ -5,6 +5,7 @@
 #include "SFML/Graphics.hpp"
 
 #include <chrono>
+#include <gsl/gsl>
 #include <list>
 #include <optional>
 
@@ -42,6 +43,11 @@ class LSystemController
     // Getters
     static const std::optional<procgui::LSystemView>& saved_view();
     static procgui::LSystemView* under_mouse();
+
+    // Set the under_mouse_ attribute to an existing LSystemView.
+    // Used when loading a LSystem to have it already selected for all usual operations.
+    // Please be careful with obejct lifetime management.
+    static void set_under_mouse(gsl::not_null<procgui::LSystemView*> under_mouse);
 
   private:
     // Delete the LSystemView with identifier 'id' in 'views'

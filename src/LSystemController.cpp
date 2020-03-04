@@ -188,4 +188,9 @@ void LSystemController::right_click_menu(std::list<procgui::LSystemView>& views)
         ImGui::EndPopup();
     }
 }
+
+void LSystemController::set_under_mouse(gsl::not_null<procgui::LSystemView*> under_mouse)
+{
+    under_mouse_ = under_mouse;
+}
 } // namespace controller
