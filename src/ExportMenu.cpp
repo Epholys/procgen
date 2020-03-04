@@ -80,7 +80,7 @@ void ExportMenu::size_warning() const
     std::stringstream warning_text;
     warning_text << "You will compute a LSystem of size "
                  << (total_size_mb == 0 ? "<0" : std::to_string(total_size_mb))
-                 << " MB and an image of size "
+                 << " MB and an image of size (in memory) "
                  << (image_size_mb == 0 ? "<0" : std::to_string(image_size_mb)) << " MB";
 
     ImGui::Text("%s", warning_text.str().c_str());
@@ -100,7 +100,7 @@ void ExportMenu::size_warning() const
     ImGui::Text(".");
 }
 
-void ExportMenu::save_file()
+void ExportMenu::export_lsys()
 {
     const auto* const lsystem = LSystemController::under_mouse();
     Expects(lsystem);
@@ -174,7 +174,7 @@ bool ExportMenu::open(sf::Keyboard::Key key)
 
         size_warning();
 
-        save_file();
+        export_lsys();
 
         ext::ImGui::PushStyleColoredButton<ext::ImGui::Red>();
         if (ImGui::Button("Cancel") || key == sf::Keyboard::Escape)

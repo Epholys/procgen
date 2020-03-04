@@ -37,7 +37,7 @@ class ExportMenu
     void parameters();
     void size_warning() const;
     void export_to_png() const;
-    void save_file();
+    void export_lsys();
 
     const fs::path save_dir_ = WindowController::save_dir_;
 
